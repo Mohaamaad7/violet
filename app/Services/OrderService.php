@@ -1,0 +1,321 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\Order;
+use App\Models\OrderItem;
+use App\Models\OrderStatusHistory;
+use App\Models\ShippingAddress;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
+
+class OrderService
+{
+    public function __construct(
+        protected ProductService $productService
+    ) {}
+
+    /**
+     * Get all orders with filters and pagination
+     */
+    public function getAllOrders(array $filters = [], int $perPage = 15): LengthAwarePaginator
+    {
+        $query = Order::with(['user', 'items.product', 'shippingAddress']);
+
+        // Filter by status
+        if (isset($filters['status'])) {
+            $query->where('status', $filters['status']);
+        }
+
+        // Filter by payment status
+        if (isset($filters['payment_status'])) {
+            $query->where('payment_status', $filters['payment_status']);
+        }
+
+        // Filter by payment method
+        if (isset($filters['payment_method'])) {
+            $query->where('payment_method', $filters['payment_method']);
+        }
+
+        // Filter by user
+        if (isset($filters['user_id'])) {
+            $query->where('user_id', $filters['user_id']);
+        }
+
+        // Filter by date range
+        if (isset($filters['start_date'])) {
+            $query->whereDate('created_at', '>=', $filters['start_date']);
+        }
+        if (isset($filters['end_date'])) {
+            $query->whereDate('created_at', '<=', $filters['end_date']);
+        }
+
+        // Search by order number
+        if (isset($filters['search'])) {
+            $query->where('order_number', 'like', "%{$filters['search']}%");
+        }
+
+        // Sorting
+        $sortBy = $filters['sort_by'] ?? 'created_at';
+        $sortOrder = $filters['sort_order'] ?? 'desc';
+        $query->orderBy($sortBy, $sortOrder);
+
+        return $query->paginate($perPage);
+    }
+
+    /**
+     * Find order by ID
+     */
+    public function findOrder(int $id): ?Order
+    {
+        return Order::with([
+            'user',
+            'items.product',
+            'shippingAddress',
+            'discountCode',
+            'statusHistory',
+        ])->findOrFail($id);
+    }
+
+    /**
+     * Find order by order number
+     */
+    public function findByOrderNumber(string $orderNumber): ?Order
+    {
+        return Order::where('order_number', $orderNumber)
+            ->with([
+                'user',
+                'items.product',
+                'shippingAddress',
+                'discountCode',
+                'statusHistory',
+            ])
+            ->firstOrFail();
+    }
+
+    /**
+     * Create new order
+     */
+    public function createOrder(array $data): Order
+    {
+        return DB::transaction(function () use ($data) {
+            // Generate order number
+            $orderNumber = $this->generateOrderNumber();
+
+            // Create order
+            $order = Order::create([
+                'order_number' => $orderNumber,
+                'user_id' => $data['user_id'],
+                'status' => 'pending',
+                'payment_status' => 'pending',
+                'payment_method' => $data['payment_method'],
+                'subtotal' => $data['subtotal'],
+                'discount_amount' => $data['discount_amount'] ?? 0,
+                'shipping_cost' => $data['shipping_cost'] ?? 0,
+                'tax_amount' => $data['tax_amount'] ?? 0,
+                'total' => $data['total'],
+                'notes' => $data['notes'] ?? null,
+                'discount_code_id' => $data['discount_code_id'] ?? null,
+                'shipping_address_id' => $data['shipping_address_id'],
+            ]);
+
+            // Create order items and decrease stock
+            foreach ($data['items'] as $item) {
+                OrderItem::create([
+                    'order_id' => $order->id,
+                    'product_id' => $item['product_id'],
+                    'product_variant_id' => $item['product_variant_id'] ?? null,
+                    'quantity' => $item['quantity'],
+                    'price' => $item['price'],
+                    'subtotal' => $item['quantity'] * $item['price'],
+                ]);
+
+                // Decrease product stock
+                $this->productService->decreaseStock($item['product_id'], $item['quantity']);
+            }
+
+            // Create initial status history
+            $this->addStatusHistory($order->id, 'pending', 'Order created');
+
+            return $order->fresh();
+        });
+    }
+
+    /**
+     * Update order status
+     */
+    public function updateStatus(int $id, string $status, ?string $notes = null, ?int $changedBy = null): Order
+    {
+        $order = $this->findOrder($id);
+
+        $order->update(['status' => $status]);
+
+        // Update status-specific timestamps
+        match ($status) {
+            'processing' => $order->update(['shipped_at' => null]),
+            'shipped' => $order->update(['shipped_at' => now()]),
+            'delivered' => $order->update(['delivered_at' => now()]),
+            'cancelled' => $this->handleCancellation($order, $notes),
+            default => null
+        };
+
+        // Add to status history
+        $this->addStatusHistory($id, $status, $notes, $changedBy);
+
+        return $order->fresh();
+    }
+
+    /**
+     * Update payment status
+     */
+    public function updatePaymentStatus(int $id, string $paymentStatus, ?string $transactionId = null): Order
+    {
+        $order = $this->findOrder($id);
+
+        $updateData = ['payment_status' => $paymentStatus];
+
+        if ($paymentStatus === 'paid') {
+            $updateData['paid_at'] = now();
+            if ($transactionId) {
+                $updateData['payment_transaction_id'] = $transactionId;
+            }
+        }
+
+        $order->update($updateData);
+        return $order->fresh();
+    }
+
+    /**
+     * Cancel order
+     */
+    public function cancelOrder(int $id, string $reason, ?int $cancelledBy = null): Order
+    {
+        $order = $this->findOrder($id);
+
+        if (in_array($order->status, ['delivered', 'cancelled'])) {
+            throw new \Exception("Cannot cancel order with status: {$order->status}");
+        }
+
+        $order->update([
+            'status' => 'cancelled',
+            'cancelled_at' => now(),
+            'cancellation_reason' => $reason,
+        ]);
+
+        // Restore product stock
+        foreach ($order->items as $item) {
+            $this->productService->increaseStock($item->product_id, $item->quantity);
+        }
+
+        // Add to status history
+        $this->addStatusHistory($id, 'cancelled', "Reason: {$reason}", $cancelledBy);
+
+        return $order->fresh();
+    }
+
+    /**
+     * Handle order cancellation
+     */
+    protected function handleCancellation(Order $order, ?string $reason): void
+    {
+        $order->update([
+            'cancelled_at' => now(),
+            'cancellation_reason' => $reason,
+        ]);
+
+        // Restore product stock
+        foreach ($order->items as $item) {
+            $this->productService->increaseStock($item->product_id, $item->quantity);
+        }
+    }
+
+    /**
+     * Add status to history
+     */
+    protected function addStatusHistory(int $orderId, string $status, ?string $notes = null, ?int $changedBy = null): OrderStatusHistory
+    {
+        return OrderStatusHistory::create([
+            'order_id' => $orderId,
+            'status' => $status,
+            'notes' => $notes,
+            'changed_by' => $changedBy,
+        ]);
+    }
+
+    /**
+     * Generate unique order number
+     */
+    protected function generateOrderNumber(): string
+    {
+        do {
+            $orderNumber = 'ORD-' . date('Ymd') . '-' . strtoupper(substr(md5(uniqid()), 0, 6));
+        } while (Order::where('order_number', $orderNumber)->exists());
+
+        return $orderNumber;
+    }
+
+    /**
+     * Calculate order totals
+     */
+    public function calculateTotals(array $items, ?string $discountCode = null, float $shippingCost = 0): array
+    {
+        $subtotal = 0;
+
+        foreach ($items as $item) {
+            $subtotal += $item['price'] * $item['quantity'];
+        }
+
+        $discountAmount = 0;
+        if ($discountCode) {
+            // TODO: Implement discount code logic
+        }
+
+        $taxAmount = $subtotal * 0.14; // 14% VAT in Egypt
+        $total = $subtotal - $discountAmount + $shippingCost + $taxAmount;
+
+        return [
+            'subtotal' => round($subtotal, 2),
+            'discount_amount' => round($discountAmount, 2),
+            'shipping_cost' => round($shippingCost, 2),
+            'tax_amount' => round($taxAmount, 2),
+            'total' => round($total, 2),
+        ];
+    }
+
+    /**
+     * Get order statistics
+     */
+    public function getOrderStats(array $filters = []): array
+    {
+        $query = Order::query();
+
+        if (isset($filters['start_date'])) {
+            $query->whereDate('created_at', '>=', $filters['start_date']);
+        }
+        if (isset($filters['end_date'])) {
+            $query->whereDate('created_at', '<=', $filters['end_date']);
+        }
+
+        return [
+            'total_orders' => (clone $query)->count(),
+            'pending_orders' => (clone $query)->where('status', 'pending')->count(),
+            'processing_orders' => (clone $query)->where('status', 'processing')->count(),
+            'shipped_orders' => (clone $query)->where('status', 'shipped')->count(),
+            'delivered_orders' => (clone $query)->where('status', 'delivered')->count(),
+            'cancelled_orders' => (clone $query)->where('status', 'cancelled')->count(),
+            'total_revenue' => (clone $query)->where('payment_status', 'paid')->sum('total'),
+            'pending_revenue' => (clone $query)->where('payment_status', 'pending')->sum('total'),
+        ];
+    }
+
+    /**
+     * Get recent orders
+     */
+    public function getRecentOrders(int $limit = 10): \Illuminate\Database\Eloquent\Collection
+    {
+        return Order::with(['user', 'items.product'])
+            ->orderBy('created_at', 'desc')
+            ->limit($limit)
+            ->get();
+    }
+}
