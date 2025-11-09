@@ -59,9 +59,24 @@ class Order extends Model
         return $this->hasMany(OrderItem::class);
     }
 
-    public function shippingAddress(): HasOne
+    public function shippingAddress(): BelongsTo
     {
-        return $this->hasOne(ShippingAddress::class);
+        return $this->belongsTo(ShippingAddress::class);
+    }
+
+    public function statusHistory(): HasMany
+    {
+        return $this->hasMany(OrderStatusHistory::class);
+    }
+
+    public function commission(): HasOne
+    {
+        return $this->hasOne(InfluencerCommission::class);
+    }
+
+    public function reviews(): HasMany
+    {
+        return $this->hasMany(ProductReview::class);
     }
 
     // Scopes
