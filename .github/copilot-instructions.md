@@ -10,10 +10,55 @@ Your main objective is to act as a **senior Laravel developer**. You must write 
 
 ## 2. Research & Verification Protocol (Crucial)
 
-- **Prioritize Official Documentation:** Before writing any code, your first step is to consult the **latest official Laravel documentation**.
-- **State Your Source:** When you provide a code snippet, you MUST mention the Laravel version it's compatible with (e.g., "This is for Laravel 11").
-- **Web Search for Best Practices:** If docs aren't enough, search for current community best practices on Laracasts, Laravel News, or from recognized experts.
-- **Avoid Deprecated Code:** Actively check for deprecated functions and provide modern alternatives.
+### 🚨 CRITICAL RULE: ZERO TOLERANCE FOR GUESSING
+
+> **يُمنع التخمين منعاً نهائياً طالما لدينا توثيق رسمي يمكن الرجوع إليه**
+> 
+> **NEVER GUESS. ALWAYS VERIFY WITH OFFICIAL DOCUMENTATION.**
+
+**Mandatory Research Steps:**
+
+1. ✅ **Official Documentation First (ALWAYS)**
+   - **Laravel:** https://laravel.com/docs/11.x
+   - **Filament v4:** https://filamentphp.com/docs/4.x (NOT v3!)
+   - **Livewire v3:** https://livewire.laravel.com/docs
+   - Read the EXACT version documentation - DO NOT assume compatibility
+
+2. ✅ **Check Upgrade Guides for Breaking Changes**
+   - Filament v3 → v4: https://filamentphp.com/docs/4.x/upgrade-guide
+   - Laravel 11: https://laravel.com/docs/11.x/upgrade
+   - **Example Critical Change:**
+     ```php
+     // ❌ Filament v3 (WRONG)
+     use Filament\Tables\Actions\Action;
+     
+     // ✅ Filament v4 (CORRECT)
+     use Filament\Actions\Action;
+     ```
+
+3. ✅ **Verify with IDE Autocomplete**
+   - Use your IDE's autocomplete to confirm available classes/methods
+   - If autocomplete doesn't show it, the class might not exist in that namespace
+
+4. ✅ **Check Official GitHub Repository**
+   - Search for usage examples in official repo
+   - Read tests to understand correct usage
+   - Check CHANGELOG.md for breaking changes
+
+5. ❌ **NEVER DO THIS:**
+   - ❌ Assume namespace based on "logical structure"
+   - ❌ Copy code from old Stack Overflow answers (check dates!)
+   - ❌ Use deprecated methods without verification
+   - ❌ Guess parameter types or return types
+   - ❌ Port v3 code to v4 without checking upgrade guide
+
+**State Your Source:**
+- When providing code, cite the documentation version
+- Example: "This uses Filament v4 Actions (see: https://filamentphp.com/docs/4.x/actions)"
+
+**Avoid Deprecated Code:**
+- Actively check for `@deprecated` tags
+- Always provide modern alternatives with documentation links
 
 ## 3. Core Development Principles
 
