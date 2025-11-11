@@ -133,6 +133,166 @@ class ProductService
     }
 
     /**
+     * Create product with images
+     * 
+     * @param array $data Product data including 'images' array
+     * @return Product
+     * @throws \Exception
+     */
+    public function createWithImages(array $data): Product
+    {
+        \DB::beginTransaction();
+        
+        try {
+            // Extract images data if provided
+            $images = $data['images'] ?? [];
+            unset($data['images']);
+            
+            // Create product
+            $product = $this->createProduct($data);
+            
+            // Add images if provided
+            if (!empty($images)) {
+                $this->syncImages($product, $images);
+            }
+            
+            \DB::commit();
+            return $product->fresh(['images', 'variants']);
+            
+        } catch (\Exception $e) {
+            \DB::rollBack();
+            throw new \Exception("Failed to create product with images: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Update product with images
+     * 
+     * @param Product $product
+     * @param array $data Product data including optional 'images' array
+     * @return Product
+     * @throws \Exception
+     */
+    public function updateWithImages(Product $product, array $data): Product
+    {
+        \DB::beginTransaction();
+        
+        try {
+            // Extract images data if provided
+            $images = $data['images'] ?? null;
+            unset($data['images']);
+            
+            // Update slug if name changed
+            if (isset($data['name']) && $data['name'] !== $product->name) {
+                if (!isset($data['slug']) || empty($data['slug'])) {
+                    $data['slug'] = Str::slug($data['name']);
+                }
+                $data['slug'] = $this->ensureUniqueSlug($data['slug'], $product->id);
+            }
+            
+            // Update product
+            $product->update($data);
+            
+            // Update images if provided
+            if ($images !== null) {
+                $this->syncImages($product, $images);
+            }
+            
+            \DB::commit();
+            return $product->fresh(['images', 'variants']);
+            
+        } catch (\Exception $e) {
+            \DB::rollBack();
+            throw new \Exception("Failed to update product with images: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Sync product variants
+     * 
+     * @param Product $product
+     * @param array $variants Array of variant data [['sku' => '...', 'name' => '...', ...], ...]
+     * @return Product
+     * @throws \Exception
+     */
+    public function syncVariants(Product $product, array $variants): Product
+    {
+        \DB::beginTransaction();
+        
+        try {
+            // Delete existing variants
+            $product->variants()->delete();
+            
+            // Create new variants
+            foreach ($variants as $variantData) {
+                // Validate required fields
+                if (!isset($variantData['sku']) || !isset($variantData['name'])) {
+                    throw new \Exception("Variant must have 'sku' and 'name' fields");
+                }
+                
+                // Ensure variant SKU is unique
+                if (\App\Models\ProductVariant::where('sku', $variantData['sku'])->exists()) {
+                    throw new \Exception("Variant SKU '{$variantData['sku']}' already exists");
+                }
+                
+                $product->variants()->create([
+                    'sku' => $variantData['sku'],
+                    'name' => $variantData['name'],
+                    'price' => $variantData['price'] ?? $product->price,
+                    'stock' => $variantData['stock'] ?? 0,
+                    'attributes' => $variantData['attributes'] ?? [],
+                ]);
+            }
+            
+            \DB::commit();
+            return $product->fresh(['variants']);
+            
+        } catch (\Exception $e) {
+            \DB::rollBack();
+            throw new \Exception("Failed to sync variants: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Sync product images
+     * 
+     * @param Product $product
+     * @param array $images Array of image data [['image' => '...', 'is_primary' => true, ...], ...]
+     * @return void
+     */
+    protected function syncImages(Product $product, array $images): void
+    {
+        // Delete existing images
+        $product->images()->delete();
+        
+        // Ensure only one primary image
+        $hasPrimary = false;
+        
+        foreach ($images as $index => $imageData) {
+            if (!isset($imageData['image']) && !isset($imageData['image_path'])) {
+                continue;
+            }
+            
+            // Set first image as primary if no primary specified
+            $isPrimary = $imageData['is_primary'] ?? ($index === 0 && !$hasPrimary);
+            
+            if ($isPrimary && $hasPrimary) {
+                $isPrimary = false; // Only allow one primary
+            }
+            
+            if ($isPrimary) {
+                $hasPrimary = true;
+            }
+            
+            $product->images()->create([
+                'image_path' => $imageData['image'] ?? $imageData['image_path'],
+                'is_primary' => $isPrimary,
+                'order' => $imageData['order'] ?? $index,
+            ]);
+        }
+    }
+
+    /**
      * Update existing product
      */
     public function updateProduct(int $id, array $data): Product

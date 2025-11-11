@@ -73,7 +73,7 @@ class OrderService
             'items.product',
             'shippingAddress',
             'discountCode',
-            'statusHistory',
+            'statusHistory.user',
         ])->findOrFail($id);
     }
 
@@ -88,7 +88,7 @@ class OrderService
                 'items.product',
                 'shippingAddress',
                 'discountCode',
-                'statusHistory',
+                'statusHistory.user',
             ])
             ->firstOrFail();
     }
@@ -135,7 +135,7 @@ class OrderService
             }
 
             // Create initial status history
-            $this->addStatusHistory($order->id, 'pending', 'Order created');
+            $this->addStatusHistory($order->id, 'pending', 'Order created', auth()->id());
 
             return $order->fresh();
         });
@@ -160,7 +160,7 @@ class OrderService
         };
 
         // Add to status history
-        $this->addStatusHistory($id, $status, $notes, $changedBy);
+        $this->addStatusHistory($id, $status, $notes, $changedBy ?? auth()->id());
 
         return $order->fresh();
     }
@@ -208,7 +208,7 @@ class OrderService
         }
 
         // Add to status history
-        $this->addStatusHistory($id, 'cancelled', "Reason: {$reason}", $cancelledBy);
+        $this->addStatusHistory($id, 'cancelled', "Reason: {$reason}", $cancelledBy ?? auth()->id());
 
         return $order->fresh();
     }

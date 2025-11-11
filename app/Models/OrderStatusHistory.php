@@ -30,4 +30,10 @@ class OrderStatusHistory extends Model
     {
         return $this->belongsTo(User::class, 'changed_by');
     }
+
+    // Alias for easier access in views
+    public function user(): BelongsTo
+    {
+        return $this->changedBy();
+    }
 }
