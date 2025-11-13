@@ -179,9 +179,11 @@ class ProductsTable
                 TrashedFilter::make(),
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()
+                    ->visible(fn ($record) => auth()->user()->can('update', $record)),
                 ReplicateAction::make()
                     ->label('Duplicate')
+                    ->visible(fn ($record) => auth()->user()->can('create', $record))
                     ->excludeAttributes(['sku', 'slug'])
                     ->beforeReplicaSaved(function (Product $replica): void {
                         $replica->name = $replica->name . ' (Copy)';
@@ -189,7 +191,8 @@ class ProductsTable
                         $replica->sku = null; // Will auto-generate
                         $replica->status = 'draft';
                     }),
-                DeleteAction::make(),
+                DeleteAction::make()
+                    ->visible(fn ($record) => auth()->user()->can('delete', $record)),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
@@ -198,6 +201,7 @@ class ProductsTable
                         ->label('Publish Selected')
                         ->icon('heroicon-o-check-circle')
                         ->color('success')
+                        ->visible(fn () => auth()->user()->can('edit products'))
                         ->requiresConfirmation()
                         ->action(function (Collection $records) {
                             $records->each->update(['status' => 'active']);
@@ -209,6 +213,7 @@ class ProductsTable
                         ->label('Unpublish Selected')
                         ->icon('heroicon-o-x-circle')
                         ->color('warning')
+                        ->visible(fn () => auth()->user()->can('edit products'))
                         ->requiresConfirmation()
                         ->action(function (Collection $records) {
                             $records->each->update(['status' => 'inactive']);
@@ -220,6 +225,7 @@ class ProductsTable
                         ->label('Mark as Featured')
                         ->icon('heroicon-o-star')
                         ->color('warning')
+                        ->visible(fn () => auth()->user()->can('edit products'))
                         ->requiresConfirmation()
                         ->action(function (Collection $records) {
                             $records->each->update(['is_featured' => true]);
@@ -231,6 +237,7 @@ class ProductsTable
                         ->label('Remove from Featured')
                         ->icon('heroicon-o-minus-circle')
                         ->color('gray')
+                        ->visible(fn () => auth()->user()->can('edit products'))
                         ->requiresConfirmation()
                         ->action(function (Collection $records) {
                             $records->each->update(['is_featured' => false]);
@@ -238,9 +245,12 @@ class ProductsTable
                         ->deselectRecordsAfterCompletion()
                         ->successNotificationTitle('Products removed from featured'),
                     
-                    DeleteBulkAction::make(),
-                    ForceDeleteBulkAction::make(),
-                    RestoreBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->visible(fn () => auth()->user()->can('delete products')),
+                    ForceDeleteBulkAction::make()
+                        ->visible(fn () => auth()->user()->can('delete products')),
+                    RestoreBulkAction::make()
+                        ->visible(fn () => auth()->user()->can('edit products')),
                 ]),
             ])
             ->defaultSort('created_at', 'desc')

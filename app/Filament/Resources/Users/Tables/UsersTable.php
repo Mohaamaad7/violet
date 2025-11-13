@@ -7,6 +7,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
@@ -17,6 +18,11 @@ class UsersTable
     {
         return $table
             ->columns([
+                ImageColumn::make('profile_photo_path')
+                    ->label('الصورة')
+                    ->circular()
+                    ->defaultImageUrl(url('/images/default-avatar.png')),
+
                 TextColumn::make('name')
                     ->label('الاسم')
                     ->searchable()
@@ -26,6 +32,11 @@ class UsersTable
                     ->label('البريد الإلكتروني')
                     ->searchable()
                     ->sortable(),
+
+                TextColumn::make('phone')
+                    ->label('رقم الهاتف')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 
                 TextColumn::make('roles.name')
                     ->label('الدور')
@@ -43,13 +54,17 @@ class UsersTable
                 TrashedFilter::make(),
             ])
             ->recordActions([
-                EditAction::make(),
+                EditAction::make()
+                    ->visible(fn ($record) => auth()->user()->can('update', $record)),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                    RestoreBulkAction::make(),
-                    ForceDeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->visible(fn () => auth()->user()->can('delete users')),
+                    RestoreBulkAction::make()
+                        ->visible(fn () => auth()->user()->can('edit users')),
+                    ForceDeleteBulkAction::make()
+                        ->visible(fn () => auth()->user()->can('delete users')),
                 ]),
             ])
             ->defaultSort('name', 'asc');

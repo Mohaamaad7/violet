@@ -130,7 +130,8 @@ class CategoryResource extends Resource
                     ->sortable(),
 
                 Tables\Columns\ToggleColumn::make('is_active')
-                    ->label('نشط'),
+                    ->label('نشط')
+                    ->disabled(fn ($record) => !auth()->user()->can('update', $record)),
 
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('تاريخ الإنشاء')
@@ -150,12 +151,15 @@ class CategoryResource extends Resource
                     ->query(fn (Builder $query): Builder => $query->whereNull('parent_id')),
             ])
             ->actions([
-                Actions\EditAction::make(),
-                Actions\DeleteAction::make(),
+                Actions\EditAction::make()
+                    ->visible(fn ($record) => auth()->user()->can('update', $record)),
+                Actions\DeleteAction::make()
+                    ->visible(fn ($record) => auth()->user()->can('delete', $record)),
             ])
             ->bulkActions([
                 Actions\BulkActionGroup::make([
-                    Actions\DeleteBulkAction::make(),
+                    Actions\DeleteBulkAction::make()
+                        ->visible(fn () => auth()->user()->can('delete categories')),
                 ]),
             ]);
     }

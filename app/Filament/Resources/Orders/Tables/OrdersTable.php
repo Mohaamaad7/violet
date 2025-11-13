@@ -221,12 +221,14 @@ class OrdersTable
             ->filtersFormColumns(4)
             ->recordActions([
                 ViewAction::make()
-                    ->label('عرض التفاصيل'),
+                    ->label('عرض التفاصيل')
+                    ->visible(fn ($record) => auth()->user()->can('view', $record)),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
-                        ->label('حذف المحدد'),
+                        ->label('حذف المحدد')
+                        ->visible(fn () => auth()->user()->can('delete orders')),
                 ]),
             ])
             ->defaultSort('created_at', 'desc')

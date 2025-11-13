@@ -33,4 +33,12 @@ class EditUser extends EditRecord
             $this->record->roles()->detach();
         }
     }
+
+    /**
+     * Redirect to index page after update
+     */
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }

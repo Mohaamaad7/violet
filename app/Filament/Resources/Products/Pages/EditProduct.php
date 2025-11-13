@@ -93,4 +93,12 @@ class EditProduct extends EditRecord
     {
         return 'Product updated successfully';
     }
+
+    /**
+     * Redirect to index page after update
+     */
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }

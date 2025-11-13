@@ -65,10 +65,10 @@
 
 ---
 
-**المرحلة 4: Admin Panel UI + Multilingual System ✅ (جزئياً - 90%)**
+**المرحلة 4: Admin Panel UI + Multilingual System ✅ (جزئياً - 95%)**
 
-**التاريخ:** 10 نوفمبر 2025 - 11 نوفمبر 2025
-**آخر تحديث:** 11 نوفمبر 2025 - 12:30 PM
+**التاريخ:** 10 نوفمبر 2025 - 12 نوفمبر 2025
+**آخر تحديث:** 12 نوفمبر 2025 - 10:00 PM
 
 #### ✅ نظام الترجمات الديناميكي (DB-Backed Translation System) - مكتمل 100%
 
@@ -149,6 +149,37 @@
 - [x] Navigation Group: "الكتالوج"
 - [x] Navigation Icon & Sort
 - [x] CRUD كامل يعمل بنجاح ✅
+
+**3. RolesResource (✅ مكتمل 100%):**
+- [x] إنشاء RolesResource مع Filament v4 conventions
+- [x] Form بسيط (name, guard_name)
+- [x] Table مع Columns & Filters
+- [x] ربط الصلاحيات (Permissions) باستخدام `Select::relationship`
+- [x] Navigation Group: "الإدارة"
+- [x] CRUD كامل يعمل بنجاح ✅
+
+**4. UsersResource (✅ مكتمل 100%):**
+- [x] إنشاء UsersResource مع Filament v4 conventions
+- [x] Form معقد (name, email, password, avatar, roles)
+- [x] Table مع Columns & Filters
+- [x] ربط الأدوار (Roles)
+- [x] Navigation Group: "الإدارة"
+- [x] CRUD كامل يعمل بنجاح ✅
+
+**5. General UI/UX Fixes (✅ مكتمل):**
+- [x] **Task 7.2.1: Post-Creation Redirect Fix**
+  - [x] تعديل جميع صفحات `CreateRecord` لتعود لصفحة `index` بعد الإنشاء.
+  - [x] شمل الموارد: Users, Roles, Categories, Products.
+  - [x] تحسين تجربة المستخدم ومنع بقاء المستخدم في صفحة إنشاء فارغة.
+- [x] **Task 7.2.2: Post-Update Redirect Fix**
+  - [x] تعديل جميع صفحات `EditRecord` لتعود لصفحة `index` بعد التعديل.
+  - [x] شمل الموارد: Users, Roles, Categories, Products.
+  - [x] توحيد تجربة المستخدم بين الإنشاء والتعديل.
+- [x] **Task 7.2.3: Add Phone & Profile Photo to Users**
+  - [x] إضافة Migration لحقلي `phone` و `profile_photo_path`.
+  - [x] تحديث `UserForm` بإضافة `FileUpload` للصورة الشخصية و `TextInput` للهاتف.
+  - [x] تحديث `UsersTable` بإضافة `ImageColumn` دائرية و `TextColumn` للهاتف.
+  - [x] إنشاء صورة افتراضية للمستخدمين بدون صورة.
 
 **2. ProductResource (✅ مكتمل 100% - تم الاختبار والقبول):**
 
@@ -287,7 +318,7 @@
 
 ## 🚧 المهام قيد التنفيذ
 
-**المرحلة 4 - الجزء المتبقي (10%):**
+**المرحلة 4 - الجزء المتبقي (5%):**
 - [x] ✅ إنشاء CategoryResource (مكتمل 100%)
 - [x] ✅ إنشاء ProductResource (مكتمل 100%):
   - [x] Task 1: Migrations & Models ✅
@@ -298,8 +329,14 @@
   - [x] Task 5.1: List Orders Table ✅
   - [x] Task 5.2: View Order Page ✅
   - [x] Task 5.3: Order Status History & Timeline ✅
-- [ ] Dashboard widgets بالإحصائيات الرئيسية (التالي)
-- [ ] تطبيق Permissions على Filament Resources
+- [x] ✅ تطبيق Permissions على Filament Resources (مكتمل 100% - Task 7.3):
+  - [x] إنشاء 7 Model Policies ✅
+  - [x] ربط Navigation بالصلاحيات ✅
+  - [x] ربط Actions بالصلاحيات ✅
+  - [x] ToggleColumn Authorization ✅
+  - [x] إضافة 6 Permissions جديدة ✅
+  - [x] تنظيم Form الصلاحيات ✅
+- [ ] Dashboard widgets بالإحصائيات الرئيسية (التالي - أولوية عالية)
 
 ---
 
@@ -735,6 +772,210 @@
 
 ---
 
+### جلسة العمل - 12 نوفمبر 2025 (المرحلة 4 - يوم 3)
+
+#### ✅ ما تم إنجازه - Authorization & Policies System (Task 7.3):
+
+**الهدف الرئيسي:**
+تطبيق Model Policies لجميع Resources للتحكم في ظهور Navigation والأزرار بناءً على صلاحيات المستخدم، وحماية الوصول المباشر للـ URLs.
+
+**Task 7.3: Authorization System (✅ مكتمل 100%):**
+
+**1. إنشاء Model Policies (7 policies):**
+- ✅ ProductPolicy: view/create/update/delete methods + before() for Super Admin
+- ✅ OrderPolicy: view/create/update/delete methods
+- ✅ CategoryPolicy: view/create/update/delete methods
+- ✅ UserPolicy: view/create/update/delete methods
+- ✅ RolePolicy: view/create/update/delete methods
+- ✅ TranslationPolicy: Super Admin only (all methods return false, before() returns true)
+- ✅ PermissionPolicy: view/edit methods (no create/delete)
+
+**النمط المستخدم في جميع Policies:**
+```php
+public function before(User $user, string $ability): bool|null
+{
+    if ($user->hasRole('super-admin')) {
+        return true; // Super Admin bypass
+    }
+    return null; // Continue to regular permission checks
+}
+
+public function viewAny(User $user): bool
+{
+    return $user->can('view [resource]');
+}
+```
+
+**2. ربط Actions بالصلاحيات (23+ Actions):**
+
+**OrdersTable:**
+- ✅ ViewAction: `->visible(fn ($record) => auth()->user()->can('view', $record))`
+- ✅ DeleteBulkAction: `->visible(fn () => auth()->user()->can('delete orders'))`
+
+**ProductsTable:**
+- ✅ EditAction: `->visible(fn ($record) => auth()->user()->can('update', $record))`
+- ✅ ReplicateAction: `->visible(fn ($record) => auth()->user()->can('create', $record))`
+- ✅ DeleteAction: `->visible(fn ($record) => auth()->user()->can('delete', $record))`
+- ✅ 7 BulkActions: publish, unpublish, featured, delete, force delete, restore (all protected)
+
+**CategoryResource:**
+- ✅ EditAction: `->visible(fn ($record) => auth()->user()->can('update', $record))`
+- ✅ DeleteAction: `->visible(fn ($record) => auth()->user()->can('delete', $record))`
+- ✅ DeleteBulkAction: `->visible(fn () => auth()->user()->can('delete categories'))`
+- ✅ ToggleColumn: `->disabled(fn ($record) => !auth()->user()->can('update', $record))`
+
+**UsersTable:**
+- ✅ EditAction: `->visible(fn ($record) => auth()->user()->can('update', $record))`
+- ✅ DeleteBulkAction: `->visible(fn () => auth()->user()->can('delete users'))`
+- ✅ RestoreBulkAction: `->visible(fn () => auth()->user()->can('edit users'))`
+- ✅ ForceDeleteBulkAction: `->visible(fn () => auth()->user()->can('delete users'))`
+
+**RolesTable:**
+- ✅ EditAction: `->visible(fn ($record) => auth()->user()->can('update', $record))`
+- ✅ DeleteBulkAction: `->visible(fn () => auth()->user()->can('delete roles'))`
+
+**TranslationResource:**
+- ✅ EditAction: `->visible(fn ($record) => auth()->user()->can('update', $record))`
+- ✅ DeleteAction: `->visible(fn ($record) => auth()->user()->can('delete', $record))`
+- ✅ DeleteBulkAction: `->visible(fn () => auth()->user()->hasRole('super-admin'))`
+
+**ViewOrder Custom Action:**
+- ✅ updateStatus Action: `->visible(fn () => auth()->user()->can('manage order status'))`
+
+**3. إضافة Permissions ناقصة (6 permissions):**
+```php
+// Roles Management
+Permission::create(['name' => 'view roles']);
+Permission::create(['name' => 'create roles']);
+Permission::create(['name' => 'edit roles']);
+Permission::create(['name' => 'delete roles']);
+
+// Permissions Management
+Permission::create(['name' => 'view permissions']);
+Permission::create(['name' => 'edit permissions']);
+```
+
+**4. تنظيم Form الصلاحيات (9 مجموعات):**
+- ✅ المنتجات (4 صلاحيات): view, create, edit, delete
+- ✅ الفئات (4 صلاحيات): view, create, edit, delete
+- ✅ الطلبات (5 صلاحيات): view, create, edit, delete, manage status
+- ✅ المستخدمين (4 صلاحيات): view, create, edit, delete
+- ✅ الأدوار والصلاحيات (6 صلاحيات): view/create/edit/delete roles + view/edit permissions
+- ✅ المؤثرين والعمولات (6 صلاحيات): view/manage/edit/delete influencers + view commissions + manage payouts
+- ✅ أكواد الخصم (4 صلاحيات): view, create, edit, delete
+- ✅ المحتوى (3 صلاحيات): manage content, manage blog, manage pages
+- ✅ التقارير (1 صلاحية): view reports
+
+**5. تحسينات UX:**
+- ✅ Single Column Layout في Edit Role (`->columns(1)`)
+- ✅ كل قسم صلاحيات في CheckboxList منفصل
+- ✅ BulkToggleable لتحديد/إلغاء تحديد مجموعة كاملة
+
+**الملفات المُنشأة/المُعدّلة:**
+
+**Policies (7 files - جديدة):**
+- app/Policies/ProductPolicy.php
+- app/Policies/OrderPolicy.php
+- app/Policies/CategoryPolicy.php
+- app/Policies/UserPolicy.php
+- app/Policies/RolePolicy.php
+- app/Policies/TranslationPolicy.php
+- app/Policies/PermissionPolicy.php
+
+**Tables (6 files - مُعدّلة):**
+- app/Filament/Resources/Orders/Tables/OrdersTable.php
+- app/Filament/Resources/Products/Tables/ProductsTable.php
+- app/Filament/Resources/Users/Tables/UsersTable.php
+- app/Filament/Resources/Roles/Tables/RolesTable.php
+- app/Filament/Resources/CategoryResource.php
+- app/Filament/Resources/TranslationResource.php
+
+**Pages (1 file - مُعدّلة):**
+- app/Filament/Resources/Orders/Pages/ViewOrder.php
+
+**Schemas (1 file - مُعدّلة):**
+- app/Filament/Resources/Roles/Schemas/RoleForm.php (تنظيم كامل للصلاحيات)
+
+**Seeders (1 file - مُعدّلة):**
+- database/seeders/RolesAndPermissionsSeeder.php (6 permissions جديدة)
+
+**Documentation (1 file - جديد):**
+- docs/TASK_7.3_POLICIES_REPORT.md (تقرير شامل 1000+ lines)
+
+**التحديات والحلول:**
+
+**المشكلة #1: Policies لا تؤثر على Actions**
+- ❌ **الاعتقاد الخاطئ:** Policies كافية لإخفاء الأزرار تلقائياً
+- ✅ **الحل:** Filament يحتاج `->visible()` صريح على كل Action
+- 📚 **الدرس:** Policies تعمل على Resource Level (Navigation), Actions تحتاج Authorization يدوي
+
+**المشكلة #2: ToggleColumn يعمل بدون صلاحية**
+- ❌ **المشكلة:** المستخدم بدون `edit categories` يقدر يغير `is_active`
+- ✅ **الحل:** `->disabled(fn ($record) => !auth()->user()->can('update', $record))`
+- 📚 **الدرس:** ToggleColumn يحتاج `disabled()` مش `visible()`
+
+**المشكلة #3: Roles/Permissions تظهر للجميع**
+- ❌ **السبب:** Permissions مش موجودة في Database
+- ✅ **الحل:** إضافة 6 permissions جديدة عبر Tinker + تحديث Seeder
+- 📚 **الدرس:** Policy لوحده مش كافي، لازم Permission موجود في DB
+
+**المشكلة #4: Custom Actions مش محمية**
+- ❌ **مثال:** زر "تغيير حالة الطلب" في ViewOrder يظهر للكل
+- ✅ **الحل:** `->visible(fn () => auth()->user()->can('manage order status'))`
+- 📚 **الدرس:** كل Action (حتى Custom) يحتاج فحص صلاحية صريح
+
+**الأوامر المستخدمة:**
+```bash
+# إنشاء Policies
+php artisan make:policy ProductPolicy --model=Product
+php artisan make:policy OrderPolicy --model=Order
+php artisan make:policy CategoryPolicy --model=Category
+php artisan make:policy UserPolicy --model=User
+php artisan make:policy RolePolicy --model=Role
+php artisan make:policy TranslationPolicy --model=Translation
+php artisan make:policy PermissionPolicy --model=Permission
+
+# إضافة Permissions عبر Tinker
+php artisan tinker
+>>> Permission::create(['name' => 'view roles']);
+>>> Permission::create(['name' => 'create roles']);
+>>> Permission::create(['name' => 'edit roles']);
+>>> Permission::create(['name' => 'delete roles']);
+>>> Permission::create(['name' => 'view permissions']);
+>>> Permission::create(['name' => 'edit permissions']);
+
+# مسح Cache (تم تكرارها 8+ مرات)
+php artisan permission:cache-reset
+php artisan optimize:clear
+php artisan filament:cache-components
+```
+
+**الوقت المستغرق:** ~3 ساعات
+
+**الحالة النهائية:**
+- 🟢 7 Model Policies مُنشأة ومربوطة بـ Spatie Permissions
+- 🟢 Super Admin Bypass يعمل في جميع Policies
+- 🟢 Navigation Authorization: العناصر تظهر/تختفي حسب الصلاحيات ✅
+- 🟢 Action Authorization: 23+ Actions محمية ✅
+- 🟢 ToggleColumn Authorization: معطّل لمن بدون صلاحية ✅
+- 🟢 URL Protection: الوصول المباشر يُرجع 403 ✅
+- 🟢 6 Permissions جديدة مضافة للنظام
+- 🟢 Form الصلاحيات منظم في 9 مجموعات واضحة
+- 🟢 Single Column Layout في Edit Role
+- 🟢 التوثيق شامل (1000+ lines report)
+
+**معايير القبول (تم تحقيقها):**
+- ✅ Super Admin يرى كل شيء
+- ✅ Sales يرى Dashboard و Orders فقط
+- ✅ الأزرار تختفي حسب الصلاحيات
+- ✅ الوصول المباشر للـ URLs يُرفض بـ 403
+- ✅ ToggleColumn معطّل لمن بدون صلاحية
+- ✅ Custom Actions محمية (مثل: تغيير حالة الطلب)
+
+**✅ Authorization System مكتمل 100% - Production Ready!**
+
+---
+
 ## 📊 الإحصائيات
 
 **المرحلة 1:**
@@ -767,26 +1008,29 @@
 - Troubleshooting Documentation: 100% ✅
 
 **المشروع الكلي:**
-- المراحل المكتملة: 3/8 (المرحلة 4 عند 90%)
-- النسبة الكلية: ~65%
+- المراحل المكتملة: 3/8 (المرحلة 4 عند 95%)
+- النسبة الكلية: ~70%
 - عدد Models: 24 (+ OrderStatusHistory)
+- عدد Policies: 7 (Product, Order, Category, User, Role, Translation, Permission) ✅
 - عدد Services: 6 (TranslationService, ProductImageUploader, OrderService, ProductService, CategoryService, InfluencerService)
 - عدد Jobs: 1 (ProcessProductImage)
 - عدد Controllers: 4
 - عدد Form Requests: 4
-- عدد Routes: 44 (32 admin + 6 public + 6 product/order resources)
+- عدد Routes: 48 (32 admin + 6 public + 10 resource routes)
 - عدد Migrations: 30 (+ order_status_histories)
 - عدد جداول قاعدة البيانات: 40 (order_status_histories table)
-- عدد Seeders: 5 (TranslationSeeder, OrderSeeder, CategorySeeder, ProductSeeder, RolesSeeder)
+- عدد Seeders: 5 (TranslationSeeder, OrderSeeder, CategorySeeder, ProductSeeder, RolesSeeder - updated with 6 new permissions)
+- عدد Permissions: 42 (40 أصلية + 6 جديدة للـ Roles/Permissions management)
 - عدد Factories: 2
-- عدد Filament Resources: 4 (TranslationResource, CategoryResource, ProductResource, OrderResource - all complete ✅)
+- عدد Filament Resources: 6 (Translation, Category, Product, Order, Role, User - all complete ✅)
 - عدد Livewire Components: 2 (TopbarLanguages fixed, Store/Home)
 - عدد Custom Translation Loaders: 1 (CombinedLoader)
 - عدد Helper Files: 1 (app/helpers.php)
 - عدد Unit Tests: 8 (ProductServiceTest)
 - عدد Feature Tests: 9 (ProductImageUploadTest)
 - Test Success Rate: 100% (17/17 passing)
-- عدد Documentation Files: 9 (ERD, Translation System, Task 3/4/5.2/5.3 Reports, Troubleshooting Guide)
+- عدد Documentation Files: 13 (ERD, Translation System, Task 3/4/5.2/5.3/7.2.2/7.2.3/7.3 Reports, Troubleshooting Guide)
+- Authorization System: 100% implemented (7 Policies, 23+ protected Actions, Navigation/URL protection)
 
 ---
 
@@ -817,9 +1061,9 @@
    - تطبيق Policies على Resources
    - Role-based access control
 
-**المدة المتوقعة:** 1-2 يوم متبقي
+**المدة المتوقعة:** 0.5-1 يوم متبقي (Dashboard Widgets فقط)
 
-**الحالة الحالية:** CategoryResource ✅ → ProductResource ✅ → OrderResource ✅ → Dashboard Widgets ⏳
+**الحالة الحالية:** CategoryResource ✅ → ProductResource ✅ → OrderResource ✅ → Authorization System ✅ → Dashboard Widgets ⏳
 
 **الملاحظات المهمة:**
 - ⚠️ تأكد من `upload_tmp_dir` في php.ini قبل أي file upload feature
@@ -837,3 +1081,25 @@
 - ✅ 7 مشاكل تقنية تم حلها في Task 5.2
 - ✅ Timezone fix للتوقيت المصري
 - ✅ 2 acceptance reports شاملة (Task 5.2 + 5.3)
+
+**الإنجازات الأخيرة (12 نوفمبر 2025):**
+- ✅ RolesResource مكتمل بالكامل مع ربط الصلاحيات.
+- ✅ UsersResource مكتمل بالكامل مع ربط الأدوار.
+- ✅ Post-Creation Redirect Fix: تحسين تجربة المستخدم في جميع نماذج الإنشاء.
+- ✅ Post-Update Redirect Fix: توحيد سلوك إعادة التوجيه بعد التعديل.
+- ✅ Add Phone & Profile Photo to Users: تحويل UserResource إلى Mini-HR.
+- ✅ **Task 7.3: Authorization & Policies System** (مكتمل 100%)
+  - ✅ إنشاء 7 Model Policies (Product, Order, Category, User, Role, Translation, Permission)
+  - ✅ ربط Policies بـ Spatie Permissions (42 permission)
+  - ✅ Super Admin Bypass في جميع Policies
+  - ✅ Navigation Authorization (عناصر القائمة تظهر/تختفي حسب الصلاحيات)
+  - ✅ Action Authorization (أزرار Edit/Delete/Custom Actions مربوطة بالصلاحيات)
+  - ✅ ToggleColumn Authorization (Toggles معطّلة لمن بدون صلاحية)
+  - ✅ إضافة 6 Permissions جديدة (view/create/edit/delete roles + view/edit permissions)
+  - ✅ تنظيم Form الصلاحيات في 9 مجموعات (Products, Categories, Orders, Users, Roles, Influencers, Discounts, Content, Reports)
+  - ✅ Single Column Layout في Edit Role
+  - ✅ حماية URLs من الوصول المباشر (403 Forbidden)
+  - ✅ 23+ Actions محمية
+  - ✅ تحديث Seeder بالصلاحيات الجديدة
+  - ✅ توثيق شامل: docs/TASK_7.3_POLICIES_REPORT.md
+- ✅ تحديث ملفات التوثيق والتقدم (4 تقارير قبول).

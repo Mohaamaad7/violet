@@ -18,4 +18,12 @@ class CreateUser extends CreateRecord
             $this->record->roles()->sync([$roleId]);
         }
     }
+
+    /**
+     * Redirect to index page after creation
+     */
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }

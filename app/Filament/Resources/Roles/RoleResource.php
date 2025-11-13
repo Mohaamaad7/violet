@@ -44,6 +44,8 @@ class RoleResource extends Resource
         return 'دور';
     }
 
+
+
     public static function form(Schema $schema): Schema
     {
         return RoleForm::configure($schema);

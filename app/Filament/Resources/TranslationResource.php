@@ -39,6 +39,11 @@ class TranslationResource extends Resource
         return 50;
     }
 
+    public static function canViewAny(): bool
+    {
+        return auth()->check() && auth()->user()->hasRole('super-admin');
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema->schema([
@@ -82,12 +87,15 @@ class TranslationResource extends Resource
                 TernaryFilter::make('is_active'),
             ])
             ->actions([
-                EditAction::make(),
-                DeleteAction::make(),
+                EditAction::make()
+                    ->visible(fn ($record) => auth()->user()->can('update', $record)),
+                DeleteAction::make()
+                    ->visible(fn ($record) => auth()->user()->can('delete', $record)),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->visible(fn () => auth()->user()->hasRole('super-admin')),
                 ]),
             ]);
     }

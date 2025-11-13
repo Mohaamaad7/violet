@@ -73,6 +73,26 @@ Your main objective is to act as a **senior Laravel developer**. You must write 
 - **Route Model Binding**: Use implicit/explicit binding.
 - **Eloquent First**: Prefer Eloquent ORM over Query Builder or raw SQL.
 
+### Filament FileUpload Configuration (CRITICAL)
+- **⚠️ ALWAYS add `->disk('public')` to FileUpload for publicly accessible files**
+- Default disk is 'local' (`storage/app/`) which is NOT web-accessible
+- For images/documents that need URLs, use 'public' disk (`storage/app/public/`)
+- **Example:**
+  ```php
+  // ✅ CORRECT - For images in admin tables
+  FileUpload::make('image_path')
+      ->disk('public')        // REQUIRED for web-accessible files
+      ->directory('products')
+      ->image()
+      ->maxSize(5120);
+  
+  // ❌ WRONG - Missing disk() will save to storage/app/ (not accessible)
+  FileUpload::make('image_path')
+      ->directory('products')  // Will use 'local' disk by default!
+      ->image();
+  ```
+- **Reference:** See `docs/TROUBLESHOOTING_IMAGE_UPLOAD.md` for complete troubleshooting guide
+
 ### Code Style (PSR-12)
 - Classes: `PascalCase`, Methods/Variables: `camelCase`, DB tables/columns: `snake_case`.
 

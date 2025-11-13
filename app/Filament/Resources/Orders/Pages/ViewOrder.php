@@ -40,6 +40,7 @@ class ViewOrder extends ViewRecord
                 ->label('تغيير حالة الطلب')
                 ->icon('heroicon-o-arrow-path')
                 ->color('primary')
+                ->visible(fn () => auth()->user()->can('manage order status'))
                 ->form([
                     Select::make('status')
                         ->label('الحالة الجديدة')

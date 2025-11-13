@@ -40,6 +40,14 @@ class RolesAndPermissionsSeeder extends Seeder
             'edit users',
             'delete users',
             
+            // Roles & Permissions
+            'view roles',
+            'create roles',
+            'edit roles',
+            'delete roles',
+            'view permissions',
+            'edit permissions',
+            
             // Influencers
             'view influencers',
             'manage influencer applications',
@@ -69,6 +77,8 @@ class RolesAndPermissionsSeeder extends Seeder
         foreach ($permissions as $permission) {
             Permission::create(['name' => $permission]);
         }
+
+        // Create roles and assign permissions
 
         // Create roles and assign permissions
 

@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Filament\Resources\Roles\Pages;
+namespace App\Filament\Resources\Banners\Pages;
 
-use App\Filament\Resources\Roles\RoleResource;
+use App\Filament\Resources\Banners\BannerResource;
 use Filament\Actions\DeleteAction;
 use Filament\Resources\Pages\EditRecord;
 
-class EditRole extends EditRecord
+class EditBanner extends EditRecord
 {
-    protected static string $resource = RoleResource::class;
+    protected static string $resource = BannerResource::class;
 
     protected function getHeaderActions(): array
     {
@@ -16,10 +16,7 @@ class EditRole extends EditRecord
             DeleteAction::make(),
         ];
     }
-
-    /**
-     * Redirect to index page after update
-     */
+    
     protected function getRedirectUrl(): string
     {
         return $this->getResource()::getUrl('index');

@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Users\Schemas;
 
 use App\Models\Role;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Section;
@@ -17,6 +18,15 @@ class UserForm
             ->components([
                 Section::make('معلومات المستخدم')
                     ->schema([
+                        FileUpload::make('profile_photo_path')
+                            ->label('الصورة الشخصية')
+                            ->image()
+                            ->avatar()
+                            ->directory('profile-photos')
+                            ->imageEditor()
+                            ->maxSize(1024)
+                            ->columnSpanFull(),
+
                         TextInput::make('name')
                             ->label('الاسم')
                             ->required()
@@ -28,6 +38,13 @@ class UserForm
                             ->required()
                             ->unique(ignoreRecord: true)
                             ->maxLength(255),
+
+                        TextInput::make('phone')
+                            ->label('رقم الهاتف')
+                            ->tel()
+                            ->numeric()
+                            ->nullable()
+                            ->maxLength(20),
                     ])
                     ->columns(2),
                 
