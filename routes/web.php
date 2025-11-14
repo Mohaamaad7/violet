@@ -9,7 +9,7 @@ use App\Http\Controllers\LanguageController;
 Route::get('/language/{locale}', [LanguageController::class, 'switch'])->name('language.switch');
 
 // Store Front
-Route::get('/', App\Livewire\Store\Home::class)->name('home');
+Route::get('/', [App\Http\Controllers\Store\HomeController::class, 'index'])->name('home');
 
 Route::view('profile', 'profile')
     ->middleware(['auth'])
