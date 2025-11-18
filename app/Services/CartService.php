@@ -143,7 +143,7 @@ class CartService
         // Check if item already exists in cart
         $existingItem = $cart->items()
             ->where('product_id', $productId)
-            ->where('variant_id', $variantId)
+            ->where('product_variant_id', $variantId)
             ->first();
 
         if ($existingItem) {
@@ -184,7 +184,7 @@ class CartService
         CartItem::create([
             'cart_id' => $cart->id,
             'product_id' => $productId,
-            'variant_id' => $variantId,
+            'product_variant_id' => $variantId,
             'quantity' => $quantity,
             'price' => $product->sale_price ?? $product->price,
         ]);
@@ -374,7 +374,7 @@ class CartService
             // Check if user already has this product in cart
             $existingItem = $userCart->items()
                 ->where('product_id', $guestItem->product_id)
-                ->where('variant_id', $guestItem->variant_id)
+                ->where('product_variant_id', $guestItem->product_variant_id)
                 ->first();
 
             if ($existingItem) {
