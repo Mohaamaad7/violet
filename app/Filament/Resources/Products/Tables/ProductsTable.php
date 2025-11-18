@@ -30,10 +30,26 @@ class ProductsTable
                 ImageColumn::make('primary_image')
                     ->label('Image')
                     ->getStateUsing(function (Product $record) {
+                        // Try Spatie Media Library first
+                        $primaryMedia = $record->getMedia('product-images')
+                            ->filter(fn($media) => $media->getCustomProperty('is_primary') === true)
+                            ->first();
+                        
+                        if (!$primaryMedia) {
+                            $primaryMedia = $record->getFirstMedia('product-images');
+                        }
+                        
+                        if ($primaryMedia) {
+                            return $primaryMedia->hasGeneratedConversion('thumbnail') 
+                                ? $primaryMedia->getUrl('thumbnail')
+                                : $primaryMedia->getUrl();
+                        }
+                        
+                        // Fallback to old system
                         $primaryImage = $record->images()->where('is_primary', true)->first();
                         return $primaryImage?->image_path 
                             ? asset('storage/' . $primaryImage->image_path) 
-                            : null;
+                            : asset('images/default-product.png');
                     })
                     ->size(50)
                     ->circular(),

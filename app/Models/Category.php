@@ -56,4 +56,37 @@ class Category extends Model
     {
         return $query->whereNull('parent_id');
     }
+
+    // Helper Methods
+    
+    /**
+     * Get total active products count including all children categories recursively
+     */
+    public function getTotalActiveProductsCount(): int
+    {
+        // Count products directly in this category
+        $count = $this->products()->where('status', 'active')->count();
+        
+        // Recursively count products from all children
+        foreach ($this->children as $child) {
+            $count += $child->getTotalActiveProductsCount();
+        }
+        
+        return $count;
+    }
+
+    /**
+     * Get all descendant category IDs (children, grandchildren, etc.)
+     */
+    public function getDescendantIds(): array
+    {
+        $ids = [];
+        
+        foreach ($this->children as $child) {
+            $ids[] = $child->id;
+            $ids = array_merge($ids, $child->getDescendantIds());
+        }
+        
+        return $ids;
+    }
 }

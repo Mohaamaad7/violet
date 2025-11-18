@@ -11,9 +11,27 @@ Route::get('/language/{locale}', [LanguageController::class, 'switch'])->name('l
 // Store Front
 Route::get('/', [App\Http\Controllers\Store\HomeController::class, 'index'])->name('home');
 
+// Products Listing Page (Task 9.3)
+Route::get('/products', [App\Http\Controllers\Store\ProductsController::class, 'index'])->name('products.index');
+
+// Product Details Page (Task 9.4)
+Route::get('/products/{slug}', [App\Http\Controllers\Store\ProductDetailsController::class, 'show'])->name('product.show');
+
+Route::get('/categories/{category:slug}', function () {
+    return 'Category page (Coming soon)';
+})->name('category.show');
+
 Route::view('profile', 'profile')
     ->middleware(['auth'])
     ->name('profile');
+
+// Admin Product Image Management Routes
+Route::prefix('admin/products')->middleware(['auth'])->name('admin.products.')->group(function () {
+    Route::post('{product}/upload-images', [App\Http\Controllers\Admin\ProductImageController::class, 'upload'])->name('upload-images');
+    Route::post('images/{image}/set-primary', [App\Http\Controllers\Admin\ProductImageController::class, 'setPrimary'])->name('images.set-primary');
+    Route::delete('images/{image}', [App\Http\Controllers\Admin\ProductImageController::class, 'destroy'])->name('images.destroy');
+    Route::post('{product}/images/update-order', [App\Http\Controllers\Admin\ProductImageController::class, 'updateOrder'])->name('images.update-order');
+});
 
 require __DIR__.'/auth.php';
 

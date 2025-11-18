@@ -8,6 +8,7 @@
     "require": {
         "php": "^8.2",
         "filament/filament": "^4.2",
+        "filament/spatie-laravel-media-library-plugin": "^4.2",
         "filament/tables": "^4.2",
         "intervention/image-laravel": "^1.5",
         "laravel/framework": "^12.0",
@@ -16,6 +17,7 @@
         "livewire/livewire": "^3.6.4",
         "livewire/volt": "^1.7.0",
         "spatie/laravel-activitylog": "^4.0",
+        "spatie/laravel-medialibrary": "^11.17",
         "spatie/laravel-permission": "^6.0"
     },
     "require-dev": {

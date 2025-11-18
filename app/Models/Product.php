@@ -7,10 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class Product extends Model
+class Product extends Model implements HasMedia
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, InteractsWithMedia;
 
     protected $fillable = [
         'category_id',
@@ -19,6 +21,9 @@ class Product extends Model
         'sku',
         'description',
         'short_description',
+        'long_description',
+        'specifications',
+        'how_to_use',
         'price',
         'sale_price',
         'cost_price',
@@ -31,6 +36,8 @@ class Product extends Model
         'is_featured',
         'views_count',
         'sales_count',
+        'average_rating',
+        'reviews_count',
         'meta_title',
         'meta_description',
         'meta_keywords',
@@ -45,6 +52,8 @@ class Product extends Model
         'low_stock_threshold' => 'integer',
         'views_count' => 'integer',
         'sales_count' => 'integer',
+        'average_rating' => 'decimal:2',
+        'reviews_count' => 'integer',
         'is_featured' => 'boolean',
     ];
 
@@ -108,5 +117,65 @@ class Product extends Model
         }
         
         return round((($this->price - $this->sale_price) / $this->price) * 100);
+    }
+
+    public function getPrimaryImageAttribute()
+    {
+        // Try Spatie Media Library first
+        $primaryMedia = $this->getMedia('product-images')
+            ->filter(fn($media) => $media->getCustomProperty('is_primary') === true)
+            ->first();
+            
+        if ($primaryMedia) {
+            return $primaryMedia->getUrl();
+        }
+        
+        // Fallback to first media
+        $firstMedia = $this->getFirstMedia('product-images');
+        if ($firstMedia) {
+            return $firstMedia->getUrl();
+        }
+        
+        // Fallback to old system (for backwards compatibility)
+        $primary = $this->images()->where('is_primary', true)->first();
+        if ($primary && $primary->image_path) {
+            return asset('storage/' . $primary->image_path);
+        }
+        
+        // Final fallback to placeholder
+        return asset('images/default-product.png');
+    }
+
+    public function getIsInStockAttribute()
+    {
+        return $this->stock > 0;
+    }
+
+    public function getStockStatusAttribute()
+    {
+        return $this->is_in_stock ? 'In Stock' : 'Out of Stock';
+    }
+    
+    /**
+     * Register media collections for Spatie Media Library
+     */
+    public function registerMediaCollections(): void
+    {
+        $this
+            ->addMediaCollection('product-images')
+            ->useDisk('public')
+            ->registerMediaConversions(function () {
+                $this
+                    ->addMediaConversion('thumbnail')
+                    ->width(150)
+                    ->height(150)
+                    ->sharpen(10);
+                    
+                $this
+                    ->addMediaConversion('preview')
+                    ->width(800)
+                    ->height(800)
+                    ->sharpen(10);
+            });
     }
 }

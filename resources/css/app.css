@@ -1,3 +1,113 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ============================================
+   Drift Zoom Custom Styling (Amazon-style INLINE CONSTRAINED)
+   ============================================ */
+
+/* Zoom Container - Must have position relative */
+#zoom-container {
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+/* Inline Zoom Pane (Constrained within image) */
+.drift-amazon-zoom-pane {
+    position: absolute !important;
+    z-index: 10 !important;
+    border: 2px solid #888 !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+    border-radius: 4px !important;
+    pointer-events: none !important;
+    background: white !important;
+}
+
+/* When inline pane is opening */
+.drift-amazon-zoom-pane.drift-opening {
+    animation: fadeIn 0.2s ease-in;
+}
+
+/* When inline pane is closing */
+.drift-amazon-zoom-pane.drift-closing {
+    animation: fadeOut 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+    from { opacity: 1; }
+    to { opacity: 0; }
+}
+
+/* Bounding Box on Hover (shows area being zoomed) */
+.drift-amazon-bounding-box {
+    border: 2px solid #ff9900 !important;
+    background: rgba(255, 153, 0, 0.15) !important;
+    opacity: 1 !important;
+    pointer-events: none !important;
+}
+
+/* Main Image Cursor */
+#product-main-image {
+    cursor: crosshair;
+    user-select: none;
+}
+
+/* ============================================
+   Spotlight Gallery Custom Styling
+   ============================================ */
+
+/* Spotlight Modal Background */
+#spotlight {
+    background: rgba(0, 0, 0, 0.95) !important;
+}
+
+/* Spotlight Toolbar Buttons */
+.spl-close,
+.spl-fullscreen,
+.spl-zoom-in,
+.spl-zoom-out,
+.spl-autofit {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    border-radius: 4px !important;
+    transition: all 0.2s ease !important;
+}
+
+.spl-close:hover,
+.spl-fullscreen:hover,
+.spl-zoom-in:hover,
+.spl-zoom-out:hover,
+.spl-autofit:hover {
+    background-color: rgba(255, 153, 0, 0.8) !important;
+}
+
+/* Spotlight Navigation Buttons */
+.spl-prev,
+.spl-next {
+    background: rgba(255, 255, 255, 0.2) !important;
+    border-radius: 50% !important;
+    transition: all 0.2s ease !important;
+}
+
+.spl-prev:hover,
+.spl-next:hover {
+    background: rgba(255, 153, 0, 0.9) !important;
+    transform: scale(1.1);
+}
+
+/* Spotlight Image Title */
+.spl-title {
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    color: #fff !important;
+}
+
+/* Spotlight Page Counter */
+.spl-page {
+    color: rgba(255, 255, 255, 0.8) !important;
+    font-size: 14px !important;
+}

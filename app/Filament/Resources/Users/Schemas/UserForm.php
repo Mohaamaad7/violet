@@ -20,6 +20,7 @@ class UserForm
                     ->schema([
                         FileUpload::make('profile_photo_path')
                             ->label('الصورة الشخصية')
+                            ->disk('public') // ✅ CRITICAL FIX - Save avatars to public disk
                             ->image()
                             ->avatar()
                             ->directory('profile-photos')

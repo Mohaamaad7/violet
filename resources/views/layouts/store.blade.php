@@ -1,334 +1,111 @@
-<!DOCTYPE html><!DOCTYPE html>
-
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}"><html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
-
-<head><head>
-
-    <meta charset="utf-8">    <meta charset="utf-8">
-
-    <meta name="viewport" content="width=device-width, initial-scale=1">    <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <meta name="csrf-token" content="{{ csrf_token() }}">    <meta name="csrf-token" content="{{ csrf_token() }}">
-
-
-
-    {{-- SEO Meta Tags --}}    {{-- SEO Meta Tags --}}
-
-    <title>{{ $title ?? config('app.name', 'Violet Store') }}</title>    <title>{{ $title ?? config('app.name', 'Violet Store') }}</title>
-
-    <meta name="description" content="{{ $description ?? 'Your premium e-commerce destination for quality products' }}">    <meta name="description" content="{{ $description ?? 'Your premium e-commerce destination for quality products' }}">
-
-    <meta name="keywords" content="{{ $keywords ?? 'e-commerce, online shop, violet store' }}">    <meta name="keywords" content="{{ $keywords ?? 'e-commerce, online shop, violet store' }}">
-
-    <meta name="author" content="Violet Store">    <meta name="author" content="Violet Store">
-
-        
-
-    {{-- Open Graph / Facebook --}}    {{-- Open Graph / Facebook --}}
-
-    <meta property="og:type" content="website">    <meta property="og:type" content="website">
-
-    <meta property="og:url" content="{{ url()->current() }}">    <meta property="og:url" content="{{ url()->current() }}">
-
-    <meta property="og:title" content="{{ $title ?? config('app.name') }}">    <meta property="og:title" content="{{ $title ?? config('app.name') }}">
-
-    <meta property="og:description" content="{{ $description ?? 'Your premium e-commerce destination' }}">    <meta property="og:description" content="{{ $description ?? 'Your premium e-commerce destination' }}">
-
-    <meta property="og:image" content="{{ asset('images/og-image.jpg') }}">    <meta property="og:image" content="{{ asset('images/og-image.jpg') }}">
-
-
-
-    {{-- Twitter --}}    {{-- Twitter --}}
-
-    <meta property="twitter:card" content="summary_large_image">    <meta property="twitter:card" content="summary_large_image">
-
-    <meta property="twitter:url" content="{{ url()->current() }}">    <meta property="twitter:url" content="{{ url()->current() }}">
-
-    <meta property="twitter:title" content="{{ $title ?? config('app.name') }}">    <meta property="twitter:title" content="{{ $title ?? config('app.name') }}">
-
-    <meta property="twitter:description" content="{{ $description ?? 'Your premium e-commerce destination' }}">    <meta property="twitter:description" content="{{ $description ?? 'Your premium e-commerce destination' }}">
-
-    <meta property="twitter:image" content="{{ asset('images/og-image.jpg') }}">    <meta property="twitter:image" content="{{ asset('images/og-image.jpg') }}">
-
-
-
-    {{-- Favicon --}}    {{-- Favicon --}}
-
-    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
-
-    <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">    <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
-
-
-
-    {{-- Fonts --}}    {{-- Fonts --}}
-
-    <link rel="preconnect" href="https://fonts.bunny.net">    <link rel="preconnect" href="https://fonts.bunny.net">
-
-    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
-
-
-
-    {{-- Styles --}}    {{-- Styles --}}
-
-    @vite(['resources/css/app.css', 'resources/js/app.js'])    @vite(['resources/css/app.css', 'resources/js/app.js'])
-
-    @livewireStyles    @livewireStyles
-
-
-
-    {{-- Additional Head Content --}}    {{-- Additional Head Content --}}
-
-    @stack('styles')    @stack('styles')
-
-</head></head>
-
-<body class="font-sans antialiased bg-cream-50 text-gray-900"><body class="font-sans antialiased bg-cream-50 text-gray-900">
-
-    {{-- Page Wrapper --}}    {{-- Page Wrapper --}}
-
-    <div class="min-h-screen flex flex-col">    <div class="min-h-screen flex flex-col">
-
-        {{-- Header --}}        {{-- Header --}}
-
-        <x-store.header />        <x-store.header />
-
-
-
-        {{-- Main Content --}}        {{-- Main Content --}}
-
-        <main class="flex-grow">        <main class="flex-grow">
-
-            {{ $slot }}            <div class="container mx-auto px-4">
-
-        </main>                <div class="flex justify-between items-center text-sm">
-
-                    <div class="flex items-center gap-4">
-
-        {{-- Footer --}}                        <a href="mailto:info@violet.com" class="hover:underline">
-
-        <x-store.footer />                            <svg class="w-4 h-4 inline {{ app()->getLocale() === 'ar' ? 'ml-1' : 'mr-1' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-
-    </div>                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-
-                            </svg>
-
-    {{-- Toast Notifications (if needed) --}}                            info@violet.com
-
-    <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2"></div>                        </a>
-
-                        <a href="tel:+201234567890" class="hover:underline">
-
-    {{-- Livewire Scripts --}}                            <svg class="w-4 h-4 inline {{ app()->getLocale() === 'ar' ? 'ml-1' : 'mr-1' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-
-    @livewireScripts                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-
-                            </svg>
-
-    {{-- Additional Scripts --}}                            +20 123 456 7890
-
-    @stack('scripts')                        </a>
-
-                    </div>
-
-    {{-- Alpine.js & Custom Scripts --}}                    
-
-    <script>                    <!-- Language Switcher -->
-
-        // Cart counter update function                    <div class="flex items-center gap-2">
-
-        window.updateCartCounter = function(count) {                        <a href="{{ route('language.switch', 'ar') }}" 
-
-            const counter = document.getElementById('cart-counter');                           class="px-2 py-1 rounded {{ app()->getLocale() === 'ar' ? 'bg-white/20 font-bold' : 'hover:bg-white/10' }}">
-
-            if (counter) {                            عربي
-
-                counter.textContent = count;                        </a>
-
-                counter.classList.toggle('hidden', count === 0);                        <span>|</span>
-
-            }                        <a href="{{ route('language.switch', 'en') }}" 
-
-        };                           class="px-2 py-1 rounded {{ app()->getLocale() === 'en' ? 'bg-white/20 font-bold' : 'hover:bg-white/10' }}">
-
-                            English
-
-        // Wishlist counter update function                        </a>
-
-        window.updateWishlistCounter = function(count) {                    </div>
-
-            const counter = document.getElementById('wishlist-counter');                </div>
-
-            if (counter) {            </div>
-
-                counter.textContent = count;        </div>
-
-                counter.classList.toggle('hidden', count === 0);        
-
-            }        <!-- Main Header -->
-
-        };        <div class="container mx-auto px-4 py-4">
-
-            <div class="flex justify-between items-center">
-
-        // Mobile menu toggle                <!-- Logo -->
-
-        window.toggleMobileMenu = function() {                <a href="/" class="text-2xl font-bold bg-gradient-to-r from-purple-600 to-indigo-600 bg-clip-text text-transparent">
-
-            const mobileMenu = document.getElementById('mobile-menu');                    🌸 Violet
-
-            const menuIcon = document.getElementById('mobile-menu-icon');                </a>
-
-            const closeIcon = document.getElementById('mobile-menu-close');                
-
-                            <!-- Search Bar -->
-
-            if (mobileMenu.classList.contains('hidden')) {                <div class="flex-1 max-w-xl {{ app()->getLocale() === 'ar' ? 'mr-8' : 'mx-8' }}">
-
-                mobileMenu.classList.remove('hidden');                    <div class="relative">
-
-                menuIcon.classList.add('hidden');                        <input type="text" 
-
-                closeIcon.classList.remove('hidden');                               placeholder="{{ __('messages.search_products') }}"
-
-            } else {                               class="w-full px-4 py-2 {{ app()->getLocale() === 'ar' ? 'pr-10' : 'pl-10' }} border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent">
-
-                mobileMenu.classList.add('hidden');                        <svg class="w-5 h-5 absolute {{ app()->getLocale() === 'ar' ? 'right-3' : 'left-3' }} top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-
-                menuIcon.classList.remove('hidden');                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-
-                closeIcon.classList.add('hidden');                        </svg>
-
-            }                    </div>
-
-        };                </div>
-
-                
-
-        // Search toggle (mobile)                <!-- Actions -->
-
-        window.toggleMobileSearch = function() {                <div class="flex items-center gap-4">
-
-            const searchBar = document.getElementById('mobile-search-bar');                    @auth
-
-            searchBar.classList.toggle('hidden');                        <a href="{{ route('profile') }}" class="text-gray-700 hover:text-purple-600">
-
-        };                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-
-    </script>                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-
-</body>                            </svg>
-
-</html>                        </a>
-
-                    @else
-                        <a href="{{ route('login') }}" class="text-gray-700 hover:text-purple-600">
-                            {{ __('messages.login') }}
-                        </a>
-                    @endauth
-                    
-                    <a href="/cart" class="relative text-gray-700 hover:text-purple-600">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                        </svg>
-                        <span class="absolute -top-2 {{ app()->getLocale() === 'ar' ? '-left-2' : '-right-2' }} bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                            0
-                        </span>
-                    </a>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Navigation -->
-        <nav class="border-t border-gray-200">
-            <div class="container mx-auto px-4">
-                <ul class="flex items-center gap-8 py-3 text-sm font-medium">
-                    <li>
-                        <a href="/" class="text-gray-700 hover:text-purple-600">
-                            {{ __('messages.home') }}
-                        </a>
-                    </li>
-                    <li>
-                        <a href="/products" class="text-gray-700 hover:text-purple-600">
-                            {{ __('messages.products') }}
-                        </a>
-                    </li>
-                    <li>
-                        <a href="/categories" class="text-gray-700 hover:text-purple-600">
-                            {{ __('messages.categories') }}
-                        </a>
-                    </li>
-                    <li>
-                        <a href="/on-sale" class="text-red-600 hover:text-red-700 font-bold">
-                            {{ __('messages.on_sale') }} 🔥
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </nav>
-    </header>
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    {{-- SEO Meta Tags --}}
+    <title>{{ $title ?? config('app.name', 'Violet Store') }}</title>
+    <meta name="description" content="{{ $description ?? 'Your premium e-commerce destination for quality products' }}">
+    <meta name="keywords" content="{{ $keywords ?? 'e-commerce, online shop, violet store' }}">
+    <meta name="author" content="Violet Store">
     
-    <!-- Main Content -->
-    <main class="flex-1">
-        {{ $slot }}
-    </main>
-    
-    <!-- Footer -->
-    <footer class="bg-gray-900 text-gray-300 mt-16">
-        <div class="container mx-auto px-4 py-12">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-                <!-- About -->
-                <div>
-                    <h3 class="text-white text-lg font-bold mb-4">🌸 Violet</h3>
-                    <p class="text-sm">
-                        {{ __('messages.welcome') }}
-                    </p>
-                </div>
-                
-                <!-- Quick Links -->
-                <div>
-                    <h4 class="text-white font-semibold mb-4">{{ __('messages.customer_service') }}</h4>
-                    <ul class="space-y-2 text-sm">
-                        <li><a href="#" class="hover:text-white">{{ __('messages.about_us') }}</a></li>
-                        <li><a href="#" class="hover:text-white">{{ __('messages.contact_us') }}</a></li>
-                        <li><a href="#" class="hover:text-white">{{ __('messages.privacy_policy') }}</a></li>
-                        <li><a href="#" class="hover:text-white">{{ __('messages.terms_conditions') }}</a></li>
-                    </ul>
-                </div>
-                
-                <!-- Categories -->
-                <div>
-                    <h4 class="text-white font-semibold mb-4">{{ __('messages.categories') }}</h4>
-                    <ul class="space-y-2 text-sm">
-                        @foreach(\App\Models\Category::whereNull('parent_id')->take(5)->get() as $cat)
-                            <li><a href="/categories/{{ $cat->slug }}" class="hover:text-white">{{ $cat->name }}</a></li>
-                        @endforeach
-                    </ul>
-                </div>
-                
-                <!-- Social -->
-                <div>
-                    <h4 class="text-white font-semibold mb-4">{{ __('messages.follow_us') }}</h4>
-                    <div class="flex gap-3">
-                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-purple-600 transition">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                            </svg>
-                        </a>
-                        <a href="#" class="w-10 h-10 bg-gray-800 rounded-full flex items-center justify-center hover:bg-purple-600 transition">
-                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-                            </svg>
-                        </a>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="border-t border-gray-800 mt-8 pt-8 text-center text-sm">
-                <p>&copy; {{ date('Y') }} Violet. {{ __('messages.all_rights_reserved') }}</p>
-            </div>
-        </div>
-    </footer>
-    
+    {{-- Open Graph / Facebook --}}
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:title" content="{{ $title ?? config('app.name') }}">
+    <meta property="og:description" content="{{ $description ?? 'Your premium e-commerce destination' }}">
+    <meta property="og:image" content="{{ asset('images/og-image.jpg') }}">
+
+    {{-- Twitter --}}
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="{{ url()->current() }}">
+    <meta property="twitter:title" content="{{ $title ?? config('app.name') }}">
+    <meta property="twitter:description" content="{{ $description ?? 'Your premium e-commerce destination' }}">
+    <meta property="twitter:image" content="{{ asset('images/og-image.jpg') }}">
+
+    {{-- Favicon --}}
+    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    <link rel="apple-touch-icon" href="{{ asset('apple-touch-icon.png') }}">
+
+    {{-- Fonts --}}
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700&display=swap" rel="stylesheet" />
+
+    {{-- Styles --}}
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @livewireStyles
+
+    {{-- Additional Head Content --}}
+    @stack('styles')
+</head>
+<body class="font-sans antialiased bg-cream-50 text-gray-900">
+    {{-- Page Wrapper --}}
+    <div class="min-h-screen flex flex-col">
+        {{-- Header --}}
+        <x-store.header />
+
+        {{-- Main Content --}}
+        <main class="flex-grow">
+            {{ $slot }}
+        </main>
+
+        {{-- Footer --}}
+        <x-store.footer />
+    </div>
+
+    {{-- Toast Notifications (if needed) --}}
+    <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2"></div>
+
+    {{-- Livewire Scripts --}}
     @livewireScripts
+
+    {{-- Additional Scripts --}}
+    @stack('scripts')
+
+    {{-- Alpine.js & Custom Scripts --}}
+    <script>
+        // Cart counter update function
+        window.updateCartCounter = function(count) {
+            const counter = document.getElementById('cart-counter');
+            if (counter) {
+                counter.textContent = count;
+                counter.classList.toggle('hidden', count === 0);
+            }
+        };
+
+        // Wishlist counter update function
+        window.updateWishlistCounter = function(count) {
+            const counter = document.getElementById('wishlist-counter');
+            if (counter) {
+                counter.textContent = count;
+                counter.classList.toggle('hidden', count === 0);
+            }
+        };
+
+        // Mobile menu toggle
+        window.toggleMobileMenu = function() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            const menuIcon = document.getElementById('mobile-menu-icon');
+            const closeIcon = document.getElementById('mobile-menu-close');
+            
+            if (mobileMenu.classList.contains('hidden')) {
+                mobileMenu.classList.remove('hidden');
+                menuIcon.classList.add('hidden');
+                closeIcon.classList.remove('hidden');
+            } else {
+                mobileMenu.classList.add('hidden');
+                menuIcon.classList.remove('hidden');
+                closeIcon.classList.add('hidden');
+            }
+        };
+
+        // Search toggle (mobile)
+        window.toggleMobileSearch = function() {
+            const searchBar = document.getElementById('mobile-search-bar');
+            searchBar.classList.toggle('hidden');
+        };
+    </script>
 </body>
 </html>

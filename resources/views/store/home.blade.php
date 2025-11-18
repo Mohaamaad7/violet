@@ -3,25 +3,8 @@
     description="Shop quality products at unbeatable prices"
     keywords="online shopping, e-commerce, violet store"
 >
-    {{-- Hero Section / Sliders would go here --}}
-    <div class="bg-gradient-to-r from-violet-600 to-violet-800 text-white py-20">
-        <div class="container mx-auto px-4 text-center">
-            <h1 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-4">
-                Welcome to Violet Store
-            </h1>
-            <p class="text-xl md:text-2xl text-violet-100 mb-8 max-w-2xl mx-auto">
-                Your premium destination for quality products at unbeatable prices
-            </p>
-            <div class="flex flex-wrap justify-center gap-4">
-                <a href="/products" class="px-8 py-3 bg-white text-violet-700 rounded-lg font-semibold hover:bg-cream-100 transition">
-                    Shop Now
-                </a>
-                <a href="/offers" class="px-8 py-3 bg-violet-700 text-white border-2 border-white rounded-lg font-semibold hover:bg-violet-800 transition">
-                    View Offers
-                </a>
-            </div>
-        </div>
-    </div>
+    {{-- Dynamic Hero Slider --}}
+    <livewire:store.hero-slider />
 
     {{-- Features Section --}}
     <div class="py-12 bg-white">
@@ -63,49 +46,11 @@
         </div>
     </div>
 
-    {{-- Featured Products Section (Placeholder) --}}
-    <div class="py-16 bg-cream-50">
-        <div class="container mx-auto px-4">
-            <div class="text-center mb-12">
-                <h2 class="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-                    Featured Products
-                </h2>
-                <p class="text-gray-600 text-lg">
-                    Discover our handpicked selection of premium products
-                </p>
-            </div>
-            
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                @for($i = 1; $i <= 4; $i++)
-                <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition group">
-                    <div class="aspect-square bg-gray-200 flex items-center justify-center">
-                        <svg class="w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                        </svg>
-                    </div>
-                    <div class="p-4">
-                        <h3 class="font-semibold text-gray-900 mb-2 group-hover:text-violet-600 transition">
-                            Product Name {{ $i }}
-                        </h3>
-                        <p class="text-sm text-gray-500 mb-3">Category Name</p>
-                        <div class="flex items-center justify-between">
-                            <span class="text-xl font-bold text-violet-600">$99.99</span>
-                            <button class="px-4 py-2 bg-violet-600 text-white rounded-lg text-sm font-medium hover:bg-violet-700 transition">
-                                Add to Cart
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                @endfor
-            </div>
+    {{-- Dynamic Promotional Banners --}}
+    <livewire:store.banners-section position="homepage_middle" />
 
-            <div class="text-center mt-10">
-                <a href="/products" class="inline-block px-8 py-3 bg-violet-600 text-white rounded-lg font-semibold hover:bg-violet-700 transition">
-                    View All Products
-                </a>
-            </div>
-        </div>
-    </div>
+    {{-- Dynamic Featured Products --}}
+    <livewire:store.featured-products />
 
     {{-- Newsletter Section --}}
     <div class="py-16 bg-gradient-to-r from-violet-600 to-violet-800 text-white">

@@ -30,14 +30,7 @@ class EditProduct extends EditRecord
      */
     protected function mutateFormDataBeforeFill(array $data): array
     {
-        // Load existing images for the form
-        $product = $this->record;
-        $images = $product->images()->orderBy('order')->get();
-        
-        if ($images->isNotEmpty()) {
-            $data['images'] = $images->pluck('image_path')->toArray();
-        }
-        
+        // Repeater will automatically load images from the relationship
         return $data;
     }
 
@@ -46,7 +39,22 @@ class EditProduct extends EditRecord
      */
     protected function mutateFormDataBeforeSave(array $data): array
     {
-        // Filament will handle image uploads automatically
+        // Ensure at least one image is marked as primary
+        if (isset($data['images']) && !empty($data['images'])) {
+            $hasPrimary = false;
+            foreach ($data['images'] as $index => &$image) {
+                if ($image['is_primary'] ?? false) {
+                    $hasPrimary = true;
+                    break;
+                }
+            }
+            
+            // If no primary image is set, make the first one primary
+            if (!$hasPrimary) {
+                $data['images'][0]['is_primary'] = true;
+            }
+        }
+        
         return $data;
     }
 
@@ -61,29 +69,16 @@ class EditProduct extends EditRecord
         $variants = $data['variants'] ?? [];
         unset($data['variants']);
         
-        // Extract and process image uploads
-        $images = [];
-        if (isset($data['images']) && is_array($data['images'])) {
-            foreach ($data['images'] as $index => $imagePath) {
-                // Filament stores the file and returns the final path
-                $images[] = [
-                    'image_path' => $imagePath,
-                    'is_primary' => $index === 0,
-                    'order' => $index,
-                ];
-            }
-            $data['images'] = $images;
-        }
-        
-        // Update product with images using service
-        $product = $productService->updateWithImages($record, $data);
+        // Filament Repeater handles images relationship automatically
+        // Just update the product
+        $record->update($data);
         
         // Sync variants if provided
         if (isset($variants)) {
-            $productService->syncVariants($product, $variants);
+            $productService->syncVariants($record, $variants);
         }
         
-        return $product->fresh(['images', 'variants']);
+        return $record->fresh(['images', 'variants']);
     }
 
     /**

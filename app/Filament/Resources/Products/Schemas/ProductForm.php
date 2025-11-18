@@ -6,6 +6,7 @@ use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
@@ -82,17 +83,27 @@ class ProductForm
                 
                 // Media Section
                 Section::make('Media')
-                    ->description('Product images')
+                    ->description('Upload product images - First image will be primary')
                     ->schema([
-                        FileUpload::make('images')
+                        SpatieMediaLibraryFileUpload::make('media')
                             ->label('Product Images')
+                            ->collection('product-images')
                             ->multiple()
-                            ->image()
-                            ->maxFiles(10)
-                            ->maxSize(5120) // 5MB
                             ->reorderable()
-                            ->directory('products')
-                            ->helperText('Upload up to 10 images. First image will be primary. Max 5MB each.')
+                            ->maxFiles(10)
+                            ->maxSize(5120)
+                            ->image()
+                            ->imageEditor()
+                            ->imageCropAspectRatio('1:1')
+                            ->imageResizeTargetWidth('800')
+                            ->imageResizeTargetHeight('800')
+                            ->conversion('thumbnail')
+                            ->conversionsDisk('public')
+                            ->panelLayout('grid')
+                            ->removeUploadedFileButtonPosition('right')
+                            ->uploadButtonPosition('left')
+                            ->uploadProgressIndicatorPosition('left')
+                            ->helperText('Upload up to 10 images. Drag to reorder. First image will be primary.')
                             ->columnSpanFull(),
                     ])
                     ->collapsible(),

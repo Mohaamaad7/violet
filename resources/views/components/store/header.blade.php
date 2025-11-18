@@ -153,41 +153,51 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                         </svg>
                     </button>
-                    {{-- Mega Menu Placeholder --}}
-                    <div class="absolute left-0 top-full mt-2 w-screen max-w-4xl bg-white shadow-xl rounded-lg p-6 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                        <div class="grid grid-cols-4 gap-6">
+                    {{-- Dynamic Mega Menu with ALL Categories --}}
+                    <div class="absolute left-0 top-full mt-2 w-screen max-w-6xl bg-white shadow-xl rounded-lg p-6 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+                            @foreach(\App\Models\Category::with('children')->whereNull('parent_id')->where('is_active', true)->orderBy('order')->get() as $parentCategory)
                             <div>
-                                <h4 class="font-bold text-gray-900 mb-3">Electronics</h4>
+                                <h4 class="font-bold text-gray-900 mb-3 flex items-center gap-2">
+                                    @if($parentCategory->icon)
+                                    <i class="{{ $parentCategory->icon }} text-violet-600"></i>
+                                    @else
+                                    <i class="fas fa-tag text-violet-600"></i>
+                                    @endif
+                                    {{ $parentCategory->name }}
+                                </h4>
+                                @if($parentCategory->children->count() > 0)
                                 <ul class="space-y-2 text-sm text-gray-600">
-                                    <li><a href="#" class="hover:text-violet-600">Computers</a></li>
-                                    <li><a href="#" class="hover:text-violet-600">Phones</a></li>
-                                    <li><a href="#" class="hover:text-violet-600">Accessories</a></li>
+                                    @foreach($parentCategory->children->take(5) as $childCategory)
+                                    <li>
+                                        <a href="{{ route('category.show', $childCategory->slug) }}" class="hover:text-violet-600 transition flex items-center gap-1">
+                                            <i class="fas fa-chevron-right text-[8px]"></i>
+                                            {{ $childCategory->name }}
+                                        </a>
+                                    </li>
+                                    @endforeach
+                                    @if($parentCategory->children->count() > 5)
+                                    <li>
+                                        <a href="{{ route('category.show', $parentCategory->slug) }}" class="text-violet-600 hover:text-violet-700 font-semibold text-xs">
+                                            View All ({{ $parentCategory->children->count() }})
+                                        </a>
+                                    </li>
+                                    @endif
                                 </ul>
+                                @else
+                                <a href="{{ route('category.show', $parentCategory->slug) }}" class="text-sm text-violet-600 hover:text-violet-700">
+                                    View Products
+                                </a>
+                                @endif
                             </div>
-                            <div>
-                                <h4 class="font-bold text-gray-900 mb-3">Fashion</h4>
-                                <ul class="space-y-2 text-sm text-gray-600">
-                                    <li><a href="#" class="hover:text-violet-600">Men's Wear</a></li>
-                                    <li><a href="#" class="hover:text-violet-600">Women's Wear</a></li>
-                                    <li><a href="#" class="hover:text-violet-600">Kids</a></li>
-                                </ul>
-                            </div>
-                            <div>
-                                <h4 class="font-bold text-gray-900 mb-3">Home & Garden</h4>
-                                <ul class="space-y-2 text-sm text-gray-600">
-                                    <li><a href="#" class="hover:text-violet-600">Furniture</a></li>
-                                    <li><a href="#" class="hover:text-violet-600">Decor</a></li>
-                                    <li><a href="#" class="hover:text-violet-600">Kitchen</a></li>
-                                </ul>
-                            </div>
-                            <div>
-                                <h4 class="font-bold text-gray-900 mb-3">Sports</h4>
-                                <ul class="space-y-2 text-sm text-gray-600">
-                                    <li><a href="#" class="hover:text-violet-600">Equipment</a></li>
-                                    <li><a href="#" class="hover:text-violet-600">Clothing</a></li>
-                                    <li><a href="#" class="hover:text-violet-600">Shoes</a></li>
-                                </ul>
-                            </div>
+                            @endforeach
+                        </div>
+                        <div class="mt-6 pt-4 border-t border-gray-200">
+                            <a href="/products" class="text-violet-600 hover:text-violet-700 font-semibold flex items-center gap-2">
+                                <i class="fas fa-th"></i>
+                                View All Products
+                                <i class="fas fa-arrow-right text-xs"></i>
+                            </a>
                         </div>
                     </div>
                 </li>

@@ -17,8 +17,7 @@ class CreateProduct extends CreateRecord
      */
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        // Filament will handle image uploads automatically
-        // Just keep the temporary paths for now
+        // Filament Repeater with relationship() will handle images automatically
         return $data;
     }
 
@@ -33,26 +32,30 @@ class CreateProduct extends CreateRecord
         $variants = $data['variants'] ?? [];
         unset($data['variants']);
         
-        // Extract images (Filament already stored them in storage/app/public/products/)
-        // The paths here are relative: "products/filename.jpg"
-        $imagesPaths = $data['images'] ?? [];
-        unset($data['images']);
+        // Extract images - Filament Repeater handles this via relationship
+        // But we need to ensure at least one is primary
+        $images = $data['images'] ?? [];
         
-        // Prepare images array for ProductService
-        $imagesData = [];
-        if (!empty($imagesPaths)) {
-            foreach ($imagesPaths as $index => $imagePath) {
-                $imagesData[] = [
-                    'image_path' => $imagePath, // Already stored by Filament
-                    'is_primary' => $index === 0,
-                    'order' => $index,
-                ];
+        // Ensure at least one image is marked as primary
+        if (!empty($images)) {
+            $hasPrimary = false;
+            foreach ($images as $index => &$image) {
+                if ($image['is_primary'] ?? false) {
+                    $hasPrimary = true;
+                    break;
+                }
             }
-            $data['images'] = $imagesData;
+            
+            // If no primary image is set, make the first one primary
+            if (!$hasPrimary) {
+                $images[0]['is_primary'] = true;
+            }
+            
+            $data['images'] = $images;
         }
         
-        // Create product with images using service
-        $product = $productService->createWithImages($data);
+        // Create product - Filament will handle the images relationship
+        $product = parent::handleRecordCreation($data);
         
         // Sync variants if provided
         if (!empty($variants)) {
