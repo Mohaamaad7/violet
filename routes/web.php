@@ -17,6 +17,12 @@ Route::get('/products', [App\Http\Controllers\Store\ProductsController::class, '
 // Product Details Page (Task 9.4)
 Route::get('/products/{slug}', [App\Http\Controllers\Store\ProductDetailsController::class, 'show'])->name('product.show');
 
+// Shopping Cart (Task 9.5)
+Route::get('/cart', App\Livewire\Store\CartPage::class)->name('cart');
+Route::get('/checkout', function () {
+    return 'Checkout page (Coming soon)';
+})->name('checkout');
+
 Route::get('/categories/{category:slug}', function () {
     return 'Category page (Coming soon)';
 })->name('category.show');

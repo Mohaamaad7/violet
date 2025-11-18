@@ -55,6 +55,9 @@
         <x-store.footer />
     </div>
 
+    {{-- Cart Manager (Slide-over) --}}
+    @livewire('store.cart-manager')
+
     {{-- Toast Notifications (if needed) --}}
     <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2"></div>
 
@@ -66,6 +69,45 @@
 
     {{-- Alpine.js & Custom Scripts --}}
     <script>
+        // Toast Notification System
+        window.showToast = function(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            const bgColor = type === 'success' ? 'bg-green-500' : 'bg-red-500';
+            const icon = type === 'success' 
+                ? '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>'
+                : '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>';
+            
+            toast.className = `${bgColor} text-white px-6 py-4 rounded-lg shadow-lg flex items-center gap-3 transform transition-all duration-300 translate-x-full opacity-0`;
+            toast.innerHTML = `
+                ${icon}
+                <span class="font-medium">${message}</span>
+                <button onclick="this.parentElement.remove()" class="ml-2 hover:bg-white/20 rounded p-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            `;
+            
+            container.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.classList.remove('translate-x-full', 'opacity-0');
+            }, 100);
+            
+            setTimeout(() => {
+                toast.classList.add('translate-x-full', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 5000);
+        };
+
+        // Listen for show-toast event from Livewire
+        window.addEventListener('show-toast', (event) => {
+            const { message, type } = event.detail;
+            window.showToast(message, type);
+        });
+
         // Cart counter update function
         window.updateCartCounter = function(count) {
             const counter = document.getElementById('cart-counter');

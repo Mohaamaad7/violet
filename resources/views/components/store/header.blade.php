@@ -93,14 +93,28 @@
                 </a>
 
                 {{-- Cart --}}
-                <a href="/cart" class="relative p-2 hover:bg-gray-100 rounded-lg transition group">
+                <button 
+                    @click="$dispatch('open-cart')"
+                    class="relative p-2 hover:bg-gray-100 rounded-lg transition group"
+                >
                     <svg class="w-6 h-6 text-gray-700 group-hover:text-violet-600 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                     </svg>
-                    <span id="cart-counter" class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center hidden">
-                        0
+                    <span 
+                        id="cart-counter" 
+                        class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center"
+                        x-data="{ count: 0 }"
+                        x-init="
+                            window.addEventListener('cart-count-updated', (e) => {
+                                count = (e.detail && e.detail.count) ? e.detail.count : 0;
+                            });
+                        "
+                        x-show="count > 0"
+                        x-text="count"
+                        style="display: none;"
+                    >
                     </span>
-                </a>
+                </button>
 
                 {{-- Mobile Menu Toggle --}}
                 <button onclick="toggleMobileMenu()" class="lg:hidden p-2 hover:bg-gray-100 rounded-lg transition">

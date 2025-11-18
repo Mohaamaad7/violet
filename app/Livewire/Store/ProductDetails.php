@@ -166,18 +166,44 @@ class ProductDetails extends Component
     public function addToCart()
     {
         if (!$this->isInStock()) {
-            $this->dispatch('notify', [
+            $this->dispatch('show-toast', [
                 'type' => 'error',
-                'message' => 'Product is out of stock'
+                'message' => 'المنتج غير متوفر حالياً'
             ]);
             return;
         }
 
-        // TODO: Implement actual cart logic
-        $this->dispatch('notify', [
-            'type' => 'success',
-            'message' => 'Product added to cart successfully!'
-        ]);
+        // Inject CartService and add product
+        $cartService = app(\App\Services\CartService::class);
+        
+        $result = $cartService->addToCart(
+            productId: $this->product->id,
+            quantity: $this->quantity,
+            variantId: $this->selectedVariantId
+        );
+
+        if ($result['success']) {
+            // Dispatch cart-updated event to refresh cart manager
+            $this->dispatch('cart-updated');
+            
+            // Show success message
+            $this->dispatch('show-toast', [
+                'type' => 'success',
+                'message' => $result['message']
+            ]);
+
+            // Open cart panel
+            $this->dispatch('open-cart');
+            
+            // Reset quantity to 1
+            $this->quantity = 1;
+        } else {
+            // Show error message
+            $this->dispatch('show-toast', [
+                'type' => 'error',
+                'message' => $result['message']
+            ]);
+        }
     }
 
     /**
