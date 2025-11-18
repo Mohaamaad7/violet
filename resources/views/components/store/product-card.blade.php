@@ -91,13 +91,14 @@
         </div>
         
         {{-- Actions --}}
-        <div class="flex items-center gap-2" x-data="{ adding: false }" x-init="
-            window.addEventListener('cart-count-updated', () => { adding = false });
-        ">
+        <div class="flex items-center gap-2" 
+             x-data="{ adding: false }" 
+             x-init="window.addEventListener('cart-count-updated', () => { adding = false });"
+        >
             {{-- Add to Cart Button --}}
             <button 
                 @if($product->stock > 0)
-                @click="adding = true; $dispatch('add-to-cart', { productId: {{ $product->id }}, quantity: 1 })"
+                @click="adding = true; window.Livewire.dispatch('add-to-cart', { productId: {{ $product->id }}, quantity: 1 })"
                 @else
                 disabled
                 @endif

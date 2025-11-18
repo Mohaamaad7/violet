@@ -94,7 +94,7 @@
 
                 {{-- Cart --}}
                 <button 
-                    @click="$dispatch('open-cart')"
+                    @click="window.Livewire.dispatch('open-cart')"
                     class="relative p-2 hover:bg-gray-100 rounded-lg transition group"
                 >
                     <svg class="w-6 h-6 text-gray-700 group-hover:text-violet-600 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
