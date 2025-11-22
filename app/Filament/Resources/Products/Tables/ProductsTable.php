@@ -28,7 +28,7 @@ class ProductsTable
         return $table
             ->columns([
                 ImageColumn::make('primary_image')
-                    ->label('Image')
+                    ->label(__('admin.table.image'))
                     ->getStateUsing(function (Product $record) {
                         // Try Spatie Media Library first
                         $primaryMedia = $record->getMedia('product-images')
@@ -55,13 +55,14 @@ class ProductsTable
                     ->circular(),
                 
                 TextColumn::make('name')
+                    ->label(__('admin.table.name'))
                     ->searchable()
                     ->sortable()
                     ->weight('bold')
                     ->wrap(),
                 
                 TextColumn::make('sku')
-                    ->label('SKU')
+                    ->label(__('admin.table.sku'))
                     ->searchable()
                     ->sortable()
                     ->copyable()
@@ -69,19 +70,21 @@ class ProductsTable
                     ->toggleable(),
                 
                 TextColumn::make('category.name')
+                    ->label(__('admin.table.category'))
                     ->searchable()
                     ->sortable()
                     ->badge()
                     ->color('info'),
                 
                 TextColumn::make('price')
+                    ->label(__('admin.table.price'))
                     ->money('USD')
                     ->sortable()
                     ->weight('bold')
                     ->color('success'),
                 
                 TextColumn::make('sale_price')
-                    ->label('Sale')
+                    ->label(__('admin.table.sale'))
                     ->money('USD')
                     ->sortable()
                     ->color('warning')
@@ -89,6 +92,7 @@ class ProductsTable
                     ->default('—'),
                 
                 TextColumn::make('stock')
+                    ->label(__('admin.table.stock'))
                     ->numeric()
                     ->sortable()
                     ->color(fn (int $state): string => match (true) {
@@ -103,6 +107,7 @@ class ProductsTable
                     }),
                 
                 TextColumn::make('status')
+                    ->label(__('admin.table.status'))
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'active' => 'success',
@@ -111,7 +116,7 @@ class ProductsTable
                     }),
                 
                 IconColumn::make('is_featured')
-                    ->label('Featured')
+                    ->label(__('admin.table.featured'))
                     ->boolean()
                     ->trueIcon('heroicon-o-star')
                     ->falseIcon('heroicon-o-star')
@@ -119,7 +124,7 @@ class ProductsTable
                     ->toggleable(),
                 
                 TextColumn::make('created_at')
-                    ->label('Created')
+                    ->label(__('admin.table.created_at'))
                     ->dateTime('M d, Y')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -131,21 +136,21 @@ class ProductsTable
                     ->searchable()
                     ->preload()
                     ->multiple()
-                    ->label('Category'),
+                    ->label(__('admin.table.category')),
                 
                 // Status Filter
                 SelectFilter::make('status')
                     ->options([
-                        'active' => 'Active',
-                        'draft' => 'Draft',
-                        'inactive' => 'Inactive',
+                        'active' => __('admin.status.active'),
+                        'draft' => __('admin.status.draft'),
+                        'inactive' => __('admin.status.inactive'),
                     ])
                     ->multiple()
-                    ->label('Status'),
+                    ->label(__('admin.table.status')),
                 
                 // Is Active/Featured Filter
                 Filter::make('is_featured')
-                    ->label('Featured Only')
+                    ->label(__('admin.filters.featured_only'))
                     ->query(fn (Builder $query): Builder => $query->where('is_featured', true))
                     ->toggle(),
                 
@@ -155,11 +160,11 @@ class ProductsTable
                         \Filament\Forms\Components\TextInput::make('price_from')
                             ->numeric()
                             ->prefix('$')
-                            ->placeholder('Min'),
+                            ->placeholder(__('admin.filters.min')),
                         \Filament\Forms\Components\TextInput::make('price_to')
                             ->numeric()
                             ->prefix('$')
-                            ->placeholder('Max'),
+                            ->placeholder(__('admin.filters.max')),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
@@ -175,17 +180,17 @@ class ProductsTable
                     ->indicateUsing(function (array $data): array {
                         $indicators = [];
                         if ($data['price_from'] ?? null) {
-                            $indicators['price_from'] = 'Min: $' . $data['price_from'];
+                            $indicators['price_from'] = __('admin.filters.min') . ': $' . $data['price_from'];
                         }
                         if ($data['price_to'] ?? null) {
-                            $indicators['price_to'] = 'Max: $' . $data['price_to'];
+                            $indicators['price_to'] = __('admin.filters.max') . ': $' . $data['price_to'];
                         }
                         return $indicators;
                     }),
                 
                 // Low Stock Filter
                 Filter::make('low_stock')
-                    ->label('Low Stock Only')
+                    ->label(__('admin.filters.low_stock_only'))
                     ->query(fn (Builder $query): Builder => 
                         $query->whereColumn('stock', '<=', 'low_stock_threshold')
                     )
@@ -198,7 +203,7 @@ class ProductsTable
                 EditAction::make()
                     ->visible(fn ($record) => auth()->user()->can('update', $record)),
                 ReplicateAction::make()
-                    ->label('Duplicate')
+                    ->label(__('admin.action.duplicate'))
                     ->visible(fn ($record) => auth()->user()->can('create', $record))
                     ->excludeAttributes(['sku', 'slug'])
                     ->beforeReplicaSaved(function (Product $replica): void {
@@ -214,7 +219,7 @@ class ProductsTable
                 BulkActionGroup::make([
                     // Publish/Unpublish Actions
                     BulkAction::make('publish')
-                        ->label('Publish Selected')
+                        ->label(__('admin.action.publish_selected'))
                         ->icon('heroicon-o-check-circle')
                         ->color('success')
                         ->visible(fn () => auth()->user()->can('edit products'))
@@ -223,10 +228,10 @@ class ProductsTable
                             $records->each->update(['status' => 'active']);
                         })
                         ->deselectRecordsAfterCompletion()
-                        ->successNotificationTitle('Products published successfully'),
+                        ->successNotificationTitle(__('admin.message.published')),
                     
                     BulkAction::make('unpublish')
-                        ->label('Unpublish Selected')
+                        ->label(__('admin.action.unpublish_selected'))
                         ->icon('heroicon-o-x-circle')
                         ->color('warning')
                         ->visible(fn () => auth()->user()->can('edit products'))
@@ -235,10 +240,10 @@ class ProductsTable
                             $records->each->update(['status' => 'inactive']);
                         })
                         ->deselectRecordsAfterCompletion()
-                        ->successNotificationTitle('Products unpublished successfully'),
+                        ->successNotificationTitle(__('admin.message.unpublished')),
                     
                     BulkAction::make('set_featured')
-                        ->label('Mark as Featured')
+                        ->label(__('admin.action.mark_featured'))
                         ->icon('heroicon-o-star')
                         ->color('warning')
                         ->visible(fn () => auth()->user()->can('edit products'))
@@ -247,10 +252,10 @@ class ProductsTable
                             $records->each->update(['is_featured' => true]);
                         })
                         ->deselectRecordsAfterCompletion()
-                        ->successNotificationTitle('Products marked as featured'),
+                        ->successNotificationTitle(__('admin.message.featured')),
                     
                     BulkAction::make('unset_featured')
-                        ->label('Remove from Featured')
+                        ->label(__('admin.action.remove_featured'))
                         ->icon('heroicon-o-minus-circle')
                         ->color('gray')
                         ->visible(fn () => auth()->user()->can('edit products'))
@@ -259,7 +264,7 @@ class ProductsTable
                             $records->each->update(['is_featured' => false]);
                         })
                         ->deselectRecordsAfterCompletion()
-                        ->successNotificationTitle('Products removed from featured'),
+                        ->successNotificationTitle(__('admin.message.unfeatured')),
                     
                     DeleteBulkAction::make()
                         ->visible(fn () => auth()->user()->can('delete products')),

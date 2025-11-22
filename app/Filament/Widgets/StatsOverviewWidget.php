@@ -15,6 +15,11 @@ class StatsOverviewWidget extends BaseWidget
      */
     protected ?string $pollingInterval = '60s';
 
+    public function getHeading(): ?string
+    {
+        return __('admin.widgets.stats.heading');
+    }
+
     /**
      * Get the stats cards for the widget
      */
@@ -49,8 +54,8 @@ class StatsOverviewWidget extends BaseWidget
             ? (($todayRevenue - $yesterdayRevenue) / $yesterdayRevenue) * 100 
             : 0;
 
-        return Stat::make('إيرادات اليوم', number_format($todayRevenue, 2) . ' جنيه')
-            ->description($this->getChangeDescription($percentageChange, 'عن أمس'))
+        return Stat::make(__('admin.widgets.stats.today_revenue'), number_format($todayRevenue, 2) . ' ' . __('admin.currency.egp_short'))
+            ->description($this->getChangeDescription($percentageChange, __('admin.widgets.stats.vs_yesterday')))
             ->descriptionIcon($percentageChange >= 0 ? 'heroicon-m-arrow-trending-up' : 'heroicon-m-arrow-trending-down')
             ->color($percentageChange >= 0 ? 'success' : 'danger')
             ->chart($this->getLast7DaysRevenue());
@@ -73,8 +78,8 @@ class StatsOverviewWidget extends BaseWidget
             ? (($newOrdersCount - $yesterdayNewOrders) / $yesterdayNewOrders) * 100 
             : 0;
 
-        return Stat::make('طلبات جديدة اليوم', $newOrdersCount)
-            ->description($this->getChangeDescription($percentageChange, 'عن أمس'))
+        return Stat::make(__('admin.widgets.stats.new_orders_today'), $newOrdersCount)
+            ->description($this->getChangeDescription($percentageChange, __('admin.widgets.stats.vs_yesterday')))
             ->descriptionIcon($percentageChange >= 0 ? 'heroicon-m-arrow-trending-up' : 'heroicon-m-arrow-trending-down')
             ->color($percentageChange >= 0 ? 'success' : 'warning')
             ->url(route('filament.admin.resources.orders.index'))
@@ -98,8 +103,8 @@ class StatsOverviewWidget extends BaseWidget
             now()->endOfWeek(),
         ])->count();
 
-        return Stat::make('إجمالي العملاء', number_format($totalCustomers))
-            ->description($newCustomersThisWeek . ' عميل جديد هذا الأسبوع')
+        return Stat::make(__('admin.widgets.stats.total_customers'), number_format($totalCustomers))
+            ->description($newCustomersThisWeek . ' ' . __('admin.widgets.stats.new_customers_this_week'))
             ->descriptionIcon('heroicon-m-user-plus')
             ->color('primary')
             ->chart($this->getLast7DaysCustomers());
@@ -127,10 +132,10 @@ class StatsOverviewWidget extends BaseWidget
             ->count();
 
         $description = $lowStockProducts > 0 
-            ? $lowStockProducts . ' منتج بمخزون منخفض'
-            : 'جميع المنتجات متوفرة';
+            ? $lowStockProducts . ' ' . __('admin.widgets.stats.low_stock_products')
+            : __('admin.widgets.stats.all_in_stock');
 
-        return Stat::make('منتجات متاحة', number_format($productsInStock))
+        return Stat::make(__('admin.widgets.stats.products_in_stock'), number_format($productsInStock))
             ->description($description)
             ->descriptionIcon($lowStockProducts > 0 ? 'heroicon-m-exclamation-triangle' : 'heroicon-m-check-circle')
             ->color($lowStockProducts > 0 ? 'warning' : 'success')
@@ -191,7 +196,7 @@ class StatsOverviewWidget extends BaseWidget
     protected function getChangeDescription(float $percentage, string $suffix = ''): string
     {
         if ($percentage == 0) {
-            return 'لا تغيير ' . $suffix;
+            return __('admin.widgets.stats.no_change') . ' ' . $suffix;
         }
 
         $sign = $percentage > 0 ? '+' : '';

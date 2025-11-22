@@ -13,7 +13,12 @@ class RecentOrdersWidget extends BaseWidget
     /**
      * Widget heading
      */
-    protected static ?string $heading = 'آخر الطلبات';
+    protected static ?string $heading = null;
+
+    public function getHeading(): ?string
+    {
+        return __('admin.widgets.recent_orders.heading');
+    }
 
     /**
      * Widget sort order (displayed after stats cards)
@@ -41,22 +46,22 @@ class RecentOrdersWidget extends BaseWidget
             ->columns([
                 // Column 1: Order ID (Code)
                 Tables\Columns\TextColumn::make('order_number')
-                    ->label('رقم الطلب')
+                    ->label(__('admin.widgets.recent_orders.order_number'))
                     ->searchable()
                     ->sortable()
                     ->weight('medium')
                     ->copyable()
-                    ->copyMessage('تم نسخ رقم الطلب'),
+                    ->copyMessage(__('admin.widgets.recent_orders.copied')),
 
                 // Column 2: Customer Name
                 Tables\Columns\TextColumn::make('user.name')
-                    ->label('العميل')
+                    ->label(__('admin.widgets.recent_orders.customer'))
                     ->searchable()
                     ->sortable(),
 
                 // Column 3: Status (Colored Badge)
                 Tables\Columns\TextColumn::make('status')
-                    ->label('الحالة')
+                    ->label(__('admin.widgets.recent_orders.status'))
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'pending' => 'warning',
@@ -67,17 +72,17 @@ class RecentOrdersWidget extends BaseWidget
                         default => 'gray',
                     })
                     ->formatStateUsing(fn (string $state): string => match ($state) {
-                        'pending' => 'قيد الانتظار',
-                        'processing' => 'قيد التجهيز',
-                        'shipped' => 'تم الشحن',
-                        'delivered' => 'تم التسليم',
-                        'cancelled' => 'ملغي',
+                        'pending' => __('admin.orders.status.pending'),
+                        'processing' => __('admin.orders.status.processing'),
+                        'shipped' => __('admin.orders.status.shipped'),
+                        'delivered' => __('admin.orders.status.delivered'),
+                        'cancelled' => __('admin.orders.status.cancelled'),
                         default => $state,
                     }),
 
                 // Column 4: Total
                 Tables\Columns\TextColumn::make('total')
-                    ->label('الإجمالي')
+                    ->label(__('admin.widgets.recent_orders.total'))
                     ->money('EGP')
                     ->sortable()
                     ->weight('bold'),
@@ -85,7 +90,7 @@ class RecentOrdersWidget extends BaseWidget
             ->actions([
                 // Row action to view order details
                 Action::make('view')
-                    ->label('عرض')
+                    ->label(__('admin.action.view'))
                     ->icon('heroicon-o-eye')
                     ->url(fn (Order $record): string => route('filament.admin.resources.orders.view', ['record' => $record->id]))
                     ->color('primary'),
@@ -93,7 +98,7 @@ class RecentOrdersWidget extends BaseWidget
             ->headerActions([
                 // Header action to view all orders
                 Action::make('viewAll')
-                    ->label('عرض جميع الطلبات')
+                    ->label(__('admin.widgets.recent_orders.view_all'))
                     ->icon('heroicon-o-arrow-right')
                     ->url(route('filament.admin.resources.orders.index'))
                     ->color('primary'),

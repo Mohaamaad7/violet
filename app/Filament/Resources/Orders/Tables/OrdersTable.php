@@ -21,17 +21,17 @@ class OrdersTable
             ->columns([
                 // رقم الطلب
                 TextColumn::make('order_number')
-                    ->label('رقم الطلب')
+                    ->label(__('admin.table.order_number'))
                     ->searchable()
                     ->sortable()
                     ->weight(FontWeight::Bold)
                     ->copyable()
-                    ->copyMessage('تم نسخ رقم الطلب')
+                    ->copyMessage(__('admin.widgets.recent_orders.copied'))
                     ->icon('heroicon-o-hashtag'),
 
                 // اسم العميل
                 TextColumn::make('user.name')
-                    ->label('العميل')
+                    ->label(__('admin.table.customer'))
                     ->searchable()
                     ->sortable()
                     ->description(fn ($record) => $record->user?->email)
@@ -39,7 +39,7 @@ class OrdersTable
 
                 // الإجمالي
                 TextColumn::make('total')
-                    ->label('الإجمالي')
+                    ->label(__('admin.table.total'))
                     ->money('EGP')
                     ->sortable()
                     ->weight(FontWeight::SemiBold)
@@ -47,15 +47,15 @@ class OrdersTable
 
                 // حالة الطلب (Status Badge)
                 TextColumn::make('status')
-                    ->label('حالة الطلب')
+                    ->label(__('admin.table.order_status'))
                     ->badge()
                     ->sortable()
                     ->formatStateUsing(fn (string $state): string => match ($state) {
-                        'pending' => 'جديد',
-                        'processing' => 'قيد المعالجة',
-                        'shipped' => 'تم الشحن',
-                        'delivered' => 'تم التسليم',
-                        'cancelled' => 'ملغي',
+                        'pending' => __('admin.orders.status.pending'),
+                        'processing' => __('admin.orders.status.processing'),
+                        'shipped' => __('admin.orders.status.shipped'),
+                        'delivered' => __('admin.orders.status.delivered'),
+                        'cancelled' => __('admin.orders.status.cancelled'),
                         default => $state,
                     })
                     ->color(fn (string $state): string => match ($state) {
@@ -77,14 +77,14 @@ class OrdersTable
 
                 // حالة الدفع (Payment Status Badge)
                 TextColumn::make('payment_status')
-                    ->label('حالة الدفع')
+                    ->label(__('admin.table.payment_status'))
                     ->badge()
                     ->sortable()
                     ->formatStateUsing(fn (string $state): string => match ($state) {
-                        'unpaid' => 'غير مدفوع',
-                        'paid' => 'مدفوع',
-                        'failed' => 'فشل',
-                        'refunded' => 'مُسترد',
+                        'unpaid' => __('admin.orders.payment.unpaid'),
+                        'paid' => __('admin.orders.payment.paid'),
+                        'failed' => __('admin.orders.payment.failed'),
+                        'refunded' => __('admin.orders.payment.refunded'),
                         default => $state,
                     })
                     ->color(fn (string $state): string => match ($state) {
@@ -104,11 +104,11 @@ class OrdersTable
 
                 // طريقة الدفع
                 TextColumn::make('payment_method')
-                    ->label('طريقة الدفع')
+                    ->label(__('admin.table.payment_method'))
                     ->badge()
                     ->formatStateUsing(fn (string $state): string => match ($state) {
-                        'cod' => 'عند الاستلام',
-                        'card' => 'بطاقة',
+                        'cod' => __('admin.orders.method.cod'),
+                        'card' => __('admin.orders.method.card'),
                         'instapay' => 'InstaPay',
                         default => $state,
                     })
@@ -117,7 +117,7 @@ class OrdersTable
 
                 // تاريخ الإنشاء
                 TextColumn::make('created_at')
-                    ->label('تاريخ الطلب')
+                    ->label(__('admin.table.order_date'))
                     ->dateTime('d M Y, H:i')
                     ->sortable()
                     ->description(fn ($record) => $record->created_at->diffForHumans())
@@ -126,7 +126,7 @@ class OrdersTable
             ->filters([
                 // فلتر حالة الطلب (Multi-Select)
                 SelectFilter::make('status')
-                    ->label('حالة الطلب')
+                    ->label(__('admin.table.order_status'))
                     ->multiple()
                     ->options([
                         'pending' => 'جديد',
@@ -139,7 +139,7 @@ class OrdersTable
 
                 // فلتر حالة الدفع
                 SelectFilter::make('payment_status')
-                    ->label('حالة الدفع')
+                    ->label(__('admin.table.payment_status'))
                     ->multiple()
                     ->options([
                         'unpaid' => 'غير مدفوع',
@@ -151,7 +151,7 @@ class OrdersTable
 
                 // فلتر طريقة الدفع
                 SelectFilter::make('payment_method')
-                    ->label('طريقة الدفع')
+                    ->label(__('admin.table.payment_method'))
                     ->options([
                         'cod' => 'عند الاستلام',
                         'card' => 'بطاقة',
@@ -163,10 +163,10 @@ class OrdersTable
                 Filter::make('created_at')
                     ->form([
                         \Filament\Forms\Components\DatePicker::make('created_from')
-                            ->label('من تاريخ')
+                            ->label(__('admin.filters.date_from'))
                             ->placeholder('اختر التاريخ'),
                         \Filament\Forms\Components\DatePicker::make('created_until')
-                            ->label('إلى تاريخ')
+                            ->label(__('admin.filters.date_to'))
                             ->placeholder('اختر التاريخ'),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
@@ -215,19 +215,19 @@ class OrdersTable
                             return null;
                         }
 
-                        return 'العميل: ' . $data['customer_search'];
+                        return __('admin.table.customer') . ': ' . $data['customer_search'];
                     }),
             ], layout: FiltersLayout::AboveContent)
             ->filtersFormColumns(4)
             ->recordActions([
                 ViewAction::make()
-                    ->label('عرض التفاصيل')
+                    ->label(__('admin.action.view_details'))
                     ->visible(fn ($record) => auth()->user()->can('view', $record)),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
-                        ->label('حذف المحدد')
+                        ->label(__('admin.action.delete_selected'))
                         ->visible(fn () => auth()->user()->can('delete orders')),
                 ]),
             ])

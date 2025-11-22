@@ -12,17 +12,17 @@ class PermissionsTable
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->label('اسم الصلاحية')
+                    ->label(__('admin.table.name'))
                     ->searchable()
                     ->sortable(),
                     
                 TextColumn::make('guard_name')
-                    ->label('Guard')
+                    ->label(__('admin.table.guard'))
                     ->badge()
                     ->sortable(),
                     
                 TextColumn::make('created_at')
-                    ->label('تاريخ الإنشاء')
+                    ->label(__('admin.table.created_at'))
                     ->dateTime('Y-m-d H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

@@ -17,7 +17,12 @@ class SalesChartWidget extends ChartWidget
     /**
      * Widget heading (non-static in ChartWidget)
      */
-    protected ?string $heading = 'مبيعات';
+    protected ?string $heading = null;
+
+    public function getHeading(): ?string
+    {
+        return __('admin.widgets.sales.heading');
+    }
 
     /**
      * Widget sort order (static in Widget base class)
@@ -44,8 +49,8 @@ class SalesChartWidget extends ChartWidget
     protected function getFilters(): ?array
     {
         return [
-            '7days' => 'آخر 7 أيام',
-            '30days' => 'آخر 30 يوم',
+            '7days' => __('admin.widgets.sales.filters.7days'),
+            '30days' => __('admin.widgets.sales.filters.30days'),
         ];
     }
 
@@ -87,20 +92,18 @@ class SalesChartWidget extends ChartWidget
         });
 
         // Format labels based on filter
-        $labels = $dates->map(function (Carbon $date) use ($days) {
+        $currentLocale = app()->getLocale();
+        $labels = $dates->map(function (Carbon $date) use ($days, $currentLocale) {
             if ($days === 7) {
-                // Show day name for 7 days (e.g., "السبت")
-                return $date->locale('ar')->dayName;
-            } else {
-                // Show date for 30 days (e.g., "1 نوفمبر")
-                return $date->locale('ar')->format('j M');
+                return $date->locale($currentLocale)->dayName;
             }
+            return $date->locale($currentLocale)->format('j M');
         });
 
         return [
             'datasets' => [
                 [
-                    'label' => 'الإيرادات',
+                    'label' => __('admin.widgets.sales.dataset_label'),
                     'data' => $chartData->toArray(),
                     'fill' => 'start', // Fill area under line
                 ],
@@ -127,8 +130,8 @@ class SalesChartWidget extends ChartWidget
     public function getDescription(): ?string
     {
         return $this->filter === '30days'
-            ? 'إجمالي الإيرادات من الطلبات المكتملة والمدفوعة خلال آخر 30 يوم'
-            : 'إجمالي الإيرادات من الطلبات المكتملة والمدفوعة خلال آخر 7 أيام';
+            ? __('admin.widgets.sales.desc_30days')
+            : __('admin.widgets.sales.desc_7days');
     }
 
     /**
@@ -142,6 +145,9 @@ class SalesChartWidget extends ChartWidget
      */
     protected function getOptions(): ?array
     {
+        $locale = app()->getLocale() === 'ar' ? 'ar-EG' : 'en-US';
+        $currencyShort = __('admin.currency.egp_short');
+
         return [
             'plugins' => [
                 'legend' => [
@@ -152,7 +158,7 @@ class SalesChartWidget extends ChartWidget
                 'y' => [
                     'beginAtZero' => true,
                     'ticks' => [
-                        'callback' => 'function(value) { return value.toLocaleString("ar-EG") + " ج.م"; }',
+                        'callback' => 'function(value) { return value.toLocaleString("' . $locale . '") + " ' . $currencyShort . '"; }',
                     ],
                 ],
             ],

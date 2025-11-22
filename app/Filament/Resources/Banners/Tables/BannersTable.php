@@ -17,45 +17,46 @@ class BannersTable
         return $table
             ->columns([
                 ImageColumn::make('image_path')
-                    ->label('Image')
+                    ->label(__('admin.table.image'))
                     ->disk('public')
                     ->height(50),
                 
                 TextColumn::make('title')
-                    ->label('Title')
+                    ->label(__('admin.table.title'))
                     ->searchable()
                     ->sortable()
-                    ->placeholder('No title'),
+                    ->placeholder(__('admin.table.no_title')),
                 
                 TextColumn::make('position')
-                    ->label('Position')
+                    ->label(__('admin.table.position'))
                     ->badge()
                     ->searchable()
                     ->sortable()
                     ->formatStateUsing(fn (string $state): string => match ($state) {
-                        'homepage_top' => 'Homepage - Top',
-                        'homepage_middle' => 'Homepage - Middle',
-                        'homepage_bottom' => 'Homepage - Bottom',
-                        'sidebar_top' => 'Sidebar - Top',
-                        'sidebar_middle' => 'Sidebar - Middle',
-                        'sidebar_bottom' => 'Sidebar - Bottom',
-                        'category_page' => 'Category Page',
-                        'product_page' => 'Product Page',
+                        'homepage_top' => __('admin.banners.position.homepage_top'),
+                        'homepage_middle' => __('admin.banners.position.homepage_middle'),
+                        'homepage_bottom' => __('admin.banners.position.homepage_bottom'),
+                        'sidebar_top' => __('admin.banners.position.sidebar_top'),
+                        'sidebar_middle' => __('admin.banners.position.sidebar_middle'),
+                        'sidebar_bottom' => __('admin.banners.position.sidebar_bottom'),
+                        'category_page' => __('admin.banners.position.category_page'),
+                        'product_page' => __('admin.banners.position.product_page'),
                         default => $state,
                     })
                     ->color('info'),
                 
                 TextColumn::make('link_url')
-                    ->label('Link')
+                    ->label(__('admin.table.link'))
                     ->limit(30)
                     ->toggleable()
-                    ->placeholder('No link'),
+                    ->placeholder(__('admin.table.no_link')),
                 
                 ToggleColumn::make('is_active')
-                    ->label('Active')
+                    ->label(__('admin.table.active'))
                     ->sortable(),
                 
                 TextColumn::make('created_at')
+                    ->label(__('admin.table.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

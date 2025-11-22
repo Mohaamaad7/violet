@@ -12,15 +12,14 @@ class TopbarLanguages extends Component
             return;
         }
 
-        // Persist locale in session
+        // Persist locale in session & cookie so middleware picks it up on next request
         session(['locale' => $locale]);
         app()->setLocale($locale);
+        // 1 year cookie to keep admin preference stable
+        cookie()->queue(cookie('locale', $locale, 60 * 24 * 365));
 
-        // Notify the frontend to update direction
-        $this->dispatch('locale-updated', locale: $locale);
-
-        // Refresh the page without redirect (Livewire-safe)
-        $this->dispatch('$refresh');
+        // Use JavaScript to reload the entire page
+        $this->dispatch('locale-updated', locale: $locale, reload: true);
     }
 
     public function render()

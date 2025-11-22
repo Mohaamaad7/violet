@@ -15,24 +15,24 @@ class RolesTable
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->label('اسم الدور')
+                    ->label(__('admin.table.name'))
                     ->searchable()
                     ->sortable(),
                     
                 TextColumn::make('permissions_count')
-                    ->label('عدد الصلاحيات')
+                    ->label(__('admin.table.permissions_count'))
                     ->counts('permissions')
                     ->sortable()
                     ->badge()
                     ->color('success'),
                     
                 TextColumn::make('guard_name')
-                    ->label('Guard')
+                    ->label(__('admin.table.guard'))
                     ->badge()
                     ->sortable(),
                     
                 TextColumn::make('created_at')
-                    ->label('تاريخ الإنشاء')
+                    ->label(__('admin.table.created_at'))
                     ->dateTime('Y-m-d H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),

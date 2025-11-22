@@ -13,6 +13,55 @@ class AdminTranslationsSeeder extends Seeder
     public function run(): void
     {
         $translations = [
+                        // Currency short label
+                        'admin.currency.egp_short' => ['ar' => 'ج.م', 'en' => 'EGP'],
+
+                        // Widgets: Stats Overview
+                        'admin.widgets.stats.today_revenue' => ['ar' => 'إيرادات اليوم', 'en' => "Today's Revenue"],
+                        'admin.widgets.stats.heading' => ['ar' => 'ملخص الإحصائيات', 'en' => 'Stats Overview'],
+                        'admin.widgets.stats.vs_yesterday' => ['ar' => 'عن أمس', 'en' => 'vs yesterday'],
+                        'admin.widgets.stats.new_orders_today' => ['ar' => 'طلبات جديدة اليوم', 'en' => 'New Orders Today'],
+                        'admin.widgets.stats.total_customers' => ['ar' => 'إجمالي العملاء', 'en' => 'Total Customers'],
+                        'admin.widgets.stats.new_customers_this_week' => ['ar' => 'عميل جديد هذا الأسبوع', 'en' => 'new this week'],
+                        'admin.widgets.stats.products_in_stock' => ['ar' => 'منتجات متاحة', 'en' => 'Products In Stock'],
+                        'admin.widgets.stats.low_stock_products' => ['ar' => 'منتج بمخزون منخفض', 'en' => 'low stock products'],
+                        'admin.widgets.stats.all_in_stock' => ['ar' => 'جميع المنتجات متوفرة', 'en' => 'All products in stock'],
+                        'admin.widgets.stats.no_change' => ['ar' => 'لا تغيير', 'en' => 'No change'],
+
+                        // Widgets: Sales Chart
+                        'admin.widgets.sales.filters.7days' => ['ar' => 'آخر 7 أيام', 'en' => 'Last 7 days'],
+                        'admin.widgets.sales.filters.30days' => ['ar' => 'آخر 30 يوم', 'en' => 'Last 30 days'],
+                        'admin.widgets.sales.heading' => ['ar' => 'مبيعات', 'en' => 'Sales'],
+                        'admin.widgets.sales.dataset_label' => ['ar' => 'الإيرادات', 'en' => 'Revenue'],
+                        'admin.widgets.sales.desc_7days' => ['ar' => 'إجمالي الإيرادات خلال آخر 7 أيام', 'en' => 'Total revenue over the last 7 days'],
+                        'admin.widgets.sales.desc_30days' => ['ar' => 'إجمالي الإيرادات خلال آخر 30 يوم', 'en' => 'Total revenue over the last 30 days'],
+
+                        // Widgets: Recent Orders
+                        'admin.widgets.recent_orders.heading' => ['ar' => 'آخر الطلبات', 'en' => 'Recent Orders'],
+                        'admin.widgets.recent_orders.order_number' => ['ar' => 'رقم الطلب', 'en' => 'Order Number'],
+                        'admin.widgets.recent_orders.copied' => ['ar' => 'تم نسخ رقم الطلب', 'en' => 'Order number copied'],
+                        'admin.widgets.recent_orders.customer' => ['ar' => 'العميل', 'en' => 'Customer'],
+                        'admin.widgets.recent_orders.status' => ['ar' => 'الحالة', 'en' => 'Status'],
+                        'admin.widgets.recent_orders.total' => ['ar' => 'الإجمالي', 'en' => 'Total'],
+                        'admin.widgets.recent_orders.view_all' => ['ar' => 'عرض جميع الطلبات', 'en' => 'View all orders'],
+
+                        // Orders: Status labels
+                        'admin.orders.status.pending' => ['ar' => 'قيد الانتظار', 'en' => 'Pending'],
+                        'admin.orders.status.processing' => ['ar' => 'قيد التجهيز', 'en' => 'Processing'],
+                        'admin.orders.status.shipped' => ['ar' => 'تم الشحن', 'en' => 'Shipped'],
+                        'admin.orders.status.delivered' => ['ar' => 'تم التسليم', 'en' => 'Delivered'],
+                        'admin.orders.status.cancelled' => ['ar' => 'ملغي', 'en' => 'Cancelled'],
+
+                        // Orders: Payment status labels
+                        'admin.orders.payment.unpaid' => ['ar' => 'غير مدفوع', 'en' => 'Unpaid'],
+                        'admin.orders.payment.paid' => ['ar' => 'مدفوع', 'en' => 'Paid'],
+                        'admin.orders.payment.failed' => ['ar' => 'فشل', 'en' => 'Failed'],
+                        'admin.orders.payment.refunded' => ['ar' => 'مسترد', 'en' => 'Refunded'],
+
+                        // Orders: Payment method labels
+                        'admin.orders.method.cod' => ['ar' => 'الدفع عند الاستلام', 'en' => 'Cash on Delivery'],
+                        'admin.orders.method.card' => ['ar' => 'بطاقة', 'en' => 'Card'],
+                        'admin.orders.method.instapay' => ['ar' => 'إنستاباي', 'en' => 'InstaPay'],
             // Navigation Groups
             'admin.nav.catalog' => ['ar' => 'الكتالوج', 'en' => 'Catalog'],
             'admin.nav.sales' => ['ar' => 'إدارة المبيعات', 'en' => 'Sales Management'],
@@ -98,9 +147,13 @@ class AdminTranslationsSeeder extends Seeder
             'admin.table.id' => ['ar' => 'المعرّف', 'en' => 'ID'],
             'admin.table.name' => ['ar' => 'الاسم', 'en' => 'Name'],
             'admin.table.title' => ['ar' => 'العنوان', 'en' => 'Title'],
+            'admin.table.link' => ['ar' => 'الرابط', 'en' => 'Link'],
+            'admin.table.no_link' => ['ar' => 'لا يوجد رابط', 'en' => 'No link'],
+            'admin.table.no_title' => ['ar' => 'لا يوجد عنوان', 'en' => 'No title'],
             'admin.table.price' => ['ar' => 'السعر', 'en' => 'Price'],
             'admin.table.stock' => ['ar' => 'المخزون', 'en' => 'Stock'],
             'admin.table.category' => ['ar' => 'الفئة', 'en' => 'Category'],
+            'admin.table.customer' => ['ar' => 'العميل', 'en' => 'Customer'],
             'admin.table.parent_category' => ['ar' => 'الفئة الأساسية', 'en' => 'Parent Category'],
             'admin.table.subcategories' => ['ar' => 'الفئات الفرعية', 'en' => 'Subcategories'],
             'admin.table.products' => ['ar' => 'المنتجات', 'en' => 'Products'],
@@ -111,16 +164,28 @@ class AdminTranslationsSeeder extends Seeder
             'admin.table.updated_at' => ['ar' => 'تاريخ التحديث', 'en' => 'Updated At'],
             'admin.table.actions' => ['ar' => 'الإجراءات', 'en' => 'Actions'],
             'admin.table.photo' => ['ar' => 'الصورة', 'en' => 'Photo'],
+            'admin.table.image' => ['ar' => 'الصورة', 'en' => 'Image'],
             'admin.table.email' => ['ar' => 'البريد الإلكتروني', 'en' => 'Email'],
             'admin.table.phone' => ['ar' => 'رقم الهاتف', 'en' => 'Phone'],
             'admin.table.role' => ['ar' => 'الدور', 'en' => 'Role'],
             'admin.table.no_role' => ['ar' => 'لا يوجد', 'en' => 'No Role'],
+            'admin.table.order' => ['ar' => 'الترتيب', 'en' => 'Order'],
+            'admin.table.position' => ['ar' => 'الموضع', 'en' => 'Position'],
+            'admin.table.order_number' => ['ar' => 'رقم الطلب', 'en' => 'Order Number'],
+            'admin.table.order_status' => ['ar' => 'حالة الطلب', 'en' => 'Order Status'],
+            'admin.table.payment_status' => ['ar' => 'حالة الدفع', 'en' => 'Payment Status'],
+            'admin.table.payment_method' => ['ar' => 'طريقة الدفع', 'en' => 'Payment Method'],
+            'admin.table.order_date' => ['ar' => 'تاريخ الطلب', 'en' => 'Order Date'],
+            'admin.table.guard' => ['ar' => 'حارس', 'en' => 'Guard'],
+            'admin.table.permissions_count' => ['ar' => 'عدد الصلاحيات', 'en' => 'Permissions Count'],
 
             // Actions
             'admin.action.create' => ['ar' => 'إنشاء', 'en' => 'Create'],
             'admin.action.edit' => ['ar' => 'تعديل', 'en' => 'Edit'],
             'admin.action.delete' => ['ar' => 'حذف', 'en' => 'Delete'],
             'admin.action.view' => ['ar' => 'عرض', 'en' => 'View'],
+            'admin.action.view_details' => ['ar' => 'عرض التفاصيل', 'en' => 'View Details'],
+            'admin.action.delete_selected' => ['ar' => 'حذف المحدد', 'en' => 'Delete Selected'],
             'admin.action.save' => ['ar' => 'حفظ', 'en' => 'Save'],
             'admin.action.cancel' => ['ar' => 'إلغاء', 'en' => 'Cancel'],
             'admin.action.back' => ['ar' => 'رجوع', 'en' => 'Back'],
@@ -134,6 +199,18 @@ class AdminTranslationsSeeder extends Seeder
             'admin.filter.active' => ['ar' => 'النشط', 'en' => 'Active'],
             'admin.filter.inactive' => ['ar' => 'غير النشط', 'en' => 'Inactive'],
             'admin.filter.category' => ['ar' => 'حسب الفئة', 'en' => 'By Category'],
+            'admin.filters.date_from' => ['ar' => 'من تاريخ', 'en' => 'From Date'],
+            'admin.filters.date_to' => ['ar' => 'إلى تاريخ', 'en' => 'To Date'],
+
+            // Banners positions
+            'admin.banners.position.homepage_top' => ['ar' => 'الصفحة الرئيسية - أعلى', 'en' => 'Homepage - Top'],
+            'admin.banners.position.homepage_middle' => ['ar' => 'الصفحة الرئيسية - منتصف', 'en' => 'Homepage - Middle'],
+            'admin.banners.position.homepage_bottom' => ['ar' => 'الصفحة الرئيسية - أسفل', 'en' => 'Homepage - Bottom'],
+            'admin.banners.position.sidebar_top' => ['ar' => 'الشريط الجانبي - أعلى', 'en' => 'Sidebar - Top'],
+            'admin.banners.position.sidebar_middle' => ['ar' => 'الشريط الجانبي - منتصف', 'en' => 'Sidebar - Middle'],
+            'admin.banners.position.sidebar_bottom' => ['ar' => 'الشريط الجانبي - أسفل', 'en' => 'Sidebar - Bottom'],
+            'admin.banners.position.category_page' => ['ar' => 'صفحة الفئة', 'en' => 'Category Page'],
+            'admin.banners.position.product_page' => ['ar' => 'صفحة المنتج', 'en' => 'Product Page'],
 
             // Messages
             'admin.message.created' => ['ar' => 'تم الإنشاء بنجاح', 'en' => 'Created successfully'],

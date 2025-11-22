@@ -17,33 +17,34 @@ class SlidersTable
         return $table
             ->columns([
                 ImageColumn::make('image_path')
-                    ->label('Image')
+                    ->label(__('admin.table.image'))
                     ->disk('public')
                     ->height(50),
                 
                 TextColumn::make('title')
-                    ->label('Title')
+                    ->label(__('admin.table.title'))
                     ->searchable()
                     ->sortable()
                     ->description(fn ($record) => $record->subtitle),
                 
                 TextColumn::make('link_url')
-                    ->label('Link')
+                    ->label(__('admin.table.link'))
                     ->limit(30)
                     ->toggleable()
-                    ->placeholder('No link'),
+                    ->placeholder(__('admin.table.no_link')),
                 
                 TextColumn::make('order')
-                    ->label('Order')
+                    ->label(__('admin.table.order'))
                     ->sortable()
                     ->badge()
                     ->color('info'),
                 
                 ToggleColumn::make('is_active')
-                    ->label('Active')
+                    ->label(__('admin.table.active'))
                     ->sortable(),
                 
                 TextColumn::make('created_at')
+                    ->label(__('admin.table.created_at'))
                     ->dateTime()
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
