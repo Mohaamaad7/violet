@@ -31,12 +31,27 @@ class TranslationResource extends Resource
 
     public static function getNavigationGroup(): string|null
     {
-        return 'System';
+        return __('admin.nav.system');
     }
 
     public static function getNavigationSort(): ?int
     {
         return 50;
+    }
+    
+    public static function getNavigationLabel(): string
+    {
+        return __('admin.translations.title');
+    }
+    
+    public static function getModelLabel(): string
+    {
+        return __('admin.translations.singular');
+    }
+    
+    public static function getPluralLabel(): string
+    {
+        return __('admin.translations.plural');
     }
 
     public static function canViewAny(): bool
@@ -50,16 +65,29 @@ class TranslationResource extends Resource
             TextInput::make('key')
                 ->required()
                 ->maxLength(255)
-                ->unique(ignoreRecord: true),
+                ->disabled(fn ($context) => $context === 'edit')
+                ->dehydrated()
+                ->unique(table: Translation::class, column: 'key', ignoreRecord: true, modifyRuleUsing: function ($rule, $context) {
+                    if ($context === 'edit') {
+                        return $rule->where(function ($query) {
+                            return $query->whereRaw('1 = 0'); // Disable validation in edit mode
+                        });
+                    }
+                    return $rule;
+                }),
             Select::make('locale')
                 ->options([
                     'ar' => 'Arabic',
                     'en' => 'English',
                 ])
-                ->required(),
+                ->required()
+                ->disabled(fn ($context) => $context === 'edit')
+                ->dehydrated(),
             TextInput::make('group')
                 ->maxLength(255)
-                ->label('Group (optional)'),
+                ->label('Group (optional)')
+                ->disabled(fn ($context) => $context === 'edit')
+                ->dehydrated(),
             Toggle::make('is_active')
                 ->default(true),
             Textarea::make('value')
@@ -73,6 +101,13 @@ class TranslationResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('key')->searchable()->sortable()->wrap(),
+                TextColumn::make('value')
+                    ->label('Translation')
+                    ->searchable()
+                    ->sortable()
+                    ->wrap()
+                    ->limit(50)
+                    ->tooltip(fn ($record) => $record->value),
                 TextColumn::make('locale')->sortable()->badge(),
                 TextColumn::make('group')->toggleable(isToggledHiddenByDefault: true)->sortable(),
                 IconColumn::make('is_active')->boolean()->sortable(),

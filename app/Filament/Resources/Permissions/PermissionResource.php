@@ -22,24 +22,24 @@ class PermissionResource extends Resource
     
     public static function getNavigationGroup(): ?string
     {
-        return 'إدارة النظام';
+        return __('admin.nav.system');
     }
     
     protected static ?int $navigationSort = 1;
     
     public static function getNavigationLabel(): string
     {
-        return 'الصلاحيات';
+        return __('admin.permissions.title');
     }
     
     public static function getPluralLabel(): string
     {
-        return 'الصلاحيات';
+        return __('admin.permissions.plural');
     }
     
     public static function getModelLabel(): string
     {
-        return 'صلاحية';
+        return __('admin.permissions.singular');
     }
 
     public static function form(Schema $schema): Schema

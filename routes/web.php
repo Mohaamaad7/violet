@@ -7,6 +7,7 @@ use App\Http\Controllers\LanguageController;
 
 // Language switcher
 Route::get('/language/{locale}', [LanguageController::class, 'switch'])->name('language.switch');
+Route::get('/locale/{locale}', [LanguageController::class, 'switch'])->name('locale.switch');
 
 // Store Front
 Route::get('/', [App\Http\Controllers\Store\HomeController::class, 'index'])->name('home');

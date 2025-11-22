@@ -5,7 +5,7 @@ namespace App\Translation;
 use App\Models\Translation;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Translation\FileLoader;
-use Illuminate\Translation\LoaderInterface;
+use Illuminate\Contracts\Translation\Loader as LoaderInterface;
 
 class CombinedLoader implements LoaderInterface
 {
@@ -33,10 +33,18 @@ class CombinedLoader implements LoaderInterface
         }
 
         foreach ($query->get(['key', 'value']) as $row) {
-            // Expect keys like 'messages.welcome' when group='messages': we need the part after the first dot
-            $dotPos = strpos($row->key, '.');
-            $item = $dotPos !== false ? substr($row->key, $dotPos + 1) : $row->key;
-            data_set($lines, $item, $row->value);
+            // For keys like "store.header.home", when group="store",
+            // we need to extract "header.home" and set it nested
+            $fullKey = $row->key;
+            
+            // If group matches the start of the key, remove it
+            if ($group && strpos($fullKey, $group . '.') === 0) {
+                $nestedKey = substr($fullKey, strlen($group) + 1);
+                data_set($lines, $nestedKey, $row->value);
+            } else {
+                // Fallback: set the entire key
+                data_set($lines, $fullKey, $row->value);
+            }
         }
 
         return $lines;

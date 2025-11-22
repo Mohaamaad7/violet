@@ -26,22 +26,22 @@ class UserResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return 'إدارة النظام';
+        return __('admin.nav.system');
     }
 
     public static function getNavigationLabel(): string
     {
-        return 'الموظفين';
+        return __('admin.users.title');
     }
 
     public static function getModelLabel(): string
     {
-        return 'موظف';
+        return __('admin.users.singular');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return 'الموظفين';
+        return __('admin.users.plural');
     }
 
     public static function form(Schema $schema): Schema

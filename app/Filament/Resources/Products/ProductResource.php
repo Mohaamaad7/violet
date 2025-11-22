@@ -27,11 +27,31 @@ class ProductResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
-    protected static UnitEnum|string|null $navigationGroup = 'الكتالوج';
+    protected static UnitEnum|string|null $navigationGroup = null;
 
     protected static ?int $navigationSort = 2;
 
-    protected static ?string $navigationLabel = 'Products';
+    protected static ?string $navigationLabel = null;
+    
+    public static function getNavigationGroup(): ?string
+    {
+        return __('admin.nav.catalog');
+    }
+    
+    public static function getNavigationLabel(): string
+    {
+        return __('admin.products.title');
+    }
+    
+    public static function getModelLabel(): string
+    {
+        return __('admin.products.singular');
+    }
+    
+    public static function getPluralLabel(): string
+    {
+        return __('admin.products.plural');
+    }
 
     public static function form(Schema $schema): Schema
     {

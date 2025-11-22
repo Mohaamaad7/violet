@@ -14,11 +14,11 @@
                     <span class="text-2xl font-bold text-white">Violet</span>
                 </div>
                 <p class="text-sm text-gray-400 leading-relaxed mb-4">
-                    Your premium destination for quality products. We bring you the best selection with unbeatable prices and excellent customer service.
+                    {{ __('store.footer.description') }}
                 </p>
                 {{-- Payment Methods --}}
                 <div class="flex items-center gap-2 mt-4">
-                    <span class="text-xs text-gray-500">We Accept:</span>
+                    <span class="text-xs text-gray-500">{{ __('store.footer.we_accept') }}</span>
                     <div class="flex gap-2">
                         <div class="w-10 h-6 bg-white rounded flex items-center justify-center">
                             <svg class="w-6 h-4" viewBox="0 0 48 32" fill="none">
@@ -38,14 +38,14 @@
 
             {{-- Quick Links --}}
             <div>
-                <h4 class="text-white font-bold text-lg mb-4">Quick Links</h4>
+                <h4 class="text-white font-bold text-lg mb-4">{{ __('store.footer.quick_links') }}</h4>
                 <ul class="space-y-2.5">
                     <li>
                         <a href="/about" class="text-gray-400 hover:text-violet-400 transition text-sm flex items-center gap-1.5 group">
                             <svg class="w-4 h-4 group-hover:translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                             </svg>
-                            About Us
+                            {{ __('store.footer.about_us') }}
                         </a>
                     </li>
                     <li>
@@ -53,7 +53,7 @@
                             <svg class="w-4 h-4 group-hover:translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                             </svg>
-                            Shop Now
+                            {{ __('store.footer.shop_now') }}
                         </a>
                     </li>
                     <li>
@@ -61,7 +61,7 @@
                             <svg class="w-4 h-4 group-hover:translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                             </svg>
-                            Special Offers
+                            {{ __('store.footer.special_offers') }}
                         </a>
                     </li>
                     <li>
@@ -69,7 +69,7 @@
                             <svg class="w-4 h-4 group-hover:translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                             </svg>
-                            Contact Us
+                            {{ __('store.footer.contact_us') }}
                         </a>
                     </li>
                     <li>
@@ -77,7 +77,7 @@
                             <svg class="w-4 h-4 group-hover:translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                             </svg>
-                            Blog
+                            {{ __('store.footer.blog') }}
                         </a>
                     </li>
                 </ul>
@@ -85,14 +85,14 @@
 
             {{-- Customer Service --}}
             <div>
-                <h4 class="text-white font-bold text-lg mb-4">Customer Service</h4>
+                <h4 class="text-white font-bold text-lg mb-4">{{ __('store.footer.customer_service') }}</h4>
                 <ul class="space-y-2.5">
                     <li>
                         <a href="/help" class="text-gray-400 hover:text-violet-400 transition text-sm flex items-center gap-1.5 group">
                             <svg class="w-4 h-4 group-hover:translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                             </svg>
-                            Help Center
+                            {{ __('store.footer.help_center') }}
                         </a>
                     </li>
                     <li>
@@ -100,7 +100,7 @@
                             <svg class="w-4 h-4 group-hover:translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                             </svg>
-                            Shipping Info
+                            {{ __('store.footer.shipping_info') }}
                         </a>
                     </li>
                     <li>
@@ -108,7 +108,7 @@
                             <svg class="w-4 h-4 group-hover:translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                             </svg>
-                            Returns & Refunds
+                            {{ __('store.footer.returns_refunds') }}
                         </a>
                     </li>
                     <li>
@@ -116,7 +116,7 @@
                             <svg class="w-4 h-4 group-hover:translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                             </svg>
-                            Track Order
+                            {{ __('store.footer.track_order') }}
                         </a>
                     </li>
                     <li>
@@ -124,7 +124,7 @@
                             <svg class="w-4 h-4 group-hover:translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                             </svg>
-                            FAQs
+                            {{ __('store.footer.faqs') }}
                         </a>
                     </li>
                 </ul>
@@ -132,7 +132,7 @@
 
             {{-- Contact & Newsletter --}}
             <div>
-                <h4 class="text-white font-bold text-lg mb-4">Stay Connected</h4>
+                <h4 class="text-white font-bold text-lg mb-4">{{ __('store.footer.stay_connected') }}</h4>
                 
                 {{-- Contact Info --}}
                 <div class="space-y-3 mb-6">
@@ -163,13 +163,13 @@
 
                 {{-- Newsletter Subscription --}}
                 <div>
-                    <h5 class="text-white font-semibold text-sm mb-2">Subscribe to Newsletter</h5>
-                    <p class="text-xs text-gray-500 mb-3">Get latest offers and updates</p>
+                    <h5 class="text-white font-semibold text-sm mb-2">{{ __('store.footer.subscribe') }}</h5>
+                    <p class="text-xs text-gray-500 mb-3">{{ __('store.footer.newsletter_desc') }}</p>
                     <form action="#" method="POST" class="flex gap-2">
                         @csrf
                         <input 
                             type="email" 
-                            placeholder="Your email"
+                            placeholder="{{ __('store.footer.your_email') }}"
                             class="flex-1 px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm text-white placeholder-gray-500 focus:border-violet-500 focus:ring-1 focus:ring-violet-500 focus:outline-none"
                             required
                         >
@@ -177,7 +177,7 @@
                             type="submit"
                             class="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg text-sm font-medium transition"
                         >
-                            Subscribe
+                            {{ __('store.footer.subscribe_button') }}
                         </button>
                     </form>
                 </div>
@@ -191,7 +191,7 @@
             <div class="flex flex-col md:flex-row justify-between items-center gap-4">
                 {{-- Social Links --}}
                 <div class="flex items-center gap-4">
-                    <span class="text-sm text-gray-500">Follow Us:</span>
+                    <span class="text-sm text-gray-500">{{ __('store.footer.follow_us') }}</span>
                     <div class="flex gap-3">
                         <a href="#" class="w-9 h-9 bg-gray-800 hover:bg-violet-600 rounded-lg flex items-center justify-center transition group">
                             <svg class="w-4 h-4 text-gray-400 group-hover:text-white transition" fill="currentColor" viewBox="0 0 24 24">
@@ -219,14 +219,14 @@
                 {{-- Copyright --}}
                 <div class="text-center md:text-right">
                     <p class="text-sm text-gray-500">
-                        &copy; {{ date('Y') }} <span class="text-violet-400 font-semibold">Violet</span>. All rights reserved.
+                        &copy; {{ date('Y') }} <span class="text-violet-400 font-semibold">Violet</span>. {{ __('store.footer.copyright') }}
                     </p>
                     <div class="flex items-center justify-center md:justify-end gap-4 mt-2 text-xs text-gray-600">
-                        <a href="/privacy" class="hover:text-violet-400 transition">Privacy Policy</a>
+                        <a href="/privacy" class="hover:text-violet-400 transition">{{ __('store.footer.privacy_policy') }}</a>
                         <span>•</span>
-                        <a href="/terms" class="hover:text-violet-400 transition">Terms & Conditions</a>
+                        <a href="/terms" class="hover:text-violet-400 transition">{{ __('store.footer.terms') }}</a>
                         <span>•</span>
-                        <a href="/cookies" class="hover:text-violet-400 transition">Cookie Policy</a>
+                        <a href="/cookies" class="hover:text-violet-400 transition">{{ __('store.footer.cookie_policy') }}</a>
                     </div>
                 </div>
             </div>

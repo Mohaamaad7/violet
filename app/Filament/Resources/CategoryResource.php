@@ -24,7 +24,7 @@ class CategoryResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return 'الكتالوج';
+        return __('admin.nav.catalog');
     }
 
     public static function getNavigationSort(): ?int
@@ -34,17 +34,17 @@ class CategoryResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return 'الفئات';
+        return __('admin.categories.title');
     }
 
     public static function getPluralLabel(): string
     {
-        return 'الفئات';
+        return __('admin.categories.plural');
     }
 
     public static function getModelLabel(): string
     {
-        return 'فئة';
+        return __('admin.categories.singular');
     }
 
     public static function form(Schema $schema): Schema
@@ -54,32 +54,32 @@ class CategoryResource extends Resource
                 Components\Section::make()
                     ->schema([
                         Forms\Components\TextInput::make('name')
-                            ->label('اسم الفئة')
+                            ->label(__('admin.form.name'))
                             ->required()
                             ->maxLength(255),
 
                         Forms\Components\Select::make('parent_id')
-                            ->label('الفئة الأساسية')
+                            ->label(__('admin.form.parent_category'))
                             ->relationship('parent', 'name')
                             ->searchable()
                             ->preload()
                             ->nullable(),
 
                         Forms\Components\Textarea::make('description')
-                            ->label('الوصف')
+                            ->label(__('admin.form.description'))
                             ->rows(3),
 
                         Forms\Components\TextInput::make('icon')
-                            ->label('الأيقونة')
+                            ->label(__('admin.form.icon'))
                             ->maxLength(50),
 
                         Forms\Components\TextInput::make('order')
-                            ->label('الترتيب')
+                            ->label(__('admin.form.order'))
                             ->numeric()
                             ->default(0),
 
                         Forms\Components\Toggle::make('is_active')
-                            ->label('نشط')
+                            ->label(__('admin.form.is_active'))
                             ->default(true),
                     ])
                     ->columns(2),
@@ -103,24 +103,24 @@ class CategoryResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('name')
-                    ->label('الاسم')
+                    ->label(__('admin.table.name'))
                     ->searchable()
                     ->sortable(),
 
                 Tables\Columns\TextColumn::make('parent.name')
-                    ->label('الفئة الأساسية')
+                    ->label(__('admin.table.parent_category'))
                     ->searchable()
                     ->sortable()
                     ->placeholder('-'),
 
                 Tables\Columns\TextColumn::make('children_count')
-                    ->label('الفئات الفرعية')
+                    ->label(__('admin.table.subcategories'))
                     ->counts('children')
                     ->badge()
                     ->color('info'),
 
                 Tables\Columns\TextColumn::make('products_count')
-                    ->label('المنتجات')
+                    ->label(__('admin.table.products'))
                     ->counts('products')
                     ->badge()
                     ->color('success'),

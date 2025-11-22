@@ -24,24 +24,24 @@ class RoleResource extends Resource
     
     public static function getNavigationGroup(): ?string
     {
-        return 'إدارة النظام';
+        return __('admin.nav.system');
     }
     
     protected static ?int $navigationSort = 2;
     
     public static function getNavigationLabel(): string
     {
-        return 'الأدوار';
+        return __('admin.roles.title');
     }
     
     public static function getPluralLabel(): string
     {
-        return 'الأدوار';
+        return __('admin.roles.plural');
     }
     
     public static function getModelLabel(): string
     {
-        return 'دور';
+        return __('admin.roles.singular');
     }
 
 

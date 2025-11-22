@@ -12,14 +12,14 @@ class TopbarLanguages extends Component
             return;
         }
 
-        // Persist locale and apply immediately for this request
+        // Persist locale in session
         session(['locale' => $locale]);
         app()->setLocale($locale);
 
-        // Notify the frontend (for things like toggling document direction instantly)
+        // Notify the frontend to update direction
         $this->dispatch('locale-updated', locale: $locale);
 
-        // Refresh the current page to apply locale changes
+        // Refresh the page without redirect (Livewire-safe)
         $this->dispatch('$refresh');
     }
 

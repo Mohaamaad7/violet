@@ -28,7 +28,27 @@ class OrderResource extends Resource
 
     protected static ?string $pluralModelLabel = 'الطلبات';
 
-    protected static UnitEnum|string|null $navigationGroup = 'إدارة المبيعات';
+    protected static UnitEnum|string|null $navigationGroup = null;
+    
+    public static function getNavigationGroup(): ?string
+    {
+        return __('admin.nav.sales');
+    }
+    
+    public static function getNavigationLabel(): string
+    {
+        return __('admin.orders.title');
+    }
+    
+    public static function getModelLabel(): string
+    {
+        return __('admin.orders.singular');
+    }
+    
+    public static function getPluralLabel(): string
+    {
+        return __('admin.orders.plural');
+    }
 
     protected static ?int $navigationSort = 1;
 

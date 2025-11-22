@@ -16,10 +16,10 @@ class UserForm
     {
         return $schema
             ->components([
-                Section::make('معلومات المستخدم')
+                Section::make(__('admin.form.user_info'))
                     ->schema([
                         FileUpload::make('profile_photo_path')
-                            ->label('الصورة الشخصية')
+                            ->label(__('admin.form.profile_photo'))
                             ->disk('public') // ✅ CRITICAL FIX - Save avatars to public disk
                             ->image()
                             ->avatar()
@@ -29,19 +29,19 @@ class UserForm
                             ->columnSpanFull(),
 
                         TextInput::make('name')
-                            ->label('الاسم')
+                            ->label(__('admin.form.name'))
                             ->required()
                             ->maxLength(255),
                         
                         TextInput::make('email')
-                            ->label('البريد الإلكتروني')
+                            ->label(__('admin.form.email'))
                             ->email()
                             ->required()
                             ->unique(ignoreRecord: true)
                             ->maxLength(255),
 
                         TextInput::make('phone')
-                            ->label('رقم الهاتف')
+                            ->label(__('admin.form.phone'))
                             ->tel()
                             ->numeric()
                             ->nullable()
@@ -49,10 +49,10 @@ class UserForm
                     ])
                     ->columns(2),
                 
-                Section::make('الدور والصلاحيات')
+                Section::make(__('admin.form.role_permissions'))
                     ->schema([
                         Select::make('role')
-                            ->label('الدور الوظيفي')
+                            ->label(__('admin.form.role'))
                             ->options(Role::all()->pluck('name', 'id'))
                             ->searchable()
                             ->preload()
@@ -66,10 +66,10 @@ class UserForm
                             ->dehydrated(false), // Will be handled manually in Create/Edit pages
                     ]),
                 
-                Section::make('كلمة المرور')
+                Section::make(__('admin.form.password_section'))
                     ->schema([
                         TextInput::make('password')
-                            ->label('كلمة المرور')
+                            ->label(__('admin.form.password'))
                             ->password()
                             ->revealable()
                             ->required(fn (string $operation): bool => $operation === 'create')
