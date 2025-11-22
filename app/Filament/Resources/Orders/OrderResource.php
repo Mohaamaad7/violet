@@ -22,11 +22,11 @@ class OrderResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'order_number';
 
-    protected static ?string $navigationLabel = 'الطلبات';
+    protected static ?string $navigationLabel = null;
 
-    protected static ?string $modelLabel = 'طلب';
+    protected static ?string $modelLabel = null;
 
-    protected static ?string $pluralModelLabel = 'الطلبات';
+    protected static ?string $pluralModelLabel = null;
 
     protected static UnitEnum|string|null $navigationGroup = null;
     

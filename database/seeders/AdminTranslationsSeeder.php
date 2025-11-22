@@ -117,6 +117,8 @@ class AdminTranslationsSeeder extends Seeder
             'admin.form.name' => ['ar' => 'الاسم', 'en' => 'Name'],
             'admin.form.title' => ['ar' => 'العنوان', 'en' => 'Title'],
             'admin.form.description' => ['ar' => 'الوصف', 'en' => 'Description'],
+            'admin.form.slug' => ['ar' => 'المعرف النصي', 'en' => 'Slug'],
+            'admin.form.sku' => ['ar' => 'SKU', 'en' => 'SKU'],
             'admin.form.price' => ['ar' => 'السعر', 'en' => 'Price'],
             'admin.form.stock' => ['ar' => 'المخزون', 'en' => 'Stock'],
             'admin.form.category' => ['ar' => 'الفئة', 'en' => 'Category'],
@@ -143,6 +145,24 @@ class AdminTranslationsSeeder extends Seeder
             'admin.form.role_permissions' => ['ar' => 'الدور والصلاحيات', 'en' => 'Role & Permissions'],
             'admin.form.password_section' => ['ar' => 'كلمة المرور', 'en' => 'Password'],
 
+            // Orders Form Fields
+            'admin.form.order_number' => ['ar' => 'رقم الطلب', 'en' => 'Order Number'],
+            'admin.form.customer' => ['ar' => 'العميل', 'en' => 'Customer'],
+            'admin.form.discount_code' => ['ar' => 'كود الخصم', 'en' => 'Discount Code'],
+            'admin.form.subtotal' => ['ar' => 'المجموع الفرعي', 'en' => 'Subtotal'],
+            'admin.form.discount_amount' => ['ar' => 'قيمة الخصم', 'en' => 'Discount Amount'],
+            'admin.form.shipping_cost' => ['ar' => 'تكلفة الشحن', 'en' => 'Shipping Cost'],
+            'admin.form.tax_amount' => ['ar' => 'الضرائب', 'en' => 'Tax Amount'],
+            'admin.form.total' => ['ar' => 'الإجمالي', 'en' => 'Total'],
+            'admin.form.notes' => ['ar' => 'ملاحظات', 'en' => 'Notes'],
+            'admin.form.admin_notes' => ['ar' => 'ملاحظات المدير', 'en' => 'Admin Notes'],
+            'admin.form.payment_transaction_id' => ['ar' => 'معرّف عملية الدفع', 'en' => 'Payment Transaction ID'],
+            'admin.form.paid_at' => ['ar' => 'تاريخ الدفع', 'en' => 'Paid At'],
+            'admin.form.shipped_at' => ['ar' => 'تاريخ الشحن', 'en' => 'Shipped At'],
+            'admin.form.delivered_at' => ['ar' => 'تاريخ التسليم', 'en' => 'Delivered At'],
+            'admin.form.cancelled_at' => ['ar' => 'تاريخ الإلغاء', 'en' => 'Cancelled At'],
+            'admin.form.cancellation_reason' => ['ar' => 'سبب الإلغاء', 'en' => 'Cancellation Reason'],
+
             // Table Columns
             'admin.table.id' => ['ar' => 'المعرّف', 'en' => 'ID'],
             'admin.table.name' => ['ar' => 'الاسم', 'en' => 'Name'],
@@ -151,6 +171,7 @@ class AdminTranslationsSeeder extends Seeder
             'admin.table.no_link' => ['ar' => 'لا يوجد رابط', 'en' => 'No link'],
             'admin.table.no_title' => ['ar' => 'لا يوجد عنوان', 'en' => 'No title'],
             'admin.table.price' => ['ar' => 'السعر', 'en' => 'Price'],
+            'admin.table.total' => ['ar' => 'الإجمالي', 'en' => 'Total'],
             'admin.table.stock' => ['ar' => 'المخزون', 'en' => 'Stock'],
             'admin.table.category' => ['ar' => 'الفئة', 'en' => 'Category'],
             'admin.table.customer' => ['ar' => 'العميل', 'en' => 'Customer'],
@@ -201,6 +222,63 @@ class AdminTranslationsSeeder extends Seeder
             'admin.filter.category' => ['ar' => 'حسب الفئة', 'en' => 'By Category'],
             'admin.filters.date_from' => ['ar' => 'من تاريخ', 'en' => 'From Date'],
             'admin.filters.date_to' => ['ar' => 'إلى تاريخ', 'en' => 'To Date'],
+            'admin.filters.select_date' => ['ar' => 'اختر التاريخ', 'en' => 'Select date'],
+            'admin.filters.customer_search' => ['ar' => 'بحث عن عميل', 'en' => 'Search Customer'],
+            'admin.filters.customer_search_placeholder' => ['ar' => 'اسم أو إيميل العميل', 'en' => 'Customer name or email'],
+
+            // Units
+            'admin.unit.kg' => ['ar' => 'كجم', 'en' => 'kg'],
+
+            // Status (generic)
+            'admin.status.draft' => ['ar' => 'مسودة', 'en' => 'Draft'],
+            'admin.status.active' => ['ar' => 'نشط', 'en' => 'Active'],
+            'admin.status.inactive' => ['ar' => 'غير نشط', 'en' => 'Inactive'],
+
+            // Products Form Sections & Fields
+            'admin.products.form.general.title' => ['ar' => 'المعلومات العامة', 'en' => 'General Information'],
+            'admin.products.form.general.desc' => ['ar' => 'تفاصيل المنتج الأساسية', 'en' => 'Basic product details'],
+            'admin.products.form.general.slug_help' => ['ar' => 'يُنشأ تلقائياً من الاسم ويمكن تعديله', 'en' => 'Auto-generated from name, but can be edited'],
+            'admin.products.form.general.sku_help' => ['ar' => 'اتركه فارغاً للتوليد التلقائي', 'en' => 'Leave empty for auto-generation'],
+            'admin.products.form.general.short_description' => ['ar' => 'وصف مختصر', 'en' => 'Short Description'],
+            'admin.products.form.general.short_description_help' => ['ar' => 'وصف موجز لصفحات السرد', 'en' => 'Brief description for listing pages'],
+
+            'admin.products.form.media.title' => ['ar' => 'الوسائط', 'en' => 'Media'],
+            'admin.products.form.media.desc' => ['ar' => 'قم برفع صور المنتج - ستكون أول صورة هي الأساسية', 'en' => 'Upload product images - First image will be primary'],
+            'admin.products.form.media.images_label' => ['ar' => 'صور المنتج', 'en' => 'Product Images'],
+            'admin.products.form.media.images_help' => ['ar' => 'ارفع حتى 10 صور. اسحب لإعادة الترتيب. أول صورة ستكون الأساسية.', 'en' => 'Upload up to 10 images. Drag to reorder. First image will be primary.'],
+
+            'admin.products.form.pricing.title' => ['ar' => 'التسعير', 'en' => 'Pricing'],
+            'admin.products.form.pricing.desc' => ['ar' => 'معلومات تسعير المنتج', 'en' => 'Product pricing information'],
+            'admin.products.form.pricing.sale_price' => ['ar' => 'سعر التخفيض', 'en' => 'Sale Price'],
+            'admin.products.form.pricing.sale_price_help' => ['ar' => 'اختياري. إن تم تحديده سيُعرض كسعر مخفض', 'en' => 'Optional. If set, will be displayed as discounted price'],
+            'admin.products.form.pricing.cost_price' => ['ar' => 'سعر التكلفة', 'en' => 'Cost Price'],
+            'admin.products.form.pricing.cost_price_help' => ['ar' => 'تكلفة داخلية لحساب الربح', 'en' => 'Internal cost for profit calculation'],
+
+            'admin.products.form.inventory.title' => ['ar' => 'المخزون', 'en' => 'Inventory'],
+            'admin.products.form.inventory.desc' => ['ar' => 'إدارة المخزون', 'en' => 'Stock management'],
+            'admin.products.form.inventory.low_stock_alert' => ['ar' => 'تنبيه انخفاض المخزون', 'en' => 'Low Stock Alert'],
+            'admin.products.form.inventory.low_stock_help' => ['ar' => 'سيتم تنبيهك عند الوصول لهذا المستوى', 'en' => 'Get notified when stock reaches this level'],
+            'admin.products.form.inventory.weight' => ['ar' => 'الوزن', 'en' => 'Weight'],
+            'admin.products.form.inventory.weight_help' => ['ar' => 'لاحتساب تكلفة الشحن', 'en' => 'For shipping calculations'],
+            'admin.products.form.inventory.barcode' => ['ar' => 'الباركود', 'en' => 'Barcode'],
+
+            'admin.products.form.variants.title' => ['ar' => 'متغيرات المنتج', 'en' => 'Product Variants'],
+            'admin.products.form.variants.desc' => ['ar' => 'الحجم، اللون، أو متغيرات أخرى', 'en' => 'Size, color, or other variations'],
+            'admin.products.form.variants.variant_sku' => ['ar' => 'SKU للمتغير', 'en' => 'Variant SKU'],
+            'admin.products.form.variants.name_placeholder' => ['ar' => 'مثلاً: أحمر - كبير، 128GB', 'en' => 'e.g., Red - Large, 128GB'],
+            'admin.products.form.variants.price_help' => ['ar' => 'اتركه فارغاً لاستخدام سعر المنتج', 'en' => 'Leave empty to use product price'],
+            'admin.products.form.variants.add_variant' => ['ar' => 'إضافة متغير', 'en' => 'Add Variant'],
+
+            'admin.products.form.additional.title' => ['ar' => 'إعدادات إضافية', 'en' => 'Additional Settings'],
+            'admin.products.form.additional.desc' => ['ar' => 'الحالة والمزايا والبيانات الوصفية', 'en' => 'Status, features, and metadata'],
+            'admin.products.form.additional.featured_product' => ['ar' => 'منتج مميز', 'en' => 'Featured Product'],
+            'admin.products.form.additional.featured_help' => ['ar' => 'عرض في الصفحة الرئيسية', 'en' => 'Show on homepage'],
+            'admin.products.form.additional.brand' => ['ar' => 'العلامة التجارية', 'en' => 'Brand'],
+            'admin.products.form.additional.seo_title' => ['ar' => 'عنوان SEO', 'en' => 'SEO Title'],
+            'admin.products.form.additional.seo_help' => ['ar' => 'لأغراض محركات البحث', 'en' => 'For search engines'],
+            'admin.products.form.additional.seo_description' => ['ar' => 'وصف SEO', 'en' => 'SEO Description'],
+            'admin.products.form.additional.seo_keywords' => ['ar' => 'كلمات SEO', 'en' => 'SEO Keywords'],
+            'admin.products.form.additional.seo_keywords_help' => ['ar' => 'كلمات مفصولة بفواصل', 'en' => 'Comma-separated keywords'],
 
             // Banners positions
             'admin.banners.position.homepage_top' => ['ar' => 'الصفحة الرئيسية - أعلى', 'en' => 'Homepage - Top'],

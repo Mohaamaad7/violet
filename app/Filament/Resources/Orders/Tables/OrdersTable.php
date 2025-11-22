@@ -129,45 +129,45 @@ class OrdersTable
                     ->label(__('admin.table.order_status'))
                     ->multiple()
                     ->options([
-                        'pending' => 'جديد',
-                        'processing' => 'قيد المعالجة',
-                        'shipped' => 'تم الشحن',
-                        'delivered' => 'تم التسليم',
-                        'cancelled' => 'ملغي',
+                        'pending' => __('admin.orders.status.pending'),
+                        'processing' => __('admin.orders.status.processing'),
+                        'shipped' => __('admin.orders.status.shipped'),
+                        'delivered' => __('admin.orders.status.delivered'),
+                        'cancelled' => __('admin.orders.status.cancelled'),
                     ])
-                    ->placeholder('كل الحالات'),
+                    ->placeholder(__('admin.filter.all')),
 
                 // فلتر حالة الدفع
                 SelectFilter::make('payment_status')
                     ->label(__('admin.table.payment_status'))
                     ->multiple()
                     ->options([
-                        'unpaid' => 'غير مدفوع',
-                        'paid' => 'مدفوع',
-                        'failed' => 'فشل',
-                        'refunded' => 'مُسترد',
+                        'unpaid' => __('admin.orders.payment.unpaid'),
+                        'paid' => __('admin.orders.payment.paid'),
+                        'failed' => __('admin.orders.payment.failed'),
+                        'refunded' => __('admin.orders.payment.refunded'),
                     ])
-                    ->placeholder('كل حالات الدفع'),
+                    ->placeholder(__('admin.filter.all')),
 
                 // فلتر طريقة الدفع
                 SelectFilter::make('payment_method')
                     ->label(__('admin.table.payment_method'))
                     ->options([
-                        'cod' => 'عند الاستلام',
-                        'card' => 'بطاقة',
-                        'instapay' => 'InstaPay',
+                        'cod' => __('admin.orders.method.cod'),
+                        'card' => __('admin.orders.method.card'),
+                        'instapay' => __('admin.orders.method.instapay'),
                     ])
-                    ->placeholder('كل الطرق'),
+                    ->placeholder(__('admin.filter.all')),
 
                 // فلتر بالتاريخ (Date Range)
                 Filter::make('created_at')
                     ->form([
                         \Filament\Forms\Components\DatePicker::make('created_from')
                             ->label(__('admin.filters.date_from'))
-                            ->placeholder('اختر التاريخ'),
+                            ->placeholder(__('admin.filters.select_date')),
                         \Filament\Forms\Components\DatePicker::make('created_until')
                             ->label(__('admin.filters.date_to'))
-                            ->placeholder('اختر التاريخ'),
+                            ->placeholder(__('admin.filters.select_date')),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query
@@ -184,11 +184,11 @@ class OrdersTable
                         $indicators = [];
 
                         if ($data['created_from'] ?? null) {
-                            $indicators[] = 'من: ' . \Carbon\Carbon::parse($data['created_from'])->format('d/m/Y');
+                            $indicators[] = __('admin.filters.date_from') . ': ' . \Carbon\Carbon::parse($data['created_from'])->format('d/m/Y');
                         }
 
                         if ($data['created_until'] ?? null) {
-                            $indicators[] = 'إلى: ' . \Carbon\Carbon::parse($data['created_until'])->format('d/m/Y');
+                            $indicators[] = __('admin.filters.date_to') . ': ' . \Carbon\Carbon::parse($data['created_until'])->format('d/m/Y');
                         }
 
                         return $indicators;
@@ -198,8 +198,8 @@ class OrdersTable
                 Filter::make('customer')
                     ->form([
                         \Filament\Forms\Components\TextInput::make('customer_search')
-                            ->label('بحث عن عميل')
-                            ->placeholder('اسم أو إيميل العميل'),
+                            ->label(__('admin.filters.customer_search'))
+                            ->placeholder(__('admin.filters.customer_search_placeholder')),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query->when(
