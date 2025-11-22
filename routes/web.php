@@ -23,6 +23,11 @@ Route::get('/checkout', function () {
     return 'Checkout page (Coming soon)';
 })->name('checkout');
 
+// Debug Route (Temporary - for troubleshooting)
+Route::get('/test-cart-debug', function () {
+    return view('debug.cart-test');
+})->name('debug.cart');
+
 Route::get('/categories/{category:slug}', function () {
     return 'Category page (Coming soon)';
 })->name('category.show');

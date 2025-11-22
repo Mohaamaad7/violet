@@ -49,7 +49,14 @@ class CartManager extends Component
      */
     public function mount(): void
     {
-        $this->loadCartData();
+        try {
+            $this->loadCartData();
+        } catch (\Exception $e) {
+            // Log error but don't break the component
+            logger()->error('CartManager mount failed: ' . $e->getMessage());
+            $this->cartCount = 0;
+            $this->subtotal = 0;
+        }
     }
 
     /**
@@ -189,7 +196,12 @@ class CartManager extends Component
      */
     public function render()
     {
-        $cart = $this->cartService->getCart();
+        try {
+            $cart = $this->cartService->getCart();
+        } catch (\Exception $e) {
+            logger()->error('CartManager render failed: ' . $e->getMessage());
+            $cart = null;
+        }
 
         return view('livewire.store.cart-manager', [
             'cart' => $cart,

@@ -1,13 +1,43 @@
 # 🐛 URGENT BUG FIX REPORT - Task 9.5 Add to Cart BROKEN
 
 **Date**: 2025-11-18  
+**Last Update**: 2025-11-18 (Second Critical Fix)  
 **Severity**: CRITICAL (P0)  
-**Status**: ✅ FIXED  
-**Commit**: 0efa768
+**Status**: ✅ FIXED (Multiple Issues Resolved)  
+**Commits**: 0efa768, [current]
 
 ---
 
-## 🎯 PROBLEM DESCRIPTION
+## ⚠️ CRITICAL UPDATE - SECOND BUG DISCOVERED
+
+**NEW ROOT CAUSE (November 18, 2025):**
+
+The `<livewire:store.cart-manager />` component was **COMPLETELY MISSING** from the main layout file (`resources/views/components/store-layout.blade.php`). 
+
+**Why This Breaks Everything:**
+- Livewire events require the component to be rendered on the page
+- The `#[On('add-to-cart')]` listener in `CartManager.php` never exists
+- Events fire into the void with no listener
+- Alpine.js waits forever for a Livewire response that never comes
+- Button stays stuck in `adding = true` state permanently
+
+**FIX APPLIED:**
+```blade
+{{-- Added to store-layout.blade.php after footer --}}
+<livewire:store.cart-manager />
+```
+
+**Also Added Missing Toast System:**
+```javascript
+window.addEventListener('show-toast', (event) => {
+    // Creates and displays toast notifications
+    // Auto-removes after 3 seconds with slide-out animation
+});
+```
+
+---
+
+## 🎯 ORIGINAL PROBLEM DESCRIPTION (First Bug)
 
 **Reported Behavior**: User clicks "Add to Cart" → Button shows spinner "Adding..." → **STAYS STUCK FOREVER**
 

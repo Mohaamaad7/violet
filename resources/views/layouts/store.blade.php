@@ -55,8 +55,8 @@
         <x-store.footer />
     </div>
 
-    {{-- Cart Manager (Slide-over) --}}
-    @livewire('store.cart-manager')
+    {{-- Cart Manager (Slide-over) - CRITICAL: Must be present on ALL pages --}}
+    <livewire:store.cart-manager />
 
     {{-- Toast Notifications (if needed) --}}
     <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2"></div>

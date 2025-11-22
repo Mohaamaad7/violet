@@ -183,16 +183,16 @@ class ProductDetails extends Component
         );
 
         if ($result['success']) {
-            // Dispatch cart-updated event to refresh cart manager
-            $this->dispatch('cart-updated');
-            
             // Show success message
             $this->dispatch('show-toast', [
                 'type' => 'success',
                 'message' => $result['message']
             ]);
-
-            // Open cart panel
+            
+            // Dispatch cart-updated event to refresh cart manager (triggers counter update)
+            $this->dispatch('cart-updated');
+            
+            // CRITICAL: Open cart slide-over panel (Bug #2 Fix)
             $this->dispatch('open-cart');
             
             // Reset quantity to 1

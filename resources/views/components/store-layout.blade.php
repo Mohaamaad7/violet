@@ -44,6 +44,11 @@
 
     {{-- Custom Styles for Filters --}}
     <style>
+        /* Alpine.js Cloak - Hide elements until Alpine loads */
+        [x-cloak] {
+            display: none !important;
+        }
+
         /* Custom Scrollbar */
         .overflow-y-auto::-webkit-scrollbar {
             width: 6px;
@@ -144,6 +149,9 @@
 
         {{-- Footer --}}
         <x-store.footer />
+
+        {{-- Cart Manager (Slide-over) - CRITICAL: Must be included for add-to-cart to work --}}
+        <livewire:store.cart-manager />
     </div>
 
     {{-- Livewire Scripts --}}
@@ -152,9 +160,87 @@
     {{-- Alpine.js will be started by Livewire automatically --}}
     <script>
         document.addEventListener('livewire:init', () => {
-            console.log('Livewire initialized');
+            console.log('✅ Livewire initialized');
+            
+            // Debug: Check if CartManager component exists in DOM
+            setTimeout(() => {
+                const cartManager = document.querySelector('[wire\\:id]');
+                if (cartManager) {
+                    console.log('✅ CartManager component found in DOM:', cartManager.getAttribute('wire:id'));
+                } else {
+                    console.error('❌ CartManager component NOT FOUND in DOM!');
+                }
+            }, 500);
+
+            // CRITICAL: Listen for browser 'open-cart' event and forward to Livewire
+            window.addEventListener('open-cart', () => {
+                console.log('🎯 Browser event received, dispatching to Livewire...');
+                Livewire.dispatch('open-cart');
+            });
+        });
+
+        // Toast Notification System
+        window.addEventListener('show-toast', (event) => {
+            const detail = event.detail[0] || event.detail;
+            const message = detail.message || 'تمت العملية بنجاح';
+            const type = detail.type || 'success';
+            
+            // Create toast element
+            const toast = document.createElement('div');
+            toast.className = `fixed top-20 right-4 z-[9999] px-6 py-4 rounded-lg shadow-2xl flex items-center gap-3 animate-slide-in ${
+                type === 'success' ? 'bg-green-500 text-white' : 
+                type === 'error' ? 'bg-red-500 text-white' : 
+                'bg-blue-500 text-white'
+            }`;
+            
+            // Add icon
+            const icon = type === 'success' 
+                ? '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>'
+                : '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>';
+            
+            toast.innerHTML = `${icon}<span class="font-semibold">${message}</span>`;
+            document.body.appendChild(toast);
+            
+            // Auto-remove after 3 seconds
+            setTimeout(() => {
+                toast.classList.add('animate-slide-out');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
         });
     </script>
+
+    {{-- Toast Animations --}}
+    <style>
+        @keyframes slide-in {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slide-out {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+        }
+        
+        .animate-slide-in {
+            animation: slide-in 0.3s ease-out forwards;
+        }
+        
+        .animate-slide-out {
+            animation: slide-out 0.3s ease-in forwards;
+        }
+    </style>
 
     {{-- Additional Scripts --}}
     @stack('scripts')
