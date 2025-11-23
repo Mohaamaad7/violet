@@ -61,41 +61,50 @@ body, .fi-body, .fi-main, .fi-sidebar, .fi-topbar {
   @apply text-white;
 }
 
-/* Brand Logo Styling - TOP OF SIDEBAR */
-.fi-logo img {
-  @apply object-contain;
-  max-height: 3rem !important;
-  width: auto !important;
-}
+/* Brand Logo removed from sidebar - now positioned above Dashboard title */
 
-/* Brand Area Enhancement - PROMINENT TOP SECTION */
+/* Brand Area in Sidebar - Clean header without logo */
 .fi-sidebar .fi-logo,
 .fi-sidebar-header {
-  @apply px-6 py-8 border-b border-violet-700/30 mb-6;
+  @apply px-6 py-4 border-b border-violet-700/30 mb-6;
   background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
   backdrop-filter: blur(10px);
+  min-height: 60px !important;
 }
 
 .fi-logo {
-  @apply flex flex-col items-center justify-center text-white font-bold text-2xl;
-  min-height: 120px !important;
+  @apply flex items-center justify-center text-white font-bold text-xl;
 }
 
-.fi-logo img {
-  margin-bottom: 0.75rem;
-}
-
-/* Logo text styling */
 .fi-logo .fi-logo-text {
   color: white !important;
-  font-size: 1.5rem !important;
+  font-size: 1.25rem !important;
   font-weight: 700 !important;
   letter-spacing: 0.5px;
 }
 
-/* RTL specific adjustments for logo */
-[dir="rtl"] .fi-logo {
-  @apply space-x-reverse;
+/* Logo positioned above Dashboard title - 250x250 */
+.fi-page-heading::before {
+  content: '';
+  display: block;
+  width: 250px;
+  height: 250px;
+  background-image: url('/images/logo.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  margin: 0 auto 2rem auto;
+}
+
+/* Center the page heading container for logo */
+.fi-page-heading {
+  text-align: center;
+}
+
+/* Dashboard title below logo */
+.fi-page-heading h1,
+.fi-page-heading .fi-header-heading {
+  margin-top: 1rem;
 }
 
 /* Force White Text for ALL Sidebar Elements (EXCEPT Active) */
