@@ -27,22 +27,22 @@ body, .fi-body, .fi-main, .fi-sidebar, .fi-topbar {
   @apply text-white;
 }
 
-/* Force White Text for ALL Sidebar Elements */
-.fi-sidebar,
-.fi-sidebar *,
-.fi-sidebar a,
-.fi-sidebar button,
-.fi-sidebar .fi-sidebar-item,
-.fi-sidebar .fi-sidebar-item-button,
-.fi-sidebar .fi-sidebar-item-label,
-.fi-sidebar .fi-sidebar-nav-item,
-.fi-sidebar .fi-sidebar-nav-icon,
-.fi-sidebar svg {
+/* Force White Text for ALL Sidebar Elements (EXCEPT Active) */
+.fi-sidebar:not(.fi-sidebar-item-active),
+.fi-sidebar *:not(.fi-sidebar-item-active):not(.fi-sidebar-item-active *),
+.fi-sidebar a:not(.fi-sidebar-item-active a),
+.fi-sidebar button:not(.fi-sidebar-item-active button),
+.fi-sidebar .fi-sidebar-item:not(.fi-sidebar-item-active),
+.fi-sidebar .fi-sidebar-item-button:not(.fi-sidebar-item-active .fi-sidebar-item-button),
+.fi-sidebar .fi-sidebar-item-label:not(.fi-sidebar-item-active .fi-sidebar-item-label),
+.fi-sidebar .fi-sidebar-nav-item:not(.fi-sidebar-item-active .fi-sidebar-nav-item),
+.fi-sidebar .fi-sidebar-nav-icon:not(.fi-sidebar-item-active .fi-sidebar-nav-icon),
+.fi-sidebar svg:not(.fi-sidebar-item-active svg) {
   color: white;
 }
 
-.fi-sidebar .fi-sidebar-item-icon,
-.fi-sidebar .fi-icon {
+.fi-sidebar .fi-sidebar-item-icon:not(.fi-sidebar-item-active .fi-sidebar-item-icon),
+.fi-sidebar .fi-icon:not(.fi-sidebar-item-active .fi-icon) {
   color: white;
 }
 
@@ -52,14 +52,35 @@ body, .fi-body, .fi-main, .fi-sidebar, .fi-topbar {
   @apply rounded-md;
 }
 
-.fi-sidebar nav .fi-sidebar-item-active,
-.fi-sidebar .fi-sidebar-item-active .fi-sidebar-item-button {
-  @apply bg-violet-700/40 text-white shadow-md;
+/* CRITICAL FIX: Sidebar Active State - Based on Official Filament CSS Structure */
+.fi-sidebar .fi-sidebar-item.fi-active > .fi-sidebar-item-btn,
+.fi-sidebar .fi-sidebar-item.fi-active .fi-sidebar-item-btn {
+  @apply bg-white/95 shadow-md;
+  font-weight: 600;
 }
 
+/* CRITICAL FIX: Active Item Text Visibility - Official Filament Hook Classes */
+.fi-sidebar .fi-sidebar-item.fi-active > .fi-sidebar-item-btn > .fi-sidebar-item-label,
+.fi-sidebar .fi-sidebar-item.fi-active > .fi-sidebar-item-btn > .fi-icon,
+.fi-sidebar .fi-sidebar-item.fi-active .fi-sidebar-item-label,
+.fi-sidebar .fi-sidebar-item.fi-active .fi-sidebar-item-icon,
+.fi-sidebar .fi-sidebar-item.fi-active svg,
+.fi-sidebar .fi-sidebar-item.fi-active a,
+.fi-sidebar .fi-sidebar-item.fi-active button,
+.fi-sidebar .fi-sidebar-item.fi-active span {
+    color: rgb(51 65 85) !important; /* slate-700 */
+    fill: rgb(51 65 85) !important;
+}
+
+/* CRITICAL FIX: Sidebar Hover State - Dark Text on Light Background */
 .fi-sidebar .fi-sidebar-item:hover,
-.fi-sidebar .fi-sidebar-item-button:hover {
-  @apply bg-violet-700/20;
+.fi-sidebar .fi-sidebar-item-button:hover,
+.fi-sidebar .fi-sidebar-item:hover a,
+.fi-sidebar .fi-sidebar-item:hover .fi-sidebar-item-label,
+.fi-sidebar .fi-sidebar-item:hover .fi-sidebar-item-icon,
+.fi-sidebar .fi-sidebar-item:hover svg {
+  @apply bg-white/80;
+  color: rgb(124 58 237) !important; /* violet-600 */
 }
 
 /* Navigation Group Labels - Distinct Section Headers */
@@ -74,12 +95,24 @@ body, .fi-body, .fi-main, .fi-sidebar, .fi-topbar {
   @apply mt-2;
 }
 
-/* Topbar refinement */
+/* Topbar refinement - Optimized spacing */
 .fi-topbar {
   @apply backdrop-blur bg-white/80 dark:bg-violet-950/80 border-b border-violet-200 dark:border-violet-800 shadow-sm;
+  padding: 0.75rem 1rem; /* Reduced padding for tighter layout */
 }
+
 .fi-topbar .fi-btn, .fi-topbar .fi-icon-btn {
   @apply rounded-md;
+}
+
+/* Remove excessive margins in header area */
+.fi-topbar > *,
+.fi-topbar .fi-header-actions,
+.fi-topbar .fi-topbar-start,
+.fi-topbar .fi-topbar-end {
+  margin: 0;
+  padding-top: 0;
+  padding-bottom: 0;
 }
 
 /* Language action group buttons */
