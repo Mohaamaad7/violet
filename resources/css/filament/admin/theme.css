@@ -18,13 +18,35 @@ body, .fi-body, .fi-main, .fi-sidebar, .fi-topbar {
 /* Sidebar Luxury Style */
 .fi-sidebar {
   @apply bg-gradient-to-b from-violet-950 via-violet-900 to-violet-800 shadow-xl border-r border-violet-700/40;
-  min-height: 100vh;
+  min-height: 100vh !important;
+  height: 100vh !important;
 }
 
 /* Sidebar Brand/Header Area */
 .fi-sidebar-header,
 .fi-sidebar .fi-logo {
   @apply text-white;
+}
+
+/* Brand Logo Styling */
+.fi-logo img {
+  @apply object-contain;
+  max-height: 2.5rem;
+}
+
+/* Brand Area Enhancement */
+.fi-sidebar .fi-logo,
+.fi-sidebar-header {
+  @apply px-4 py-6 border-b border-violet-700/30 mb-4;
+}
+
+.fi-logo {
+  @apply flex items-center justify-center space-x-2 text-white font-bold text-xl;
+}
+
+/* RTL specific adjustments for logo */
+[dir="rtl"] .fi-logo {
+  @apply space-x-reverse;
 }
 
 /* Force White Text for ALL Sidebar Elements (EXCEPT Active) */
@@ -95,7 +117,7 @@ body, .fi-body, .fi-main, .fi-sidebar, .fi-topbar {
   @apply mt-2;
 }
 
-/* Topbar refinement - Optimized spacing */
+/* Topbar refinement - Optimized spacing with RTL/LTR support */
 .fi-topbar {
   @apply backdrop-blur bg-white/80 dark:bg-violet-950/80 border-b border-violet-200 dark:border-violet-800 shadow-sm;
   padding: 0.75rem 1rem; /* Reduced padding for tighter layout */
@@ -103,6 +125,66 @@ body, .fi-body, .fi-main, .fi-sidebar, .fi-topbar {
 
 .fi-topbar .fi-btn, .fi-topbar .fi-icon-btn {
   @apply rounded-md;
+}
+
+/* RTL/LTR Topbar Layout Positioning */
+.fi-topbar {
+  @apply flex items-center justify-between;
+}
+
+/* User Info Button - RTL: Left aligned, LTR: Right aligned */
+[dir="rtl"] .fi-topbar .fi-user-menu,
+[dir="rtl"] .fi-topbar .fi-avatar,
+[dir="rtl"] .fi-topbar .fi-user-menu-trigger {
+  @apply order-first ml-0 mr-auto;
+}
+
+[dir="ltr"] .fi-topbar .fi-user-menu,
+[dir="ltr"] .fi-topbar .fi-avatar,
+[dir="ltr"] .fi-topbar .fi-user-menu-trigger {
+  @apply order-last mr-0 ml-auto;
+}
+
+/* Search Box - Responsive positioning */
+[dir="rtl"] .fi-topbar .fi-global-search,
+[dir="rtl"] .fi-topbar .fi-global-search-input {
+  @apply order-last mr-0 ml-auto;
+}
+
+[dir="ltr"] .fi-topbar .fi-global-search,
+[dir="ltr"] .fi-topbar .fi-global-search-input {
+  @apply order-first ml-0 mr-auto;
+}
+
+/* Enhanced Topbar Container */
+.fi-topbar-start {
+  @apply flex items-center space-x-3;
+}
+
+[dir="rtl"] .fi-topbar-start {
+  @apply space-x-reverse;
+}
+
+.fi-topbar-end {
+  @apply flex items-center space-x-3;
+}
+
+[dir="rtl"] .fi-topbar-end {
+  @apply space-x-reverse;
+}
+
+/* Global Search Enhancements */
+.fi-global-search-input {
+  @apply bg-white/90 dark:bg-violet-900/50 border-violet-200 dark:border-violet-700 rounded-lg shadow-sm;
+}
+
+.fi-global-search-input:focus {
+  @apply ring-2 ring-violet-500 border-violet-500;
+}
+
+/* User Avatar Button */
+.fi-avatar {
+  @apply ring-2 ring-violet-200 dark:ring-violet-700 hover:ring-violet-300 dark:hover:ring-violet-600 transition-all duration-150;
 }
 
 /* Remove excessive margins in header area */
