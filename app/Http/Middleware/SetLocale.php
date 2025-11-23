@@ -14,36 +14,36 @@ class SetLocale
     public function handle(Request $request, Closure $next): Response
     {
         $supported = ['ar', 'en'];
-
-        // Priority: user -> cookie -> session -> header -> app default
+        
+        // Priority Logic: User Preference -> Session/Cookie Fallback -> App Default (ar)
         $locale = null;
 
-        if (auth()->check() && isset(auth()->user()->locale)) {
+        // PRIMARY: If user is logged in, use their preference
+        if (auth()->check() && !empty(auth()->user()->locale)) {
             $locale = auth()->user()->locale;
         }
-
+        
+        // FALLBACK: For guests or users without preference, check session/cookie
         if (!$locale) {
-            $locale = $request->cookie('locale');
+            $locale = session('locale') ?: $request->cookie('locale');
         }
 
-        if (!$locale) {
-            $locale = session('locale');
-        }
-
-        if (!$locale) {
-            $locale = $request->getPreferredLanguage($supported);
-        }
-
+        // DEFAULT: Use app default if no preference found
         if (!$locale) {
             $locale = config('app.locale', 'ar');
         }
 
+        // VALIDATION: Ensure locale is supported
         if (!in_array($locale, $supported, true)) {
             $locale = 'ar';
         }
 
         app()->setLocale($locale);
-        session(['locale' => $locale]);
+        
+        // Maintain session for consistency
+        if (session('locale') !== $locale) {
+            session(['locale' => $locale]);
+        }
         
         return $next($request);
     }

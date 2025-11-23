@@ -29,6 +29,7 @@ class User extends Authenticatable
         'profile_photo_path',
         'type',
         'status',
+        'locale',
     ];
 
     /**

@@ -46,6 +46,16 @@ class UserForm
                             ->numeric()
                             ->nullable()
                             ->maxLength(20),
+
+                        Select::make('locale')
+                            ->label(__('admin.form.language'))
+                            ->options([
+                                'ar' => 'العربية',
+                                'en' => 'English'
+                            ])
+                            ->default('ar')
+                            ->required()
+                            ->helperText(__('admin.form.language_help')),
                     ])
                     ->columns(2),
                 

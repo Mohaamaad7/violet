@@ -141,6 +141,8 @@ class AdminTranslationsSeeder extends Seeder
             'admin.form.updated_at' => ['ar' => 'تاريخ التحديث', 'en' => 'Updated At'],
             'admin.form.phone' => ['ar' => 'رقم الهاتف', 'en' => 'Phone'],
             'admin.form.profile_photo' => ['ar' => 'الصورة الشخصية', 'en' => 'Profile Photo'],
+            'admin.form.language' => ['ar' => 'اللغة', 'en' => 'Language'],
+            'admin.form.language_help' => ['ar' => 'اختر لغة واجهة المستخدم المفضلة لهذا المستخدم', 'en' => 'Select preferred UI language for this user'],
             'admin.form.user_info' => ['ar' => 'معلومات المستخدم', 'en' => 'User Information'],
             'admin.form.role_permissions' => ['ar' => 'الدور والصلاحيات', 'en' => 'Role & Permissions'],
             'admin.form.password_section' => ['ar' => 'كلمة المرور', 'en' => 'Password'],

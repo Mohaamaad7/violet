@@ -52,8 +52,6 @@ class AdminPanelProvider extends PanelProvider
                 AccountWidget::class,
                 FilamentInfoWidget::class,
             ])
-            // Custom Livewire topbar component supplies localized language ActionGroup dropdown
-            ->topbarLivewireComponent(\App\Livewire\Filament\TopbarLanguages::class)
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
