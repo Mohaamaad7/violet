@@ -23,5 +23,5 @@
         if ($event.detail.reload) { setTimeout(() => window.location.reload(), 120); }
      "
      class="flex items-center">
-    {!! $group !!}
+    {!! $group->toHtml() !!}
 </div>

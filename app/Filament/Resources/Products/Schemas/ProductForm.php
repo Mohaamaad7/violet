@@ -21,10 +21,11 @@ class ProductForm
         return $schema
             ->schema([
                 // General Information Section
-                Section::make('General Information')
-                    ->description('Basic product details')
+                Section::make(__('admin.products.form.general.title'))
+                    ->description(__('admin.products.form.general.desc'))
                     ->schema([
                         TextInput::make('name')
+                            ->label(__('admin.form.name'))
                             ->required()
                             ->maxLength(255)
                             ->live(onBlur: true)
@@ -35,31 +36,36 @@ class ProductForm
                             }),
                         
                         TextInput::make('slug')
+                            ->label(__('admin.form.slug'))
                             ->required()
                             ->maxLength(255)
                             ->unique(ignoreRecord: true)
-                            ->helperText('Auto-generated from name, but can be edited'),
+                            ->helperText(__('admin.products.form.general.slug_help')),
                         
                         TextInput::make('sku')
-                            ->label('SKU')
+                            ->label(__('admin.form.sku'))
                             ->maxLength(100)
-                            ->helperText('Leave empty for auto-generation'),
+                            ->helperText(__('admin.products.form.general.sku_help')),
                         
                         Select::make('category_id')
+                            ->label(__('admin.form.category'))
                             ->relationship('category', 'name')
                             ->required()
                             ->searchable()
                             ->preload()
                             ->createOptionForm([
                                 TextInput::make('name')
+                                    ->label(__('admin.form.name'))
                                     ->required()
                                     ->maxLength(255),
                                 TextInput::make('slug')
+                                    ->label(__('admin.form.slug'))
                                     ->required()
                                     ->maxLength(255),
                             ]),
                         
                         RichEditor::make('description')
+                            ->label(__('admin.form.description'))
                             ->columnSpanFull()
                             ->toolbarButtons([
                                 'bold',
@@ -74,19 +80,20 @@ class ProductForm
                             ]),
                         
                         Textarea::make('short_description')
+                            ->label(__('admin.products.form.general.short_description'))
                             ->rows(3)
                             ->columnSpanFull()
-                            ->helperText('Brief description for listing pages'),
+                            ->helperText(__('admin.products.form.general.short_description_help')),
                     ])
                     ->columns(2)
                     ->collapsible(),
                 
                 // Media Section
-                Section::make('Media')
-                    ->description('Upload product images - First image will be primary')
+                Section::make(__('admin.products.form.media.title'))
+                    ->description(__('admin.products.form.media.desc'))
                     ->schema([
                         SpatieMediaLibraryFileUpload::make('media')
-                            ->label('Product Images')
+                            ->label(__('admin.products.form.media.images_label'))
                             ->collection('product-images')
                             ->multiple()
                             ->reorderable()
@@ -103,16 +110,17 @@ class ProductForm
                             ->removeUploadedFileButtonPosition('right')
                             ->uploadButtonPosition('left')
                             ->uploadProgressIndicatorPosition('left')
-                            ->helperText('Upload up to 10 images. Drag to reorder. First image will be primary.')
+                            ->helperText(__('admin.products.form.media.images_help'))
                             ->columnSpanFull(),
                     ])
                     ->collapsible(),
                 
                 // Pricing Section
-                Section::make('Pricing')
-                    ->description('Product pricing information')
+                Section::make(__('admin.products.form.pricing.title'))
+                    ->description(__('admin.products.form.pricing.desc'))
                     ->schema([
                         TextInput::make('price')
+                            ->label(__('admin.form.price'))
                             ->required()
                             ->numeric()
                             ->prefix('$')
@@ -120,81 +128,87 @@ class ProductForm
                             ->step(0.01),
                         
                         TextInput::make('sale_price')
-                            ->label('Sale Price')
+                            ->label(__('admin.products.form.pricing.sale_price'))
                             ->numeric()
                             ->prefix('$')
                             ->minValue(0)
                             ->step(0.01)
-                            ->helperText('Optional. If set, will be displayed as discounted price'),
+                            ->helperText(__('admin.products.form.pricing.sale_price_help')),
                         
                         TextInput::make('cost_price')
-                            ->label('Cost Price')
+                            ->label(__('admin.products.form.pricing.cost_price'))
                             ->numeric()
                             ->prefix('$')
                             ->minValue(0)
                             ->step(0.01)
-                            ->helperText('Internal cost for profit calculation'),
+                            ->helperText(__('admin.products.form.pricing.cost_price_help')),
                     ])
                     ->columns(3)
                     ->collapsible(),
                 
                 // Inventory Section
-                Section::make('Inventory')
-                    ->description('Stock management')
+                Section::make(__('admin.products.form.inventory.title'))
+                    ->description(__('admin.products.form.inventory.desc'))
                     ->schema([
                         TextInput::make('stock')
+                            ->label(__('admin.form.stock'))
                             ->required()
                             ->numeric()
                             ->default(0)
                             ->minValue(0),
                         
                         TextInput::make('low_stock_threshold')
-                            ->label('Low Stock Alert')
+                            ->label(__('admin.products.form.inventory.low_stock_alert'))
                             ->required()
                             ->numeric()
                             ->default(5)
                             ->minValue(0)
-                            ->helperText('Get notified when stock reaches this level'),
+                            ->helperText(__('admin.products.form.inventory.low_stock_help')),
                         
                         TextInput::make('weight')
+                            ->label(__('admin.products.form.inventory.weight'))
                             ->numeric()
-                            ->suffix('kg')
+                            ->suffix(__('admin.unit.kg'))
                             ->minValue(0)
                             ->step(0.01)
-                            ->helperText('For shipping calculations'),
+                            ->helperText(__('admin.products.form.inventory.weight_help')),
                         
                         TextInput::make('barcode')
+                            ->label(__('admin.products.form.inventory.barcode'))
                             ->maxLength(100),
                     ])
                     ->columns(2)
                     ->collapsible(),
                 
                 // Product Variants Section
-                Section::make('Product Variants')
-                    ->description('Size, color, or other variations')
+                Section::make(__('admin.products.form.variants.title'))
+                    ->description(__('admin.products.form.variants.desc'))
                     ->schema([
                         Repeater::make('variants')
                             ->relationship('variants')
                             ->schema([
                                 TextInput::make('sku')
-                                    ->label('Variant SKU')
+                                    ->label(__('admin.products.form.variants.variant_sku'))
                                     ->required()
                                     ->maxLength(100)
                                     ->unique(table: 'product_variants', ignoreRecord: true),
                                 
                                 TextInput::make('name')
+                                    ->label(__('admin.form.name'))
                                     ->required()
                                     ->maxLength(255)
-                                    ->placeholder('e.g., Red - Large, 128GB'),
+                                    ->placeholder(__('admin.products.form.variants.name_placeholder')),
                                 
                                 TextInput::make('price')
+                                    ->label(__('admin.form.price'))
                                     ->numeric()
                                     ->prefix('$')
                                     ->minValue(0)
                                     ->step(0.01)
-                                    ->helperText('Leave empty to use product price'),
+                                    ->helperText(__('admin.products.form.variants.price_help')),
                                 
                                 TextInput::make('stock')
+                                    ->label(__('admin.form.stock'))
                                     ->required()
                                     ->numeric()
                                     ->default(0)
@@ -205,49 +219,51 @@ class ProductForm
                             ->reorderable(false)
                             ->collapsible()
                             ->itemLabel(fn (array $state): ?string => $state['name'] ?? null)
-                            ->addActionLabel('Add Variant')
+                            ->addActionLabel(__('admin.products.form.variants.add_variant'))
                             ->columnSpanFull(),
                     ])
                     ->collapsible()
                     ->collapsed(),
                 
                 // Additional Settings Section
-                Section::make('Additional Settings')
-                    ->description('Status, features, and metadata')
+                Section::make(__('admin.products.form.additional.title'))
+                    ->description(__('admin.products.form.additional.desc'))
                     ->schema([
                         Select::make('status')
+                            ->label(__('admin.table.status'))
                             ->options([
-                                'draft' => 'Draft',
-                                'active' => 'Active',
-                                'inactive' => 'Inactive',
+                                'draft' => __('admin.status.draft'),
+                                'active' => __('admin.status.active'),
+                                'inactive' => __('admin.status.inactive'),
                             ])
                             ->default('active')
                             ->required()
                             ->native(false),
                         
                         Toggle::make('is_featured')
-                            ->label('Featured Product')
+                            ->label(__('admin.products.form.additional.featured_product'))
                             ->default(false)
-                            ->helperText('Show on homepage'),
+                            ->helperText(__('admin.products.form.additional.featured_help')),
                         
                         TextInput::make('brand')
+                            ->label(__('admin.products.form.additional.brand'))
                             ->maxLength(100),
                         
                         TextInput::make('meta_title')
-                            ->label('SEO Title')
+                            ->label(__('admin.products.form.additional.seo_title'))
                             ->maxLength(255)
-                            ->helperText('For search engines'),
+                            ->helperText(__('admin.products.form.additional.seo_help')),
                         
                         Textarea::make('meta_description')
-                            ->label('SEO Description')
+                            ->label(__('admin.products.form.additional.seo_description'))
                             ->rows(2)
                             ->maxLength(255)
                             ->columnSpanFull(),
                         
                         Textarea::make('meta_keywords')
-                            ->label('SEO Keywords')
+                            ->label(__('admin.products.form.additional.seo_keywords'))
                             ->rows(2)
-                            ->helperText('Comma-separated keywords')
+                            ->helperText(__('admin.products.form.additional.seo_keywords_help'))
                             ->columnSpanFull(),
                     ])
                     ->columns(3)

@@ -1,8 +1,10 @@
-/* Filament Admin Custom Theme (Task 9.8 UI Overhaul)
-   References: Filament v4 Docs (Customizing appearance: .fi-btn example shows semantic class override approach)
-   Font: Cairo (fallback: IBM Plex Sans Arabic, system-ui, sans-serif)
-*/
 @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap');
+@import '../../../../vendor/filament/filament/resources/css/theme.css';
+
+@source '../../../../app/Filament/**/*';
+@source '../../../../resources/views/filament/**/*';
+
+/* Luxury Violet Theme - Task 9.8 UI Overhaul */
 
 :root {
   --lux-font: 'Cairo', 'IBM Plex Sans Arabic', system-ui, sans-serif;
@@ -15,13 +17,61 @@ body, .fi-body, .fi-main, .fi-sidebar, .fi-topbar {
 
 /* Sidebar Luxury Style */
 .fi-sidebar {
-  @apply bg-gradient-to-b from-violet-950 via-violet-900 to-violet-800 text-gray-100 shadow-xl border-r border-violet-700/40; 
+  @apply bg-gradient-to-b from-violet-950 via-violet-900 to-violet-800 shadow-xl border-r border-violet-700/40;
+  min-height: 100vh;
 }
-.fi-sidebar nav .fi-sidebar-item, .fi-sidebar .fi-nav-group {
+
+/* Sidebar Brand/Header Area */
+.fi-sidebar-header,
+.fi-sidebar .fi-logo {
+  @apply text-white;
+}
+
+/* Force White Text for ALL Sidebar Elements */
+.fi-sidebar,
+.fi-sidebar *,
+.fi-sidebar a,
+.fi-sidebar button,
+.fi-sidebar .fi-sidebar-item,
+.fi-sidebar .fi-sidebar-item-button,
+.fi-sidebar .fi-sidebar-item-label,
+.fi-sidebar .fi-sidebar-nav-item,
+.fi-sidebar .fi-sidebar-nav-icon,
+.fi-sidebar svg {
+  color: white;
+}
+
+.fi-sidebar .fi-sidebar-item-icon,
+.fi-sidebar .fi-icon {
+  color: white;
+}
+
+/* Sidebar Navigation Items */
+.fi-sidebar nav .fi-sidebar-item,
+.fi-sidebar .fi-nav-group {
   @apply rounded-md;
 }
-.fi-sidebar nav .fi-sidebar-item-active {
+
+.fi-sidebar nav .fi-sidebar-item-active,
+.fi-sidebar .fi-sidebar-item-active .fi-sidebar-item-button {
   @apply bg-violet-700/40 text-white shadow-md;
+}
+
+.fi-sidebar .fi-sidebar-item:hover,
+.fi-sidebar .fi-sidebar-item-button:hover {
+  @apply bg-violet-700/20;
+}
+
+/* Navigation Group Labels - Distinct Section Headers */
+.fi-sidebar .fi-sidebar-group,
+.fi-sidebar .fi-sidebar-group-label,
+.fi-sidebar-group-label {
+  @apply bg-white/10 rounded-lg px-3 py-2 mt-4 mb-2 text-white font-semibold text-xs uppercase tracking-wider;
+  backdrop-filter: blur(8px);
+}
+
+.fi-sidebar .fi-sidebar-group-label:first-child {
+  @apply mt-2;
 }
 
 /* Topbar refinement */
@@ -61,7 +111,7 @@ body, .fi-body, .fi-main, .fi-sidebar, .fi-topbar {
   @apply border-violet-600 text-violet-600 hover:bg-violet-50;
 }
 
-/* Scrollbar subtle styling (Webkit only graceful degradation) */
+/* Scrollbar subtle styling */
 .fi-sidebar ::-webkit-scrollbar { width: 8px; }
 .fi-sidebar ::-webkit-scrollbar-track { @apply bg-violet-950; }
 .fi-sidebar ::-webkit-scrollbar-thumb { @apply bg-violet-700 rounded-full; }
@@ -77,7 +127,7 @@ body, .fi-body, .fi-main, .fi-sidebar, .fi-topbar {
   @apply bg-violet-600/90 text-white;
 }
 
-/* Code fences (if any) */
+/* Code fences */
 .fi-code-block { @apply bg-violet-950/60 text-violet-100 rounded-lg; }
 
 /* Transition for sidebar collapse */
@@ -88,5 +138,5 @@ body, .fi-body, .fi-main, .fi-sidebar, .fi-topbar {
 .dark .fi-topbar { @apply bg-violet-950/85; }
 .dark .fi-btn-primary { @apply bg-violet-500 hover:bg-violet-400; }
 
-/* Fallback if some classes differ: generic card containers */
+/* Fallback generic card containers */
 [class*='widget'] { @apply shadow-lg; }
