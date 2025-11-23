@@ -28,9 +28,16 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+            // Brand color palette switched to Violet (Filament Support Colors\Color)
             ->colors([
-                'primary' => Color::Amber,
+                'primary' => Color::Violet,
             ])
+            // Premium font (Google Fonts Cairo – professional Arabic/English)
+            ->font('Cairo', 'https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap')
+            // Enable global search in topbar (HasGlobalSearch trait)
+            ->globalSearch()
+            // Improve UX: collapsible sidebar on desktop for spacious content area
+            ->sidebarCollapsibleOnDesktop()
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([
@@ -41,7 +48,7 @@ class AdminPanelProvider extends PanelProvider
                 AccountWidget::class,
                 FilamentInfoWidget::class,
             ])
-            // Use custom Livewire topbar component so we can show language switcher
+            // Custom Livewire topbar component supplies localized language ActionGroup dropdown
             ->topbarLivewireComponent(\App\Livewire\Filament\TopbarLanguages::class)
             ->middleware([
                 EncryptCookies::class,

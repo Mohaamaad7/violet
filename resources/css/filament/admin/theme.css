@@ -1,0 +1,92 @@
+/* Filament Admin Custom Theme (Task 9.8 UI Overhaul)
+   References: Filament v4 Docs (Customizing appearance: .fi-btn example shows semantic class override approach)
+   Font: Cairo (fallback: IBM Plex Sans Arabic, system-ui, sans-serif)
+*/
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap');
+
+:root {
+  --lux-font: 'Cairo', 'IBM Plex Sans Arabic', system-ui, sans-serif;
+}
+
+body, .fi-body, .fi-main, .fi-sidebar, .fi-topbar {
+  font-family: var(--lux-font);
+  font-feature-settings: 'kern' 1, 'liga' 1;
+}
+
+/* Sidebar Luxury Style */
+.fi-sidebar {
+  @apply bg-gradient-to-b from-violet-950 via-violet-900 to-violet-800 text-gray-100 shadow-xl border-r border-violet-700/40; 
+}
+.fi-sidebar nav .fi-sidebar-item, .fi-sidebar .fi-nav-group {
+  @apply rounded-md;
+}
+.fi-sidebar nav .fi-sidebar-item-active {
+  @apply bg-violet-700/40 text-white shadow-md;
+}
+
+/* Topbar refinement */
+.fi-topbar {
+  @apply backdrop-blur bg-white/80 dark:bg-violet-950/80 border-b border-violet-200 dark:border-violet-800 shadow-sm;
+}
+.fi-topbar .fi-btn, .fi-topbar .fi-icon-btn {
+  @apply rounded-md;
+}
+
+/* Language action group buttons */
+.fi-topbar .locale-active .fi-btn {
+  @apply ring-2 ring-violet-500 dark:ring-violet-400;
+}
+
+/* Widget cards elevated */
+.fi-widget, .fi-dashboard-widget, .fi-stats-overview, .fi-stats-overview > * {
+  @apply shadow-lg rounded-xl bg-white dark:bg-violet-900/40 border border-violet-200/60 dark:border-violet-700/50 backdrop-blur;
+}
+
+/* Stats Overview numbers accent */
+.fi-stats-overview .fi-stat-value {
+  @apply text-violet-600 dark:text-violet-300 font-semibold;
+}
+.fi-stats-overview .fi-stat-description {
+  @apply text-sm text-gray-500 dark:text-violet-200/70;
+}
+
+/* Buttons luxury feel */
+.fi-btn {
+  @apply rounded-md font-medium transition-all duration-150;
+}
+.fi-btn-primary {
+  @apply bg-violet-600 hover:bg-violet-500 text-white shadow-md;
+}
+.fi-btn-outline-primary {
+  @apply border-violet-600 text-violet-600 hover:bg-violet-50;
+}
+
+/* Scrollbar subtle styling (Webkit only graceful degradation) */
+.fi-sidebar ::-webkit-scrollbar { width: 8px; }
+.fi-sidebar ::-webkit-scrollbar-track { @apply bg-violet-950; }
+.fi-sidebar ::-webkit-scrollbar-thumb { @apply bg-violet-700 rounded-full; }
+.fi-sidebar ::-webkit-scrollbar-thumb:hover { @apply bg-violet-600; }
+
+/* Forms & tables subtle elevation */
+.fi-form, .fi-table {
+  @apply bg-white dark:bg-violet-900/30 rounded-xl shadow-sm border border-violet-100 dark:border-violet-800;
+}
+
+/* Refine badges */
+.fi-badge-primary {
+  @apply bg-violet-600/90 text-white;
+}
+
+/* Code fences (if any) */
+.fi-code-block { @apply bg-violet-950/60 text-violet-100 rounded-lg; }
+
+/* Transition for sidebar collapse */
+.fi-sidebar { transition: width .25s ease; }
+
+/* Dark mode adjustments */
+.dark .fi-sidebar { @apply from-violet-950 via-violet-900 to-violet-800; }
+.dark .fi-topbar { @apply bg-violet-950/85; }
+.dark .fi-btn-primary { @apply bg-violet-500 hover:bg-violet-400; }
+
+/* Fallback if some classes differ: generic card containers */
+[class*='widget'] { @apply shadow-lg; }
