@@ -33,17 +33,32 @@ body, .fi-body, .fi-main, .fi-sidebar, .fi-topbar {
   left: auto !important;
 }
 
-/* Adjust main content for fixed sidebar */
+/* Adjust main content for fixed sidebar - NO GAP */
 .fi-main-ctn,
 .fi-main {
   margin-left: 280px !important;
   min-height: 100vh !important;
+  padding: 0 !important;
 }
 
 [dir="rtl"] .fi-main-ctn,
 [dir="rtl"] .fi-main {
   margin-left: 0 !important;
   margin-right: 280px !important;
+}
+
+/* Remove any padding/margin from topbar to eliminate gap */
+.fi-topbar {
+  margin: 0 !important;
+  padding-left: 1rem !important;
+  padding-right: 1rem !important;
+}
+
+/* Ensure body and layout have no gaps */
+.fi-body,
+.fi-layout {
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 /* Body and layout adjustments */
