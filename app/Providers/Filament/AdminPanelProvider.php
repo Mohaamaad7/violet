@@ -30,7 +30,9 @@ class AdminPanelProvider extends PanelProvider
             ->login()
             // Brand identity
             ->brandName('Violet')
-            // Remove brandLogo from sidebar - will be placed above Dashboard title instead
+            // Place brand logo inside the sidebar header (Filament v4)
+            ->brandLogo(asset('images/logo.svg'))
+            ->brandLogoHeight('3.5rem')
             // Brand color palette switched to Violet (Filament Support Colors\Color)
             ->colors([
                 'primary' => Color::Violet,

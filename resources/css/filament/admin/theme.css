@@ -17,7 +17,7 @@ body, .fi-body, .fi-main, .fi-sidebar, .fi-topbar {
 
 /* Sidebar Luxury Style - EXACT FULL HEIGHT MATCH */
 .fi-sidebar {
-  @apply bg-gradient-to-b from-violet-950 via-violet-900 to-violet-800 shadow-xl border-r border-violet-700/40;
+  @apply bg-gradient-to-b from-violet-950 via-violet-900 to-violet-800 shadow-xl;
   position: fixed !important;
   top: 0 !important;
   left: 0 !important;
@@ -55,57 +55,20 @@ body, .fi-body, .fi-main, .fi-sidebar, .fi-topbar {
   min-height: 100vh !important;
 }
 
-/* Sidebar Brand/Header Area */
+/* Sidebar Brand/Header Area - inside the purple column */
 .fi-sidebar-header,
 .fi-sidebar .fi-logo {
   @apply text-white;
 }
 
-/* Brand Logo removed from sidebar - now positioned above Dashboard title */
-
-/* Brand Area in Sidebar - Clean header without logo */
-.fi-sidebar .fi-logo,
 .fi-sidebar-header {
-  @apply px-6 py-4 border-b border-violet-700/30 mb-6;
-  background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%);
-  backdrop-filter: blur(10px);
-  min-height: 60px !important;
+  @apply px-6 py-6 mb-4 flex items-center justify-center;
+  background: linear-gradient(180deg, rgba(23, 6, 56, 0.25) 0%, rgba(23, 6, 56, 0) 100%);
 }
 
-.fi-logo {
-  @apply flex items-center justify-center text-white font-bold text-xl;
-}
-
-.fi-logo .fi-logo-text {
-  color: white !important;
-  font-size: 1.25rem !important;
-  font-weight: 700 !important;
-  letter-spacing: 0.5px;
-}
-
-/* Logo positioned above Dashboard title - 250x250 */
-.fi-page-heading::before {
-  content: '';
-  display: block;
-  width: 250px;
-  height: 250px;
-  background-image: url('/images/logo.svg');
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
-  margin: 0 auto 2rem auto;
-}
-
-/* Center the page heading container for logo */
-.fi-page-heading {
-  text-align: center;
-}
-
-/* Dashboard title below logo */
-.fi-page-heading h1,
-.fi-page-heading .fi-header-heading {
-  margin-top: 1rem;
-}
+.fi-logo { @apply flex items-center justify-center gap-2; }
+.fi-logo img { @apply object-contain; max-height: 3.5rem; }
+.fi-logo .fi-logo-text { @apply text-white text-xl font-bold; letter-spacing: .5px; }
 
 /* Force White Text for ALL Sidebar Elements (EXCEPT Active) */
 .fi-sidebar:not(.fi-sidebar-item-active),
@@ -175,58 +138,27 @@ body, .fi-body, .fi-main, .fi-sidebar, .fi-topbar {
   @apply mt-2;
 }
 
-/* Topbar refinement - Fixed layout with centered search */
+/* Topbar refinement - RTL mirror: search near sidebar (right), user on far left */
 .fi-topbar {
   @apply backdrop-blur bg-white/80 dark:bg-violet-950/80 border-b border-violet-200 dark:border-violet-800 shadow-sm;
   padding: 0.75rem 1rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: .75rem;
 }
 
-.fi-topbar .fi-btn, .fi-topbar .fi-icon-btn {
-  @apply rounded-md;
-}
+.fi-topbar .fi-btn, .fi-topbar .fi-icon-btn { @apply rounded-md; }
 
-/* Topbar Layout Structure: [User Button] [Search - Center] [Other Elements] */
-.fi-topbar {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
-  align-items: center;
-  gap: 1rem;
-}
+/* Base order (LTR): search on left, user on right */
+.fi-topbar .fi-global-search { order: 1; margin-inline-end: auto; }
+.fi-topbar .fi-user-menu, .fi-topbar .fi-avatar { order: 3; margin-inline-start: auto; }
 
-/* Search Box - ALWAYS CENTERED regardless of language */
-.fi-topbar .fi-global-search,
-.fi-global-search {
-  grid-column: 2;
-  justify-self: center;
-}
-
-/* User Info Button - Changes position based on language direction */
-[dir="rtl"] .fi-topbar .fi-user-menu,
-[dir="rtl"] .fi-topbar .fi-avatar,
-[dir="rtl"] .fi-user-menu {
-  grid-column: 1;
-  justify-self: start; /* Left side for RTL */
-}
-
-[dir="ltr"] .fi-topbar .fi-user-menu,
-[dir="ltr"] .fi-topbar .fi-avatar,
-[dir="ltr"] .fi-user-menu {
-  grid-column: 3; 
-  justify-self: end; /* Right side for LTR */
-}
-
-/* Other topbar elements go to remaining space */
-.fi-topbar > *:not(.fi-global-search):not(.fi-user-menu):not(.fi-avatar) {
-  grid-column: 3;
-}
-
-[dir="rtl"] .fi-topbar > *:not(.fi-global-search):not(.fi-user-menu):not(.fi-avatar) {
-  grid-column: 3;
-  justify-self: end;
-}
+/* RTL mirror: search on the right adjacent to sidebar, user on far left */
+[dir="rtl"] .fi-topbar { flex-direction: row-reverse; }
+[dir="rtl"] .fi-topbar .fi-global-search { order: 1; margin-inline-end: 0; margin-inline-start: auto; }
+[dir="rtl"] .fi-topbar .fi-user-menu, 
+[dir="rtl"] .fi-topbar .fi-avatar { order: 3; margin-inline-start: 0; margin-inline-end: auto; }
 
 /* Global Search Enhancements */
 .fi-global-search-input {
