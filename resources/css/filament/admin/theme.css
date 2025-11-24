@@ -4,7 +4,7 @@
 @source '../../../../app/Filament/**/*';
 @source '../../../../resources/views/filament/**/*';
 
-/* Luxury Violet Theme - Task 9.8 UI Overhaul */
+/* Luxury Violet Theme - FIXED Layout & RTL Support */
 
 :root {
   --lux-font: 'Cairo', 'IBM Plex Sans Arabic', system-ui, sans-serif;
@@ -15,75 +15,57 @@ body, .fi-body, .fi-main, .fi-sidebar, .fi-topbar {
   font-feature-settings: 'kern' 1, 'liga' 1;
 }
 
-/* Sidebar Luxury Style - EXACT FULL HEIGHT MATCH */
+/* ============================================
+   CRITICAL FIX: Sidebar Layout - Native Filament Way
+   ============================================ */
+
+/* Sidebar Luxury Style - Use Filament's Native Positioning */
 .fi-sidebar {
   @apply bg-gradient-to-b from-violet-950 via-violet-900 to-violet-800 shadow-xl;
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  bottom: 0 !important;
-  width: 280px !important;
-  height: 100vh !important;
-  z-index: 50 !important;
-  overflow-y: auto;
+  /* REMOVED: position: fixed - Let Filament handle positioning */
+  /* REMOVED: Manual top/left/bottom - Filament manages this */
+  /* Keep only visual styling */
 }
 
-[dir="rtl"] .fi-sidebar {
-  right: 0 !important;
-  left: auto !important;
-}
-
-/* Adjust main content for fixed sidebar - NO GAP */
+/* Remove manual margin adjustments - Filament handles this automatically */
 .fi-main-ctn,
 .fi-main {
-  margin-left: 280px !important;
-  min-height: 100vh !important;
-  padding: 0 !important;
+  /* REMOVED: margin-left manual override */
+  /* Filament automatically adjusts based on sidebar state */
 }
 
 [dir="rtl"] .fi-main-ctn,
 [dir="rtl"] .fi-main {
-  margin-left: 0 !important;
-  margin-right: 280px !important;
+  /* REMOVED: Manual RTL margin adjustments */
+  /* Filament handles RTL automatically */
 }
 
-/* Remove any padding/margin from topbar to eliminate gap */
-.fi-topbar {
-  margin: 0 !important;
-  padding-left: 1rem !important;
-  padding-right: 1rem !important;
-}
-
-/* Ensure body and layout have no gaps */
+/* Ensure no conflicting overrides */
 .fi-body,
 .fi-layout {
   margin: 0 !important;
   padding: 0 !important;
-}
-
-/* Body and layout adjustments */
-.fi-body {
   min-height: 100vh !important;
 }
 
-.fi-layout {
-  min-height: 100vh !important;
-}
+/* ============================================
+   Sidebar Visual Styling (Keep These)
+   ============================================ */
 
-/* Sidebar Brand/Header Area - inside the purple column */
+/* ============================================
+   CRITICAL: Hide Sidebar Logo (Logo shown in Topbar only)
+   ============================================ */
+
+/* Hide entire sidebar header/logo area */
 .fi-sidebar-header,
 .fi-sidebar .fi-logo {
-  @apply text-white;
+  display: none !important;
 }
 
-.fi-sidebar-header {
-  @apply px-6 py-6 mb-4 flex items-center justify-center;
-  background: linear-gradient(180deg, rgba(23, 6, 56, 0.25) 0%, rgba(23, 6, 56, 0) 100%);
+/* Optional: Remove the gradient space that was allocated for the logo */
+.fi-sidebar nav {
+  padding-top: 1rem;
 }
-
-.fi-logo { @apply flex items-center justify-center gap-2; }
-.fi-logo img { @apply object-contain; max-height: 3.5rem; }
-.fi-logo .fi-logo-text { @apply text-white text-xl font-bold; letter-spacing: .5px; }
 
 /* Force White Text for ALL Sidebar Elements (EXCEPT Active) */
 .fi-sidebar:not(.fi-sidebar-item-active),
@@ -96,12 +78,12 @@ body, .fi-body, .fi-main, .fi-sidebar, .fi-topbar {
 .fi-sidebar .fi-sidebar-nav-item:not(.fi-sidebar-item-active .fi-sidebar-nav-item),
 .fi-sidebar .fi-sidebar-nav-icon:not(.fi-sidebar-item-active .fi-sidebar-nav-icon),
 .fi-sidebar svg:not(.fi-sidebar-item-active svg) {
-  color: white;
+  color: white !important;
 }
 
 .fi-sidebar .fi-sidebar-item-icon:not(.fi-sidebar-item-active .fi-sidebar-item-icon),
 .fi-sidebar .fi-icon:not(.fi-sidebar-item-active .fi-icon) {
-  color: white;
+  color: white !important;
 }
 
 /* Sidebar Navigation Items */
@@ -110,14 +92,14 @@ body, .fi-body, .fi-main, .fi-sidebar, .fi-topbar {
   @apply rounded-md;
 }
 
-/* CRITICAL FIX: Sidebar Active State - Based on Official Filament CSS Structure */
+/* Sidebar Active State */
 .fi-sidebar .fi-sidebar-item.fi-active > .fi-sidebar-item-btn,
 .fi-sidebar .fi-sidebar-item.fi-active .fi-sidebar-item-btn {
   @apply bg-white/95 shadow-md;
   font-weight: 600;
 }
 
-/* CRITICAL FIX: Active Item Text Visibility - Official Filament Hook Classes */
+/* Active Item Text Visibility */
 .fi-sidebar .fi-sidebar-item.fi-active > .fi-sidebar-item-btn > .fi-sidebar-item-label,
 .fi-sidebar .fi-sidebar-item.fi-active > .fi-sidebar-item-btn > .fi-icon,
 .fi-sidebar .fi-sidebar-item.fi-active .fi-sidebar-item-label,
@@ -126,22 +108,22 @@ body, .fi-body, .fi-main, .fi-sidebar, .fi-topbar {
 .fi-sidebar .fi-sidebar-item.fi-active a,
 .fi-sidebar .fi-sidebar-item.fi-active button,
 .fi-sidebar .fi-sidebar-item.fi-active span {
-    color: rgb(51 65 85) !important; /* slate-700 */
-    fill: rgb(51 65 85) !important;
+  color: rgb(51 65 85) !important; /* slate-700 */
+  fill: rgb(51 65 85) !important;
 }
 
-/* CRITICAL FIX: Sidebar Hover State - Dark Text on Light Background */
-.fi-sidebar .fi-sidebar-item:hover,
-.fi-sidebar .fi-sidebar-item-button:hover,
-.fi-sidebar .fi-sidebar-item:hover a,
-.fi-sidebar .fi-sidebar-item:hover .fi-sidebar-item-label,
-.fi-sidebar .fi-sidebar-item:hover .fi-sidebar-item-icon,
-.fi-sidebar .fi-sidebar-item:hover svg {
-  @apply bg-white/80;
-  color: rgb(124 58 237) !important; /* violet-600 */
+/* Sidebar Hover State */
+.fi-sidebar .fi-sidebar-item:hover:not(.fi-active),
+.fi-sidebar .fi-sidebar-item-button:hover:not(.fi-active),
+.fi-sidebar .fi-sidebar-item:hover:not(.fi-active) a,
+.fi-sidebar .fi-sidebar-item:hover:not(.fi-active) .fi-sidebar-item-label,
+.fi-sidebar .fi-sidebar-item:hover:not(.fi-active) .fi-sidebar-item-icon,
+.fi-sidebar .fi-sidebar-item:hover:not(.fi-active) svg {
+  @apply bg-white/20;
+  color: white !important;
 }
 
-/* Navigation Group Labels - Distinct Section Headers */
+/* Navigation Group Labels */
 .fi-sidebar .fi-sidebar-group,
 .fi-sidebar .fi-sidebar-group-label,
 .fi-sidebar-group-label {
@@ -153,7 +135,10 @@ body, .fi-body, .fi-main, .fi-sidebar, .fi-topbar {
   @apply mt-2;
 }
 
-/* Topbar refinement - RTL mirror: search near sidebar (right), user on far left */
+/* ============================================
+   Topbar Styling
+   ============================================ */
+
 .fi-topbar {
   @apply backdrop-blur bg-white/80 dark:bg-violet-950/80 border-b border-violet-200 dark:border-violet-800 shadow-sm;
   padding: 0.75rem 1rem;
@@ -163,17 +148,40 @@ body, .fi-body, .fi-main, .fi-sidebar, .fi-topbar {
   gap: .75rem;
 }
 
-.fi-topbar .fi-btn, .fi-topbar .fi-icon-btn { @apply rounded-md; }
+.fi-topbar .fi-btn, 
+.fi-topbar .fi-icon-btn { 
+  @apply rounded-md; 
+}
 
 /* Base order (LTR): search on left, user on right */
-.fi-topbar .fi-global-search { order: 1; margin-inline-end: auto; }
-.fi-topbar .fi-user-menu, .fi-topbar .fi-avatar { order: 3; margin-inline-start: auto; }
+.fi-topbar .fi-global-search { 
+  order: 1; 
+  margin-inline-end: auto; 
+}
+
+.fi-topbar .fi-user-menu, 
+.fi-topbar .fi-avatar { 
+  order: 3; 
+  margin-inline-start: auto; 
+}
 
 /* RTL mirror: search on the right adjacent to sidebar, user on far left */
-[dir="rtl"] .fi-topbar { flex-direction: row-reverse; }
-[dir="rtl"] .fi-topbar .fi-global-search { order: 1; margin-inline-end: 0; margin-inline-start: auto; }
+[dir="rtl"] .fi-topbar { 
+  flex-direction: row-reverse; 
+}
+
+[dir="rtl"] .fi-topbar .fi-global-search { 
+  order: 1; 
+  margin-inline-end: 0; 
+  margin-inline-start: auto; 
+}
+
 [dir="rtl"] .fi-topbar .fi-user-menu, 
-[dir="rtl"] .fi-topbar .fi-avatar { order: 3; margin-inline-start: 0; margin-inline-end: auto; }
+[dir="rtl"] .fi-topbar .fi-avatar { 
+  order: 3; 
+  margin-inline-start: 0; 
+  margin-inline-end: auto; 
+}
 
 /* Global Search Enhancements */
 .fi-global-search-input {
@@ -205,8 +213,15 @@ body, .fi-body, .fi-main, .fi-sidebar, .fi-topbar {
   @apply ring-2 ring-violet-500 dark:ring-violet-400;
 }
 
+/* ============================================
+   Content Area Styling
+   ============================================ */
+
 /* Widget cards elevated */
-.fi-widget, .fi-dashboard-widget, .fi-stats-overview, .fi-stats-overview > * {
+.fi-widget, 
+.fi-dashboard-widget, 
+.fi-stats-overview, 
+.fi-stats-overview > * {
   @apply shadow-lg rounded-xl bg-white dark:bg-violet-900/40 border border-violet-200/60 dark:border-violet-700/50 backdrop-blur;
 }
 
@@ -214,6 +229,7 @@ body, .fi-body, .fi-main, .fi-sidebar, .fi-topbar {
 .fi-stats-overview .fi-stat-value {
   @apply text-violet-600 dark:text-violet-300 font-semibold;
 }
+
 .fi-stats-overview .fi-stat-description {
   @apply text-sm text-gray-500 dark:text-violet-200/70;
 }
@@ -222,21 +238,35 @@ body, .fi-body, .fi-main, .fi-sidebar, .fi-topbar {
 .fi-btn {
   @apply rounded-md font-medium transition-all duration-150;
 }
+
 .fi-btn-primary {
   @apply bg-violet-600 hover:bg-violet-500 text-white shadow-md;
 }
+
 .fi-btn-outline-primary {
   @apply border-violet-600 text-violet-600 hover:bg-violet-50;
 }
 
 /* Scrollbar subtle styling */
-.fi-sidebar ::-webkit-scrollbar { width: 8px; }
-.fi-sidebar ::-webkit-scrollbar-track { @apply bg-violet-950; }
-.fi-sidebar ::-webkit-scrollbar-thumb { @apply bg-violet-700 rounded-full; }
-.fi-sidebar ::-webkit-scrollbar-thumb:hover { @apply bg-violet-600; }
+.fi-sidebar ::-webkit-scrollbar { 
+  width: 8px; 
+}
+
+.fi-sidebar ::-webkit-scrollbar-track { 
+  @apply bg-violet-950; 
+}
+
+.fi-sidebar ::-webkit-scrollbar-thumb { 
+  @apply bg-violet-700 rounded-full; 
+}
+
+.fi-sidebar ::-webkit-scrollbar-thumb:hover { 
+  @apply bg-violet-600; 
+}
 
 /* Forms & tables subtle elevation */
-.fi-form, .fi-table {
+.fi-form, 
+.fi-table {
   @apply bg-white dark:bg-violet-900/30 rounded-xl shadow-sm border border-violet-100 dark:border-violet-800;
 }
 
@@ -246,15 +276,24 @@ body, .fi-body, .fi-main, .fi-sidebar, .fi-topbar {
 }
 
 /* Code fences */
-.fi-code-block { @apply bg-violet-950/60 text-violet-100 rounded-lg; }
-
-/* Transition for sidebar collapse */
-.fi-sidebar { transition: width .25s ease; }
+.fi-code-block { 
+  @apply bg-violet-950/60 text-violet-100 rounded-lg; 
+}
 
 /* Dark mode adjustments */
-.dark .fi-sidebar { @apply from-violet-950 via-violet-900 to-violet-800; }
-.dark .fi-topbar { @apply bg-violet-950/85; }
-.dark .fi-btn-primary { @apply bg-violet-500 hover:bg-violet-400; }
+.dark .fi-sidebar { 
+  @apply from-violet-950 via-violet-900 to-violet-800; 
+}
+
+.dark .fi-topbar { 
+  @apply bg-violet-950/85; 
+}
+
+.dark .fi-btn-primary { 
+  @apply bg-violet-500 hover:bg-violet-400; 
+}
 
 /* Fallback generic card containers */
-[class*='widget'] { @apply shadow-lg; }
+[class*='widget'] { 
+  @apply shadow-lg; 
+}
