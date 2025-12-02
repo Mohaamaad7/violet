@@ -97,16 +97,7 @@
                 {{-- Cart --}}
                 <button 
                     type="button"
-                    onclick="
-                        const components = window.Livewire.all();
-                        const cartManager = components.find(c => c.name === 'store.cart-manager');
-                        if (cartManager) {
-                            console.log('🎯 Setting isOpen via $wire...');
-                            cartManager.$wire.isOpen = true;
-                        } else {
-                            console.error('❌ Not found');
-                        }
-                    "
+                    onclick="openCart()"
                     class="relative p-2 hover:bg-gray-100 rounded-lg transition group"
                     title="{{ __('store.cart.shopping_cart') }}"
                 >
@@ -117,13 +108,7 @@
                         id="cart-counter" 
                         class="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center"
                         x-data="{ count: 0 }"
-                        x-init="
-                            // Get initial count from CartManager
-                            const cartManager = Livewire.find('cart-manager');
-                            if (cartManager) {
-                                count = cartManager.cartCount || 0;
-                            }
-                        "
+                        x-init="$nextTick(() => { let cm = Livewire.find('cart-manager'); if (cm) count = cm.cartCount || 0; })"
                         @cart-count-updated.window="count = $event.detail.count"
                         x-show="count > 0"
                         x-text="count"
@@ -293,3 +278,38 @@
         </nav>
     </div>
 </header>
+
+<script>
+    /**
+     * Open Cart Slide-Over (Task 9.5 Cart Integration)
+     * Finds CartManager Livewire component and opens the slide-over panel
+     */
+    window.openCart = function() {
+        const components = window.Livewire.all();
+        const cartManager = components.find(c => c.name === 'store.cart-manager');
+        
+        if (cartManager) {
+            console.log('🎯 Opening Cart Slide-Over via CartManager component');
+            cartManager.$wire.isOpen = true;
+        } else {
+            console.error('❌ CartManager component not found. Available components:', 
+                components.map(c => c.name)
+            );
+        }
+    };
+
+    /**
+     * Toggle Mobile Menu
+     */
+    function toggleMobileMenu() {
+        const menu = document.getElementById('mobile-menu');
+        const icon = document.getElementById('mobile-menu-icon');
+        const close = document.getElementById('mobile-menu-close');
+        
+        if (menu && icon && close) {
+            menu.classList.toggle('hidden');
+            icon.classList.toggle('hidden');
+            close.classList.toggle('hidden');
+        }
+    }
+</script>

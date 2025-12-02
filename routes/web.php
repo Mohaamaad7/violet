@@ -20,9 +20,9 @@ Route::get('/products/{slug}', [App\Http\Controllers\Store\ProductDetailsControl
 
 // Shopping Cart (Task 9.5)
 Route::get('/cart', App\Livewire\Store\CartPage::class)->name('cart');
-Route::get('/checkout', function () {
-    return 'Checkout page (Coming soon)';
-})->name('checkout');
+
+// Checkout Page (Task 9.7 - Part 1)
+Route::get('/checkout', App\Livewire\Store\CheckoutPage::class)->name('checkout');
 
 // Debug Route (Temporary - for troubleshooting)
 Route::get('/test-cart-debug', function () {

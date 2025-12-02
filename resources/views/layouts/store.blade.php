@@ -104,7 +104,17 @@
 
         // Listen for show-toast event from Livewire
         window.addEventListener('show-toast', (event) => {
-            const { message, type } = event.detail;
+            // Handle both Livewire 3 formats: event.detail or event.detail[0]
+            let data = event.detail;
+            
+            // Livewire 3 wraps named parameters in array
+            if (Array.isArray(data) && data.length > 0) {
+                data = data[0];
+            }
+            
+            const message = data?.message || 'تم بنجاح';
+            const type = data?.type || 'success';
+            
             window.showToast(message, type);
         });
 
