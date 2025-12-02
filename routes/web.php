@@ -24,6 +24,10 @@ Route::get('/cart', App\Livewire\Store\CartPage::class)->name('cart');
 // Checkout Page (Task 9.7 - Part 1)
 Route::get('/checkout', App\Livewire\Store\CheckoutPage::class)->name('checkout');
 
+// Order Success Page (Task 9.7 - Part 2)
+// Security handled in component: users can only view their own orders
+Route::get('/checkout/success/{order}', App\Livewire\Store\OrderSuccessPage::class)->name('checkout.success');
+
 // Debug Route (Temporary - for troubleshooting)
 Route::get('/test-cart-debug', function () {
     return view('debug.cart-test');

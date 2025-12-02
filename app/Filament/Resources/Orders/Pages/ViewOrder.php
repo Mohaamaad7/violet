@@ -78,21 +78,32 @@ class ViewOrder extends ViewRecord
                     ->schema([
                         Grid::make(2)
                             ->schema([
-                                TextEntry::make('user.name')
+                                TextEntry::make('customer_name')
                                     ->label('اسم العميل')
                                     ->icon('heroicon-o-user')
                                     ->color('primary')
-                                    ->weight('bold'),
+                                    ->weight('bold')
+                                    ->state(fn ($record) => $record->user?->name 
+                                        ?? $record->shippingAddress?->full_name 
+                                        ?? $record->guest_name 
+                                        ?? 'زائر'),
                                 
-                                TextEntry::make('user.email')
+                                TextEntry::make('customer_email')
                                     ->label('البريد الإلكتروني')
                                     ->icon('heroicon-o-envelope')
-                                    ->copyable(),
+                                    ->copyable()
+                                    ->state(fn ($record) => $record->user?->email 
+                                        ?? $record->shippingAddress?->email 
+                                        ?? $record->guest_email 
+                                        ?? 'غير متوفر'),
                                 
-                                TextEntry::make('user.phone')
+                                TextEntry::make('customer_phone')
                                     ->label('رقم الهاتف')
                                     ->icon('heroicon-o-phone')
-                                    ->default('غير متوفر'),
+                                    ->state(fn ($record) => $record->user?->phone 
+                                        ?? $record->shippingAddress?->phone 
+                                        ?? $record->guest_phone 
+                                        ?? 'غير متوفر'),
                                 
                                 TextEntry::make('order_number')
                                     ->label('رقم الطلب')
@@ -102,25 +113,36 @@ class ViewOrder extends ViewRecord
                                     ->color('success'),
                             ]),
                         
-                        TextEntry::make('shippingAddress.full_address')
+                        TextEntry::make('shipping_address_display')
                             ->label('عنوان الشحن')
                             ->icon('heroicon-o-map-pin')
-                            ->default('لم يتم تحديد عنوان')
                             ->columnSpanFull()
-                            ->formatStateUsing(function ($record) {
-                                if (!$record->shippingAddress) {
-                                    return 'لم يتم تحديد عنوان الشحن';
+                            ->state(function ($record) {
+                                // Check for linked shipping address first
+                                if ($record->shippingAddress) {
+                                    $address = $record->shippingAddress;
+                                    return sprintf(
+                                        '%s، %s، %s، %s - الهاتف: %s',
+                                        $address->street_address ?? $address->address_line1 ?? '',
+                                        $address->city ?? '',
+                                        $address->governorate ?? $address->state ?? '',
+                                        $address->country ?? 'مصر',
+                                        $address->phone ?? 'غير متوفر'
+                                    );
                                 }
                                 
-                                $address = $record->shippingAddress;
-                                return sprintf(
-                                    '%s، %s، %s، %s - الهاتف: %s',
-                                    $address->address_line1 ?? '',
-                                    $address->city ?? '',
-                                    $address->state ?? '',
-                                    $address->country ?? '',
-                                    $address->phone ?? 'غير متوفر'
-                                );
+                                // Fall back to guest address fields
+                                if ($record->guest_address || $record->guest_city) {
+                                    return sprintf(
+                                        '%s، %s، %s - الهاتف: %s',
+                                        $record->guest_address ?? '',
+                                        $record->guest_city ?? '',
+                                        $record->guest_governorate ?? '',
+                                        $record->guest_phone ?? 'غير متوفر'
+                                    );
+                                }
+                                
+                                return 'لم يتم تحديد عنوان الشحن';
                             }),
                     ])
                     ->collapsible(),

@@ -91,6 +91,27 @@ return [
         'use_this_address' => 'استخدم هذا العنوان',
         'items' => 'عناصر',
         'free' => 'مجاني',
+        'invalid_address' => 'العنوان المحدد غير صالح. يرجى المحاولة مرة أخرى.',
+        'invalid_payment' => 'طريقة الدفع المحددة غير صالحة.',
+        'cart_expired' => 'انتهت صلاحية السلة. يرجى إضافة المنتجات مرة أخرى.',
+        'product_unavailable' => ':name لم يعد متاحاً.',
+        'insufficient_stock' => ':name يتوفر منه :available قطعة فقط.',
+        'order_failed' => 'فشل في إرسال الطلب. يرجى المحاولة مرة أخرى.',
+    ],
+    
+    // Order Success Page
+    'order_success' => [
+        'thank_you' => 'شكراً لطلبك!',
+        'confirmation_sent' => 'سيتم إرسال تأكيد الطلب إلى بريدك الإلكتروني.',
+        'order_number' => 'رقم الطلب',
+        'order_date' => 'تاريخ الطلب',
+        'items_ordered' => 'المنتجات المطلوبة',
+        'qty' => 'الكمية',
+        'discount' => 'الخصم',
+        'shipping_to' => 'عنوان الشحن',
+        'cod_note' => 'ادفع عند استلام طلبك',
+        'view_orders' => 'عرض طلباتي',
+        'help_text' => 'تحتاج مساعدة؟ تواصل معنا على',
     ],
     
     // Currency

@@ -2,8 +2,14 @@
 
 namespace App\Livewire\Store;
 
+use App\Models\Order;
+use App\Models\OrderItem;
+use App\Models\Product;
 use App\Models\ShippingAddress;
 use App\Services\CartService;
+use Illuminate\Support\Facades\Cookie;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
@@ -168,5 +174,236 @@ class CheckoutPage extends Component
             'savedAddresses' => $savedAddresses,
             'governorates' => $egyptGovernorates,
         ])->layout('layouts.store');
+    }
+
+    /**
+     * Place the order with COD payment method
+     * 
+     * Flow:
+     * 1. Validate address selection/creation
+     * 2. Verify stock availability (race condition protection)
+     * 3. DB::transaction for atomic operation
+     * 4. Create Order -> Create OrderItems -> Decrement Stock -> Clear Cart
+     * 5. Redirect to success page
+     */
+    public function placeOrder()
+    {
+        // =============================================
+        // STEP 1: VALIDATION GUARDS
+        // =============================================
+        
+        // Ensure cart has items
+        if (empty($this->cartItems)) {
+            $this->dispatch('show-toast', [
+                'message' => __('messages.checkout.empty_cart'),
+                'type' => 'error'
+            ]);
+            return;
+        }
+
+        // Validate address - either saved address selected OR form filled
+        $shippingAddress = null;
+        $guestAddressData = null;
+
+        if (auth()->check() && $this->selectedAddressId) {
+            // Authenticated user with saved address
+            $shippingAddress = ShippingAddress::where('id', $this->selectedAddressId)
+                ->where('user_id', auth()->id())
+                ->first();
+            
+            if (!$shippingAddress) {
+                $this->dispatch('show-toast', [
+                    'message' => __('messages.checkout.invalid_address'),
+                    'type' => 'error'
+                ]);
+                return;
+            }
+        } else {
+            // Guest OR authenticated user creating new address
+            $this->validate();
+            
+            // Prepare guest address data
+            $guestAddressData = [
+                'name' => $this->first_name . ' ' . $this->last_name,
+                'email' => $this->email,
+                'phone' => $this->phone,
+                'governorate' => $this->governorate,
+                'city' => $this->city,
+                'address' => $this->address_details,
+            ];
+
+            // If authenticated, save the address for future use
+            if (auth()->check()) {
+                $shippingAddress = ShippingAddress::create([
+                    'user_id' => auth()->id(),
+                    'full_name' => $guestAddressData['name'],
+                    'phone' => $guestAddressData['phone'],
+                    'governorate' => $guestAddressData['governorate'],
+                    'city' => $guestAddressData['city'],
+                    'street_address' => $guestAddressData['address'],
+                    'is_default' => auth()->user()->shippingAddresses()->count() === 0,
+                ]);
+                $guestAddressData = null; // Use the saved address instead
+            }
+        }
+
+        // Validate payment method (COD only for now)
+        if ($this->paymentMethod !== 'cod') {
+            $this->dispatch('show-toast', [
+                'message' => __('messages.checkout.invalid_payment'),
+                'type' => 'error'
+            ]);
+            return;
+        }
+
+        // =============================================
+        // STEP 2: STOCK VERIFICATION (Race Condition Protection)
+        // =============================================
+        
+        $stockErrors = [];
+        $cart = $this->cartService->getCart();
+        
+        if (!$cart || $cart->items->isEmpty()) {
+            $this->dispatch('show-toast', [
+                'message' => __('messages.checkout.cart_expired'),
+                'type' => 'error'
+            ]);
+            return;
+        }
+
+        // Fresh load products with current stock
+        foreach ($cart->items as $cartItem) {
+            $product = Product::find($cartItem->product_id);
+            
+            if (!$product) {
+                $stockErrors[] = __('messages.checkout.product_unavailable', [
+                    'name' => $cartItem->product_name ?? 'Unknown'
+                ]);
+                continue;
+            }
+
+            // Check if variant or main product
+            if ($cartItem->product_variant_id) {
+                $variant = $product->variants()->find($cartItem->product_variant_id);
+                if (!$variant || $variant->stock < $cartItem->quantity) {
+                    $stockErrors[] = __('messages.checkout.insufficient_stock', [
+                        'name' => $product->name,
+                        'available' => $variant->stock ?? 0
+                    ]);
+                }
+            } else {
+                if ($product->stock < $cartItem->quantity) {
+                    $stockErrors[] = __('messages.checkout.insufficient_stock', [
+                        'name' => $product->name,
+                        'available' => $product->stock
+                    ]);
+                }
+            }
+        }
+
+        if (!empty($stockErrors)) {
+            $this->dispatch('show-toast', [
+                'message' => implode("\n", $stockErrors),
+                'type' => 'error'
+            ]);
+            return;
+        }
+
+        // =============================================
+        // STEP 3: ATOMIC TRANSACTION
+        // =============================================
+        
+        try {
+            $order = DB::transaction(function () use ($cart, $shippingAddress, $guestAddressData) {
+                // Generate unique order number
+                $orderNumber = 'VLT-' . strtoupper(Str::random(8)) . '-' . now()->format('ymd');
+                
+                // Create Order
+                $order = Order::create([
+                    'order_number' => $orderNumber,
+                    'user_id' => auth()->id(),
+                    'shipping_address_id' => $shippingAddress?->id,
+                    'guest_name' => $guestAddressData['name'] ?? null,
+                    'guest_email' => $guestAddressData['email'] ?? null,
+                    'guest_phone' => $guestAddressData['phone'] ?? null,
+                    'guest_governorate' => $guestAddressData['governorate'] ?? null,
+                    'guest_city' => $guestAddressData['city'] ?? null,
+                    'guest_address' => $guestAddressData['address'] ?? null,
+                    'status' => 'pending',
+                    'payment_status' => 'unpaid', // COD = unpaid until delivery
+                    'payment_method' => 'cod',
+                    'subtotal' => $this->subtotal,
+                    'shipping_cost' => $this->shippingCost,
+                    'discount_amount' => 0, // TODO: Implement discount codes
+                    'tax_amount' => 0, // TODO: Implement tax calculation
+                    'total' => $this->total,
+                ]);
+
+                // Create Order Items & Decrement Stock
+                foreach ($cart->items as $cartItem) {
+                    $product = Product::find($cartItem->product_id);
+                    $variant = $cartItem->product_variant_id 
+                        ? $product->variants()->find($cartItem->product_variant_id) 
+                        : null;
+
+                    // Get price (variant or product)
+                    $price = $variant 
+                        ? ($variant->sale_price ?? $variant->price)
+                        : ($product->sale_price ?? $product->price);
+
+                    // Create order item
+                    OrderItem::create([
+                        'order_id' => $order->id,
+                        'product_id' => $product->id,
+                        'product_variant_id' => $variant?->id,
+                        'product_name' => $product->name,
+                        'product_sku' => $variant?->sku ?? $product->sku ?? '',
+                        'variant_name' => $variant?->name,
+                        'price' => $price,
+                        'quantity' => $cartItem->quantity,
+                        'subtotal' => $price * $cartItem->quantity,
+                    ]);
+
+                    // Decrement stock
+                    if ($variant) {
+                        $variant->decrement('stock', $cartItem->quantity);
+                    } else {
+                        $product->decrement('stock', $cartItem->quantity);
+                    }
+
+                    // Increment sales count
+                    $product->increment('sales_count', $cartItem->quantity);
+                }
+
+                // Clear cart
+                $cart->items()->delete();
+                $cart->delete();
+
+                // Clear cart session cookie for guests
+                if (!auth()->check()) {
+                    Cookie::queue(Cookie::forget('cart_session_id'));
+                }
+
+                return $order;
+            });
+
+            // =============================================
+            // STEP 4: SUCCESS - Redirect to confirmation page
+            // =============================================
+            
+            // Dispatch cart update event for header counter
+            $this->dispatch('cart-updated', count: 0);
+
+            return redirect()->route('checkout.success', ['order' => $order->id]);
+
+        } catch (\Exception $e) {
+            // Transaction automatically rolled back
+            report($e); // Log the error
+            
+            $this->dispatch('show-toast', [
+                'message' => __('messages.checkout.order_failed'),
+                'type' => 'error'
+            ]);
+        }
     }
 }

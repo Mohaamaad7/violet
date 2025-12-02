@@ -1,7 +1,31 @@
 # 📊 تقرير تقدم مشروع Violet E-Commerce
 
 **تاريخ البدء:** 9 نوفمبر 2025  
-**آخر تحديث:** 1 ديسمبر 2025 - Task 9.7 Part 1 Completed
+**آخر تحديث:** 2 ديسمبر 2025 - Task 9.7 Part 2 Completed
+
+---
+
+## 🚀 آخر التحديثات (2 ديسمبر 2025)
+
+### Task 9.7 Part 2: Order Engine (Checkout)
+- [x] placeOrder() method implemented in CheckoutPage.php (COD, validation, atomic transaction, stock check, cart clear)
+- [x] Guest checkout fully supported (guest address fields, guest order creation)
+- [x] OrderSuccessPage Livewire component created (route: /checkout/success/{order})
+- [x] Success page: order details, thank you message, continue shopping
+- [x] Security: Only order owner (user or guest) can view success page
+- [x] Database migration: shipping_address_id + guest fields added to orders table
+- [x] All translation keys for checkout and order success added (EN/AR)
+- [x] Validation error messages now display correctly (validation.php created for EN/AR)
+- [x] Admin ViewOrder page now displays guest customer details (name, email, phone, address) with fallback logic
+- [x] Task report updated: docs/TASK_9.7_PART2_REPORT.md
+
+### UI/UX & Admin Panel Fixes
+- [x] Admin ViewOrder: Customer Details section now shows guest info if user is null (smart fallback chain)
+- [x] Validation error toasts now show human-readable messages (EN/AR)
+- [x] lang/en/validation.php & lang/ar/validation.php created with custom messages for checkout fields
+
+**الحالة:** ✅ المرحلة 4 Checkout & Guest Orders مكتملة (100%)
+**آخر تحديث:** 2 ديسمبر 2025 - Task 9.7 Part 2 + UI/UX Fixes
 
 ---
 
@@ -380,8 +404,8 @@
   - **Status:** ✅ Ready for Testing
   - **Next:** Task 9.7 Part 2 (Place Order logic & Payment Gateways)
 
-- [ ] **Task 9.7 - Part 2: Place Order Logic** (Pending)
-- [ ] Customer Account Pages
+- [x] **Task 9.7 - Part 2: Place Order Logic** (Pending)
+- [x] Customer Account Pages
 
 **⏳ التالي:**
 - [ ] Customer Authentication (Login/Register)
@@ -783,7 +807,7 @@
 **الملفات المُنشأة/المُعدّلة:**
 - app/Filament/Resources/Orders/OrderResource.php (modified)
 - app/Filament/Resources/Orders/Pages/ListOrders.php (basic list page)
-- app/Filament/Resources/Orders/Pages/ViewOrder.php (335 lines - 4 sections)
+- app/Filament/Resources/Orders/Pages/ViewOrder.php (335 lines)
 - app/Filament/Resources/Orders/Tables/OrdersTable.php (241 lines)
 - database/seeders/OrderSeeder.php (150 lines - 30 orders)
 - database/migrations/2025_11_09_110919_create_order_status_history_table.php (fixed)
@@ -1008,7 +1032,7 @@ php artisan filament:cache-components
 - 🟢 Super Admin Bypass يعمل في جميع Policies
 - 🟢 Navigation Authorization: العناصر تظهر/تختفي حسب الصلاحيات ✅
 - 🟢 Action Authorization: 23+ Actions محمية ✅
-- 🟢 ToggleColumn Authorization: معطّل لمن بدون صلاحية ✅
+- 🟢 ToggleColumn Authorization: معطّلة لمن بدون صلاحية ✅
 - 🟢 URL Protection: الوصول المباشر يُرجع 403 ✅
 - 🟢 6 Permissions جديدة مضافة للنظام
 - 🟢 Form الصلاحيات منظم في 9 مجموعات واضحة

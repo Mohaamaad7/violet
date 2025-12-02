@@ -91,6 +91,27 @@ return [
         'use_this_address' => 'Use This Address',
         'items' => 'Items',
         'free' => 'Free',
+        'invalid_address' => 'Invalid address selected. Please try again.',
+        'invalid_payment' => 'Invalid payment method selected.',
+        'cart_expired' => 'Your cart has expired. Please add items again.',
+        'product_unavailable' => ':name is no longer available.',
+        'insufficient_stock' => ':name has only :available items in stock.',
+        'order_failed' => 'Failed to place order. Please try again.',
+    ],
+    
+    // Order Success Page
+    'order_success' => [
+        'thank_you' => 'Thank You for Your Order!',
+        'confirmation_sent' => 'A confirmation email will be sent to your email address.',
+        'order_number' => 'Order Number',
+        'order_date' => 'Order Date',
+        'items_ordered' => 'Items Ordered',
+        'qty' => 'Qty',
+        'discount' => 'Discount',
+        'shipping_to' => 'Shipping To',
+        'cod_note' => 'Pay when you receive your order',
+        'view_orders' => 'View My Orders',
+        'help_text' => 'Need help? Contact us at',
     ],
     
     // Currency

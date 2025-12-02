@@ -303,17 +303,28 @@
                             </div>
                         </div>
 
-                        {{-- Place Order Button Placeholder --}}
+                        {{-- Place Order Button (COD) --}}
                         <div class="mt-6">
                             <button 
                                 type="button"
-                                disabled
-                                class="w-full py-4 bg-gray-300 text-gray-500 rounded-lg font-bold text-lg cursor-not-allowed"
+                                wire:click="placeOrder"
+                                wire:loading.attr="disabled"
+                                wire:loading.class="!bg-gray-400 !cursor-wait"
+                                class="w-full py-4 bg-violet-600 hover:bg-violet-700 text-white rounded-lg font-bold text-lg transition-colors flex items-center justify-center gap-2"
                             >
-                                {{ __('messages.checkout.place_order') }}
+                                <span wire:loading.remove wire:target="placeOrder">
+                                    {{ __('messages.checkout.place_order') }}
+                                </span>
+                                <span wire:loading wire:target="placeOrder" class="flex items-center gap-2">
+                                    <svg class="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    {{ __('messages.loading') }}
+                                </span>
                             </button>
                             <p class="mt-2 text-xs text-center text-gray-500">
-                                🔒 {{ __('messages.checkout.place_order_part2') }}
+                                💳 {{ __('messages.checkout.cod_description') }}
                             </p>
                         </div>
                     </div>
