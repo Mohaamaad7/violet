@@ -335,14 +335,8 @@
                 <span>{{ $this->isInStock() ? 'Add to Cart' : 'Out of Stock' }}</span>
             </button>
 
-            <button 
-                type="button"
-                wire:click="addToWishlist"
-                class="px-6 py-4 border-2 border-violet-600 text-violet-600 hover:bg-violet-50 rounded-lg font-semibold transition-all duration-200"
-                title="Add to Wishlist"
-            >
-                <i class="far fa-heart"></i>
-            </button>
+            {{-- Wishlist Button (Livewire Component) --}}
+            <livewire:store.wishlist-button :productId="$product->id" size="lg" :showText="false" :key="'detail-wishlist-'.$product->id" />
         </div>
 
         {{-- Additional Product Meta --}}
@@ -438,88 +432,8 @@
 
         {{-- Reviews Tab --}}
         <div x-show="activeTab === 'reviews'" x-cloak>
-            <div class="space-y-6">
-                {{-- Reviews Summary --}}
-                <div class="bg-gray-50 rounded-lg p-6">
-                    <div class="flex flex-col sm:flex-row sm:items-center gap-6">
-                        <div class="text-center sm:text-left">
-                            <div class="text-5xl font-bold text-violet-700">
-                                {{ number_format($product->average_rating, 1) }}
-                            </div>
-                            <div class="flex items-center justify-center sm:justify-start gap-1 mt-2">
-                                @for($i = 1; $i <= 5; $i++)
-                                    <i class="fas fa-star {{ $i <= floor($product->average_rating) ? 'text-yellow-400' : 'text-gray-300' }}"></i>
-                                @endfor
-                            </div>
-                            <div class="text-sm text-gray-600 mt-1">
-                                Based on {{ $product->reviews_count }} {{ $product->reviews_count === 1 ? 'review' : 'reviews' }}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {{-- Reviews List --}}
-                @if($product->reviews->count() > 0)
-                    <div class="space-y-6">
-                        @foreach($product->reviews as $review)
-                            <div class="border-b border-gray-200 pb-6 last:border-0">
-                                <div class="flex items-start gap-4">
-                                    <div class="flex-shrink-0">
-                                        <div class="w-12 h-12 bg-violet-100 rounded-full flex items-center justify-center">
-                                            <span class="text-violet-700 font-semibold text-lg">
-                                                {{ strtoupper(substr($review->user->name ?? 'A', 0, 1)) }}
-                                            </span>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="flex-1 min-w-0">
-                                        <div class="flex flex-wrap items-center gap-3 mb-2">
-                                            <h4 class="font-semibold text-gray-900">
-                                                {{ $review->user->name ?? 'Anonymous' }}
-                                            </h4>
-                                            
-                                            @if($review->is_verified)
-                                                <span class="inline-flex items-center gap-1 text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">
-                                                    <i class="fas fa-check-circle"></i>
-                                                    Verified Purchase
-                                                </span>
-                                            @endif
-                                        </div>
-                                        
-                                        <div class="flex items-center gap-2 mb-2">
-                                            <div class="flex items-center gap-1">
-                                                @for($i = 1; $i <= 5; $i++)
-                                                    <i class="fas fa-star text-sm {{ $i <= $review->rating ? 'text-yellow-400' : 'text-gray-300' }}"></i>
-                                                @endfor
-                                            </div>
-                                            <span class="text-sm text-gray-500">
-                                                {{ $review->created_at->diffForHumans() }}
-                                            </span>
-                                        </div>
-                                        
-                                        @if($review->title)
-                                            <h5 class="font-semibold text-gray-900 mb-1">
-                                                {{ $review->title }}
-                                            </h5>
-                                        @endif
-                                        
-                                        @if($review->comment)
-                                            <p class="text-gray-700 leading-relaxed">
-                                                {{ $review->comment }}
-                                            </p>
-                                        @endif
-                                    </div>
-                                </div>
-                            </div>
-                        @endforeach
-                    </div>
-                @else
-                    <div class="text-center py-12">
-                        <i class="fas fa-star text-gray-300 text-5xl mb-4"></i>
-                        <p class="text-gray-500 text-lg">No reviews yet. Be the first to review this product!</p>
-                    </div>
-                @endif
-            </div>
+            {{-- Use the ProductReviews Livewire component for full review functionality --}}
+            <livewire:store.product-reviews :product="$product" />
         </div>
     </div>
 </div>

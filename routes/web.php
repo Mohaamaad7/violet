@@ -12,6 +12,9 @@ Route::get('/locale/{locale}', [LanguageController::class, 'switch'])->name('loc
 // Store Front
 Route::get('/', [App\Http\Controllers\Store\HomeController::class, 'index'])->name('home');
 
+// Cosmetics Theme Landing Page (Task 9.8)
+Route::get('/cosmetics', App\Livewire\Cosmetics\HomePage::class)->name('cosmetics.home');
+
 // Products Listing Page (Task 9.3)
 Route::get('/products', [App\Http\Controllers\Store\ProductsController::class, 'index'])->name('products.index');
 
@@ -21,12 +24,31 @@ Route::get('/products/{slug}', [App\Http\Controllers\Store\ProductDetailsControl
 // Shopping Cart (Task 9.5)
 Route::get('/cart', App\Livewire\Store\CartPage::class)->name('cart');
 
+// Wishlist Page (Task 4.3 - Phase 4)
+Route::get('/wishlist', App\Livewire\Store\WishlistPage::class)->middleware('auth')->name('wishlist');
+
 // Checkout Page (Task 9.7 - Part 1)
 Route::get('/checkout', App\Livewire\Store\CheckoutPage::class)->name('checkout');
 
 // Order Success Page (Task 9.7 - Part 2)
 // Security handled in component: users can only view their own orders
 Route::get('/checkout/success/{order}', App\Livewire\Store\OrderSuccessPage::class)->name('checkout.success');
+
+// Guest Order Tracking (Task 4.4 - Phase 4)
+Route::get('/track-order', App\Livewire\Store\TrackOrder::class)->name('track-order');
+
+// Customer Account Area (Task 4.2 - Phase 4)
+Route::middleware(['auth'])->prefix('account')->name('account.')->group(function () {
+    Route::get('/', App\Livewire\Store\Account\Dashboard::class)->name('dashboard');
+    Route::get('/profile', App\Livewire\Store\Account\Profile::class)->name('profile');
+    Route::get('/addresses', App\Livewire\Store\Account\Addresses::class)->name('addresses');
+    Route::get('/orders', App\Livewire\Store\Account\Orders::class)->name('orders');
+    Route::get('/orders/{order}', App\Livewire\Store\Account\OrderDetails::class)->name('orders.show');
+    Route::get('/reviews', App\Livewire\Store\Account\MyReviews::class)->name('reviews');
+});
+
+// Legacy route redirect
+Route::middleware(['auth'])->get('/orders', fn() => redirect()->route('account.orders'))->name('store.orders.index');
 
 // Debug Route (Temporary - for troubleshooting)
 Route::get('/test-cart-debug', function () {

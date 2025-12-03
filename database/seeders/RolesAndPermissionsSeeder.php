@@ -134,5 +134,8 @@ class RolesAndPermissionsSeeder extends Seeder
             'manage blog',
             'manage pages',
         ]);
+
+        // Customer - basic customer role (no admin permissions)
+        Role::create(['name' => 'customer']);
     }
 }

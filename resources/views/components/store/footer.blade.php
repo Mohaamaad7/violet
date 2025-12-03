@@ -112,7 +112,7 @@
                         </a>
                     </li>
                     <li>
-                        <a href="/track" class="text-gray-400 hover:text-violet-400 transition text-sm flex items-center gap-1.5 group">
+                        <a href="/track-order" class="text-gray-400 hover:text-violet-400 transition text-sm flex items-center gap-1.5 group">
                             <svg class="w-4 h-4 group-hover:translate-x-1 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                             </svg>

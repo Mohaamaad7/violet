@@ -237,6 +237,7 @@ class CheckoutPage extends Component
                 $shippingAddress = ShippingAddress::create([
                     'user_id' => auth()->id(),
                     'full_name' => $guestAddressData['name'],
+                    'email' => $guestAddressData['email'],
                     'phone' => $guestAddressData['phone'],
                     'governorate' => $guestAddressData['governorate'],
                     'city' => $guestAddressData['city'],

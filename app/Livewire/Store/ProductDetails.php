@@ -207,18 +207,6 @@ class ProductDetails extends Component
     }
 
     /**
-     * Add to wishlist
-     */
-    public function addToWishlist()
-    {
-        // TODO: Implement actual wishlist logic
-        $this->dispatch('notify', [
-            'type' => 'success',
-            'message' => 'Product added to wishlist!'
-        ]);
-    }
-
-    /**
      * Render component
      */
     public function render()

@@ -17,14 +17,18 @@ class ProductReview extends Model
         'rating',
         'title',
         'comment',
-        'is_verified',
+        'images',
+        'is_verified_purchase',
         'is_approved',
+        'helpful_count',
     ];
 
     protected $casts = [
         'rating' => 'integer',
-        'is_verified' => 'boolean',
+        'images' => 'array',
+        'is_verified_purchase' => 'boolean',
         'is_approved' => 'boolean',
+        'helpful_count' => 'integer',
     ];
 
     public function product(): BelongsTo
@@ -49,6 +53,11 @@ class ProductReview extends Model
 
     public function scopeVerified($query)
     {
-        return $query->where('is_verified', true);
+        return $query->where('is_verified_purchase', true);
+    }
+
+    public function scopePending($query)
+    {
+        return $query->where('is_approved', false);
     }
 }

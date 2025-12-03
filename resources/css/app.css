@@ -28,6 +28,26 @@
     --color-cream-700: #dfd2ae;
     --color-cream-800: #d6c597;
     --color-cream-900: #cdb880;
+
+    /* Gold Color Palette (Cosmetics Theme) */
+    --color-gold-50: #fffbeb;
+    --color-gold-100: #fef3c7;
+    --color-gold-200: #fde68a;
+    --color-gold-300: #fcd34d;
+    --color-gold-400: #fbbf24;
+    --color-gold-500: #f59e0b;
+    --color-gold-600: #d97706;
+    --color-gold-700: #b45309;
+    --color-gold-800: #92400e;
+    --color-gold-900: #78350f;
+
+    /* Float Animation for Cosmetics Hero */
+    --animate-float: float 6s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
 }
 
 /* ============================================
