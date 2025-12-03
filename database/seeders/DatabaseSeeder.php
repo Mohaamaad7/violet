@@ -18,7 +18,8 @@ class DatabaseSeeder extends Seeder
         $this->call([
             RolesAndPermissionsSeeder::class,
             AdminUserSeeder::class,
-            DemoDataSeeder::class,
+            // SettingsSeeder::class, // Uncomment if you have a settings seeder
+            // DemoDataSeeder::class, // Disabled for clean production install
         ]);
     }
 }

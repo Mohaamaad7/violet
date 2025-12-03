@@ -10,11 +10,15 @@ class AdminUserSeeder extends Seeder
 {
     public function run(): void
     {
+        // Get credentials from .env or fallback to defaults
+        $email = env('SUPER_ADMIN_EMAIL', 'admin@violet.com');
+        $password = env('SUPER_ADMIN_PASSWORD', 'password');
+
         // Create Super Admin
-        $superAdmin = User::create([
+        $superAdmin = \App\Models\User::create([
             'name' => 'Super Admin',
-            'email' => 'admin@violet.com',
-            'password' => Hash::make('password'),
+            'email' => $email,
+            'password' => \Illuminate\Support\Facades\Hash::make($password),
             'phone' => '01000000000',
             'type' => 'admin',
             'status' => 'active',
@@ -23,33 +27,10 @@ class AdminUserSeeder extends Seeder
 
         $superAdmin->assignRole('super-admin');
 
-        // Create Sample Manager
-        $manager = User::create([
-            'name' => 'Manager User',
-            'email' => 'manager@violet.com',
-            'password' => Hash::make('password'),
-            'phone' => '01000000001',
-            'type' => 'admin',
-            'status' => 'active',
-            'email_verified_at' => now(),
-        ]);
-
-        $manager->assignRole('manager');
-
-        // Create Sample Customer
-        $customer = User::create([
-            'name' => 'Test Customer',
-            'email' => 'customer@violet.com',
-            'password' => Hash::make('password'),
-            'phone' => '01000000002',
-            'type' => 'customer',
-            'status' => 'active',
-            'email_verified_at' => now(),
-        ]);
-
-        $this->command->info('Users created successfully!');
-        $this->command->info('Super Admin: admin@violet.com / password');
-        $this->command->info('Manager: manager@violet.com / password');
-        $this->command->info('Customer: customer@violet.com / password');
+        $this->command->info('Super Admin created successfully!');
+        $this->command->info('Login credentials:');
+        $this->command->info('Email: ' . $email);
+        $this->command->info('Password: ' . $password);
+        $this->command->info('Please change the password after first login.');
     }
 }
