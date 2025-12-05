@@ -20,12 +20,4 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           port: ${{ secrets.SSH_PORT }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          script: |
-            cd ${{ secrets.DEPLOY_PATH }} && \
-            echo "🚀 بدء عملية النشر..." && \
-            git fetch --all && \
-            git reset --hard origin/master && \
-            find . -type f -exec chmod 644 {} \; && \
-            find . -type d -exec chmod 755 {} \; && \
-            echo "✅ تم النشر بنجاح!" && \
-            date >> ~/deploy-log.txt
+          script: cd ${{ secrets.DEPLOY_PATH }} && echo "🚀 بدء عملية النشر..." && git fetch --all && git reset --hard origin/master && find . -type f -exec chmod 644 {} \; && find . -type d -exec chmod 755 {} \; && echo "✅ تم النشر بنجاح!" && date >> ~/deploy-log.txt
