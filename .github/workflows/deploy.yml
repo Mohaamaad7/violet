@@ -1,0 +1,40 @@
+name: Deploy to Server
+
+# متى يشتغل الـ Workflow
+on:
+  push:
+    branches:
+      - master  # غير لـ master لو فرعك اسمه master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # الخطوة 1: جلب الكود من GitHub
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      # الخطوة 2: الاتصال بالسيرفر ورفع الكود
+      - name: Deploy to Server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            echo "🚀 بدء عملية النشر..."
+            
+            # الانتقال لمجلد المشروع
+            cd ${{ secrets.DEPLOY_PATH }}
+            
+            # سحب آخر التحديثات
+            git fetch --all
+            git reset --hard origin/master
+            
+            # تعديل الصلاحيات
+            find . -type f -exec chmod 644 {} \;
+            find . -type d -exec chmod 755 {} \;
+            
+            echo "✅ تم النشر بنجاح!"
+            date >> ~/deploy-log.txt
