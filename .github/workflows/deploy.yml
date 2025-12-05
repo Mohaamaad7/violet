@@ -37,4 +37,4 @@ jobs:
             find . -type d -exec chmod 755 {} \;
             
             echo "✅ تم النشر بنجاح!"
-            date >> ~/deploy-log.txt 
+            date >> ~/deploy-log.txt
