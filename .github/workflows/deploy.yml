@@ -20,8 +20,8 @@ jobs:
           username: ${{ secrets.SSH_USER }}
           port: ${{ secrets.SSH_PORT }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-script: |
-  echo "Current directory: $(pwd)"
-  echo "DEPLOY_PATH value: ${{ secrets.DEPLOY_PATH }}"
-  echo "Home: $HOME"
-  cd ${{ secrets.DEPLOY_PATH }} && pwd
+          script: |
+            echo "Current directory: $(pwd)"
+            echo "DEPLOY_PATH value: ${{ secrets.DEPLOY_PATH }}"
+            echo "Home: $HOME"
+            cd ${{ secrets.DEPLOY_PATH }} && pwd
