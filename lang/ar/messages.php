@@ -119,7 +119,7 @@ return [
     
     // Search & Filters
     'search' => 'بحث',
-    'search_products' => 'ابحث عن منتج',
+    'search_products' => 'ابحث عن منتج...',
     'filter_by' => 'تصفية حسب',
     'sort_by' => 'ترتيب حسب',
     'price_low_high' => 'السعر: من الأقل للأعلى',
@@ -128,6 +128,41 @@ return [
     'name_desc' => 'الاسم: ي-أ',
     'newest' => 'الأحدث',
     'show_results' => 'عرض :count نتيجة',
+    
+    // Advanced Filters (Task 5.1)
+    'filters' => 'التصفية',
+    'clear_all' => 'مسح الكل',
+    'clear_all_filters' => 'مسح جميع المرشحات',
+    'active_filters' => 'المرشحات النشطة',
+    'apply_filters' => 'تطبيق المرشحات',
+    'results' => 'نتيجة',
+    'brand' => 'العلامة التجارية',
+    'min' => 'الحد الأدنى',
+    'max' => 'الحد الأقصى',
+    'on_sale' => 'تخفيضات',
+    'show_sale_items_only' => 'عرض المنتجات المخفضة فقط',
+    'availability' => 'التوفر',
+    'all_products' => 'جميع المنتجات',
+    'in_stock' => 'متوفر',
+    'out_of_stock' => 'غير متوفر',
+    'customer_reviews' => 'تقييمات العملاء',
+    'and_up' => 'وأكثر',
+    'clear_rating' => 'مسح التقييم',
+    'stars' => 'نجوم',
+    'showing' => 'عرض',
+    'to' => 'إلى',
+    'of' => 'من',
+    'products' => 'منتج',
+    'no_products_found' => 'لا توجد منتجات',
+    'no_products_message' => 'لم نتمكن من العثور على منتجات تطابق معايير البحث. جرب تعديل خيارات التصفية.',
+    
+    // Sorting Options
+    'sort_featured' => 'المميزة',
+    'sort_newest' => 'الأحدث وصولاً',
+    'sort_price_low' => 'السعر: من الأقل للأعلى',
+    'sort_price_high' => 'السعر: من الأعلى للأقل',
+    'sort_rating' => 'الأعلى تقييماً',
+    'sort_popular' => 'الأكثر مبيعاً',
     
     // Footer
     'about_us' => 'من نحن',

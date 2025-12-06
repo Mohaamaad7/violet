@@ -119,7 +119,7 @@ return [
     
     // Search & Filters
     'search' => 'Search',
-    'search_products' => 'Search for products',
+    'search_products' => 'Search for products...',
     'filter_by' => 'Filter by',
     'sort_by' => 'Sort by',
     'price_low_high' => 'Price: Low to High',
@@ -128,6 +128,41 @@ return [
     'name_desc' => 'Name: Z-A',
     'newest' => 'Newest',
     'show_results' => 'Showing :count results',
+    
+    // Advanced Filters (Task 5.1)
+    'filters' => 'Filters',
+    'clear_all' => 'Clear All',
+    'clear_all_filters' => 'Clear All Filters',
+    'active_filters' => 'Active Filters',
+    'apply_filters' => 'Apply Filters',
+    'results' => 'results',
+    'brand' => 'Brand',
+    'min' => 'Min',
+    'max' => 'Max',
+    'on_sale' => 'On Sale',
+    'show_sale_items_only' => 'Show sale items only',
+    'availability' => 'Availability',
+    'all_products' => 'All Products',
+    'in_stock' => 'In Stock',
+    'out_of_stock' => 'Out of Stock',
+    'customer_reviews' => 'Customer Reviews',
+    'and_up' => '& Up',
+    'clear_rating' => 'Clear Rating',
+    'stars' => 'Stars',
+    'showing' => 'Showing',
+    'to' => 'to',
+    'of' => 'of',
+    'products' => 'products',
+    'no_products_found' => 'No Products Found',
+    'no_products_message' => 'We couldn\'t find any products matching your filters. Try adjusting your search criteria.',
+    
+    // Sorting Options
+    'sort_featured' => 'Featured',
+    'sort_newest' => 'Newest Arrivals',
+    'sort_price_low' => 'Price: Low to High',
+    'sort_price_high' => 'Price: High to Low',
+    'sort_rating' => 'Highest Rated',
+    'sort_popular' => 'Most Popular',
     
     // Footer
     'about_us' => 'About Us',
