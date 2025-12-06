@@ -25,7 +25,17 @@
                 @foreach($categories as $category)
                     <a href="/categories/{{ $category->slug }}" class="group">
                         <div class="bg-white rounded-xl p-6 shadow-sm hover:shadow-lg transition text-center">
-                            <div class="text-4xl mb-3">{{ $category->icon ?: '📦' }}</div>
+                            <div class="mb-3 flex justify-center text-4xl text-violet-600">
+                                @if($category->icon)
+                                    @if(Str::startsWith($category->icon, 'heroicon'))
+                                        @svg($category->icon, 'w-12 h-12')
+                                    @else
+                                        <div class="{{ $category->icon }}"></div>
+                                    @endif
+                                @else
+                                    <span>📦</span>
+                                @endif
+                            </div>
                             <h3 class="font-semibold text-gray-800 group-hover:text-purple-600 transition">
                                 {{ $category->name }}
                             </h3>

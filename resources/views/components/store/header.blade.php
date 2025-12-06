@@ -168,9 +168,13 @@
                             <div>
                                 <h4 class="font-bold text-gray-900 mb-3 flex items-center gap-2">
                                     @if($parentCategory->icon)
-                                    <i class="{{ $parentCategory->icon }} text-violet-600"></i>
+                                        @if(Str::startsWith($parentCategory->icon, 'heroicon'))
+                                            @svg($parentCategory->icon, 'w-5 h-5 text-violet-600')
+                                        @else
+                                            <i class="{{ $parentCategory->icon }} text-violet-600"></i>
+                                        @endif
                                     @else
-                                    <i class="fas fa-tag text-violet-600"></i>
+                                        @svg('heroicon-o-tag', 'w-5 h-5 text-violet-600')
                                     @endif
                                     {{ $parentCategory->name }}
                                 </h4>

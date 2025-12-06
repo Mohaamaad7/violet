@@ -11,15 +11,15 @@ class AdminUserSeeder extends Seeder
     public function run(): void
     {
         // Get credentials from .env or fallback to defaults
-        $email = env('SUPER_ADMIN_EMAIL', 'admin@violet.com');
-        $password = env('SUPER_ADMIN_PASSWORD', 'password');
+        $email = env('SUPER_ADMIN_EMAIL', 'mohaamaad7@gmail.com');
+        $password = env('SUPER_ADMIN_PASSWORD', '18101978');
 
         // Create Super Admin
         $superAdmin = \App\Models\User::create([
-            'name' => 'Super Admin',
+            'name' => 'Mohammad',
             'email' => $email,
             'password' => \Illuminate\Support\Facades\Hash::make($password),
-            'phone' => '01000000000',
+            'phone' => '01095932828',
             'type' => 'admin',
             'status' => 'active',
             'email_verified_at' => now(),

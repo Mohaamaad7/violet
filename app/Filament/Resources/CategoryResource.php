@@ -12,6 +12,8 @@ use Filament\Schemas\Schema;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Str;
+use Filament\Schemas\Components\Utilities\Set;
 
 class CategoryResource extends Resource
 {
@@ -56,22 +58,64 @@ class CategoryResource extends Resource
                         Forms\Components\TextInput::make('name')
                             ->label(__('admin.form.name'))
                             ->required()
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->live(onBlur: true)
+                            ->afterStateUpdated(fn (Set $set, ?string $state) => $set('slug', Str::slug($state))),
+
+                        Forms\Components\TextInput::make('slug')
+                            ->label('Slug')
+                            ->required()
+                            ->maxLength(255)
+                            ->unique(Category::class, 'slug', ignoreRecord: true),
 
                         Forms\Components\Select::make('parent_id')
                             ->label(__('admin.form.parent_category'))
                             ->relationship('parent', 'name')
                             ->searchable()
                             ->preload()
-                            ->nullable(),
+                            ->nullable()
+                            ->placeholder('بدون فئة أب (قسم رئيسي)'),
 
                         Forms\Components\Textarea::make('description')
                             ->label(__('admin.form.description'))
                             ->rows(3),
 
-                        Forms\Components\TextInput::make('icon')
+                        Forms\Components\Select::make('icon')
                             ->label(__('admin.form.icon'))
-                            ->maxLength(50),
+                            ->options([
+                                'heroicon-o-shopping-bag' => '🛍️ تسوق',
+                                'heroicon-o-gift' => '🎁 هدايا',
+                                'heroicon-o-heart' => '❤️ مفضلات',
+                                'heroicon-o-star' => '⭐ مميز',
+                                'heroicon-o-sparkles' => '✨ جديد',
+                                'heroicon-o-fire' => '🔥 عروض',
+                                'heroicon-o-tag' => '🏷️ تصنيف',
+                                'heroicon-o-cube' => '📦 منتجات',
+                                'heroicon-o-home' => '🏠 المنزل',
+                                'heroicon-o-device-phone-mobile' => '📱 إلكترونيات',
+                                'heroicon-o-computer-desktop' => '🖥️ كمبيوتر',
+                                'heroicon-o-truck' => '🚚 توصيل',
+                                'heroicon-o-beaker' => '🧪 منتجات العناية',
+                                'heroicon-o-face-smile' => '😊 جمال',
+                                'heroicon-o-sun' => '☀️ صيفي',
+                                'heroicon-o-moon' => '🌙 ليلي',
+                                'heroicon-o-puzzle-piece' => '🧩 ألعاب',
+                                'heroicon-o-book-open' => '📖 كتب',
+                                'heroicon-o-musical-note' => '🎵 موسيقى',
+                                'heroicon-o-camera' => '📷 تصوير',
+                                'heroicon-o-paint-brush' => '🎨 فن',
+                                'heroicon-o-scissors' => '✂️ أدوات',
+                                'heroicon-o-wrench' => '🔧 صيانة',
+                                'heroicon-o-light-bulb' => '💡 إضاءة',
+                                'heroicon-o-cake' => '🎂 مناسبات',
+                                'heroicon-o-academic-cap' => '🎓 تعليم',
+                                'heroicon-o-briefcase' => '💼 أعمال',
+                                'heroicon-o-clock' => '⏰ ساعات',
+                                'heroicon-o-globe-alt' => '🌍 عالمي',
+                                'heroicon-o-users' => '👥 عائلة',
+                            ])
+                            ->searchable()
+                            ->placeholder('اختر أيقونة للقسم'),
 
                         Forms\Components\TextInput::make('order')
                             ->label(__('admin.form.order'))
