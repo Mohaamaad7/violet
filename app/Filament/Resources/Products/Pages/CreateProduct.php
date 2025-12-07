@@ -3,10 +3,12 @@
 namespace App\Filament\Resources\Products\Pages;
 
 use App\Filament\Resources\Products\ProductResource;
+use App\Models\Product;
 use App\Services\ProductImageUploader;
 use App\Services\ProductService;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class CreateProduct extends CreateRecord
 {
@@ -17,8 +19,24 @@ class CreateProduct extends CreateRecord
      */
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        // Filament Repeater with relationship() will handle images automatically
+        // Auto-generate SKU if not provided
+        if (empty($data['sku'])) {
+            $data['sku'] = $this->generateSKU();
+        }
+        
         return $data;
+    }
+    
+    /**
+     * Generate unique SKU
+     */
+    protected function generateSKU(): string
+    {
+        do {
+            $sku = 'PRD-' . strtoupper(Str::random(8));
+        } while (Product::where('sku', $sku)->exists());
+        
+        return $sku;
     }
 
     /**

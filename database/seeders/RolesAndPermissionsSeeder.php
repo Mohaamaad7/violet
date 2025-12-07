@@ -75,7 +75,7 @@ class RolesAndPermissionsSeeder extends Seeder
         ];
 
         foreach ($permissions as $permission) {
-            Permission::create(['name' => $permission]);
+            Permission::firstOrCreate(['name' => $permission, 'guard_name' => 'web']);
         }
 
         // Create roles and assign permissions
@@ -83,12 +83,12 @@ class RolesAndPermissionsSeeder extends Seeder
         // Create roles and assign permissions
 
         // Super Admin - all permissions
-        $superAdmin = Role::create(['name' => 'super-admin']);
-        $superAdmin->givePermissionTo(Permission::all());
+        $superAdmin = Role::firstOrCreate(['name' => 'super-admin', 'guard_name' => 'web']);
+        $superAdmin->syncPermissions(Permission::all());
 
         // Admin - most permissions
-        $admin = Role::create(['name' => 'admin']);
-        $admin->givePermissionTo([
+        $admin = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
+        $admin->syncPermissions([
             'view products', 'create products', 'edit products', 'delete products',
             'view categories', 'create categories', 'edit categories', 'delete categories',
             'view orders', 'create orders', 'edit orders', 'manage order status',
@@ -101,8 +101,8 @@ class RolesAndPermissionsSeeder extends Seeder
         ]);
 
         // Manager
-        $manager = Role::create(['name' => 'manager']);
-        $manager->givePermissionTo([
+        $manager = Role::firstOrCreate(['name' => 'manager', 'guard_name' => 'web']);
+        $manager->syncPermissions([
             'view products', 'create products', 'edit products',
             'view categories', 'create categories', 'edit categories',
             'view orders', 'edit orders', 'manage order status',
@@ -111,15 +111,15 @@ class RolesAndPermissionsSeeder extends Seeder
         ]);
 
         // Sales
-        $sales = Role::create(['name' => 'sales']);
-        $sales->givePermissionTo([
+        $sales = Role::firstOrCreate(['name' => 'sales', 'guard_name' => 'web']);
+        $sales->syncPermissions([
             'view products',
             'view orders', 'manage order status',
         ]);
 
         // Accountant
-        $accountant = Role::create(['name' => 'accountant']);
-        $accountant->givePermissionTo([
+        $accountant = Role::firstOrCreate(['name' => 'accountant', 'guard_name' => 'web']);
+        $accountant->syncPermissions([
             'view orders',
             'view commissions',
             'manage payouts',
@@ -127,8 +127,8 @@ class RolesAndPermissionsSeeder extends Seeder
         ]);
 
         // Content Manager
-        $contentManager = Role::create(['name' => 'content-manager']);
-        $contentManager->givePermissionTo([
+        $contentManager = Role::firstOrCreate(['name' => 'content-manager', 'guard_name' => 'web']);
+        $contentManager->syncPermissions([
             'view products', 'create products', 'edit products',
             'manage content',
             'manage blog',
@@ -136,6 +136,6 @@ class RolesAndPermissionsSeeder extends Seeder
         ]);
 
         // Customer - basic customer role (no admin permissions)
-        Role::create(['name' => 'customer']);
+        Role::firstOrCreate(['name' => 'customer', 'guard_name' => 'web']);
     }
 }
