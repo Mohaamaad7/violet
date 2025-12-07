@@ -16,6 +16,7 @@ export default {
             fontFamily: {
                 sans: ['Figtree', ...defaultTheme.fontFamily.sans],
                 serif: ['Playfair Display', 'Georgia', 'serif'],
+                arabic: ['Tajawal', 'sans-serif'],
             },
             colors: {
                 violet: {

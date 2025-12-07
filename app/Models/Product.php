@@ -165,12 +165,22 @@ class Product extends Model implements HasMedia
             ->addMediaCollection('product-images')
             ->useDisk('public')
             ->registerMediaConversions(function () {
+                // Small thumbnail for quick loading (wishlist, mini cart)
                 $this
                     ->addMediaConversion('thumbnail')
                     ->width(150)
                     ->height(150)
                     ->sharpen(10);
+                
+                // Card-sized image for product listings (optimized for cards)
+                $this
+                    ->addMediaConversion('card')
+                    ->width(400)
+                    ->height(400)
+                    ->sharpen(10)
+                    ->quality(90);
                     
+                // Preview for product detail page
                 $this
                     ->addMediaConversion('preview')
                     ->width(800)

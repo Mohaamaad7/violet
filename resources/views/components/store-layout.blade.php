@@ -31,7 +31,14 @@
 
     {{-- Fonts --}}
     <link rel="preconnect" href="https://fonts.bunny.net">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    
+    {{-- English Font (Figtree) --}}
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600,700|playfair-display:400,500,600,700&display=swap" rel="stylesheet" />
+    
+    {{-- Arabic Font (Tajawal) - Modern & Clean --}}
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap" rel="stylesheet">
 
     {{-- Font Awesome 6 --}}
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" 
@@ -44,6 +51,40 @@
 
     {{-- Custom Styles for Filters --}}
     <style>
+        /* ============================================
+           Arabic Typography (Tajawal Font)
+           Applied only when page direction is RTL
+           ============================================ */
+        [dir="rtl"],
+        [dir="rtl"] body,
+        [dir="rtl"] * {
+            font-family: 'Tajawal', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+        }
+        
+        /* Preserve icon fonts in RTL */
+        [dir="rtl"] .fa,
+        [dir="rtl"] .fas,
+        [dir="rtl"] .far,
+        [dir="rtl"] .fab,
+        [dir="rtl"] .fal,
+        [dir="rtl"] .fad,
+        [dir="rtl"] [class*="fa-"] {
+            font-family: 'Font Awesome 6 Free', 'Font Awesome 6 Brands' !important;
+        }
+        
+        /* Arabic heading styles - bolder weights */
+        [dir="rtl"] h1, [dir="rtl"] h2, [dir="rtl"] h3, 
+        [dir="rtl"] h4, [dir="rtl"] h5, [dir="rtl"] h6 {
+            font-weight: 700;
+            letter-spacing: 0;
+        }
+        
+        /* Arabic body text - slightly larger for readability */
+        [dir="rtl"] p, [dir="rtl"] span, [dir="rtl"] a, [dir="rtl"] li {
+            font-weight: 400;
+            line-height: 1.8;
+        }
+
         /* Alpine.js Cloak - Hide elements until Alpine loads */
         [x-cloak] {
             display: none !important;
