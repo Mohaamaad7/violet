@@ -201,11 +201,14 @@ class AdminTranslationsSeeder extends Seeder
             'admin.table.order_date' => ['ar' => 'تاريخ الطلب', 'en' => 'Order Date'],
             'admin.table.guard' => ['ar' => 'حارس', 'en' => 'Guard'],
             'admin.table.permissions_count' => ['ar' => 'عدد الصلاحيات', 'en' => 'Permissions Count'],
+            'admin.table.sku' => ['ar' => 'رمز المنتج', 'en' => 'SKU'],
+            'admin.table.sale' => ['ar' => 'التخفيض', 'en' => 'Sale'],
 
             // Actions
             'admin.action.create' => ['ar' => 'إنشاء', 'en' => 'Create'],
             'admin.action.edit' => ['ar' => 'تعديل', 'en' => 'Edit'],
             'admin.action.delete' => ['ar' => 'حذف', 'en' => 'Delete'],
+            'admin.action.duplicate' => ['ar' => 'نسخ', 'en' => 'Duplicate'],
             'admin.action.view' => ['ar' => 'عرض', 'en' => 'View'],
             'admin.action.view_details' => ['ar' => 'عرض التفاصيل', 'en' => 'View Details'],
             'admin.action.delete_selected' => ['ar' => 'حذف المحدد', 'en' => 'Delete Selected'],
