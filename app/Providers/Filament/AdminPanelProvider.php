@@ -31,7 +31,7 @@ class AdminPanelProvider extends PanelProvider
             // Brand identity
             ->brandName('Violet')
             // Place brand logo inside the sidebar header (Filament v4)
-            ->brandLogo(asset('images/logo.svg'))
+            ->brandLogo(asset('images/logo.png'))
             ->brandLogoHeight('3.5rem')
             // Brand color palette switched to Violet (Filament Support Colors\Color)
             ->colors([
