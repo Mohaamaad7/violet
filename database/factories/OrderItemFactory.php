@@ -28,6 +28,9 @@ class OrderItemFactory extends Factory
             'order_id' => Order::factory(),
             'product_id' => Product::factory(),
             'product_variant_id' => null,
+            'product_name' => fake()->words(3, true), // Required field
+            'product_sku' => strtoupper(fake()->bothify('SKU-????-####')), // Required field
+            'variant_name' => null, // Optional
             'quantity' => $quantity,
             'price' => $price,
             'subtotal' => $quantity * $price,

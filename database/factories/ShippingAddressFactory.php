@@ -23,6 +23,7 @@ class ShippingAddressFactory extends Factory
         $governorates = ['Cairo', 'Giza', 'Alexandria', 'Qalyubia', 'Sharqia', 'Dakahlia'];
         
         return [
+            'order_id' => null, // Nullable - for saved addresses without order
             'user_id' => User::factory(),
             'full_name' => fake()->name(),
             'phone' => fake()->numerify('01#########'),

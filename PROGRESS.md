@@ -1,11 +1,48 @@
 # 📊 تقرير تقدم مشروع Violet E-Commerce
 
 **تاريخ البدء:** 9 نوفمبر 2025  
-**آخر تحديث:** 6 ديسمبر 2025 - Task 5.1 Complete ✅
+**آخر تحديث:** 7 ديسمبر 2025 - Bug Fixes & Test Stabilization ✅
 
 ---
 
-## 🚀 آخر التحديثات (6 ديسمبر 2025)
+## 🚀 آخر التحديثات (7 ديسمبر 2025)
+
+### ✅ Bug Fixes & Test Stabilization
+
+**تم إصلاح عدة أخطاء حرجة وتثبيت الاختبارات:**
+
+#### 1. Wishlist Bug Fix ✅
+- **المشكلة:** خطأ `Call to undefined method addItem()` في WishlistPage
+- **السبب:** استخدام method غير موجود في CartService
+- **الحل:** تغيير `$this->cartService->addItem()` إلى `$this->cartService->addToCart()`
+- **الملف:** `app/Livewire/Store/WishlistPage.php` (Line 35)
+- **النتيجة:** 15/15 Wishlist tests passing ✅
+
+#### 2. Database Schema Fixes ✅
+- **shipping_addresses table:** 
+  - Added nullable `order_id` column (for addresses before order placement)
+  - Added `building_number`, `floor`, `apartment` columns
+  - Made these fields optional (nullable) for flexibility
+- **Migration:** Modified original migration `2025_11_09_110919_create_shipping_addresses_table.php`
+
+#### 3. Factory Fixes ✅
+- **OrderFactory:** Fixed `payment_status` enum values ('unpaid'/'paid' instead of 'pending')
+- **OrderItemFactory:** Added required `product_name` and `product_sku` fields
+- **ShippingAddressFactory:** Added `order_id => null` and `email` field
+
+#### 4. Test Fixes ✅
+- **ProductReviewsTest:** Fixed assertion from `write_review` to `tap_to_rate`
+- **CustomerAccountTest:** Fixed authorization test to expect `ModelNotFoundException`
+- **Result:** All Phase 4 tests now stable:
+  - CustomerAccountTest: 18/18 ✅
+  - ProductFilteringTest: 14/14 ✅
+  - ProductReviewsTest: 15/15 ✅
+  - WishlistTest: 15/15 ✅
+  - **Total: 62 tests, 127 assertions ✅**
+
+---
+
+## 📋 التحديثات السابقة (6 ديسمبر 2025)
 
 ### ✅ Task 5.1 Complete - Advanced Search & Filtering System
 

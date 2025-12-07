@@ -184,10 +184,11 @@ class CustomerAccountTest extends TestCase
             'user_id' => $this->otherCustomer->id,
         ]);
 
+        $this->expectException(\Illuminate\Database\Eloquent\ModelNotFoundException::class);
+        
         Livewire::actingAs($this->customer)
             ->test(Addresses::class)
-            ->call('openForm', $otherAddress->id)
-            ->assertStatus(404);
+            ->call('openForm', $otherAddress->id);
     }
 
     /** @test */

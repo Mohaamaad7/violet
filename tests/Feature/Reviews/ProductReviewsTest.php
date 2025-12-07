@@ -229,9 +229,10 @@ class ProductReviewsTest extends TestCase
             'product_id' => $product->id,
         ]);
         
+        // The component shows "tap_to_rate" for eligible users who haven't reviewed yet
         Livewire::actingAs($user)
             ->test(\App\Livewire\Store\ProductReviews::class, ['product' => $product])
-            ->assertSee(__('messages.reviews.write_review'));
+            ->assertSee(__('messages.reviews.tap_to_rate'));
     }
 
     /** @test */

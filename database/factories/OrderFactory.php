@@ -28,9 +28,9 @@ class OrderFactory extends Factory
         return [
             'order_number' => 'ORD-' . strtoupper(fake()->unique()->bothify('??####')),
             'user_id' => User::factory(),
-            'shipping_address_id' => ShippingAddress::factory(),
+            'shipping_address_id' => null, // Will be created separately
             'status' => fake()->randomElement(['pending', 'processing', 'shipped', 'delivered']),
-            'payment_status' => fake()->randomElement(['pending', 'paid']),
+            'payment_status' => fake()->randomElement(['unpaid', 'paid']), // Fixed: use 'unpaid' not 'pending'
             'payment_method' => 'cod',
             'subtotal' => $subtotal,
             'discount_amount' => $discount,
@@ -48,7 +48,7 @@ class OrderFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'status' => 'pending',
-            'payment_status' => 'pending',
+            'payment_status' => 'unpaid', // Fixed: use 'unpaid' not 'pending'
         ]);
     }
 

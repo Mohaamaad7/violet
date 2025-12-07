@@ -32,7 +32,7 @@ class WishlistPage extends Component
     {
         try {
             // Add to cart
-            $this->cartService->addItem($productId, 1);
+            $this->cartService->addToCart($productId, 1);
             
             // Remove from wishlist
             $this->wishlistService->remove($productId);
