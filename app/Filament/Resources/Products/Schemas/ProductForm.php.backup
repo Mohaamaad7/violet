@@ -68,29 +68,15 @@ class ProductForm
                             ->label(__('admin.form.description'))
                             ->columnSpanFull()
                             ->toolbarButtons([
-                                // Row 1: Text Formatting
-                                ['bold', 'italic', 'underline', 'strike', 'subscript', 'superscript', 'link'],
-                                // Row 2: Colors, Headings & Alignment
-                                ['textColor', 'highlight', 'clearFormatting'],
-                                ['h1', 'h2', 'h3'],
-                                ['alignStart', 'alignCenter', 'alignEnd', 'alignJustify'],
-                                // Row 3: Structure & Media
-                                ['bulletList', 'orderedList', 'blockquote', 'table'],
-                                ['attachFiles'],
-                                ['undo', 'redo'],
-                            ])
-                            ->textColors([
-                                '#000000' => 'Black',
-                                '#ef4444' => 'Red',
-                                '#f97316' => 'Orange',
-                                '#eab308' => 'Yellow',
-                                '#22c55e' => 'Green',
-                                '#3b82f6' => 'Blue',
-                                '#6366f1' => 'Indigo',
-                                '#a855f7' => 'Purple',
-                                '#ec4899' => 'Pink',
-                                '#6b7280' => 'Gray',
-                                '#ffffff' => 'White',
+                                'bold',
+                                'bulletList',
+                                'italic',
+                                'link',
+                                'orderedList',
+                                'redo',
+                                'strike',
+                                'underline',
+                                'undo',
                             ]),
                         
                         Textarea::make('short_description')
@@ -101,67 +87,6 @@ class ProductForm
                     ])
                     ->columns(2)
                     ->collapsible(),
-                
-                // Detailed Content Section
-                Section::make(__('admin.products.form.detailed.title'))
-                    ->description(__('admin.products.form.detailed.desc'))
-                    ->schema([
-                        RichEditor::make('long_description')
-                            ->label(__('admin.products.form.detailed.long_description'))
-                            ->columnSpanFull()
-                            ->toolbarButtons([
-                                ['bold', 'italic', 'underline', 'strike', 'subscript', 'superscript', 'link'],
-                                ['textColor', 'highlight', 'clearFormatting'],
-                                ['h1', 'h2', 'h3'],
-                                ['alignStart', 'alignCenter', 'alignEnd', 'alignJustify'],
-                                ['bulletList', 'orderedList', 'blockquote', 'table'],
-                                ['attachFiles'],
-                                ['undo', 'redo'],
-                            ])
-                            ->textColors([
-                                '#000000' => 'Black', '#ef4444' => 'Red', '#f97316' => 'Orange',
-                                '#eab308' => 'Yellow', '#22c55e' => 'Green', '#3b82f6' => 'Blue',
-                                '#6366f1' => 'Indigo', '#a855f7' => 'Purple', '#ec4899' => 'Pink',
-                                '#6b7280' => 'Gray', '#ffffff' => 'White',
-                            ])
-                            ->helperText(__('admin.products.form.detailed.long_description_help')),
-                        
-                        RichEditor::make('specifications')
-                            ->label(__('admin.products.form.detailed.specifications'))
-                            ->columnSpanFull()
-                            ->toolbarButtons([
-                                ['bold', 'italic', 'underline', 'strike', 'link'],
-                                ['textColor', 'highlight', 'clearFormatting'],
-                                ['h2', 'h3'],
-                                ['alignStart', 'alignCenter', 'alignEnd'],
-                                ['bulletList', 'orderedList', 'table'],
-                                ['undo', 'redo'],
-                            ])
-                            ->textColors([
-                                '#000000' => 'Black', '#ef4444' => 'Red', '#22c55e' => 'Green',
-                                '#3b82f6' => 'Blue', '#6b7280' => 'Gray',
-                            ])
-                            ->helperText(__('admin.products.form.detailed.specifications_help')),
-                        
-                        RichEditor::make('how_to_use')
-                            ->label(__('admin.products.form.detailed.how_to_use'))
-                            ->columnSpanFull()
-                            ->toolbarButtons([
-                                ['bold', 'italic', 'underline', 'strike', 'link'],
-                                ['textColor', 'highlight', 'clearFormatting'],
-                                ['h2', 'h3'],
-                                ['alignStart', 'alignCenter', 'alignEnd'],
-                                ['bulletList', 'orderedList'],
-                                ['undo', 'redo'],
-                            ])
-                            ->textColors([
-                                '#000000' => 'Black', '#ef4444' => 'Red', '#22c55e' => 'Green',
-                                '#3b82f6' => 'Blue', '#6b7280' => 'Gray',
-                            ])
-                            ->helperText(__('admin.products.form.detailed.how_to_use_help')),
-                    ])
-                    ->collapsible()
-                    ->collapsed(),
                 
                 // Media Section
                 Section::make(__('admin.products.form.media.title'))

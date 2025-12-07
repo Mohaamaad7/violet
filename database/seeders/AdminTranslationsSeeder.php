@@ -267,6 +267,16 @@ class AdminTranslationsSeeder extends Seeder
             'admin.products.form.inventory.weight_help' => ['ar' => 'لاحتساب تكلفة الشحن', 'en' => 'For shipping calculations'],
             'admin.products.form.inventory.barcode' => ['ar' => 'الباركود', 'en' => 'Barcode'],
 
+            // Detailed Content Section
+            'admin.products.form.detailed.title' => ['ar' => 'المحتوى التفصيلي', 'en' => 'Detailed Content'],
+            'admin.products.form.detailed.desc' => ['ar' => 'وصف مفصل ومواصفات وطريقة الاستخدام', 'en' => 'Detailed description, specifications, and usage instructions'],
+            'admin.products.form.detailed.long_description' => ['ar' => 'الوصف التفصيلي', 'en' => 'Detailed Description'],
+            'admin.products.form.detailed.long_description_help' => ['ar' => 'وصف شامل يظهر في تبويب "التفاصيل" بصفحة المنتج', 'en' => 'Comprehensive description shown in the "Details" tab on product page'],
+            'admin.products.form.detailed.specifications' => ['ar' => 'المواصفات', 'en' => 'Specifications'],
+            'admin.products.form.detailed.specifications_help' => ['ar' => 'المواصفات التقنية ومميزات المنتج', 'en' => 'Technical specifications and product features'],
+            'admin.products.form.detailed.how_to_use' => ['ar' => 'طريقة الاستخدام', 'en' => 'How to Use'],
+            'admin.products.form.detailed.how_to_use_help' => ['ar' => 'تعليمات وإرشادات استخدام المنتج', 'en' => 'Product usage instructions and guidelines'],
+
             'admin.products.form.variants.title' => ['ar' => 'متغيرات المنتج', 'en' => 'Product Variants'],
             'admin.products.form.variants.desc' => ['ar' => 'الحجم، اللون، أو متغيرات أخرى', 'en' => 'Size, color, or other variations'],
             'admin.products.form.variants.variant_sku' => ['ar' => 'SKU للمتغير', 'en' => 'Variant SKU'],

@@ -401,11 +401,11 @@
     <div class="py-8">
         {{-- Description Tab --}}
         <div x-show="activeTab === 'description'" x-cloak>
-            <div class="prose prose-violet max-w-none text-gray-700 leading-relaxed">
+            <div class="prose max-w-none text-gray-700 leading-relaxed">
                 @if($product->long_description)
-                    {!! $product->long_description !!}
+                    {!! nl2br(e($product->long_description)) !!}
                 @elseif($product->description)
-                    {!! $product->description !!}
+                    {!! nl2br(e($product->description)) !!}
                 @else
                     <p class="text-gray-500 italic">No description available.</p>
                 @endif
@@ -415,8 +415,8 @@
         {{-- Specifications Tab --}}
         @if($product->specifications)
             <div x-show="activeTab === 'specifications'" x-cloak>
-                <div class="prose prose-violet max-w-none text-gray-700 leading-relaxed">
-                    {!! $product->specifications !!}
+                <div class="prose max-w-none text-gray-700 leading-relaxed">
+                    {!! nl2br(e($product->specifications)) !!}
                 </div>
             </div>
         @endif
@@ -424,8 +424,8 @@
         {{-- How to Use Tab --}}
         @if($product->how_to_use)
             <div x-show="activeTab === 'howToUse'" x-cloak>
-                <div class="prose prose-violet max-w-none text-gray-700 leading-relaxed">
-                    {!! $product->how_to_use !!}
+                <div class="prose max-w-none text-gray-700 leading-relaxed">
+                    {!! nl2br(e($product->how_to_use)) !!}
                 </div>
             </div>
         @endif
