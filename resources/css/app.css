@@ -60,6 +60,20 @@
     overflow: hidden !important;
 }
 
+/* 
+ * RTL FIX: Force LTR direction on all Drift elements
+ * This ensures coordinate calculations work correctly regardless of page direction.
+ * Drift.js uses getBoundingClientRect() and clientX which are always LTR-based,
+ * so the positioning elements must also use LTR to match.
+ */
+.drift-zoom-pane,
+.drift-bounding-box,
+.drift-amazon-zoom-pane,
+.drift-amazon-bounding-box,
+[class*="drift-"] {
+    direction: ltr !important;
+}
+
 /* Inline Zoom Pane (Constrained within image) */
 .drift-amazon-zoom-pane {
     position: absolute !important;

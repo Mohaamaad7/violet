@@ -43,8 +43,9 @@
                 @endif
 
                 {{-- Main Image with Drift Zoom (Amazon-Style Constrained) --}}
+                {{-- RTL Fix: Added dir="ltr" to zoom-container to ensure Drift.js coordinate calculations are consistent --}}
                 <div class="relative bg-white rounded-lg border border-gray-300 overflow-visible">
-                    <div id="zoom-container" class="aspect-square flex items-center justify-center p-8 relative overflow-hidden">
+                    <div id="zoom-container" dir="ltr" class="aspect-square flex items-center justify-center p-8 relative overflow-hidden">
                         <img 
                             id="product-main-image"
                             :src="currentImageUrl"
@@ -114,6 +115,8 @@
 
                         try {
                             console.log('Initializing Drift zoom...');
+                            console.log('Page direction:', document.documentElement.dir || document.body.dir || 'ltr');
+                            
                             this.driftInstance = new window.Drift(mainImage, {
                                 paneContainer: zoomContainer,
                                 inlinePane: false,              // ✅ Floating zoom pane (Amazon style)
@@ -127,6 +130,7 @@
                                 handleTouch: false,             // Desktop only
                                 namespace: 'drift-amazon',
                                 injectBaseStyles: true,         // Use default Drift styles
+                                boundingBoxContainer: zoomContainer, // ✅ RTL Fix: Ensure bounding box is in same container as image
                             });
                             console.log('Drift initialized successfully!');
                         } catch (e) {
