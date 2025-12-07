@@ -4,7 +4,7 @@ namespace App\Filament\Resources\Products\Schemas;
 
 use App\Models\Product;
 use Filament\Infolists\Components\IconEntry;
-use Filament\Infolists\Components\ImageEntry;
+use Filament\Infolists\Components\SpatieMediaLibraryImageEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Group;
@@ -30,7 +30,7 @@ class ProductInfolist
                             ->icon('heroicon-o-photo')
                             ->collapsible()
                             ->schema([
-                                ImageEntry::make('media')
+                                SpatieMediaLibraryImageEntry::make('media')
                                     ->label('')
                                     ->collection('product-images')
                                     ->conversion('preview')
@@ -38,7 +38,7 @@ class ProductInfolist
                                     ->stacked(false)
                                     ->limit(5)
                                     ->limitedRemainingText()
-                                    ->height(200)
+                                    ->imageHeight(200)
                                     ->extraImgAttributes(['class' => 'rounded-lg shadow-sm']),
                             ]),
                             
