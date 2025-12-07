@@ -5,7 +5,6 @@ namespace Database\Seeders;
 use App\Models\Category;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 
 class CosmeticsCategoriesSeeder extends Seeder
 {
@@ -17,120 +16,76 @@ class CosmeticsCategoriesSeeder extends Seeder
         DB::transaction(function () {
             // Clear existing categories
             $this->command->info('Clearing existing categories...');
-            Category::query()->forceDelete(); // Use forceDelete to bypass soft deletes
+            Category::query()->forceDelete();
             
-            $this->command->info('Creating cosmetics categories structure...');
+            $this->command->info('Creating Flower Violet categories structure...');
             
-            // Counter for order
             $mainOrder = 1;
             
-            // 1. Skin Care (العناية بالبشرة) - 6 subcategories
-            $skinCare = Category::create([
-                'name' => 'العناية بالبشرة',
-                'slug' => 'skin-care',
-                'description' => 'منتجات العناية بالبشرة الفاخرة',
-                'order' => $mainOrder++,
-                'is_active' => true,
-            ]);
-            
-            $skinCareSubcategories = [
-                ['name' => 'غسول ومنظفات', 'slug' => 'cleansers-toners'],
-                ['name' => 'الترطيب', 'slug' => 'moisturizers'],
-                ['name' => 'السيروم والعلاجات', 'slug' => 'serums-treatments'],
-                ['name' => 'واقي الشمس', 'slug' => 'sun-protection'],
-                ['name' => 'العناية بالعين والشفاه', 'slug' => 'eye-lip-care'],
-                ['name' => 'الأقنعة والمقشرات', 'slug' => 'masks-exfoliators'],
-            ];
-            
-            $this->createSubcategories($skinCare->id, $skinCareSubcategories);
-            
-            // 2. Hair Care (العناية بالشعر) - 5 subcategories
-            $hairCare = Category::create([
-                'name' => 'العناية بالشعر',
-                'slug' => 'hair-care',
-                'description' => 'منتجات العناية بالشعر الاحترافية',
-                'order' => $mainOrder++,
-                'is_active' => true,
-            ]);
-            
-            $hairCareSubcategories = [
-                ['name' => 'الشامبو والبلسم', 'slug' => 'shampoo-conditioner'],
-                ['name' => 'علاجات وماسكات', 'slug' => 'hair-treatments-masks'],
-                ['name' => 'زيوت وسيروم', 'slug' => 'hair-oils-serums'],
-                ['name' => 'تصفيف الشعر', 'slug' => 'hair-styling'],
-                ['name' => 'فروة الرأس', 'slug' => 'scalp-care'],
-            ];
-            
-            $this->createSubcategories($hairCare->id, $hairCareSubcategories);
-            
-            // 3. Body Care (العناية بالجسم) - 5 subcategories
+            // 1. Body Care (العناية بالجسم) - 2 subcategories
             $bodyCare = Category::create([
                 'name' => 'العناية بالجسم',
                 'slug' => 'body-care',
-                'description' => 'منتجات العناية بالجسم الكاملة',
+                'description' => 'منتجات العناية بالجسم من فلاور فايوليت',
                 'order' => $mainOrder++,
                 'is_active' => true,
             ]);
             
             $bodyCareSubcategories = [
-                ['name' => 'الاستحمام', 'slug' => 'bath-shower'],
-                ['name' => 'ترطيب الجسم', 'slug' => 'body-moisturizers'],
-                ['name' => 'العناية باليدين والقدمين', 'slug' => 'hand-foot-care'],
+                ['name' => 'لوشن الجسم', 'slug' => 'body-lotions'],
                 ['name' => 'مزيلات العرق', 'slug' => 'deodorants'],
-                ['name' => 'إزالة الشعر', 'slug' => 'hair-removal'],
             ];
             
             $this->createSubcategories($bodyCare->id, $bodyCareSubcategories);
             
-            // 4. Men's Care (العناية بالرجال) - 3 subcategories
-            $mensCare = Category::create([
-                'name' => 'العناية بالرجال',
-                'slug' => 'mens-care',
-                'description' => 'منتجات العناية الرجالية الفاخرة',
+            // 2. Fragrances (العطور والروائح) - 2 subcategories
+            $fragrances = Category::create([
+                'name' => 'العطور والروائح',
+                'slug' => 'fragrances',
+                'description' => 'عطور ومعطرات فلاور فايوليت الفاخرة',
                 'order' => $mainOrder++,
                 'is_active' => true,
             ]);
             
-            $mensCareSubcategories = [
-                ['name' => 'العناية بالبشرة للرجال', 'slug' => 'mens-skin-care'],
-                ['name' => 'العناية بالشعر للرجال', 'slug' => 'mens-hair-care'],
-                ['name' => 'العناية بالجسم للرجال', 'slug' => 'mens-body-care'],
+            $fragrancesSubcategories = [
+                ['name' => 'بودي سبلاش', 'slug' => 'body-splash'],
+                ['name' => 'مخمّرية', 'slug' => 'mukhammaria'],
             ];
             
-            $this->createSubcategories($mensCare->id, $mensCareSubcategories);
+            $this->createSubcategories($fragrances->id, $fragrancesSubcategories);
             
-            // 5. Sets & Bundles (المجموعات) - No subcategories
+            // 3. Sets & Bundles (المجموعات)
             Category::create([
                 'name' => 'المجموعات',
                 'slug' => 'sets-bundles',
-                'description' => 'مجموعات المنتجات المميزة بأسعار خاصة',
+                'description' => 'مجموعات فلاور فايوليت المميزة بأسعار خاصة',
                 'order' => $mainOrder++,
                 'is_active' => true,
             ]);
             
-            // 6. Best Sellers (الأكثر مبيعاً) - No subcategories
+            // 4. Best Sellers (الأكثر مبيعاً)
             Category::create([
                 'name' => 'الأكثر مبيعاً',
                 'slug' => 'best-sellers',
-                'description' => 'المنتجات الأكثر مبيعاً لدينا',
+                'description' => 'المنتجات الأكثر مبيعاً من فلاور فايوليت',
                 'order' => $mainOrder++,
                 'is_active' => true,
             ]);
             
-            // 7. New Arrivals (وصل حديثاً) - No subcategories
+            // 5. New Arrivals (وصل حديثاً)
             Category::create([
                 'name' => 'وصل حديثاً',
                 'slug' => 'new-arrivals',
-                'description' => 'أحدث المنتجات المضافة إلى متجرنا',
+                'description' => 'أحدث منتجات فلاور فايوليت',
                 'order' => $mainOrder++,
                 'is_active' => true,
             ]);
             
-            // 8. Special Offers (العروض الخاصة) - No subcategories
+            // 6. Special Offers (العروض الخاصة)
             Category::create([
                 'name' => 'العروض الخاصة',
                 'slug' => 'special-offers',
-                'description' => 'عروض وخصومات مميزة',
+                'description' => 'عروض وخصومات مميزة على منتجات فلاور فايوليت',
                 'order' => $mainOrder++,
                 'is_active' => true,
             ]);
