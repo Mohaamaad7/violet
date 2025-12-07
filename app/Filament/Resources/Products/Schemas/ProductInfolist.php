@@ -11,6 +11,7 @@ use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
+use Filament\Support\Enums\TextSize;
 
 class ProductInfolist
 {
@@ -76,7 +77,7 @@ class ProductInfolist
                             ->schema([
                                 TextEntry::make('name')
                                     ->label(__('admin.products.name'))
-                                    ->size(TextEntry\TextEntrySize::Large)
+                                    ->size(TextSize::Large)
                                     ->weight(FontWeight::Bold)
                                     ->columnSpanFull(),
                                     
@@ -123,7 +124,7 @@ class ProductInfolist
                                 TextEntry::make('price')
                                     ->label(__('admin.products.price'))
                                     ->money('SAR', locale: 'ar')
-                                    ->size(TextEntry\TextEntrySize::Large)
+                                    ->size(TextSize::Large)
                                     ->weight(FontWeight::Bold)
                                     ->color('primary'),
                                     
