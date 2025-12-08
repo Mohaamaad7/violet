@@ -19,6 +19,7 @@ class TemplateMail extends Mailable
     public EmailLog $emailLog;
     protected string $renderedHtml;
     protected string $emailSubject;
+    protected string $emailLocale;
 
     /**
      * Create a new message instance.
@@ -26,10 +27,11 @@ class TemplateMail extends Mailable
     public function __construct(
         public EmailTemplate $template,
         public array $variables = [],
-        public string $locale = 'ar',
+        string $locale = 'ar',
         public ?string $recipientName = null,
         public ?Model $related = null,
     ) {
+        $this->emailLocale = $locale;
         $this->afterCommit();
     }
 
@@ -39,7 +41,7 @@ class TemplateMail extends Mailable
     public function envelope(): Envelope
     {
         $service = App::make(EmailTemplateService::class);
-        $this->emailSubject = $service->getSubject($this->template, $this->variables, $this->locale);
+        $this->emailSubject = $service->getSubject($this->template, $this->variables, $this->emailLocale);
 
         return new Envelope(
             subject: $this->emailSubject,
@@ -56,7 +58,7 @@ class TemplateMail extends Mailable
         $this->renderedHtml = $service->render(
             $this->template,
             $this->variables,
-            $this->locale
+            $this->emailLocale
         );
 
         return $this->html($this->renderedHtml);
