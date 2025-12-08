@@ -3,14 +3,14 @@
 namespace App\Filament\Resources\EmailTemplates\Schemas;
 
 use App\Models\EmailTemplate;
-use Filament\Forms\Components\ColorPicker;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TagsInput;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\ColorPicker;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Select;
+use Filament\Schemas\Components\TagsInput;
+use Filament\Schemas\Components\Textarea;
+use Filament\Schemas\Components\TextInput;
+use Filament\Schemas\Components\Toggle;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Str;
 
