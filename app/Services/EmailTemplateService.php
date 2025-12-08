@@ -5,43 +5,37 @@ namespace App\Services;
 use App\Models\EmailLog;
 use App\Models\EmailTemplate;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 
+/**
+ * Email Template Service
+ * 
+ * Renders pre-compiled HTML email templates with variable replacement.
+ * No external dependencies (MJML API/npm) required - templates are pre-compiled.
+ */
 class EmailTemplateService
 {
     /**
-     * MJML API credentials (free tier).
-     * Get your credentials at: https://mjml.io/api
-     */
-    protected ?string $mjmlApiAppId;
-    protected ?string $mjmlApiSecretKey;
-
-    public function __construct()
-    {
-        $this->mjmlApiAppId = config('services.mjml.app_id');
-        $this->mjmlApiSecretKey = config('services.mjml.secret_key');
-    }
-
-    /**
-     * Render MJML template to HTML with variable replacement.
+     * Render HTML template with variable replacement.
      */
     public function render(
         EmailTemplate $template,
         array $variables = [],
         string $locale = 'ar'
     ): string {
-        // Get MJML content
-        $mjml = $template->content_mjml;
+        // Get pre-compiled HTML content
+        $html = $template->content_html;
+
+        if (empty($html)) {
+            throw new \RuntimeException(
+                "Template '{$template->slug}' has no HTML content. Please run the seeder."
+            );
+        }
 
         // Add global variables
         $variables = array_merge($this->getGlobalVariables($template), $variables);
 
-        // Replace variables in MJML
-        $mjml = $this->replaceVariables($mjml, $variables);
-
-        // Convert MJML to HTML
-        return $this->convertToHtml($mjml);
+        // Replace variables in HTML
+        return $this->replaceVariables($html, $variables);
     }
 
     /**
@@ -54,118 +48,10 @@ class EmailTemplateService
     ): string {
         $subject = $template->getSubject($locale);
 
+        // Add global variables for subject too
+        $variables = array_merge($this->getGlobalVariables($template), $variables);
+
         return $this->replaceVariables($subject, $variables);
-    }
-
-    /**
-     * Convert MJML to HTML using MJML API.
-     * Uses the free MJML API service (https://mjml.io/api)
-     * No npm/Node.js required on server.
-     */
-    public function convertToHtml(string $mjml): string
-    {
-        // Check if we have API credentials
-        if (empty($this->mjmlApiAppId) || empty($this->mjmlApiSecretKey)) {
-            // Fallback: Try to use local npm package if available
-            return $this->convertWithNpm($mjml);
-        }
-
-        try {
-            $response = Http::withBasicAuth($this->mjmlApiAppId, $this->mjmlApiSecretKey)
-                ->timeout(30)
-                ->post('https://api.mjml.io/v1/render', [
-                    'mjml' => $mjml,
-                ]);
-
-            if ($response->successful()) {
-                $data = $response->json();
-                
-                if (!empty($data['errors'])) {
-                    foreach ($data['errors'] as $error) {
-                        Log::warning('MJML API conversion warning', [
-                            'line' => $error['line'] ?? null,
-                            'message' => $error['message'] ?? 'Unknown error',
-                            'tagName' => $error['tagName'] ?? null,
-                        ]);
-                    }
-                }
-
-                return $data['html'] ?? '';
-            }
-
-            Log::error('MJML API request failed', [
-                'status' => $response->status(),
-                'body' => $response->body(),
-            ]);
-
-            throw new \Exception('MJML API request failed: ' . $response->status());
-        } catch (\Exception $e) {
-            Log::error('MJML conversion failed', [
-                'error' => $e->getMessage(),
-            ]);
-
-            throw $e;
-        }
-    }
-
-    /**
-     * Convert MJML using local npm package (fallback for local development).
-     */
-    protected function convertWithNpm(string $mjml): string
-    {
-        // Check if spatie/mjml-php is available
-        if (!class_exists(\Spatie\Mjml\Mjml::class)) {
-            throw new \Exception(
-                'MJML API credentials not configured and spatie/mjml-php not available. ' .
-                'Please set MJML_APP_ID and MJML_SECRET_KEY in .env file. ' .
-                'Get free credentials at: https://mjml.io/api'
-            );
-        }
-
-        try {
-            $result = \Spatie\Mjml\Mjml::new()->convert($mjml);
-
-            if ($result->hasErrors()) {
-                foreach ($result->errors() as $error) {
-                    Log::warning('MJML npm conversion warning', [
-                        'line' => $error->line(),
-                        'message' => $error->message(),
-                        'tag' => $error->tagName(),
-                    ]);
-                }
-            }
-
-            return $result->html();
-        } catch (\Exception $e) {
-            Log::error('MJML npm conversion failed', [
-                'error' => $e->getMessage(),
-            ]);
-
-            throw $e;
-        }
-    }
-
-    /**
-     * Validate MJML syntax using API.
-     */
-    public function validateMjml(string $mjml): array
-    {
-        try {
-            // Try to convert - if it succeeds, it's valid
-            $html = $this->convertToHtml($mjml);
-
-            return [
-                'valid' => !empty($html),
-                'has_errors' => false,
-                'errors' => [],
-            ];
-        } catch (\Exception $e) {
-            return [
-                'valid' => false,
-                'has_errors' => true,
-                'errors' => [['message' => $e->getMessage()]],
-            ];
-        }
     }
 
     /**
@@ -187,7 +73,7 @@ class EmailTemplateService
             // Support both {{ variable }} and {{variable}} syntax
             $content = str_replace(
                 ['{{ ' . $key . ' }}', '{{' . $key . '}}', '{{ ' . $key . '}}', '{{' . $key . ' }}'],
-                $value,
+                (string) $value,
                 $content
             );
         }

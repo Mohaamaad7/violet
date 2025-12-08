@@ -21,6 +21,7 @@ class EmailTemplate extends Model
         'subject_ar',
         'subject_en',
         'content_mjml',
+        'content_html',
         'available_variables',
         'primary_color',
         'secondary_color',

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8b58f26a3b61add0e70a0bff626275f4",
+    "content-hash": "a59e7700dc2f0d01e0be625425e77659",
     "packages": [
         {
             "name": "anourvalar/eloquent-serialize",
@@ -6230,67 +6230,6 @@
                 }
             ],
             "time": "2025-11-03T20:16:13+00:00"
-        },
-        {
-            "name": "spatie/mjml-php",
-            "version": "1.2.5",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/spatie/mjml-php.git",
-                "reference": "0af0b3944617889df7bed69faca3819a0399feff"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/spatie/mjml-php/zipball/0af0b3944617889df7bed69faca3819a0399feff",
-                "reference": "0af0b3944617889df7bed69faca3819a0399feff",
-                "shasum": ""
-            },
-            "require": {
-                "php": "^8.1",
-                "symfony/process": "^6.3.2|^7.0"
-            },
-            "require-dev": {
-                "laravel/pint": "^1.11",
-                "pestphp/pest": "^2.16",
-                "spatie/ray": "^1.37.2"
-            },
-            "suggest": {
-                "spatie/mjml-sidecar": "When you want to run MJML compilation through Sidecar in a Laravel project"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Spatie\\Mjml\\": "src"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Freek Van der Herten",
-                    "email": "freek@spatie.be",
-                    "role": "Developer"
-                }
-            ],
-            "description": "Convert MJML to HTML using PHP",
-            "homepage": "https://github.com/spatie/mjml-php",
-            "keywords": [
-                "mjml-php",
-                "spatie"
-            ],
-            "support": {
-                "issues": "https://github.com/spatie/mjml-php/issues",
-                "source": "https://github.com/spatie/mjml-php/tree/1.2.5"
-            },
-            "funding": [
-                {
-                    "url": "https://github.com/spatie",
-                    "type": "github"
-                }
-            ],
-            "time": "2025-03-17T19:50:19+00:00"
         },
         {
             "name": "spatie/shiki-php",
