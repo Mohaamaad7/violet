@@ -390,29 +390,26 @@ class CheckoutPage extends Component
             });
 
             // =============================================
-            // STEP 4: SEND CONFIRMATION EMAILS
-            // =============================================
-            
-            try {
-                $emailService = app(EmailService::class);
-                
-                // Send order confirmation to customer
-                $emailService->sendOrderConfirmation($order);
-                
-                // Send notification to admin
-                $emailService->sendAdminNewOrderNotification($order);
-                
-            } catch (\Exception $e) {
-                // Log email error but don't fail the order
-                report($e);
-            }
-
-            // =============================================
-            // STEP 5: SUCCESS - Redirect to confirmation page
+            // STEP 4: SUCCESS - Redirect to confirmation page
             // =============================================
             
             // Dispatch cart update event for header counter
             $this->dispatch('cart-updated', count: 0);
+
+            // Send emails AFTER response (non-blocking)
+            $orderId = $order->id;
+            dispatch(function () use ($orderId) {
+                try {
+                    $order = Order::with(['items', 'shippingAddress', 'user'])->find($orderId);
+                    if ($order) {
+                        $emailService = app(EmailService::class);
+                        $emailService->sendOrderConfirmation($order);
+                        $emailService->sendAdminNewOrderNotification($order);
+                    }
+                } catch (\Exception $e) {
+                    report($e);
+                }
+            })->afterResponse();
 
             return redirect()->route('checkout.success', ['order' => $order->id]);
 
