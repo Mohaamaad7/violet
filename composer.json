@@ -18,7 +18,8 @@
         "livewire/volt": "^1.7.0",
         "spatie/laravel-activitylog": "^4.0",
         "spatie/laravel-medialibrary": "^11.17",
-        "spatie/laravel-permission": "^6.0"
+        "spatie/laravel-permission": "^6.0",
+        "spatie/mjml-php": "^1.2"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.9",
