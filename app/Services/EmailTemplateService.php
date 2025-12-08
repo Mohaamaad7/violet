@@ -5,11 +5,24 @@ namespace App\Services;
 use App\Models\EmailLog;
 use App\Models\EmailTemplate;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
-use Spatie\Mjml\Mjml;
 
 class EmailTemplateService
 {
+    /**
+     * MJML API credentials (free tier).
+     * Get your credentials at: https://mjml.io/api
+     */
+    protected ?string $mjmlApiAppId;
+    protected ?string $mjmlApiSecretKey;
+
+    public function __construct()
+    {
+        $this->mjmlApiAppId = config('services.mjml.app_id');
+        $this->mjmlApiSecretKey = config('services.mjml.secret_key');
+    }
+
     /**
      * Render MJML template to HTML with variable replacement.
      */
@@ -45,24 +58,47 @@ class EmailTemplateService
     }
 
     /**
-     * Convert MJML to HTML.
+     * Convert MJML to HTML using MJML API.
+     * Uses the free MJML API service (https://mjml.io/api)
+     * No npm/Node.js required on server.
      */
     public function convertToHtml(string $mjml): string
     {
-        try {
-            $result = Mjml::new()->convert($mjml);
+        // Check if we have API credentials
+        if (empty($this->mjmlApiAppId) || empty($this->mjmlApiSecretKey)) {
+            // Fallback: Try to use local npm package if available
+            return $this->convertWithNpm($mjml);
+        }
 
-            if ($result->hasErrors()) {
-                foreach ($result->errors() as $error) {
-                    Log::warning('MJML conversion warning', [
-                        'line' => $error->line(),
-                        'message' => $error->message(),
-                        'tag' => $error->tagName(),
-                    ]);
+        try {
+            $response = Http::withBasicAuth($this->mjmlApiAppId, $this->mjmlApiSecretKey)
+                ->timeout(30)
+                ->post('https://api.mjml.io/v1/render', [
+                    'mjml' => $mjml,
+                ]);
+
+            if ($response->successful()) {
+                $data = $response->json();
+                
+                if (!empty($data['errors'])) {
+                    foreach ($data['errors'] as $error) {
+                        Log::warning('MJML API conversion warning', [
+                            'line' => $error['line'] ?? null,
+                            'message' => $error['message'] ?? 'Unknown error',
+                            'tagName' => $error['tagName'] ?? null,
+                        ]);
+                    }
                 }
+
+                return $data['html'] ?? '';
             }
 
-            return $result->html();
+            Log::error('MJML API request failed', [
+                'status' => $response->status(),
+                'body' => $response->body(),
+            ]);
+
+            throw new \Exception('MJML API request failed: ' . $response->status());
         } catch (\Exception $e) {
             Log::error('MJML conversion failed', [
                 'error' => $e->getMessage(),
@@ -73,22 +109,55 @@ class EmailTemplateService
     }
 
     /**
-     * Validate MJML syntax.
+     * Convert MJML using local npm package (fallback for local development).
+     */
+    protected function convertWithNpm(string $mjml): string
+    {
+        // Check if spatie/mjml-php is available
+        if (!class_exists(\Spatie\Mjml\Mjml::class)) {
+            throw new \Exception(
+                'MJML API credentials not configured and spatie/mjml-php not available. ' .
+                'Please set MJML_APP_ID and MJML_SECRET_KEY in .env file. ' .
+                'Get free credentials at: https://mjml.io/api'
+            );
+        }
+
+        try {
+            $result = \Spatie\Mjml\Mjml::new()->convert($mjml);
+
+            if ($result->hasErrors()) {
+                foreach ($result->errors() as $error) {
+                    Log::warning('MJML npm conversion warning', [
+                        'line' => $error->line(),
+                        'message' => $error->message(),
+                        'tag' => $error->tagName(),
+                    ]);
+                }
+            }
+
+            return $result->html();
+        } catch (\Exception $e) {
+            Log::error('MJML npm conversion failed', [
+                'error' => $e->getMessage(),
+            ]);
+
+            throw $e;
+        }
+    }
+
+    /**
+     * Validate MJML syntax using API.
      */
     public function validateMjml(string $mjml): array
     {
         try {
-            $canConvert = Mjml::new()->canConvert($mjml);
-            $result = Mjml::new()->convert($mjml);
+            // Try to convert - if it succeeds, it's valid
+            $html = $this->convertToHtml($mjml);
 
             return [
-                'valid' => $canConvert,
-                'has_errors' => $result->hasErrors(),
-                'errors' => array_map(fn($e) => [
-                    'line' => $e->line(),
-                    'message' => $e->message(),
-                    'tag' => $e->tagName(),
-                ], $result->errors()),
+                'valid' => !empty($html),
+                'has_errors' => false,
+                'errors' => [],
             ];
         } catch (\Exception $e) {
             return [

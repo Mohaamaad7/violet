@@ -51,4 +51,20 @@ return [
         'redirect' => env('GOOGLE_REDIRECT_URI', '/auth/google/callback'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | MJML API Configuration
+    |--------------------------------------------------------------------------
+    |
+    | MJML API for converting MJML templates to responsive HTML emails.
+    | Get free credentials at: https://mjml.io/api
+    | No npm/Node.js required on server when using API.
+    |
+    */
+
+    'mjml' => [
+        'app_id' => env('MJML_APP_ID'),
+        'secret_key' => env('MJML_SECRET_KEY'),
+    ],
+
 ];
