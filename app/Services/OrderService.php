@@ -12,7 +12,8 @@ use Illuminate\Support\Facades\DB;
 class OrderService
 {
     public function __construct(
-        protected ProductService $productService
+        protected ProductService $productService,
+        protected EmailService $emailService
     ) {}
 
     /**
@@ -147,6 +148,8 @@ class OrderService
     public function updateStatus(int $id, string $status, ?string $notes = null, ?int $changedBy = null): Order
     {
         $order = $this->findOrder($id);
+        
+        $previousStatus = $order->status;
 
         $order->update(['status' => $status]);
 
@@ -161,6 +164,16 @@ class OrderService
 
         // Add to status history
         $this->addStatusHistory($id, $status, $notes, $changedBy ?? auth()->id());
+
+        // Send status update email to customer (if status actually changed)
+        if ($previousStatus !== $status) {
+            try {
+                $this->emailService->sendOrderStatusUpdate($order->fresh());
+            } catch (\Exception $e) {
+                // Log error but don't fail the status update
+                report($e);
+            }
+        }
 
         return $order->fresh();
     }
