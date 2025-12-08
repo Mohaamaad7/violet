@@ -188,6 +188,32 @@ class EmailService
     }
 
     /**
+     * Send admin notification for new order.
+     */
+    public function sendAdminNewOrderNotification(
+        \App\Models\Order $order
+    ): ?EmailLog {
+        // Get admin email from config or use a default
+        $adminEmail = config('mail.admin_email', config('mail.from.address'));
+
+        if (!$adminEmail) {
+            Log::warning('No admin email configured for order notifications');
+            return null;
+        }
+
+        $variables = $this->getOrderVariables($order);
+
+        return $this->send(
+            templateSlug: 'admin-new-order',
+            recipientEmail: $adminEmail,
+            variables: $variables,
+            recipientName: 'Admin',
+            related: $order,
+            locale: 'ar'
+        );
+    }
+
+    /**
      * Get order variables for email templates.
      */
     protected function getOrderVariables(\App\Models\Order $order): array

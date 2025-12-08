@@ -7,6 +7,7 @@ use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\ShippingAddress;
 use App\Services\CartService;
+use App\Services\EmailService;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -389,7 +390,25 @@ class CheckoutPage extends Component
             });
 
             // =============================================
-            // STEP 4: SUCCESS - Redirect to confirmation page
+            // STEP 4: SEND CONFIRMATION EMAILS
+            // =============================================
+            
+            try {
+                $emailService = app(EmailService::class);
+                
+                // Send order confirmation to customer
+                $emailService->sendOrderConfirmation($order);
+                
+                // Send notification to admin
+                $emailService->sendAdminNewOrderNotification($order);
+                
+            } catch (\Exception $e) {
+                // Log email error but don't fail the order
+                report($e);
+            }
+
+            // =============================================
+            // STEP 5: SUCCESS - Redirect to confirmation page
             // =============================================
             
             // Dispatch cart update event for header counter
