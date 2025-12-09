@@ -4,11 +4,13 @@ namespace App\Filament\Resources\EmailTemplates\Schemas;
 
 use App\Models\EmailTemplate;
 use Filament\Forms\Components\ColorPicker;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\ViewField;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
@@ -107,12 +109,51 @@ class EmailTemplateForm
                 // 3. Content & Variables (عمودين 1:1)
                 Grid::make(2)
                     ->schema([
-                        // Right Column: HTML Editor
+                        // Right Column: Dual-Mode Editor (Visual/HTML)
                         Section::make('محتوى الرسالة')
-                            ->description('كود HTML للبريد الإلكتروني')
+                            ->description('استخدم محرر WYSIWYG أو كود HTML مباشرة')
                             ->icon('heroicon-o-code-bracket')
                             ->collapsible()
                             ->schema([
+                                // Toggle Switch for Visual/HTML Mode
+                                Toggle::make('_editor_mode_visual')
+                                    ->label('وضع التحرير المرئي (WYSIWYG)')
+                                    ->helperText('غيّر بين المحرر المرئي ووضع HTML')
+                                    ->inline(false)
+                                    ->default(true)
+                                    ->live()
+                                    ->dehydrated(false), // Don't save this to database
+                                
+                                // Visual Editor (RichEditor)
+                                RichEditor::make('content_html')
+                                    ->label('المحرر المرئي')
+                                    ->required()
+                                    ->columnSpanFull()
+                                    ->toolbarButtons([
+                                        ['bold', 'italic', 'underline', 'strike', 'link'],
+                                        ['textColor', 'highlight', 'clearFormatting'],
+                                        ['h1', 'h2', 'h3'],
+                                        ['alignStart', 'alignCenter', 'alignEnd'],
+                                        ['bulletList', 'orderedList', 'blockquote'],
+                                        ['undo', 'redo'],
+                                    ])
+                                    ->textColors([
+                                        '#000000' => 'أسود',
+                                        '#ef4444' => 'أحمر',
+                                        '#f97316' => 'برتقالي',
+                                        '#eab308' => 'أصفر',
+                                        '#22c55e' => 'أخضر',
+                                        '#3b82f6' => 'أزرق',
+                                        '#6366f1' => 'نيلي',
+                                        '#a855f7' => 'بنفسجي',
+                                        '#ec4899' => 'زهري',
+                                        '#6b7280' => 'رمادي',
+                                        '#ffffff' => 'أبيض',
+                                    ])
+                                    ->helperText('انقر على المتغيرات من القائمة اليسرى لإدراجها')
+                                    ->visible(fn ($get) => $get('_editor_mode_visual') === true),
+                                
+                                // HTML Source Editor (Textarea)
                                 Textarea::make('content_html')
                                     ->label('كود HTML')
                                     ->required()
@@ -121,7 +162,8 @@ class EmailTemplateForm
                                         'dir' => 'ltr', 
                                         'style' => 'font-family: "Courier New", monospace; font-size: 13px; line-height: 1.5;'
                                     ])
-                                    ->helperText('استخدم المتغيرات بصيغة: {{ variable_name }}'),
+                                    ->helperText('استخدم المتغيرات بصيغة: {{ variable_name }}')
+                                    ->visible(fn ($get) => $get('_editor_mode_visual') === false),
                             ]),
                         
                         // Left Column: Variables + Preview
