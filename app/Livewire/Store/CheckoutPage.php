@@ -2,12 +2,14 @@
 
 namespace App\Livewire\Store;
 
+use App\Models\Customer;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\ShippingAddress;
 use App\Services\CartService;
 use App\Services\EmailService;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -45,21 +47,40 @@ class CheckoutPage extends Component
         $this->cartService = $cartService;
     }
 
+    /**
+     * Get the currently authenticated customer
+     */
+    private function getCustomer(): ?Customer
+    {
+        if (Auth::guard('customer')->check()) {
+            return Auth::guard('customer')->user();
+        }
+        return null;
+    }
+
+    /**
+     * Get the currently authenticated customer ID
+     */
+    private function getCustomerId(): ?int
+    {
+        return $this->getCustomer()?->id;
+    }
+
     public function mount()
     {
         // Load cart items using CartService
         $this->loadCart();
 
-        // Pre-fill user data if authenticated
-        if (auth()->check()) {
-            $user = auth()->user();
-            $this->first_name = $user->name ? explode(' ', $user->name)[0] : '';
-            $this->last_name = $user->name ? (explode(' ', $user->name)[1] ?? '') : '';
-            $this->email = $user->email;
-            $this->phone = $user->phone ?? '';
+        // Pre-fill customer data if authenticated
+        $customer = $this->getCustomer();
+        if ($customer) {
+            $this->first_name = $customer->name ? explode(' ', $customer->name)[0] : '';
+            $this->last_name = $customer->name ? (explode(' ', $customer->name)[1] ?? '') : '';
+            $this->email = $customer->email;
+            $this->phone = $customer->phone ?? '';
 
             // Auto-select first address if exists
-            $firstAddress = $user->shippingAddresses()->first();
+            $firstAddress = ShippingAddress::where('customer_id', $customer->id)->first();
             if ($firstAddress) {
                 $this->selectedAddressId = $firstAddress->id;
             } else {
@@ -130,15 +151,16 @@ class CheckoutPage extends Component
     public function validateAddressForm()
     {
         $this->validate();
-        
+
         // Store address state (will be used in Part 2 for order creation)
         session()->flash('message', 'Address validated successfully!');
     }
 
     public function render()
     {
-        $savedAddresses = auth()->check() 
-            ? auth()->user()->shippingAddresses 
+        $customer = $this->getCustomer();
+        $savedAddresses = $customer
+            ? ShippingAddress::where('customer_id', $customer->id)->get()
             : collect();
 
         $egyptGovernorates = [
@@ -192,7 +214,7 @@ class CheckoutPage extends Component
         // =============================================
         // STEP 1: VALIDATION GUARDS
         // =============================================
-        
+
         // Ensure cart has items
         if (empty($this->cartItems)) {
             $this->dispatch('show-toast', [
@@ -206,12 +228,12 @@ class CheckoutPage extends Component
         $shippingAddress = null;
         $guestAddressData = null;
 
-        if (auth()->check() && $this->selectedAddressId) {
-            // Authenticated user with saved address
+        if ($this->getCustomer() && $this->selectedAddressId) {
+            // Authenticated customer with saved address
             $shippingAddress = ShippingAddress::where('id', $this->selectedAddressId)
-                ->where('user_id', auth()->id())
+                ->where('customer_id', $this->getCustomerId())
                 ->first();
-            
+
             if (!$shippingAddress) {
                 $this->dispatch('show-toast', [
                     'message' => __('messages.checkout.invalid_address'),
@@ -222,7 +244,7 @@ class CheckoutPage extends Component
         } else {
             // Guest OR authenticated user creating new address
             $this->validate();
-            
+
             // Prepare guest address data
             $guestAddressData = [
                 'name' => $this->first_name . ' ' . $this->last_name,
@@ -233,17 +255,18 @@ class CheckoutPage extends Component
                 'address' => $this->address_details,
             ];
 
-            // If authenticated, save the address for future use
-            if (auth()->check()) {
+            // If authenticated customer, save the address for future use
+            $customer = $this->getCustomer();
+            if ($customer) {
                 $shippingAddress = ShippingAddress::create([
-                    'user_id' => auth()->id(),
+                    'customer_id' => $customer->id,
                     'full_name' => $guestAddressData['name'],
                     'email' => $guestAddressData['email'],
                     'phone' => $guestAddressData['phone'],
                     'governorate' => $guestAddressData['governorate'],
                     'city' => $guestAddressData['city'],
                     'street_address' => $guestAddressData['address'],
-                    'is_default' => auth()->user()->shippingAddresses()->count() === 0,
+                    'is_default' => ShippingAddress::where('customer_id', $customer->id)->count() === 0,
                 ]);
                 $guestAddressData = null; // Use the saved address instead
             }
@@ -261,10 +284,10 @@ class CheckoutPage extends Component
         // =============================================
         // STEP 2: STOCK VERIFICATION (Race Condition Protection)
         // =============================================
-        
+
         $stockErrors = [];
         $cart = $this->cartService->getCart();
-        
+
         if (!$cart || $cart->items->isEmpty()) {
             $this->dispatch('show-toast', [
                 'message' => __('messages.checkout.cart_expired'),
@@ -276,7 +299,7 @@ class CheckoutPage extends Component
         // Fresh load products with current stock
         foreach ($cart->items as $cartItem) {
             $product = Product::find($cartItem->product_id);
-            
+
             if (!$product) {
                 $stockErrors[] = __('messages.checkout.product_unavailable', [
                     'name' => $cartItem->product_name ?? 'Unknown'
@@ -314,16 +337,16 @@ class CheckoutPage extends Component
         // =============================================
         // STEP 3: ATOMIC TRANSACTION
         // =============================================
-        
+
         try {
             $order = DB::transaction(function () use ($cart, $shippingAddress, $guestAddressData) {
                 // Generate unique order number
                 $orderNumber = 'VLT-' . strtoupper(Str::random(8)) . '-' . now()->format('ymd');
-                
+
                 // Create Order
                 $order = Order::create([
                     'order_number' => $orderNumber,
-                    'user_id' => auth()->id(),
+                    'customer_id' => $this->getCustomerId(),
                     'shipping_address_id' => $shippingAddress?->id,
                     'guest_name' => $guestAddressData['name'] ?? null,
                     'guest_email' => $guestAddressData['email'] ?? null,
@@ -344,12 +367,12 @@ class CheckoutPage extends Component
                 // Create Order Items & Decrement Stock
                 foreach ($cart->items as $cartItem) {
                     $product = Product::find($cartItem->product_id);
-                    $variant = $cartItem->product_variant_id 
-                        ? $product->variants()->find($cartItem->product_variant_id) 
+                    $variant = $cartItem->product_variant_id
+                        ? $product->variants()->find($cartItem->product_variant_id)
                         : null;
 
                     // Get price (variant or product)
-                    $price = $variant 
+                    $price = $variant
                         ? ($variant->sale_price ?? $variant->price)
                         : ($product->sale_price ?? $product->price);
 
@@ -382,7 +405,7 @@ class CheckoutPage extends Component
                 $cart->delete();
 
                 // Clear cart session cookie for guests
-                if (!auth()->check()) {
+                if (!$this->getCustomer()) {
                     Cookie::queue(Cookie::forget('cart_session_id'));
                 }
 
@@ -392,16 +415,16 @@ class CheckoutPage extends Component
             // =============================================
             // STEP 4: SEND CONFIRMATION EMAILS
             // =============================================
-            
+
             try {
                 $emailService = app(EmailService::class);
-                
+
                 // Send order confirmation to customer
                 $emailService->sendOrderConfirmation($order);
-                
+
                 // Send notification to admin
                 $emailService->sendAdminNewOrderNotification($order);
-                
+
             } catch (\Exception $e) {
                 // Log email error but don't fail the order
                 report($e);
@@ -410,7 +433,7 @@ class CheckoutPage extends Component
             // =============================================
             // STEP 5: SUCCESS - Redirect to confirmation page
             // =============================================
-            
+
             // Dispatch cart update event for header counter
             $this->dispatch('cart-updated', count: 0);
 
@@ -419,7 +442,7 @@ class CheckoutPage extends Component
         } catch (\Exception $e) {
             // Transaction automatically rolled back
             report($e); // Log the error
-            
+
             $this->dispatch('show-toast', [
                 'message' => __('messages.checkout.order_failed'),
                 'type' => 'error'

@@ -2,7 +2,7 @@
 
 namespace App\Livewire\Store\Account;
 
-use App\Models\User;
+use App\Models\Customer;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
@@ -15,71 +15,97 @@ class Profile extends Component
     public string $name = '';
     public string $email = '';
     public string $phone = '';
-    
+
     // Password Change
     public string $current_password = '';
     public string $password = '';
     public string $password_confirmation = '';
-    
+
     // UI State
     public bool $showPasswordForm = false;
-    
+
+    /**
+     * Get the currently authenticated customer
+     */
+    private function getCustomer(): ?Customer
+    {
+        if (Auth::guard('customer')->check()) {
+            return Auth::guard('customer')->user();
+        }
+        return null;
+    }
+
     public function mount(): void
     {
-        $user = Auth::user();
-        $this->name = $user->name ?? '';
-        $this->email = $user->email ?? '';
-        $this->phone = $user->phone ?? '';
+        $customer = $this->getCustomer();
+
+        if (!$customer) {
+            redirect()->route('login');
+            return;
+        }
+
+        $this->name = $customer->name ?? '';
+        $this->email = $customer->email ?? '';
+        $this->phone = $customer->phone ?? '';
     }
-    
+
     public function updateProfile(): void
     {
-        $user = Auth::user();
-        
+        $customer = $this->getCustomer();
+
+        if (!$customer) {
+            return;
+        }
+
         $validated = $this->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class)->ignore($user->id)],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(Customer::class)->ignore($customer->id)],
             'phone' => ['nullable', 'string', 'max:20'],
         ]);
-        
-        $emailChanged = $user->email !== $validated['email'];
-        
-        $user->fill($validated);
-        
+
+        $emailChanged = $customer->email !== $validated['email'];
+
+        $customer->fill($validated);
+
         if ($emailChanged) {
-            $user->email_verified_at = null;
+            $customer->email_verified_at = null;
         }
-        
-        $user->save();
-        
+
+        $customer->save();
+
         $this->dispatch('show-toast', message: __('messages.account.profile_updated'), type: 'success');
     }
-    
+
     public function togglePasswordForm(): void
     {
         $this->showPasswordForm = !$this->showPasswordForm;
         $this->reset(['current_password', 'password', 'password_confirmation']);
         $this->resetValidation();
     }
-    
+
     public function updatePassword(): void
     {
+        $customer = $this->getCustomer();
+
+        if (!$customer) {
+            return;
+        }
+
         $this->validate([
-            'current_password' => ['required', 'string', 'current_password'],
+            'current_password' => ['required', 'string', 'current_password:customer'],
             'password' => ['required', 'string', Password::defaults(), 'confirmed'],
         ]);
-        
-        $user = Auth::user();
-        $user->update([
+
+        $customer->update([
             'password' => Hash::make($this->password),
         ]);
-        
+
         $this->reset(['current_password', 'password', 'password_confirmation']);
         $this->showPasswordForm = false;
-        
+
         $this->dispatch('show-toast', message: __('messages.account.password_updated'), type: 'success');
     }
-    
+
     public function render()
     {
         return view('livewire.store.account.profile')

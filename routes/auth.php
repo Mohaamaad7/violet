@@ -5,7 +5,8 @@ use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
 
-Route::middleware('guest')->group(function () {
+// Customer authentication routes (using customer guard)
+Route::middleware('guest:customer')->group(function () {
     Volt::route('register', 'pages.auth.register')
         ->name('register');
 
@@ -25,7 +26,7 @@ Route::middleware('guest')->group(function () {
         ->name('auth.google.callback');
 });
 
-Route::middleware('auth')->group(function () {
+Route::middleware('auth:customer')->group(function () {
     Volt::route('verify-email', 'pages.auth.verify-email')
         ->name('verification.notice');
 

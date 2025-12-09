@@ -15,6 +15,7 @@ class Order extends Model
     protected $fillable = [
         'order_number',
         'user_id',
+        'customer_id',
         'discount_code_id',
         'shipping_address_id',
         'guest_name',
@@ -54,9 +55,55 @@ class Order extends Model
     ];
 
     // Relations
+
+    /**
+     * Customer who placed the order (new relation)
+     */
+    public function customer(): BelongsTo
+    {
+        return $this->belongsTo(Customer::class);
+    }
+
+    /**
+     * Staff user who processed/handled the order (kept for backwards compatibility)
+     * @deprecated Use customer() for the actual customer
+     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get customer name (from customer or guest fields)
+     */
+    public function getCustomerNameAttribute(): string
+    {
+        if ($this->customer) {
+            return $this->customer->name;
+        }
+        return $this->guest_name ?? 'ضيف';
+    }
+
+    /**
+     * Get customer email (from customer or guest fields)
+     */
+    public function getCustomerEmailAttribute(): ?string
+    {
+        if ($this->customer) {
+            return $this->customer->email;
+        }
+        return $this->guest_email;
+    }
+
+    /**
+     * Get customer phone (from customer or guest fields)
+     */
+    public function getCustomerPhoneAttribute(): ?string
+    {
+        if ($this->customer) {
+            return $this->customer->phone;
+        }
+        return $this->guest_phone;
     }
 
     public function discountCode(): BelongsTo

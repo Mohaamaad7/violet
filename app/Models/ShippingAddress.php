@@ -12,7 +12,7 @@ class ShippingAddress extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id',
+        'customer_id',
         'order_id',
         'full_name',
         'email',
@@ -32,9 +32,9 @@ class ShippingAddress extends Model
         'is_default' => 'boolean',
     ];
 
-    public function user(): BelongsTo
+    public function customer(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(Customer::class);
     }
 
     public function orders(): HasMany
@@ -46,14 +46,14 @@ class ShippingAddress extends Model
     {
         $parts = array_filter([
             $this->street_address,
-            $this->building_number ? "Building {$this->building_number}" : null,
-            $this->floor ? "Floor {$this->floor}" : null,
-            $this->apartment ? "Apt {$this->apartment}" : null,
+            $this->building_number ? "مبنى {$this->building_number}" : null,
+            $this->floor ? "الدور {$this->floor}" : null,
+            $this->apartment ? "شقة {$this->apartment}" : null,
             $this->area,
             $this->city,
             $this->governorate,
         ]);
 
-        return implode(', ', $parts);
+        return implode('، ', $parts);
     }
 }

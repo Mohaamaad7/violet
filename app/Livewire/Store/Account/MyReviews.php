@@ -4,13 +4,14 @@ namespace App\Livewire\Store\Account;
 
 use App\Models\ProductReview;
 use App\Services\ReviewService;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\WithPagination;
 
 /**
  * My Reviews Component
  * 
- * Displays all reviews submitted by the logged-in user
+ * Displays all reviews submitted by the logged-in customer
  * in their account area. Allows editing and deleting.
  */
 class MyReviews extends Component
@@ -24,6 +25,17 @@ class MyReviews extends Component
     public ?int $editingReviewId = null;
 
     protected ReviewService $reviewService;
+
+    /**
+     * Get the currently authenticated customer ID
+     */
+    private function getCustomerId(): ?int
+    {
+        if (Auth::guard('customer')->check()) {
+            return Auth::guard('customer')->id();
+        }
+        return null;
+    }
 
     protected function rules(): array
     {
@@ -41,8 +53,10 @@ class MyReviews extends Component
 
     public function editReview(int $reviewId): void
     {
+        $customerId = $this->getCustomerId();
+
         $review = ProductReview::where('id', $reviewId)
-            ->where('user_id', auth()->id())
+            ->where('customer_id', $customerId)
             ->firstOrFail();
 
         $this->editingReviewId = $review->id;
@@ -97,12 +111,13 @@ class MyReviews extends Component
 
     public function render()
     {
-        $reviews = $this->reviewService->getUserReviews(auth()->id(), 10);
+        $customerId = $this->getCustomerId();
+        $reviews = $this->reviewService->getCustomerReviews($customerId, 10);
 
         return view('livewire.store.account.my-reviews', [
             'reviews' => $reviews,
         ])->layout('layouts.store', [
-            'title' => __('messages.account.my_reviews'),
-        ]);
+                    'title' => __('messages.account.my_reviews'),
+                ]);
     }
 }

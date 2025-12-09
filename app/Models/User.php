@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -13,42 +12,31 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 
+/**
+ * User Model - For Staff/Admins only
+ * 
+ * Note: Customers are now in a separate `customers` table.
+ * This model is only for admin panel users (staff, managers, etc.)
+ */
 class User extends Authenticatable implements FilamentUser
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, HasRoles, SoftDeletes;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
     protected $fillable = [
         'name',
         'email',
         'password',
         'phone',
         'profile_photo_path',
-        'type',
         'status',
         'locale',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
@@ -62,65 +50,41 @@ class User extends Authenticatable implements FilamentUser
      */
     public function canAccessPanel(Panel $panel): bool
     {
-        // Allow access if user is admin type OR has any admin role
-        return $this->type === 'admin' 
-            || $this->hasRole(['super-admin', 'admin', 'manager', 'sales', 'accountant', 'content-manager']);
+        // All users in this table can access admin panel
+        // (type column was removed - all records are now staff/admins)
+        return $this->hasRole(['super-admin', 'admin', 'manager', 'sales', 'accountant', 'content-manager', 'delivery']);
     }
 
     // Relations
+
+    /**
+     * Influencer profile (if user is an influencer staff member)
+     */
     public function influencer(): HasOne
     {
         return $this->hasOne(Influencer::class);
     }
 
-    public function orders(): HasMany
+    /**
+     * Orders processed by this admin user
+     */
+    public function processedOrders(): HasMany
     {
-        return $this->hasMany(Order::class);
+        return $this->hasMany(Order::class, 'user_id');
     }
 
-    public function shippingAddresses(): HasMany
-    {
-        return $this->hasMany(ShippingAddress::class);
-    }
-
-    public function cart(): HasOne
-    {
-        return $this->hasOne(Cart::class);
-    }
-
-    public function wishlists(): HasMany
-    {
-        return $this->hasMany(Wishlist::class);
-    }
-
-    public function reviews(): HasMany
-    {
-        return $this->hasMany(ProductReview::class);
-    }
-
+    /**
+     * Blog posts authored by this user
+     */
     public function blogPosts(): HasMany
     {
         return $this->hasMany(BlogPost::class, 'author_id');
     }
 
     // Scopes
+
     public function scopeActive($query)
     {
         return $query->where('status', 'active');
-    }
-
-    public function scopeCustomers($query)
-    {
-        return $query->where('type', 'customer');
-    }
-
-    public function scopeInfluencers($query)
-    {
-        return $query->where('type', 'influencer');
-    }
-
-    public function scopeAdmins($query)
-    {
-        return $query->where('type', 'admin');
     }
 }

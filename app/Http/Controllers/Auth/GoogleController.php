@@ -3,19 +3,21 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use App\Models\Customer;
+use App\Services\CartService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Laravel\Socialite\Facades\Socialite;
 
 /**
- * GoogleController - Handles Google OAuth authentication
+ * GoogleController - Handles Google OAuth authentication for Customers
  * 
- * Schema-Dependent: This controller aligns with Violet's users table schema.
- * Role assignment via assignRole('customer') is the source of truth for permissions.
+ * This controller creates/logins Customers (NOT Users) via Google OAuth.
+ * Admin/Staff users should use Filament admin panel login.
  * 
  * Routes:
  *   GET /auth/google          - Redirect to Google
@@ -35,69 +37,71 @@ class GoogleController extends Controller
 
     /**
      * Handle the callback from Google.
-     * 
-     * User fields aligned with Violet's users table:
-     * - name, email, password (required)
-     * - phone, profile_photo_path (optional)
-     * - type, status, locale (system fields)
-     * - email_verified_at (timestamp)
+     * Creates a Customer (not User) with the Google account info.
      */
     public function callback(): RedirectResponse
     {
         try {
             $googleUser = Socialite::driver('google')->user();
-            
-            // Check if user already exists with this email
-            $user = User::where('email', $googleUser->getEmail())->first();
-            
-            if ($user) {
-                // Existing user - just log them in
-                Auth::login($user, remember: true);
-                
-                Log::info('Google OAuth: Existing user logged in', [
-                    'user_id' => $user->id,
-                    'email' => $user->email,
+
+            // Check if customer already exists with this email
+            $customer = Customer::where('email', $googleUser->getEmail())->first();
+
+            // Get guest session ID before login (for cart merge)
+            $guestSessionId = Cookie::get('cart_session_id');
+
+            if ($customer) {
+                // Existing customer - just log them in
+                Auth::guard('customer')->login($customer, remember: true);
+
+                Log::info('Google OAuth: Existing customer logged in', [
+                    'customer_id' => $customer->id,
+                    'email' => $customer->email,
                 ]);
             } else {
-                // New user - create with Violet's users table schema
-                $user = User::create([
+                // New customer - create with Customer model
+                $customer = Customer::create([
                     'name' => $googleUser->getName(),
                     'email' => $googleUser->getEmail(),
                     'password' => Hash::make(Str::random(32)),
-                    'phone' => null,                    // Optional field
-                    'profile_photo_path' => null,       // Optional field
-                    'type' => 'customer',               // User type
-                    'status' => 'active',               // Account status
-                    'locale' => config('app.locale'),   // User language preference
-                    'email_verified_at' => now(),       // Google emails are pre-verified
+                    'phone' => null,
+                    'status' => 'active',
+                    'email_verified_at' => now(), // Google emails are pre-verified
                 ]);
-                
-                // Role assignment is the source of truth for permissions
-                $user->assignRole('customer');
-                
-                Auth::login($user, remember: true);
-                
-                Log::info('Google OAuth: New user created', [
-                    'user_id' => $user->id,
-                    'email' => $user->email,
+
+                Auth::guard('customer')->login($customer, remember: true);
+
+                Log::info('Google OAuth: New customer created', [
+                    'customer_id' => $customer->id,
+                    'email' => $customer->email,
                 ]);
             }
-            
+
+            // Merge guest cart if exists
+            if ($guestSessionId) {
+                try {
+                    $cartService = app(CartService::class);
+                    $cartService->mergeGuestCart($guestSessionId, $customer->id);
+                } catch (\Exception $e) {
+                    Log::warning('Google OAuth: Cart merge failed', ['error' => $e->getMessage()]);
+                }
+            }
+
             // Redirect to intended URL or home
             return redirect()->intended('/');
-            
+
         } catch (\Laravel\Socialite\Two\InvalidStateException $e) {
             Log::warning('Google OAuth: Invalid state', ['error' => $e->getMessage()]);
-            
+
             return redirect('/login')
                 ->with('error', __('auth.google_session_expired'));
-                
+
         } catch (\Exception $e) {
             Log::error('Google OAuth: Authentication failed', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
             ]);
-            
+
             return redirect('/login')
                 ->with('error', __('auth.google_login_failed'));
         }

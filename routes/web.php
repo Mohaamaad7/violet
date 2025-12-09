@@ -25,7 +25,7 @@ Route::get('/products/{slug}', [App\Http\Controllers\Store\ProductDetailsControl
 Route::get('/cart', App\Livewire\Store\CartPage::class)->name('cart');
 
 // Wishlist Page (Task 4.3 - Phase 4)
-Route::get('/wishlist', App\Livewire\Store\WishlistPage::class)->middleware('auth')->name('wishlist');
+Route::get('/wishlist', App\Livewire\Store\WishlistPage::class)->middleware('auth:customer')->name('wishlist');
 
 // Checkout Page (Task 9.7 - Part 1)
 Route::get('/checkout', App\Livewire\Store\CheckoutPage::class)->name('checkout');
@@ -38,7 +38,8 @@ Route::get('/checkout/success/{order}', App\Livewire\Store\OrderSuccessPage::cla
 Route::get('/track-order', App\Livewire\Store\TrackOrder::class)->name('track-order');
 
 // Customer Account Area (Task 4.2 - Phase 4)
-Route::middleware(['auth'])->prefix('account')->name('account.')->group(function () {
+// Uses customer guard for authentication
+Route::middleware(['auth:customer'])->prefix('account')->name('account.')->group(function () {
     Route::get('/', App\Livewire\Store\Account\Dashboard::class)->name('dashboard');
     Route::get('/profile', App\Livewire\Store\Account\Profile::class)->name('profile');
     Route::get('/addresses', App\Livewire\Store\Account\Addresses::class)->name('addresses');
@@ -48,7 +49,7 @@ Route::middleware(['auth'])->prefix('account')->name('account.')->group(function
 });
 
 // Legacy route redirect
-Route::middleware(['auth'])->get('/orders', fn() => redirect()->route('account.orders'))->name('store.orders.index');
+Route::middleware(['auth:customer'])->get('/orders', fn() => redirect()->route('account.orders'))->name('store.orders.index');
 
 // Debug Route (Temporary - for troubleshooting)
 Route::get('/test-cart-debug', function () {
@@ -71,14 +72,14 @@ Route::prefix('admin/products')->middleware(['auth'])->name('admin.products.')->
     Route::post('{product}/images/update-order', [App\Http\Controllers\Admin\ProductImageController::class, 'updateOrder'])->name('images.update-order');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
 
 // Public API Routes
 Route::prefix('api')->name('api.')->group(function () {
     // Categories
     Route::get('categories', [CategoryController::class, 'index'])->name('categories.index');
     Route::get('categories/{id}', [CategoryController::class, 'show'])->name('categories.show');
-    
+
     // Products
     Route::get('products', [ProductController::class, 'index'])->name('products.index');
     Route::get('products/featured', [ProductController::class, 'featured'])->name('products.featured');

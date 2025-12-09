@@ -2,6 +2,7 @@
 
 namespace App\Listeners;
 
+use App\Models\Customer;
 use App\Services\CartService;
 use Illuminate\Auth\Events\Login;
 use Illuminate\Support\Facades\Cookie;
@@ -9,8 +10,10 @@ use Illuminate\Support\Facades\Cookie;
 /**
  * MergeCartOnLogin - Event Listener
  * 
- * Automatically merges guest cart with user cart when user logs in.
+ * Automatically merges guest cart with customer cart when customer logs in.
  * Handles duplicate products by summing quantities (respecting stock limits).
+ * 
+ * NOTE: This only applies to Customer model logins, not admin User logins.
  * 
  * @package App\Listeners
  */
@@ -34,6 +37,11 @@ class MergeCartOnLogin
      */
     public function handle(Login $event): void
     {
+        // Only merge carts for Customers, not admin Users
+        if (!($event->user instanceof Customer)) {
+            return;
+        }
+
         // Get guest session ID from cookie
         $guestSessionId = Cookie::get('cart_session_id');
 
@@ -42,10 +50,10 @@ class MergeCartOnLogin
             return;
         }
 
-        // Get authenticated user ID
-        $userId = $event->user->id;
+        // Get authenticated customer ID
+        $customerId = $event->user->id;
 
-        // Merge guest cart into user cart
-        $this->cartService->mergeGuestCart($guestSessionId, $userId);
+        // Merge guest cart into customer cart
+        $this->cartService->mergeGuestCart($guestSessionId, $customerId);
     }
 }

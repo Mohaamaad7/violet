@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Store\Account;
 
+use App\Models\Customer;
 use App\Models\ShippingAddress;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
@@ -10,7 +11,7 @@ use Livewire\WithPagination;
 class Addresses extends Component
 {
     use WithPagination;
-    
+
     // Form Fields
     public ?int $editingAddressId = null;
     public string $full_name = '';
@@ -24,12 +25,12 @@ class Addresses extends Component
     public string $apartment = '';
     public string $landmark = '';
     public bool $is_default = false;
-    
+
     // UI State
     public bool $showForm = false;
     public bool $confirmingDelete = false;
     public ?int $deletingAddressId = null;
-    
+
     // Egyptian Governorates
     public array $governorates = [
         'Cairo' => 'Cairo',
@@ -60,7 +61,29 @@ class Addresses extends Component
         'New Valley' => 'New Valley',
         'Matrouh' => 'Matrouh',
     ];
-    
+
+    /**
+     * Get the currently authenticated customer ID
+     */
+    private function getCustomerId(): ?int
+    {
+        if (Auth::guard('customer')->check()) {
+            return Auth::guard('customer')->id();
+        }
+        return null;
+    }
+
+    /**
+     * Get the currently authenticated customer
+     */
+    private function getCustomer(): ?Customer
+    {
+        if (Auth::guard('customer')->check()) {
+            return Auth::guard('customer')->user();
+        }
+        return null;
+    }
+
     protected function rules(): array
     {
         return [
@@ -77,16 +100,17 @@ class Addresses extends Component
             'is_default' => ['boolean'],
         ];
     }
-    
+
     public function openForm(?int $addressId = null): void
     {
         $this->resetValidation();
-        
+        $customerId = $this->getCustomerId();
+
         if ($addressId) {
             $address = ShippingAddress::where('id', $addressId)
-                ->where('user_id', Auth::id())
+                ->where('customer_id', $customerId)
                 ->firstOrFail();
-            
+
             $this->editingAddressId = $address->id;
             $this->full_name = $address->full_name;
             $this->phone = $address->phone;
@@ -102,23 +126,23 @@ class Addresses extends Component
         } else {
             $this->editingAddressId = null;
             $this->resetForm();
-            
-            // Pre-fill name and phone from user
-            $user = Auth::user();
-            $this->full_name = $user->name ?? '';
-            $this->phone = $user->phone ?? '';
+
+            // Pre-fill name and phone from customer
+            $customer = $this->getCustomer();
+            $this->full_name = $customer?->name ?? '';
+            $this->phone = $customer?->phone ?? '';
         }
-        
+
         $this->showForm = true;
     }
-    
+
     public function closeForm(): void
     {
         $this->showForm = false;
         $this->resetForm();
         $this->resetValidation();
     }
-    
+
     protected function resetForm(): void
     {
         $this->editingAddressId = null;
@@ -134,13 +158,14 @@ class Addresses extends Component
         $this->landmark = '';
         $this->is_default = false;
     }
-    
+
     public function save(): void
     {
         $this->validate();
-        
+        $customerId = $this->getCustomerId();
+
         $data = [
-            'user_id' => Auth::id(),
+            'customer_id' => $customerId,
             'full_name' => $this->full_name,
             'phone' => $this->phone,
             'governorate' => $this->governorate,
@@ -153,105 +178,111 @@ class Addresses extends Component
             'landmark' => $this->landmark ?: null,
             'is_default' => $this->is_default,
         ];
-        
+
         // If setting as default, unset other defaults
         if ($this->is_default) {
-            ShippingAddress::where('user_id', Auth::id())
+            ShippingAddress::where('customer_id', $customerId)
                 ->where('id', '!=', $this->editingAddressId)
                 ->update(['is_default' => false]);
         }
-        
+
         if ($this->editingAddressId) {
             // Authorization check
             $address = ShippingAddress::where('id', $this->editingAddressId)
-                ->where('user_id', Auth::id())
+                ->where('customer_id', $customerId)
                 ->firstOrFail();
-            
+
             $address->update($data);
             $message = __('messages.account.address_updated');
         } else {
             // If this is first address, make it default
-            $existingCount = ShippingAddress::where('user_id', Auth::id())->count();
+            $existingCount = ShippingAddress::where('customer_id', $customerId)->count();
             if ($existingCount === 0) {
                 $data['is_default'] = true;
             }
-            
+
             ShippingAddress::create($data);
             $message = __('messages.account.address_added');
         }
-        
+
         $this->closeForm();
         $this->dispatch('show-toast', message: $message, type: 'success');
     }
-    
+
     public function setDefault(int $addressId): void
     {
+        $customerId = $this->getCustomerId();
+
         // Authorization check
         $address = ShippingAddress::where('id', $addressId)
-            ->where('user_id', Auth::id())
+            ->where('customer_id', $customerId)
             ->firstOrFail();
-        
+
         // Unset all defaults
-        ShippingAddress::where('user_id', Auth::id())->update(['is_default' => false]);
-        
+        ShippingAddress::where('customer_id', $customerId)->update(['is_default' => false]);
+
         // Set new default
         $address->update(['is_default' => true]);
-        
+
         $this->dispatch('show-toast', message: __('messages.account.default_address_set'), type: 'success');
     }
-    
+
     public function confirmDelete(int $addressId): void
     {
         $this->deletingAddressId = $addressId;
         $this->confirmingDelete = true;
     }
-    
+
     public function cancelDelete(): void
     {
         $this->deletingAddressId = null;
         $this->confirmingDelete = false;
     }
-    
+
     public function delete(): void
     {
         if (!$this->deletingAddressId) {
             return;
         }
-        
+
+        $customerId = $this->getCustomerId();
+
         // Authorization check
         $address = ShippingAddress::where('id', $this->deletingAddressId)
-            ->where('user_id', Auth::id())
+            ->where('customer_id', $customerId)
             ->firstOrFail();
-        
+
         // Check if address is used in orders
         if ($address->orders()->exists()) {
             $this->dispatch('show-toast', message: __('messages.account.address_in_use'), type: 'error');
             $this->cancelDelete();
             return;
         }
-        
+
         $wasDefault = $address->is_default;
         $address->delete();
-        
+
         // If deleted address was default, set another as default
         if ($wasDefault) {
-            $newDefault = ShippingAddress::where('user_id', Auth::id())->first();
+            $newDefault = ShippingAddress::where('customer_id', $customerId)->first();
             if ($newDefault) {
                 $newDefault->update(['is_default' => true]);
             }
         }
-        
+
         $this->cancelDelete();
         $this->dispatch('show-toast', message: __('messages.account.address_deleted'), type: 'success');
     }
-    
+
     public function render()
     {
-        $addresses = ShippingAddress::where('user_id', Auth::id())
+        $customerId = $this->getCustomerId();
+
+        $addresses = ShippingAddress::where('customer_id', $customerId)
             ->orderBy('is_default', 'desc')
             ->orderBy('created_at', 'desc')
             ->paginate(10);
-        
+
         return view('livewire.store.account.addresses', [
             'addresses' => $addresses,
         ])->layout('layouts.store', ['title' => __('messages.account.addresses')]);

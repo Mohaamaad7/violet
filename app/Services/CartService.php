@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Cart;
 use App\Models\CartItem;
+use App\Models\Customer;
 use App\Models\Product;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
@@ -12,8 +13,10 @@ use Illuminate\Support\Str;
 /**
  * CartService - Hybrid Shopping Cart System
  * 
- * Handles all cart operations with Database Persistence for both Guests and Users.
+ * Handles all cart operations with Database Persistence for both Guests and Customers.
  * Uses UUID-based session_id stored in long-lived cookie for guest identification.
+ * 
+ * NOTE: This service is for Customers only, not admin Users.
  * 
  * @package App\Services
  */
@@ -23,22 +26,36 @@ class CartService
      * Cookie name for guest cart session
      */
     private const CART_COOKIE_NAME = 'cart_session_id';
-    
+
     /**
      * Cookie lifetime in minutes (30 days)
      */
     private const COOKIE_LIFETIME = 43200; // 30 days * 24 hours * 60 minutes
 
     /**
-     * Get or create cart session identifier for the current user/guest
+     * Get the currently authenticated customer (if using customer guard)
+     */
+    private function getAuthenticatedCustomer(): ?Customer
+    {
+        // Check customer guard first
+        if (Auth::guard('customer')->check()) {
+            return Auth::guard('customer')->user();
+        }
+
+        return null;
+    }
+
+    /**
+     * Get or create cart session identifier for the current customer/guest
      * 
      * @return string UUID session identifier
      */
     public function getCartSessionId(): string
     {
-        // If user is authenticated, use their user_id
-        if (Auth::check()) {
-            return 'user_' . Auth::id();
+        // If customer is authenticated, use their customer_id
+        $customer = $this->getAuthenticatedCustomer();
+        if ($customer) {
+            return 'customer_' . $customer->id;
         }
 
         // For guests, get or create cart_session_id from cookie
@@ -46,7 +63,7 @@ class CartService
 
         if (!$sessionId) {
             $sessionId = Str::uuid()->toString();
-            
+
             // Queue cookie to be sent with the response
             Cookie::queue(
                 self::CART_COOKIE_NAME,
@@ -65,28 +82,30 @@ class CartService
     }
 
     /**
-     * Get the active cart for current user/guest
+     * Get the active cart for current customer/guest
      * 
      * @return Cart|null
      */
     public function getCart(): ?Cart
     {
-        $sessionId = $this->getCartSessionId();
+        $customer = $this->getAuthenticatedCustomer();
 
-        if (Auth::check()) {
+        if ($customer) {
             return Cart::with(['items.product.media'])
-                ->where('user_id', Auth::id())
+                ->where('customer_id', $customer->id)
                 ->first();
         }
 
+        $sessionId = $this->getCartSessionId();
+
         return Cart::with(['items.product.media'])
             ->where('session_id', $sessionId)
-            ->whereNull('user_id')
+            ->whereNull('customer_id')
             ->first();
     }
 
     /**
-     * Get or create cart for current user/guest
+     * Get or create cart for current customer/guest
      * 
      * @return Cart
      */
@@ -98,11 +117,12 @@ class CartService
             return $cart;
         }
 
+        $customer = $this->getAuthenticatedCustomer();
         $sessionId = $this->getCartSessionId();
 
         return Cart::create([
-            'user_id' => Auth::id(),
-            'session_id' => Auth::check() ? null : $sessionId,
+            'customer_id' => $customer?->id,
+            'session_id' => $customer ? null : $sessionId,
         ]);
     }
 
@@ -129,7 +149,7 @@ class CartService
 
         // Validate stock
         $maxStock = $this->getProductMaxStock($product, $variantId);
-        
+
         if ($maxStock <= 0) {
             return [
                 'success' => false,
@@ -345,17 +365,17 @@ class CartService
     }
 
     /**
-     * Merge guest cart into user cart after login
+     * Merge guest cart into customer cart after login
      * 
      * @param string $guestSessionId
-     * @param int $userId
+     * @param int $customerId
      * @return void
      */
-    public function mergeGuestCart(string $guestSessionId, int $userId): void
+    public function mergeGuestCart(string $guestSessionId, int $customerId): void
     {
         // Find guest cart
         $guestCart = Cart::where('session_id', $guestSessionId)
-            ->whereNull('user_id')
+            ->whereNull('customer_id')
             ->with('items')
             ->first();
 
@@ -363,16 +383,16 @@ class CartService
             return;
         }
 
-        // Find or create user cart
-        $userCart = Cart::firstOrCreate(
-            ['user_id' => $userId],
+        // Find or create customer cart
+        $customerCart = Cart::firstOrCreate(
+            ['customer_id' => $customerId],
             ['session_id' => null]
         );
 
         // Merge items
         foreach ($guestCart->items as $guestItem) {
-            // Check if user already has this product in cart
-            $existingItem = $userCart->items()
+            // Check if customer already has this product in cart
+            $existingItem = $customerCart->items()
                 ->where('product_id', $guestItem->product_id)
                 ->where('product_variant_id', $guestItem->product_variant_id)
                 ->first();
@@ -388,8 +408,8 @@ class CartService
                     'price' => $guestItem->price, // Use latest price
                 ]);
             } else {
-                // Move item to user cart
-                $guestItem->update(['cart_id' => $userCart->id]);
+                // Move item to customer cart
+                $guestItem->update(['cart_id' => $customerCart->id]);
             }
         }
 

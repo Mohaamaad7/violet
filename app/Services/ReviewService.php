@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Customer;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProductReview;
@@ -17,22 +18,40 @@ use Illuminate\Support\Facades\Auth;
  * - Updating reviews (owner only)
  * - Deleting reviews (owner only)
  * - Fetching reviews with filtering
+ * 
+ * NOTE: This service uses Customer model, not User model.
  */
 class ReviewService
 {
     /**
-     * Check if user can review a product (must have a delivered order containing it)
+     * Get the currently authenticated customer ID
      */
-    public function canReview(int $productId, ?int $userId = null): bool
+    private function getCustomerId(?int $customerId = null): ?int
     {
-        $userId = $userId ?? Auth::id();
-        
-        if (!$userId) {
+        if ($customerId) {
+            return $customerId;
+        }
+
+        if (Auth::guard('customer')->check()) {
+            return Auth::guard('customer')->id();
+        }
+
+        return null;
+    }
+
+    /**
+     * Check if customer can review a product (must have a delivered order containing it)
+     */
+    public function canReview(int $productId, ?int $customerId = null): bool
+    {
+        $customerId = $this->getCustomerId($customerId);
+
+        if (!$customerId) {
             return false;
         }
 
-        // Check if user has a delivered order with this product
-        return Order::where('user_id', $userId)
+        // Check if customer has a delivered order with this product
+        return Order::where('customer_id', $customerId)
             ->where('status', 'delivered')
             ->whereHas('items', function ($query) use ($productId) {
                 $query->where('product_id', $productId);
@@ -41,49 +60,49 @@ class ReviewService
     }
 
     /**
-     * Check if user has already reviewed a product
+     * Check if customer has already reviewed a product
      */
-    public function hasReviewed(int $productId, ?int $userId = null): bool
+    public function hasReviewed(int $productId, ?int $customerId = null): bool
     {
-        $userId = $userId ?? Auth::id();
-        
-        if (!$userId) {
+        $customerId = $this->getCustomerId($customerId);
+
+        if (!$customerId) {
             return false;
         }
 
         return ProductReview::where('product_id', $productId)
-            ->where('user_id', $userId)
+            ->where('customer_id', $customerId)
             ->exists();
     }
 
     /**
-     * Get user's review for a product
+     * Get customer's review for a product
      */
-    public function getUserReview(int $productId, ?int $userId = null): ?ProductReview
+    public function getCustomerReview(int $productId, ?int $customerId = null): ?ProductReview
     {
-        $userId = $userId ?? Auth::id();
-        
-        if (!$userId) {
+        $customerId = $this->getCustomerId($customerId);
+
+        if (!$customerId) {
             return null;
         }
 
         return ProductReview::where('product_id', $productId)
-            ->where('user_id', $userId)
+            ->where('customer_id', $customerId)
             ->first();
     }
 
     /**
-     * Get the order ID that allows user to review this product
+     * Get the order ID that allows customer to review this product
      */
-    public function getReviewableOrderId(int $productId, ?int $userId = null): ?int
+    public function getReviewableOrderId(int $productId, ?int $customerId = null): ?int
     {
-        $userId = $userId ?? Auth::id();
-        
-        if (!$userId) {
+        $customerId = $this->getCustomerId($customerId);
+
+        if (!$customerId) {
             return null;
         }
 
-        $order = Order::where('user_id', $userId)
+        $order = Order::where('customer_id', $customerId)
             ->where('status', 'delivered')
             ->whereHas('items', function ($query) use ($productId) {
                 $query->where('product_id', $productId);
@@ -98,25 +117,25 @@ class ReviewService
      */
     public function create(array $data): ProductReview
     {
-        $userId = Auth::id();
+        $customerId = $this->getCustomerId();
         $productId = $data['product_id'];
 
-        // Verify user can review this product
-        if (!$this->canReview($productId, $userId)) {
+        // Verify customer can review this product
+        if (!$this->canReview($productId, $customerId)) {
             throw new \Exception(__('messages.reviews.cannot_review'));
         }
 
         // Check for existing review
-        if ($this->hasReviewed($productId, $userId)) {
+        if ($this->hasReviewed($productId, $customerId)) {
             throw new \Exception(__('messages.reviews.already_reviewed'));
         }
 
         // Get order ID for verified purchase
-        $orderId = $this->getReviewableOrderId($productId, $userId);
+        $orderId = $this->getReviewableOrderId($productId, $customerId);
 
         return ProductReview::create([
             'product_id' => $productId,
-            'user_id' => $userId,
+            'customer_id' => $customerId,
             'order_id' => $orderId,
             'rating' => $data['rating'],
             'title' => $data['title'] ?? null,
@@ -133,7 +152,8 @@ class ReviewService
     public function update(ProductReview $review, array $data): ProductReview
     {
         // Verify ownership
-        if ($review->user_id !== Auth::id()) {
+        $customerId = $this->getCustomerId();
+        if ($review->customer_id !== $customerId) {
             throw new \Exception(__('messages.reviews.unauthorized'));
         }
 
@@ -154,7 +174,8 @@ class ReviewService
     public function delete(ProductReview $review): bool
     {
         // Verify ownership
-        if ($review->user_id !== Auth::id()) {
+        $customerId = $this->getCustomerId();
+        if ($review->customer_id !== $customerId) {
             throw new \Exception(__('messages.reviews.unauthorized'));
         }
 
@@ -171,14 +192,14 @@ class ReviewService
     ): LengthAwarePaginator {
         $query = ProductReview::where('product_id', $productId)
             ->where('is_approved', true)
-            ->with('user:id,name');
+            ->with('customer:id,name');
 
-        // Include user's own unapproved reviews
-        $userId = Auth::id();
-        if ($userId) {
-            $query->orWhere(function ($q) use ($productId, $userId) {
+        // Include customer's own unapproved reviews
+        $customerId = $this->getCustomerId();
+        if ($customerId) {
+            $query->orWhere(function ($q) use ($productId, $customerId) {
                 $q->where('product_id', $productId)
-                  ->where('user_id', $userId);
+                    ->where('customer_id', $customerId);
             });
         }
 
@@ -226,13 +247,13 @@ class ReviewService
     }
 
     /**
-     * Get user's reviews
+     * Get customer's reviews
      */
-    public function getUserReviews(?int $userId = null, int $perPage = 10): LengthAwarePaginator
+    public function getCustomerReviews(?int $customerId = null, int $perPage = 10): LengthAwarePaginator
     {
-        $userId = $userId ?? Auth::id();
+        $customerId = $this->getCustomerId($customerId);
 
-        return ProductReview::where('user_id', $userId)
+        return ProductReview::where('customer_id', $customerId)
             ->with(['product:id,name,slug', 'product.media'])
             ->latest()
             ->paginate($perPage);

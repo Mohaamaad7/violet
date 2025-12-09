@@ -2,9 +2,9 @@
 
 namespace App\Filament\Widgets;
 
+use App\Models\Customer;
 use App\Models\Order;
 use App\Models\Product;
-use App\Models\User;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
@@ -50,8 +50,8 @@ class StatsOverviewWidget extends BaseWidget
             ->where('payment_status', 'paid')
             ->sum('total');
 
-        $percentageChange = $yesterdayRevenue > 0 
-            ? (($todayRevenue - $yesterdayRevenue) / $yesterdayRevenue) * 100 
+        $percentageChange = $yesterdayRevenue > 0
+            ? (($todayRevenue - $yesterdayRevenue) / $yesterdayRevenue) * 100
             : 0;
 
         return Stat::make(__('admin.widgets.stats.today_revenue'), number_format($todayRevenue, 2) . ' ' . __('admin.currency.egp_short'))
@@ -74,8 +74,8 @@ class StatsOverviewWidget extends BaseWidget
         // Calculate percentage change from yesterday
         $yesterdayNewOrders = Order::whereDate('created_at', today()->subDay())->count();
 
-        $percentageChange = $yesterdayNewOrders > 0 
-            ? (($newOrdersCount - $yesterdayNewOrders) / $yesterdayNewOrders) * 100 
+        $percentageChange = $yesterdayNewOrders > 0
+            ? (($newOrdersCount - $yesterdayNewOrders) / $yesterdayNewOrders) * 100
             : 0;
 
         return Stat::make(__('admin.widgets.stats.new_orders_today'), $newOrdersCount)
@@ -88,17 +88,18 @@ class StatsOverviewWidget extends BaseWidget
 
     /**
      * Card 3: Total Customers
-     * Shows total count of registered users
+     * Shows total count of registered customers (from customers table)
      */
     protected function getTotalCustomersCard(): Stat
     {
-        $totalCustomers = User::count();
+        // Now using Customer model instead of User
+        $totalCustomers = Customer::count();
 
         // Count new customers today
-        $newCustomersToday = User::whereDate('created_at', today())->count();
+        $newCustomersToday = Customer::whereDate('created_at', today())->count();
 
         // Count new customers this week
-        $newCustomersThisWeek = User::whereBetween('created_at', [
+        $newCustomersThisWeek = Customer::whereBetween('created_at', [
             now()->startOfWeek(),
             now()->endOfWeek(),
         ])->count();
@@ -131,7 +132,7 @@ class StatsOverviewWidget extends BaseWidget
             ->where('stock', '=', 0)
             ->count();
 
-        $description = $lowStockProducts > 0 
+        $description = $lowStockProducts > 0
             ? $lowStockProducts . ' ' . __('admin.widgets.stats.low_stock_products')
             : __('admin.widgets.stats.all_in_stock');
 
@@ -184,7 +185,8 @@ class StatsOverviewWidget extends BaseWidget
         $data = [];
         for ($i = 6; $i >= 0; $i--) {
             $date = today()->subDays($i);
-            $count = User::whereDate('created_at', $date)->count();
+            // Now using Customer model instead of User
+            $count = Customer::whereDate('created_at', $date)->count();
             $data[] = $count;
         }
         return $data;
