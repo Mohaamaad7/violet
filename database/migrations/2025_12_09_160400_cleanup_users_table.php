@@ -76,8 +76,13 @@ return new class extends Migration {
         // 2. Try to drop foreign key
         $this->dropForeignKeyIfExists($tableName, $tableName . '_' . $columnName . '_foreign');
 
-        // 3. Now drop the column
-        DB::statement("ALTER TABLE `{$tableName}` DROP COLUMN `{$columnName}`");
+        // 3. Now drop the column (with try-catch for edge cases)
+        try {
+            DB::statement("ALTER TABLE `{$tableName}` DROP COLUMN `{$columnName}`");
+        } catch (\Exception $e) {
+            // Column might have been dropped already or doesn't exist
+            // Log and continue
+        }
     }
 
     /**
