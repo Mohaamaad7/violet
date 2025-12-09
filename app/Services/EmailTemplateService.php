@@ -65,6 +65,20 @@ class EmailTemplateService
     }
 
     /**
+     * Get sample data for template (used in live preview).
+     * 
+     * @param EmailTemplate $template
+     * @return array
+     */
+    public function getSampleData(EmailTemplate $template): array
+    {
+        return array_merge(
+            $this->getGlobalVariables($template),
+            $this->getSampleVariables($template)
+        );
+    }
+
+    /**
      * Replace variables in content.
      */
     protected function replaceVariables(string $content, array $variables): string
