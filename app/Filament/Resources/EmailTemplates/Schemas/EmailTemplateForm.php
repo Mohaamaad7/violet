@@ -134,7 +134,7 @@ class EmailTemplateForm
                                         ['textColor', 'highlight', 'clearFormatting'],
                                         ['h1', 'h2', 'h3'],
                                         ['alignStart', 'alignCenter', 'alignEnd'],
-                                        ['bulletList', 'orderedList', 'blockquote'],
+                                        ['bulletList', 'orderedList', 'blockquote', 'table'],
                                         ['undo', 'redo'],
                                     ])
                                     ->textColors([
@@ -162,6 +162,7 @@ class EmailTemplateForm
                                         'dir' => 'ltr', 
                                         'style' => 'font-family: "Courier New", monospace; font-size: 13px; line-height: 1.5;'
                                     ])
+                                    ->formatStateUsing(fn ($state) => is_string($state) ? $state : (is_array($state) ? json_encode($state) : (string) $state))
                                     ->helperText('استخدم المتغيرات بصيغة: {{ variable_name }}')
                                     ->visible(fn ($get) => $get('_editor_mode_visual') === false),
                             ]),
@@ -171,12 +172,17 @@ class EmailTemplateForm
                             ->schema([
                                 // Variables Section
                                 Section::make('المتغيرات المتاحة')
-                                    ->description('المتغيرات التي يمكن استخدامها في القالب')
+                                    ->description('انقر على أي متغير لإدراجه في المحرر')
                                     ->icon('heroicon-o-variable')
                                     ->collapsible()
                                     ->schema([
+                                        ViewField::make('variable_buttons')
+                                            ->label(false)
+                                            ->view('filament.email-templates.variable-buttons')
+                                            ->dehydrated(false),
+                                        
                                         TagsInput::make('available_variables')
-                                            ->label('المتغيرات')
+                                            ->label('إدارة المتغيرات')
                                             ->placeholder('أضف متغير...')
                                             ->helperText('اضغط Enter لإضافة متغير جديد')
                                             ->suggestions([
@@ -201,22 +207,16 @@ class EmailTemplateForm
                                             ]),
                                     ]),
                                 
-                                // Preview Section
-                                Section::make('معاينة القالب')
-                                    ->description('شكل الرسالة بعد استبدال المتغيرات')
+                                // Live Preview Section
+                                Section::make('معاينة مباشرة')
+                                    ->description('المعاينة تتحدث تلقائياً أثناء الكتابة')
                                     ->icon('heroicon-o-eye')
                                     ->collapsible()
                                     ->collapsed()
                                     ->schema([
-                                        Textarea::make('preview_placeholder')
+                                        ViewField::make('live_preview')
                                             ->label(false)
-                                            ->disabled()
-                                            ->rows(20)
-                                            ->placeholder('قم بحفظ القالب أولاً لرؤية المعاينة...')
-                                            ->helperText('سيتم عرض القالب مع بيانات تجريبية')
-                                            ->extraAttributes([
-                                                'style' => 'background-color: #f9fafb; border: 1px dashed #d1d5db;'
-                                            ])
+                                            ->view('filament.email-templates.live-preview')
                                             ->dehydrated(false),
                                     ]),
                             ]),
