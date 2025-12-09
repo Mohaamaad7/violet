@@ -1,31 +1,40 @@
 <div 
     x-data="{ 
         variables: {{ Js::from($getRecord()?->available_variables ?? []) }},
+        openBrace: String.fromCharCode(123, 123),
+        closeBrace: String.fromCharCode(125, 125),
+        
+        getVariableDisplay(variable) {
+            return this.openBrace + ' ' + variable + ' ' + this.closeBrace;
+        },
         
         insertVariable(variable) {
+            const variableText = this.openBrace + ' ' + variable + ' ' + this.closeBrace;
+            
             // Get the editor mode
             const visualMode = document.querySelector('[name=_editor_mode_visual]')?.checked;
             
             if (visualMode) {
                 // Insert into RichEditor (TipTap)
-                // Find the TipTap editor instance
-                const editorWrapper = document.querySelector('[wire\\\\:key*=content_html]');
+                const editorWrapper = document.querySelector('[wire\\:key*=content_html]');
                 if (editorWrapper) {
                     const editor = editorWrapper.__tiptap?.editor;
                     if (editor) {
-                        editor.chain().focus().insertContent('{{ ' + variable + ' }}').run();
+                        editor.chain().focus().insertContent(variableText).run();
                         
                         // Show success notification
-                        new window.FilamentNotification()
-                            .title('تم إدراج المتغير')
-                            .body('{{ ' + variable + ' }}')
-                            .success()
-                            .send();
+                        if (window.FilamentNotification) {
+                            new window.FilamentNotification()
+                                .title('تم إدراج المتغير')
+                                .body(variableText)
+                                .success()
+                                .send();
+                        }
                     }
                 }
             } else {
                 // Insert into Textarea (HTML mode)
-                const textarea = document.querySelector('textarea[wire\\\\:model\\.live=\"data.content_html\"]');
+                const textarea = document.querySelector('textarea[wire\\:model\\.live=\"data.content_html\"]');
                 if (textarea) {
                     const start = textarea.selectionStart;
                     const end = textarea.selectionEnd;
@@ -33,7 +42,6 @@
                     const before = text.substring(0, start);
                     const after = text.substring(end, text.length);
                     
-                    const variableText = '{{ ' + variable + ' }}';
                     textarea.value = before + variableText + after;
                     
                     // Move cursor after inserted text
@@ -43,11 +51,13 @@
                     textarea.dispatchEvent(new Event('input', { bubbles: true }));
                     
                     // Show success notification
-                    new window.FilamentNotification()
-                        .title('تم إدراج المتغير')
-                        .body(variableText)
-                        .success()
-                        .send();
+                    if (window.FilamentNotification) {
+                        new window.FilamentNotification()
+                            .title('تم إدراج المتغير')
+                            .body(variableText)
+                            .success()
+                            .send();
+                    }
                 }
             }
         }
@@ -65,7 +75,7 @@
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
-                <code class="text-xs" x-text="'{{ ' + variable + ' }}'"></code>
+                <code class="text-xs" x-text="getVariableDisplay(variable)"></code>
             </button>
         </template>
     </div>
