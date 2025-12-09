@@ -124,6 +124,12 @@ class EmailTemplateForm
                                     ->live()
                                     ->dehydrated(false), // Don't save this to database
                                 
+                                // TipTap to HTML Converter Script
+                                ViewField::make('tiptap_converter')
+                                    ->label(false)
+                                    ->view('filament.email-templates.tiptap-to-html')
+                                    ->dehydrated(false),
+                                
                                 // Visual Editor (RichEditor)
                                 RichEditor::make('content_html')
                                     ->label('المحرر المرئي')
@@ -150,6 +156,15 @@ class EmailTemplateForm
                                         '#6b7280' => 'رمادي',
                                         '#ffffff' => 'أبيض',
                                     ])
+                                    ->dehydrateStateUsing(function ($state, $component) {
+                                        // Convert TipTap JSON to HTML when saving
+                                        if (is_array($state) || is_object($state)) {
+                                            // TipTap stores as JSON, we need HTML
+                                            // This is a fallback - ideally handled by JS before submit
+                                            return json_encode($state);
+                                        }
+                                        return $state;
+                                    })
                                     ->helperText('انقر على المتغيرات من القائمة اليسرى لإدراجها')
                                     ->visible(fn ($get) => $get('_editor_mode_visual') === true),
                                 
@@ -162,7 +177,21 @@ class EmailTemplateForm
                                         'dir' => 'ltr', 
                                         'style' => 'font-family: "Courier New", monospace; font-size: 13px; line-height: 1.5;'
                                     ])
-                                    ->formatStateUsing(fn ($state) => is_string($state) ? $state : (is_array($state) ? json_encode($state) : (string) $state))
+                                    ->formatStateUsing(function ($state) {
+                                        // If it's already HTML string, return as-is
+                                        if (is_string($state) && (str_starts_with(trim($state), '<') || empty($state))) {
+                                            return $state;
+                                        }
+                                        
+                                        // If it's TipTap JSON (array/object), try to extract HTML
+                                        if (is_array($state) && isset($state['content'])) {
+                                            // This is TipTap JSON format - needs conversion
+                                            // For now, show warning message
+                                            return '<!-- ⚠️ This content is stored as TipTap JSON. Please use Visual Editor mode or re-save as HTML. -->\n\n' . json_encode($state, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+                                        }
+                                        
+                                        return is_string($state) ? $state : '';
+                                    })
                                     ->helperText('استخدم المتغيرات بصيغة: {{ variable_name }}')
                                     ->visible(fn ($get) => $get('_editor_mode_visual') === false),
                             ]),
