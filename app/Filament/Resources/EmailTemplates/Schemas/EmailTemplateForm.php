@@ -15,6 +15,7 @@ use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Str;
+use Tiptap\Editor as TiptapEditor;
 
 class EmailTemplateForm
 {
@@ -156,14 +157,19 @@ class EmailTemplateForm
                                         '#6b7280' => 'رمادي',
                                         '#ffffff' => 'أبيض',
                                     ])
-                                    ->dehydrateStateUsing(function ($state, $component) {
-                                        // Convert TipTap JSON to HTML when saving
-                                        if (is_array($state) || is_object($state)) {
-                                            // TipTap stores as JSON, we need HTML
-                                            // This is a fallback - ideally handled by JS before submit
-                                            return json_encode($state);
+                                    ->dehydrateStateUsing(function ($state) {
+                                        // Convert TipTap JSON to HTML when saving using TipTap PHP
+                                        if (is_array($state) && isset($state['type'])) {
+                                            try {
+                                                return (new TiptapEditor())
+                                                    ->setContent($state)
+                                                    ->getHTML();
+                                            } catch (\Exception $e) {
+                                                // Fallback to JSON if conversion fails
+                                                return json_encode($state);
+                                            }
                                         }
-                                        return $state;
+                                        return is_string($state) ? $state : '';
                                     })
                                     ->helperText('انقر على المتغيرات من القائمة اليسرى لإدراجها')
                                     ->visible(fn ($get) => $get('_editor_mode_visual') === true),
@@ -183,11 +189,16 @@ class EmailTemplateForm
                                             return $state;
                                         }
                                         
-                                        // If it's TipTap JSON (array/object), try to extract HTML
-                                        if (is_array($state) && isset($state['content'])) {
-                                            // This is TipTap JSON format - needs conversion
-                                            // For now, show warning message
-                                            return '<!-- ⚠️ This content is stored as TipTap JSON. Please use Visual Editor mode or re-save as HTML. -->\n\n' . json_encode($state, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+                                        // If it's TipTap JSON (array/object), convert to HTML using TipTap PHP
+                                        if (is_array($state) && isset($state['type'])) {
+                                            try {
+                                                return (new TiptapEditor())
+                                                    ->setContent($state)
+                                                    ->getHTML();
+                                            } catch (\Exception $e) {
+                                                // Fallback to JSON if conversion fails
+                                                return json_encode($state, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+                                            }
                                         }
                                         
                                         return is_string($state) ? $state : '';

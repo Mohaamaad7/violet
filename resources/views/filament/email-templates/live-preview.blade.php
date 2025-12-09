@@ -1,8 +1,77 @@
 <div 
     x-data="{ 
-        content: @entangle('data.content_html').live,
+        rawContent: @entangle('data.content_html').live,
         availableVariables: {{ Js::from($getRecord()?->available_variables ?? []) }},
         sampleData: @js($getRecord() ? app(\App\Services\EmailTemplateService::class)->getSampleData($getRecord()) : []),
+        
+        get content() {
+            // Convert TipTap JSON to HTML if needed
+            if (this.rawContent && typeof this.rawContent === 'object' && this.rawContent.type === 'doc') {
+                return this.tiptapToHtml(this.rawContent);
+            }
+            return this.rawContent || '';
+        },
+        
+        tiptapToHtml(doc) {
+            if (!doc || !doc.content) return '';
+            return this.renderNodes(doc.content);
+        },
+        
+        renderNodes(nodes) {
+            if (!Array.isArray(nodes)) return '';
+            return nodes.map(node => this.renderNode(node)).join('');
+        },
+        
+        renderNode(node) {
+            if (!node) return '';
+            
+            switch (node.type) {
+                case 'paragraph':
+                    const pAttrs = node.attrs?.textAlign ? ` style=\"text-align: ${node.attrs.textAlign}\"` : '';
+                    return `<p${pAttrs}>${this.renderNodes(node.content || [])}</p>`;
+                case 'heading':
+                    const level = node.attrs?.level || 1;
+                    return `<h${level}>${this.renderNodes(node.content || [])}</h${level}>`;
+                case 'text':
+                    let text = node.text || '';
+                    if (node.marks) {
+                        node.marks.forEach(mark => {
+                            switch (mark.type) {
+                                case 'bold': text = `<strong>${text}</strong>`; break;
+                                case 'italic': text = `<em>${text}</em>`; break;
+                                case 'underline': text = `<u>${text}</u>`; break;
+                                case 'strike': text = `<s>${text}</s>`; break;
+                                case 'link': text = `<a href=\"${mark.attrs?.href || '#'}\">${text}</a>`; break;
+                                case 'textStyle': 
+                                    if (mark.attrs?.color) text = `<span style=\"color: ${mark.attrs.color}\">${text}</span>`;
+                                    break;
+                            }
+                        });
+                    }
+                    return text;
+                case 'bulletList':
+                    return `<ul>${this.renderNodes(node.content || [])}</ul>`;
+                case 'orderedList':
+                    return `<ol>${this.renderNodes(node.content || [])}</ol>`;
+                case 'listItem':
+                    return `<li>${this.renderNodes(node.content || [])}</li>`;
+                case 'table':
+                    return `<table border=\"1\" cellpadding=\"8\" cellspacing=\"0\" style=\"border-collapse: collapse; width: 100%;\">${this.renderNodes(node.content || [])}</table>`;
+                case 'tableRow':
+                    return `<tr>${this.renderNodes(node.content || [])}</tr>`;
+                case 'tableCell':
+                case 'tableHeader':
+                    const tag = node.type === 'tableHeader' ? 'th' : 'td';
+                    const cellStyle = node.attrs?.textAlign ? ` style=\"text-align: ${node.attrs.textAlign}\"` : '';
+                    return `<${tag}${cellStyle}>${this.renderNodes(node.content || [])}</${tag}>`;
+                case 'blockquote':
+                    return `<blockquote style=\"border-right: 4px solid #ccc; padding-right: 1rem; margin-right: 0;\">${this.renderNodes(node.content || [])}</blockquote>`;
+                case 'hardBreak':
+                    return '<br>';
+                default:
+                    return this.renderNodes(node.content || []);
+            }
+        },
         
         replaceVariables(html) {
             if (!html || typeof html !== 'string') return '';
