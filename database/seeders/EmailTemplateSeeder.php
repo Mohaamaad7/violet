@@ -37,6 +37,7 @@ class EmailTemplateSeeder extends Seeder
                     'order_number', 'order_total', 'order_subtotal', 'order_shipping',
                     'order_discount', 'order_date', 'order_items_count', 'order_status',
                     'user_name', 'user_email', 'user_phone',
+                    'product_name', 'product_price',
                     'shipping_name', 'shipping_address', 'shipping_city', 'shipping_governorate',
                     'track_url', 'app_name', 'app_url', 'support_email', 'current_year',
                 ],
@@ -55,7 +56,8 @@ class EmailTemplateSeeder extends Seeder
                 'content_html' => $this->loadTemplate('order-status-update.html'),
                 'available_variables' => [
                     'order_number', 'order_status', 'order_total', 'order_date',
-                    'user_name', 'track_url', 'app_name', 'app_url', 'support_email', 'current_year',
+                    'user_name', 'product_name',
+                    'track_url', 'app_name', 'app_url', 'support_email', 'current_year',
                 ],
                 'is_active' => true,
             ],
@@ -105,6 +107,7 @@ class EmailTemplateSeeder extends Seeder
                 'available_variables' => [
                     'order_number', 'order_total', 'order_date', 'order_items_count',
                     'user_name', 'user_email', 'user_phone',
+                    'product_name',
                     'shipping_address', 'shipping_city', 'shipping_governorate',
                     'app_name', 'app_url', 'current_year',
                 ],
