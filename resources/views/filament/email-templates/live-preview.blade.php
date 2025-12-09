@@ -48,7 +48,7 @@
         <!-- Preview Info -->
         <div class="px-4 py-2 bg-gray-50 dark:bg-gray-800 border-t border-gray-300 dark:border-gray-600">
             <p class="text-xs text-gray-500 dark:text-gray-400">
-                💡 <strong>ملاحظة:</strong> المتغيرات (مثل <code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-gray-800 dark:text-gray-200">{{ '{{ order_number }}' }}</code>) 
+                💡 <strong>ملاحظة:</strong> المتغيرات (مثل <code class="px-1 py-0.5 bg-gray-200 dark:bg-gray-700 rounded text-gray-800 dark:text-gray-200">@{{ order_number }}</code>) 
                 يتم استبدالها ببيانات تجريبية للمعاينة فقط.
             </p>
         </div>
