@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\Customer;
+use App\Models\Order;
 use App\Services\CartService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
@@ -50,6 +51,8 @@ class GoogleController extends Controller
             // Get guest session ID before login (for cart merge)
             $guestSessionId = Cookie::get('cart_session_id');
 
+            $isNewCustomer = false;
+
             if ($customer) {
                 // Existing customer - just log them in
                 Auth::guard('customer')->login($customer, remember: true);
@@ -70,6 +73,7 @@ class GoogleController extends Controller
                 ]);
 
                 Auth::guard('customer')->login($customer, remember: true);
+                $isNewCustomer = true;
 
                 Log::info('Google OAuth: New customer created', [
                     'customer_id' => $customer->id,
@@ -85,6 +89,11 @@ class GoogleController extends Controller
                 } catch (\Exception $e) {
                     Log::warning('Google OAuth: Cart merge failed', ['error' => $e->getMessage()]);
                 }
+            }
+
+            // Migrate guest orders to this customer (for new customers)
+            if ($isNewCustomer) {
+                $this->migrateGuestOrders($customer);
             }
 
             // Redirect to intended URL or home
@@ -104,6 +113,44 @@ class GoogleController extends Controller
 
             return redirect('/login')
                 ->with('error', __('auth.google_login_failed'));
+        }
+    }
+
+    /**
+     * Migrate guest orders to the newly registered customer.
+     * Matches by email or phone number.
+     */
+    protected function migrateGuestOrders(Customer $customer): void
+    {
+        try {
+            // Find guest orders matching this customer's email
+            $guestOrders = Order::whereNull('customer_id')
+                ->where('guest_email', $customer->email)
+                ->get();
+
+            // Link these orders to the customer
+            foreach ($guestOrders as $order) {
+                $order->update([
+                    'customer_id' => $customer->id,
+                ]);
+            }
+
+            // Update customer statistics
+            if ($guestOrders->count() > 0) {
+                $customer->update([
+                    'total_orders' => $customer->orders()->count(),
+                    'total_spent' => $customer->orders()
+                        ->whereIn('status', ['delivered', 'processing', 'shipped'])
+                        ->sum('total'),
+                ]);
+
+                Log::info('Google OAuth: Migrated guest orders', [
+                    'customer_id' => $customer->id,
+                    'orders_count' => $guestOrders->count(),
+                ]);
+            }
+        } catch (\Exception $e) {
+            Log::warning('Google OAuth: Guest order migration failed', ['error' => $e->getMessage()]);
         }
     }
 }

@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Customer;
+use App\Models\Order;
 use App\Services\CartService;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Auth;
@@ -20,7 +21,7 @@ new #[Layout('layouts.auth')] class extends Component {
     /**
      * Handle an incoming registration request.
      * Creates a Customer (not User) and uses customer guard.
-     * Includes cart merge for guest carts.
+     * Includes cart merge and guest orders migration.
      */
     public function register(): void
     {
@@ -51,7 +52,46 @@ new #[Layout('layouts.auth')] class extends Component {
             $cartService->mergeGuestCart($guestSessionId, $customer->id);
         }
 
+        // Migrate guest orders to this customer
+        // Match by email or phone
+        $this->migrateGuestOrders($customer);
+
         $this->redirect(route('home', absolute: false), navigate: true);
+    }
+
+    /**
+     * Migrate guest orders to the newly registered customer.
+     * Matches by email or phone number.
+     */
+    protected function migrateGuestOrders(Customer $customer): void
+    {
+        // Find guest orders matching this customer's email or phone
+        $guestOrders = Order::whereNull('customer_id')
+            ->where(function ($query) use ($customer) {
+                $query->where('guest_email', $customer->email);
+
+                if ($customer->phone) {
+                    $query->orWhere('guest_phone', $customer->phone);
+                }
+            })
+            ->get();
+
+        // Link these orders to the customer
+        foreach ($guestOrders as $order) {
+            $order->update([
+                'customer_id' => $customer->id,
+            ]);
+        }
+
+        // Update customer statistics
+        if ($guestOrders->count() > 0) {
+            $customer->update([
+                'total_orders' => $customer->orders()->count(),
+                'total_spent' => $customer->orders()
+                    ->whereIn('status', ['delivered', 'processing', 'shipped'])
+                    ->sum('total'),
+            ]);
+        }
     }
 }; ?>
 
@@ -120,7 +160,8 @@ new #[Layout('layouts.auth')] class extends Component {
             <span wire:loading.remove>{{ __('messages.register') }}</span>
             <span wire:loading class="flex items-center gap-2">
                 <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4">
+                    </circle>
                     <path class="opacity-75" fill="currentColor"
                         d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
                     </path>
