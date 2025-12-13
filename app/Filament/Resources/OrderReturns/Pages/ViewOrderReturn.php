@@ -206,34 +206,14 @@ class ViewOrderReturn extends ViewRecord
                                 TextEntry::make('type')
                                     ->label('النوع')
                                     ->badge()
-                                    ->color(fn(string $state): string => match ($state) {
-                                        'rejection' => 'danger',
-                                        'return_after_delivery' => 'warning',
-                                        default => 'gray',
-                                    })
-                                    ->formatStateUsing(fn(string $state): string => match ($state) {
-                                        'rejection' => '🔴 رفض استلام',
-                                        'return_after_delivery' => '🟡 استرجاع بعد التسليم',
-                                        default => $state,
-                                    }),
+                                    ->color(fn($state) => $state?->color() ?? 'gray')
+                                    ->formatStateUsing(fn($state) => $state?->label() ?? '-'),
 
                                 TextEntry::make('status')
                                     ->label('الحالة')
                                     ->badge()
-                                    ->color(fn(string $state): string => match ($state) {
-                                        'pending' => 'warning',
-                                        'approved' => 'info',
-                                        'rejected' => 'danger',
-                                        'completed' => 'success',
-                                        default => 'gray',
-                                    })
-                                    ->formatStateUsing(fn(string $state): string => match ($state) {
-                                        'pending' => '⏳ قيد المراجعة',
-                                        'approved' => '✅ تمت الموافقة',
-                                        'rejected' => '❌ مرفوض',
-                                        'completed' => '✅ مكتمل',
-                                        default => $state,
-                                    }),
+                                    ->color(fn($state) => $state?->color() ?? 'gray')
+                                    ->formatStateUsing(fn($state) => $state?->label() ?? '-'),
                             ]),
 
                         TextEntry::make('reason')
