@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Admin;
 
+use App\Enums\OrderStatus;
 use App\Models\Product;
 use App\Models\Category;
 use App\Models\Order;
@@ -32,7 +33,7 @@ class Dashboard extends Component
             ],
             'orders' => [
                 'total' => Order::count(),
-                'pending' => Order::where('status', 'pending')->count(),
+                'pending' => Order::where('status', OrderStatus::PENDING)->count(),
                 'total_revenue' => Order::where('payment_status', 'paid')->sum('total'),
             ],
             'users' => [

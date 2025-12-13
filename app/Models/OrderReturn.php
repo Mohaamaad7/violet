@@ -69,17 +69,17 @@ class OrderReturn extends Model
     // Scopes
     public function scopePending($query)
     {
-        return $query->where('status', 'pending');
+        return $query->where('status', ReturnStatus::PENDING);
     }
 
     public function scopeApproved($query)
     {
-        return $query->where('status', 'approved');
+        return $query->where('status', ReturnStatus::APPROVED);
     }
 
     public function scopeCompleted($query)
     {
-        return $query->where('status', 'completed');
+        return $query->where('status', ReturnStatus::COMPLETED);
     }
 
     public function scopeOfType($query, string $type)

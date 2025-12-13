@@ -335,11 +335,11 @@ class OrderService
 
         return [
             'total_orders' => (clone $query)->count(),
-            'pending_orders' => (clone $query)->where('status', 'pending')->count(),
-            'processing_orders' => (clone $query)->where('status', 'processing')->count(),
-            'shipped_orders' => (clone $query)->where('status', 'shipped')->count(),
-            'delivered_orders' => (clone $query)->where('status', 'delivered')->count(),
-            'cancelled_orders' => (clone $query)->where('status', 'cancelled')->count(),
+            'pending_orders' => (clone $query)->where('status', OrderStatus::PENDING)->count(),
+            'processing_orders' => (clone $query)->where('status', OrderStatus::PROCESSING)->count(),
+            'shipped_orders' => (clone $query)->where('status', OrderStatus::SHIPPED)->count(),
+            'delivered_orders' => (clone $query)->where('status', OrderStatus::DELIVERED)->count(),
+            'cancelled_orders' => (clone $query)->where('status', OrderStatus::CANCELLED)->count(),
             'total_revenue' => (clone $query)->where('payment_status', 'paid')->sum('total'),
             'pending_revenue' => (clone $query)->where('payment_status', 'pending')->sum('total'),
         ];

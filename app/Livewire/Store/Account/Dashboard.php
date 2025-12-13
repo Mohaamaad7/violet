@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Store\Account;
 
+use App\Enums\OrderStatus;
 use App\Models\Customer;
 use App\Models\Order;
 use App\Models\ShippingAddress;
@@ -42,11 +43,11 @@ class Dashboard extends Component
         // Get order statistics
         $stats = [
             'total_orders' => Order::where('customer_id', $customerId)->count(),
-            'pending_orders' => Order::where('customer_id', $customerId)->where('status', 'pending')->count(),
-            'processing_orders' => Order::where('customer_id', $customerId)->where('status', 'processing')->count(),
-            'delivered_orders' => Order::where('customer_id', $customerId)->where('status', 'delivered')->count(),
+            'pending_orders' => Order::where('customer_id', $customerId)->where('status', OrderStatus::PENDING)->count(),
+            'processing_orders' => Order::where('customer_id', $customerId)->where('status', OrderStatus::PROCESSING)->count(),
+            'delivered_orders' => Order::where('customer_id', $customerId)->where('status', OrderStatus::DELIVERED)->count(),
             'total_spent' => Order::where('customer_id', $customerId)
-                ->whereIn('status', ['delivered', 'processing', 'shipped'])
+                ->whereIn('status', [OrderStatus::DELIVERED, OrderStatus::PROCESSING, OrderStatus::SHIPPED])
                 ->sum('total'),
         ];
 

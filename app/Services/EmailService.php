@@ -13,7 +13,8 @@ class EmailService
 {
     public function __construct(
         protected EmailTemplateService $templateService
-    ) {}
+    ) {
+    }
 
     /**
      * Send email using a template.
@@ -218,17 +219,9 @@ class EmailService
      */
     protected function getOrderVariables(\App\Models\Order $order): array
     {
-        $statusLabels = [
-            'pending' => 'قيد الانتظار',
-            'processing' => 'قيد التجهيز',
-            'shipped' => 'تم الشحن',
-            'delivered' => 'تم التوصيل',
-            'cancelled' => 'ملغي',
-        ];
-
         return [
             'order_number' => $order->order_number,
-            'order_status' => $statusLabels[$order->status] ?? $order->status,
+            'order_status' => $order->status?->label() ?? 'غير محدد',
             'order_total' => number_format($order->total, 2) . ' ج.م',
             'order_subtotal' => number_format($order->subtotal, 2) . ' ج.م',
             'order_shipping' => number_format($order->shipping_cost, 2) . ' ج.م',

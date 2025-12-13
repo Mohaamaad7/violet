@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\OrderStatus;
 use App\Models\Customer;
 use App\Models\Order;
 use App\Models\Product;
@@ -52,7 +53,7 @@ class ReviewService
 
         // Check if customer has a delivered order with this product
         return Order::where('customer_id', $customerId)
-            ->where('status', 'delivered')
+            ->where('status', OrderStatus::DELIVERED)
             ->whereHas('items', function ($query) use ($productId) {
                 $query->where('product_id', $productId);
             })
@@ -103,7 +104,7 @@ class ReviewService
         }
 
         $order = Order::where('customer_id', $customerId)
-            ->where('status', 'delivered')
+            ->where('status', OrderStatus::DELIVERED)
             ->whereHas('items', function ($query) use ($productId) {
                 $query->where('product_id', $productId);
             })

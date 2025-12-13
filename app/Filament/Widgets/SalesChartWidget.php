@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Enums\OrderStatus;
 use App\Models\Order;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Carbon;
@@ -75,7 +76,7 @@ class SalesChartWidget extends ChartWidget
 
         // Get revenue data grouped by date
         $revenueData = Order::query()
-            ->whereIn('status', ['delivered', 'completed'])
+            ->whereIn('status', [OrderStatus::DELIVERED])
             ->where('payment_status', 'paid')
             ->whereBetween('created_at', [
                 now()->subDays($days - 1)->startOfDay(),

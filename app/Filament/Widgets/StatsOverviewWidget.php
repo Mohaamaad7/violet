@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Enums\OrderStatus;
 use App\Models\Customer;
 use App\Models\Order;
 use App\Models\Product;
@@ -40,13 +41,13 @@ class StatsOverviewWidget extends BaseWidget
     protected function getTodayRevenueCard(): Stat
     {
         $todayRevenue = Order::whereDate('created_at', today())
-            ->whereIn('status', ['delivered', 'completed'])
+            ->whereIn('status', [OrderStatus::DELIVERED])
             ->where('payment_status', 'paid')
             ->sum('total');
 
         // Calculate percentage change from yesterday
         $yesterdayRevenue = Order::whereDate('created_at', today()->subDay())
-            ->whereIn('status', ['delivered', 'completed'])
+            ->whereIn('status', [OrderStatus::DELIVERED])
             ->where('payment_status', 'paid')
             ->sum('total');
 
@@ -154,7 +155,7 @@ class StatsOverviewWidget extends BaseWidget
         for ($i = 6; $i >= 0; $i--) {
             $date = today()->subDays($i);
             $revenue = Order::whereDate('created_at', $date)
-                ->whereIn('status', ['delivered', 'completed'])
+                ->whereIn('status', [OrderStatus::DELIVERED])
                 ->where('payment_status', 'paid')
                 ->sum('total');
             $data[] = (float) $revenue;

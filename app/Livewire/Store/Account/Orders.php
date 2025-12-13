@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Store\Account;
 
+use App\Enums\OrderStatus;
 use App\Models\Customer;
 use App\Models\Order;
 use Illuminate\Support\Facades\Auth;
@@ -73,11 +74,11 @@ class Orders extends Component
         // Get status counts for filter badges
         $statusCounts = [
             'all' => Order::where('customer_id', $customerId)->count(),
-            'pending' => Order::where('customer_id', $customerId)->where('status', 'pending')->count(),
-            'processing' => Order::where('customer_id', $customerId)->where('status', 'processing')->count(),
-            'shipped' => Order::where('customer_id', $customerId)->where('status', 'shipped')->count(),
-            'delivered' => Order::where('customer_id', $customerId)->where('status', 'delivered')->count(),
-            'cancelled' => Order::where('customer_id', $customerId)->where('status', 'cancelled')->count(),
+            'pending' => Order::where('customer_id', $customerId)->where('status', OrderStatus::PENDING)->count(),
+            'processing' => Order::where('customer_id', $customerId)->where('status', OrderStatus::PROCESSING)->count(),
+            'shipped' => Order::where('customer_id', $customerId)->where('status', OrderStatus::SHIPPED)->count(),
+            'delivered' => Order::where('customer_id', $customerId)->where('status', OrderStatus::DELIVERED)->count(),
+            'cancelled' => Order::where('customer_id', $customerId)->where('status', OrderStatus::CANCELLED)->count(),
         ];
 
         return view('livewire.store.account.orders', [

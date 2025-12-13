@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Enums\ReturnStatus;
 use App\Models\OrderReturn;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
@@ -12,8 +13,8 @@ class PendingReturnsWidget extends StatsOverviewWidget
 
     protected function getStats(): array
     {
-        $pendingReturns = OrderReturn::where('status', 'pending')->count();
-        $approvedReturns = OrderReturn::where('status', 'approved')->count();
+        $pendingReturns = OrderReturn::where('status', ReturnStatus::PENDING)->count();
+        $approvedReturns = OrderReturn::where('status', ReturnStatus::APPROVED)->count();
         $totalReturnsThisMonth = OrderReturn::whereMonth('created_at', now()->month)->count();
 
         return [
