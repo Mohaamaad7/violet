@@ -421,22 +421,8 @@ class ViewOrder extends ViewRecord
                                 TextEntry::make('status')
                                     ->label('حالة الطلب')
                                     ->badge()
-                                    ->color(fn(string $state): string => match ($state) {
-                                        'pending' => 'warning',
-                                        'processing' => 'info',
-                                        'shipped' => 'primary',
-                                        'delivered' => 'success',
-                                        'cancelled' => 'danger',
-                                        default => 'gray',
-                                    })
-                                    ->formatStateUsing(fn(string $state): string => match ($state) {
-                                        'pending' => 'قيد الانتظار',
-                                        'processing' => 'قيد التجهيز',
-                                        'shipped' => 'تم الشحن',
-                                        'delivered' => 'تم التسليم',
-                                        'cancelled' => 'ملغي',
-                                        default => $state,
-                                    }),
+                                    ->color(fn($state) => $state?->color() ?? 'gray')
+                                    ->formatStateUsing(fn($state) => $state?->label() ?? '-'),
 
                                 TextEntry::make('payment_status')
                                     ->label('حالة الدفع')
@@ -739,7 +725,7 @@ class ViewOrder extends ViewRecord
                                         TextEntry::make('status')
                                             ->label('الحالة الجديدة')
                                             ->badge()
-                                            ->color(fn(string $state): string => match ($state) {
+                                            ->color(fn($state) => is_object($state) ? $state->color() : match ($state) {
                                                 'pending' => 'warning',
                                                 'processing' => 'info',
                                                 'shipped' => 'primary',
@@ -747,7 +733,7 @@ class ViewOrder extends ViewRecord
                                                 'cancelled' => 'danger',
                                                 default => 'gray',
                                             })
-                                            ->formatStateUsing(fn(string $state): string => match ($state) {
+                                            ->formatStateUsing(fn($state) => is_object($state) ? $state->label() : match ($state) {
                                                 'pending' => 'قيد الانتظار',
                                                 'processing' => 'قيد التجهيز',
                                                 'shipped' => 'تم الشحن',
