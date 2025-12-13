@@ -153,20 +153,23 @@ class OrderService
 
         $previousStatus = $order->status;
 
+        // Convert string to enum
+        $statusEnum = OrderStatus::fromString($status);
+
         // Update status
-        $order->update(['status' => $status]);
+        $order->update(['status' => $statusEnum]);
 
         // Update status-specific timestamps
-        match ($status) {
-            'processing' => $order->update(['shipped_at' => null]),
-            'shipped' => $order->update(['shipped_at' => now()]),
-            'delivered' => $order->update(['delivered_at' => now()]),
-            'cancelled' => $this->handleCancellation($order, $notes),
+        match ($statusEnum) {
+            OrderStatus::PROCESSING => $order->update(['shipped_at' => null]),
+            OrderStatus::SHIPPED => $order->update(['shipped_at' => now()]),
+            OrderStatus::DELIVERED => $order->update(['delivered_at' => now()]),
+            OrderStatus::CANCELLED => $this->handleCancellation($order, $notes),
             default => null
         };
 
         // DIRECT CALL: Handle stock deduction when shipped
-        if ($status === 'shipped' && $previousStatus !== OrderStatus::SHIPPED) {
+        if ($statusEnum === OrderStatus::SHIPPED && $previousStatus !== OrderStatus::SHIPPED) {
             $stockResult = $this->deductStockForOrder($order);
             if (!$stockResult['success']) {
                 \Log::warning("Stock deduction failed for Order #{$order->order_number}: {$stockResult['message']}");
@@ -174,7 +177,7 @@ class OrderService
         }
 
         // DIRECT CALL: Handle stock restoration when cancelled (if was shipped)
-        if ($status === 'cancelled' && $previousStatus === OrderStatus::SHIPPED && $order->stock_deducted_at) {
+        if ($statusEnum === OrderStatus::CANCELLED && $previousStatus === OrderStatus::SHIPPED && $order->stock_deducted_at) {
             $restockResult = $this->restockRejectedOrder($order);
             if (!$restockResult['success']) {
                 \Log::warning("Stock restoration failed for Order #{$order->order_number}: {$restockResult['message']}");
@@ -184,11 +187,11 @@ class OrderService
         // Reload relationships for the updated order
         $order->load(['items.product', 'user', 'customer']);
 
-        // Add to status history
-        $this->addStatusHistory($id, $status, $notes, $changedBy ?? auth()->id());
+        // Add to status history (pass string for history table)
+        $this->addStatusHistory($id, $statusEnum->toString(), $notes, $changedBy ?? auth()->id());
 
         // Send status update email to customer in background (non-blocking)
-        if ($previousStatus !== $status) {
+        if ($previousStatus !== $statusEnum) {
             try {
                 // Dispatch email job to queue instead of sending immediately
                 dispatch(function () use ($order) {
