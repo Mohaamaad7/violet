@@ -15,8 +15,10 @@ return new class extends Migration {
         // خطوة التنظيف: حذف بيانات المرتجعات القديمة
         // (آمن لأن User قال يمكن فقدان الطلبات والعملاء)
         // ============================================
+        DB::statement('SET FOREIGN_KEY_CHECKS = 0');
         DB::table('return_items')->truncate();
         DB::table('returns')->truncate();
+        DB::statement('SET FOREIGN_KEY_CHECKS = 1');
 
         // ============================================
         // تحويل Orders status
