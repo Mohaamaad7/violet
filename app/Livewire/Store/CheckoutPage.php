@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Store;
 
+use App\Enums\OrderStatus;
 use App\Models\Customer;
 use App\Models\Order;
 use App\Models\OrderItem;
@@ -354,7 +355,7 @@ class CheckoutPage extends Component
                     'guest_governorate' => $guestAddressData['governorate'] ?? null,
                     'guest_city' => $guestAddressData['city'] ?? null,
                     'guest_address' => $guestAddressData['address'] ?? null,
-                    'status' => 'pending',
+                    'status' => OrderStatus::PENDING,
                     'payment_status' => 'unpaid', // COD = unpaid until delivery
                     'payment_method' => 'cod',
                     'subtotal' => $this->subtotal,
