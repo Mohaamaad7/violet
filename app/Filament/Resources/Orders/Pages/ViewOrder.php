@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Orders\Pages;
 
+use App\Enums\OrderStatus;
 use App\Filament\Resources\Orders\OrderResource;
 use App\Services\OrderService;
 use App\Services\ReturnService;
@@ -136,29 +137,29 @@ class ViewOrder extends ViewRecord
             Action::make('createReturnRequest')
                 ->label(function () {
                     return match ($this->record->status) {
-                        'shipped' => 'رفض الاستلام',
-                        'delivered' => 'طلب مرتجع',
+                        OrderStatus::SHIPPED => 'رفض الاستلام',
+                        OrderStatus::DELIVERED => 'طلب مرتجع',
                         default => 'إنشاء طلب مرتجع'
                     };
                 })
                 ->icon('heroicon-o-arrow-uturn-left')
-                ->color(fn() => $this->record->status === 'shipped' ? 'danger' : 'warning')
+                ->color(fn() => $this->record->status === OrderStatus::SHIPPED ? 'danger' : 'warning')
                 ->visible(
                     fn() =>
-                    in_array($this->record->status, ['shipped', 'delivered']) &&
+                    in_array($this->record->status, [OrderStatus::SHIPPED, OrderStatus::DELIVERED]) &&
                     $this->record->return_status === 'none'
                 )
                 ->modalHeading(function () {
                     return match ($this->record->status) {
-                        'shipped' => 'رفض استلام الطلب',
-                        'delivered' => 'طلب استرجاع بعد التسليم',
+                        OrderStatus::SHIPPED => 'رفض استلام الطلب',
+                        OrderStatus::DELIVERED => 'طلب استرجاع بعد التسليم',
                         default => 'إنشاء طلب مرتجع'
                     };
                 })
                 ->modalDescription(function () {
                     return match ($this->record->status) {
-                        'shipped' => 'املأ البيانات التالية لرفض استلام الطلب',
-                        'delivered' => 'املأ البيانات التالية لإنشاء طلب استرجاع بعد التسليم',
+                        OrderStatus::SHIPPED => 'املأ البيانات التالية لرفض استلام الطلب',
+                        OrderStatus::DELIVERED => 'املأ البيانات التالية لإنشاء طلب استرجاع بعد التسليم',
                         default => 'املأ البيانات التالية لإنشاء طلب مرتجع'
                     };
                 })
@@ -170,8 +171,8 @@ class ViewOrder extends ViewRecord
                         ->label('نوع المرتجع')
                         ->options(function () {
                             return match ($this->record->status) {
-                                'shipped' => ['rejection' => '🔴 رفض استلام'],
-                                'delivered' => ['return_after_delivery' => '🟡 استرجاع بعد التسليم'],
+                                OrderStatus::SHIPPED => ['rejection' => '🔴 رفض استلام'],
+                                OrderStatus::DELIVERED => ['return_after_delivery' => '🟡 استرجاع بعد التسليم'],
                                 default => [
                                     'rejection' => '🔴 رفض استلام',
                                     'return_after_delivery' => '🟡 استرجاع بعد التسليم',
@@ -180,19 +181,19 @@ class ViewOrder extends ViewRecord
                         })
                         ->default(function () {
                             return match ($this->record->status) {
-                                'shipped' => 'rejection',
-                                'delivered' => 'return_after_delivery',
+                                OrderStatus::SHIPPED => 'rejection',
+                                OrderStatus::DELIVERED => 'return_after_delivery',
                                 default => null
                             };
                         })
                         ->required()
                         ->native(false)
-                        ->disabled(fn() => in_array($this->record->status, ['shipped', 'delivered']))
+                        ->disabled(fn() => in_array($this->record->status, [OrderStatus::SHIPPED, OrderStatus::DELIVERED]))
                         ->dehydrated()
                         ->helperText(function () {
                             return match ($this->record->status) {
-                                'shipped' => 'نوع المرتجع محدد تلقائيًا: رفض الاستلام',
-                                'delivered' => 'نوع المرتجع محدد تلقائيًا: استرجاع بعد التسليم',
+                                OrderStatus::SHIPPED => 'نوع المرتجع محدد تلقائيًا: رفض الاستلام',
+                                OrderStatus::DELIVERED => 'نوع المرتجع محدد تلقائيًا: استرجاع بعد التسليم',
                                 default => 'اختر نوع المرتجع حسب حالة الطلب'
                             };
                         }),
