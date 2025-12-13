@@ -51,7 +51,7 @@ class ViewOrder extends ViewRecord
                     Select::make('status')
                         ->label('الحالة الجديدة')
                         ->options(function () {
-                            $currentStatus = $this->record->status;
+                            $currentStatus = $this->record->status?->toString() ?? 'pending';
                             $allStatuses = [
                                 'pending' => 'قيد الانتظار',
                                 'processing' => 'قيد التجهيز',
@@ -97,15 +97,16 @@ class ViewOrder extends ViewRecord
 
                             return $allStatuses;
                         })
-                        ->default(fn() => $this->record->status)
+                        ->default(fn() => $this->record->status?->toString() ?? 'pending')
                         ->required()
                         ->native(false)
-                        ->disableOptionWhen(fn($value) => $value === $this->record->status),
+                        ->disableOptionWhen(fn($value) => $value === ($this->record->status?->toString() ?? '')),
                 ])
                 ->modalSubmitActionLabel('تأكيد التغيير')
                 ->before(function (array $data, OrderService $orderService): void {
                     // Prevent shipment if stock is insufficient
-                    if (isset($data['status']) && $data['status'] === 'shipped' && $this->record->status !== 'shipped') {
+                    $currentStatusString = $this->record->status?->toString() ?? '';
+                    if (isset($data['status']) && $data['status'] === 'shipped' && $currentStatusString !== 'shipped') {
                         $validation = $orderService->validateStockForShipment($this->record);
 
                         if (!$validation['canShip']) {
