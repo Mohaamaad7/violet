@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\OrderReturns\Pages;
 
+use App\Enums\ReturnStatus;
 use App\Filament\Resources\OrderReturns\OrderReturnResource;
 use App\Services\ReturnService;
 use Filament\Actions\Action;
@@ -42,7 +43,7 @@ class ViewOrderReturn extends ViewRecord
                 ->label('الموافقة على المرتجع')
                 ->icon('heroicon-o-check-circle')
                 ->color('success')
-                ->visible(fn() => $this->record->status === 'pending')
+                ->visible(fn() => $this->record->status === ReturnStatus::PENDING)
                 ->requiresConfirmation()
                 ->modalHeading('الموافقة على طلب المرتجع')
                 ->modalDescription('بعد الموافقة، يمكنك معالجة المرتجع واسترجاع المخزون.')
@@ -77,7 +78,7 @@ class ViewOrderReturn extends ViewRecord
                 ->label('رفض المرتجع')
                 ->icon('heroicon-o-x-circle')
                 ->color('danger')
-                ->visible(fn() => $this->record->status === 'pending')
+                ->visible(fn() => $this->record->status === ReturnStatus::PENDING)
                 ->requiresConfirmation()
                 ->modalHeading('رفض طلب المرتجع')
                 ->modalDescription('يرجى تحديد سبب الرفض. سيتم إعلام العميل.')
@@ -114,7 +115,7 @@ class ViewOrderReturn extends ViewRecord
                 ->label('معالجة المرتجع')
                 ->icon('heroicon-o-cog-6-tooth')
                 ->color('primary')
-                ->visible(fn() => $this->record->status === 'approved')
+                ->visible(fn() => $this->record->status === ReturnStatus::APPROVED)
                 ->modalHeading('معالجة طلب المرتجع')
                 ->modalDescription('حدد حالة كل منتج واختر ما إذا كنت تريد إعادته للمخزون.')
                 ->modalIcon('heroicon-o-cog-6-tooth')
