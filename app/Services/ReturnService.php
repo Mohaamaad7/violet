@@ -30,14 +30,17 @@ class ReturnService
             // Validate order can be returned
             $this->validateReturnRequest($order, $data['type']);
 
+            // Convert type string to enum
+            $typeEnum = is_string($data['type']) ? ReturnType::fromString($data['type']) : $data['type'];
+
             // Auto-approve rejections if enabled
-            $autoApprove = $data['type'] === 'rejection' && (bool) setting('auto_approve_rejections', false);
+            $autoApprove = $typeEnum === ReturnType::REJECTION && (bool) setting('auto_approve_rejections', false);
 
             // Create return
             $return = OrderReturn::create([
                 'order_id' => $orderId,
                 'return_number' => OrderReturn::generateReturnNumber(),
-                'type' => $data['type'],
+                'type' => $typeEnum,
                 'status' => $autoApprove ? ReturnStatus::APPROVED : ReturnStatus::PENDING,
                 'reason' => $data['reason'],
                 'customer_notes' => $data['customer_notes'] ?? null,
@@ -47,7 +50,7 @@ class ReturnService
             // Create return items
             // If rejection (shipped order), include ALL items automatically
             // If return_after_delivery (delivered order), use selected items from form
-            if ($data['type'] === 'rejection') {
+            if ($typeEnum === ReturnType::REJECTION) {
                 // رفض الاستلام: إضافة جميع أصناف الطلب تلقائياً
                 $items = $order->items->map(fn($item) => [
                     'order_item_id' => $item->id,
