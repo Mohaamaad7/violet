@@ -2,9 +2,9 @@
 
 namespace Database\Factories;
 
+use App\Models\Customer;
 use App\Models\Order;
 use App\Models\ShippingAddress;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -27,7 +27,7 @@ class OrderFactory extends Factory
         
         return [
             'order_number' => 'ORD-' . strtoupper(fake()->unique()->bothify('??####')),
-            'user_id' => User::factory(),
+            'customer_id' => Customer::factory(),
             'shipping_address_id' => null, // Will be created separately
             'status' => fake()->randomElement(['pending', 'processing', 'shipped', 'delivered']),
             'payment_status' => fake()->randomElement(['unpaid', 'paid']), // Fixed: use 'unpaid' not 'pending'

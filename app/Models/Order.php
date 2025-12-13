@@ -40,6 +40,11 @@ class Order extends Model
         'delivered_at',
         'cancelled_at',
         'cancellation_reason',
+        'return_status',
+        'rejected_at',
+        'rejection_reason',
+        'stock_deducted_at',
+        'stock_restored_at',
     ];
 
     protected $casts = [
@@ -52,6 +57,9 @@ class Order extends Model
         'shipped_at' => 'datetime',
         'delivered_at' => 'datetime',
         'cancelled_at' => 'datetime',
+        'rejected_at' => 'datetime',
+        'stock_deducted_at' => 'datetime',
+        'stock_restored_at' => 'datetime',
     ];
 
     // Relations
@@ -134,6 +142,11 @@ class Order extends Model
     public function reviews(): HasMany
     {
         return $this->hasMany(ProductReview::class);
+    }
+
+    public function returns(): HasMany
+    {
+        return $this->hasMany(OrderReturn::class);
     }
 
     // Scopes

@@ -2,10 +2,10 @@
 
 namespace Database\Factories;
 
+use App\Models\Customer;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\ProductReview;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -24,7 +24,7 @@ class ProductReviewFactory extends Factory
     {
         return [
             'product_id' => Product::factory(),
-            'user_id' => User::factory(),
+            'customer_id' => Customer::factory(),
             'order_id' => null,
             'rating' => fake()->numberBetween(1, 5),
             'title' => fake()->optional(0.7)->sentence(4),

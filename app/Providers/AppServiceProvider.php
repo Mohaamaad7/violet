@@ -22,6 +22,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Register observers
+        // TEMPORARILY DISABLED - OrderObserver causing infinite loop
+        // \App\Models\Order::observe(\App\Observers\OrderObserver::class);
+
         // Register event listeners
         \Illuminate\Support\Facades\Event::listen(
             \Illuminate\Auth\Events\Login::class,

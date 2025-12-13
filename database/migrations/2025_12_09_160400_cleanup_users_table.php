@@ -11,7 +11,7 @@ return new class extends Migration {
      */
     private function columnExists(string $tableName, string $columnName): bool
     {
-        $database = config('database.connections.mysql.database');
+        $database = DB::getDatabaseName();
         $result = DB::select("
             SELECT COUNT(*) as cnt 
             FROM information_schema.COLUMNS 
@@ -28,7 +28,7 @@ return new class extends Migration {
      */
     private function dropIndexesUsingColumn(string $tableName, string $columnName): void
     {
-        $database = config('database.connections.mysql.database');
+        $database = DB::getDatabaseName();
 
         // Find all indexes that use this column
         $indexes = DB::select("
@@ -98,9 +98,36 @@ return new class extends Migration {
 
         // Step 2: Drop user_id from tables that now use customer_id
         $this->dropColumnIfExists('carts', 'user_id');
-        $this->dropColumnIfExists('wishlists', 'user_id');
         $this->dropColumnIfExists('product_reviews', 'user_id');
         $this->dropColumnIfExists('shipping_addresses', 'user_id');
+        
+        // Step 2b: Special handling for wishlists - must drop unique constraint AND foreign key first
+        if ($this->columnExists('wishlists', 'user_id')) {
+            // Drop unique constraint that includes user_id
+            try {
+                DB::statement("ALTER TABLE `wishlists` DROP INDEX `wishlists_user_id_product_id_unique`");
+            } catch (\Exception $e) {
+                // Ignore if doesn't exist
+            }
+            
+            // Drop foreign key if it exists
+            try {
+                DB::statement("ALTER TABLE `wishlists` DROP FOREIGN KEY `wishlists_user_id_foreign`");
+            } catch (\Exception $e) {
+                // Ignore if doesn't exist
+            }
+            
+            // Drop any remaining indexes on user_id
+            $this->dropIndexesUsingColumn('wishlists', 'user_id');
+            
+            // Now drop the column - wrap in try-catch for safety
+            try {
+                DB::statement("ALTER TABLE `wishlists` DROP COLUMN `user_id`");
+            } catch (\Exception $e) {
+                // If it still fails, log the error but continue
+                \Log::warning("Failed to drop user_id from wishlists: " . $e->getMessage());
+            }
+        }
 
         // Step 3: Add unique constraint on customer_id + product_id for wishlists
         // (replacing the old user_id + product_id constraint)

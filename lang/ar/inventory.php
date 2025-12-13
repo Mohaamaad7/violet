@@ -1,0 +1,101 @@
+<?php
+
+return [
+    // Add Stock Action
+    'add_stock' => 'إضافة مخزون',
+    'quantity' => 'الكمية',
+    'notes' => 'ملاحظات',
+    'notes_placeholder' => 'مثال: شحنة جديدة واردة',
+    'stock_added_successfully' => 'تمت إضافة المخزون بنجاح',
+    'added_units' => 'تمت إضافة :quantity وحدة إلى المخزون',
+
+    // Stock Movements
+    'stock_movements' => 'حركات المخزون',
+    'stock_movement' => 'حركة مخزون',
+    'type' => 'النوع',
+    'product' => 'المنتج',
+    'stock_before' => 'المخزون قبل',
+    'stock_after' => 'المخزون بعد',
+    'low_stock_threshold' => 'الحد الأدنى للمخزون',
+    'current_stock' => 'المخزون الحالي',
+    'reference' => 'المرجع',
+    'user' => 'المستخدم',
+    'date' => 'التاريخ',
+    'system' => 'النظام',
+    
+    // Movement Types
+    'restock' => 'إعادة تخزين',
+    'sale' => 'بيع',
+    'return' => 'إرجاع',
+    'expired' => 'منتهي الصلاحية',
+    'damaged' => 'تالف',
+    'adjustment' => 'تعديل',
+    
+    // Messages
+    'no_stock_movements_yet' => 'لا توجد حركات مخزون بعد',
+    'stock_movements_description' => 'ستظهر حركات المخزون هنا عند إعادة التخزين أو البيع أو التعديل.',
+    'stock_updated_successfully' => 'تم تحديث المخزون بنجاح',
+    'new_stock_is' => 'المخزون الجديد هو',
+    'movement_type' => 'نوع الحركة',
+
+    // Returns
+    'returns' => 'المرتجعات',
+    'return' => 'مرتجع',
+    'return_number' => 'رقم المرتجع',
+    'order_number' => 'رقم الطلب',
+    'reason' => 'السبب',
+    'customer_notes' => 'ملاحظات العميل',
+    'admin_notes' => 'ملاحظات الإدارة',
+    'refund_amount' => 'مبلغ الاسترداد',
+    'refund_status' => 'حالة الاسترداد',
+    'approved_by' => 'تمت الموافقة بواسطة',
+    'approved_at' => 'تاريخ الموافقة',
+    'created_at' => 'تاريخ الإنشاء',
+    
+    // Return Types
+    'rejection' => 'رفض',
+    'return_after_delivery' => 'إرجاع بعد التسليم',
+    
+    // Return Status
+    'pending' => 'قيد الانتظار',
+    'approved' => 'موافق عليه',
+    'rejected' => 'مرفوض',
+    'completed' => 'مكتمل',
+    
+    // Return Actions
+    'approve' => 'موافقة',
+    'reject' => 'رفض',
+    'complete' => 'إكمال',
+    'rejection_reason' => 'سبب الرفض',
+    'return_approved_successfully' => 'تمت الموافقة على المرتجع بنجاح',
+    'return_rejected_successfully' => 'تم رفض المرتجع بنجاح',
+    'return_completed_successfully' => 'تم إكمال المرتجع بنجاح',
+    
+    // Return Messages
+    'no_returns_yet' => 'لا توجد مرتجعات بعد',
+    'returns_description' => 'ستظهر المرتجعات هنا عندما يطلبها العملاء.',
+
+    // Dashboard Widgets
+    'low_stock_products' => 'منتجات المخزون المنخفض',
+    'products_below_threshold' => 'منتجات أقل من الحد الأدنى',
+    'in_stock' => 'متوفر في المخزون',
+    'all_products_stocked' => 'جميع المنتجات متوفرة بكميات جيدة',
+    'out_of_stock' => 'نفذ من المخزون',
+    'products_need_restock' => 'منتجات تحتاج إعادة تخزين فوري',
+    'pending_returns' => 'المرتجعات المعلقة',
+    'awaiting_approval' => 'في انتظار الموافقة',
+    'approved_returns' => 'المرتجعات الموافق عليها',
+    'ready_to_process' => 'جاهزة للمعالجة',
+    'returns_this_month' => 'مرتجعات هذا الشهر',
+    'all_statuses' => 'جميع الحالات',
+    'total_stock_value' => 'القيمة الإجمالية للمخزون',
+    'current_stock_value' => 'القيمة البيعية الحالية',
+    'potential_profit' => 'الربح المحتمل',
+    'if_all_sold' => 'إذا تم بيع كل المخزون',
+    'total_stock_units' => 'إجمالي وحدات المخزون',
+    'all_products' => 'عبر جميع المنتجات',
+    'stock_movements_chart' => 'حركات المخزون',
+    'last_7_days' => 'آخر 7 أيام',
+    'last_14_days' => 'آخر 14 يوم',
+    'last_30_days' => 'آخر 30 يوم',
+];

@@ -2,11 +2,11 @@
 
 namespace Tests\Feature\Reviews;
 
+use App\Models\Customer;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\ProductReview;
-use App\Models\User;
 use App\Services\ReviewService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
@@ -25,23 +25,23 @@ class ProductReviewsTest extends TestCase
     /** @test */
     public function user_cannot_review_product_without_delivered_order(): void
     {
-        $user = User::factory()->create();
+        $customer = Customer::factory()->create();
         $product = Product::factory()->create();
         
         $service = app(ReviewService::class);
         
-        $this->actingAs($user);
+        $this->actingAs($customer, 'customer');
         $this->assertFalse($service->canReview($product->id));
     }
 
     /** @test */
     public function user_can_review_product_from_delivered_order(): void
     {
-        $user = User::factory()->create();
+        $customer = Customer::factory()->create();
         $product = Product::factory()->create();
         
         $order = Order::factory()->create([
-            'user_id' => $user->id,
+            'customer_id' => $customer->id,
             'status' => 'delivered',
         ]);
         
@@ -52,19 +52,19 @@ class ProductReviewsTest extends TestCase
         
         $service = app(ReviewService::class);
         
-        $this->actingAs($user);
+        $this->actingAs($customer, 'customer');
         $this->assertTrue($service->canReview($product->id));
     }
 
     /** @test */
     public function user_cannot_review_same_product_twice(): void
     {
-        $user = User::factory()->create();
+        $customer = Customer::factory()->create();
         $product = Product::factory()->create();
         
         // Create delivered order with product
         $order = Order::factory()->create([
-            'user_id' => $user->id,
+            'customer_id' => $customer->id,
             'status' => 'delivered',
         ]);
         
@@ -76,23 +76,23 @@ class ProductReviewsTest extends TestCase
         // Create existing review
         ProductReview::factory()->create([
             'product_id' => $product->id,
-            'user_id' => $user->id,
+            'customer_id' => $customer->id,
         ]);
         
         $service = app(ReviewService::class);
         
-        $this->actingAs($user);
+        $this->actingAs($customer, 'customer');
         $this->assertTrue($service->hasReviewed($product->id));
     }
 
     /** @test */
     public function review_service_creates_review_with_correct_data(): void
     {
-        $user = User::factory()->create();
+        $customer = Customer::factory()->create();
         $product = Product::factory()->create();
         
         $order = Order::factory()->create([
-            'user_id' => $user->id,
+            'customer_id' => $customer->id,
             'status' => 'delivered',
         ]);
         
@@ -103,7 +103,7 @@ class ProductReviewsTest extends TestCase
         
         $service = app(ReviewService::class);
         
-        $this->actingAs($user);
+        $this->actingAs($customer, 'customer');
         
         $review = $service->create([
             'product_id' => $product->id,
@@ -114,7 +114,7 @@ class ProductReviewsTest extends TestCase
         
         $this->assertDatabaseHas('product_reviews', [
             'product_id' => $product->id,
-            'user_id' => $user->id,
+            'customer_id' => $customer->id,
             'rating' => 5,
             'title' => 'Great product!',
             'is_verified_purchase' => true,
@@ -125,17 +125,17 @@ class ProductReviewsTest extends TestCase
     /** @test */
     public function owner_can_update_own_review(): void
     {
-        $user = User::factory()->create();
+        $customer = Customer::factory()->create();
         
         $review = ProductReview::factory()->create([
-            'user_id' => $user->id,
+            'customer_id' => $customer->id,
             'rating' => 3,
             'title' => 'Original title',
         ]);
         
         $service = app(ReviewService::class);
         
-        $this->actingAs($user);
+        $this->actingAs($customer, 'customer');
         
         $updated = $service->update($review, [
             'rating' => 5,
@@ -151,15 +151,15 @@ class ProductReviewsTest extends TestCase
     /** @test */
     public function owner_can_delete_own_review(): void
     {
-        $user = User::factory()->create();
+        $customer = Customer::factory()->create();
         
         $review = ProductReview::factory()->create([
-            'user_id' => $user->id,
+            'customer_id' => $customer->id,
         ]);
         
         $service = app(ReviewService::class);
         
-        $this->actingAs($user);
+        $this->actingAs($customer, 'customer');
         
         $result = $service->delete($review);
         
@@ -170,16 +170,16 @@ class ProductReviewsTest extends TestCase
     /** @test */
     public function user_cannot_update_others_review(): void
     {
-        $user = User::factory()->create();
-        $otherUser = User::factory()->create();
+        $customer = Customer::factory()->create();
+        $otherCustomer = Customer::factory()->create();
         
         $review = ProductReview::factory()->create([
-            'user_id' => $otherUser->id,
+            'customer_id' => $otherCustomer->id,
         ]);
         
         $service = app(ReviewService::class);
         
-        $this->actingAs($user);
+        $this->actingAs($customer, 'customer');
         
         $this->expectException(\Exception::class);
         $service->update($review, ['rating' => 5]);
@@ -188,16 +188,16 @@ class ProductReviewsTest extends TestCase
     /** @test */
     public function user_cannot_delete_others_review(): void
     {
-        $user = User::factory()->create();
-        $otherUser = User::factory()->create();
+        $customer = Customer::factory()->create();
+        $otherCustomer = Customer::factory()->create();
         
         $review = ProductReview::factory()->create([
-            'user_id' => $otherUser->id,
+            'customer_id' => $otherCustomer->id,
         ]);
         
         $service = app(ReviewService::class);
         
-        $this->actingAs($user);
+        $this->actingAs($customer, 'customer');
         
         $this->expectException(\Exception::class);
         $service->delete($review);
@@ -216,11 +216,11 @@ class ProductReviewsTest extends TestCase
     /** @test */
     public function product_reviews_component_shows_write_review_for_eligible_user(): void
     {
-        $user = User::factory()->create();
+        $customer = Customer::factory()->create();
         $product = Product::factory()->create();
         
         $order = Order::factory()->create([
-            'user_id' => $user->id,
+            'customer_id' => $customer->id,
             'status' => 'delivered',
         ]);
         
@@ -230,7 +230,7 @@ class ProductReviewsTest extends TestCase
         ]);
         
         // The component shows "tap_to_rate" for eligible users who haven't reviewed yet
-        Livewire::actingAs($user)
+        Livewire::actingAs($customer, 'customer')
             ->test(\App\Livewire\Store\ProductReviews::class, ['product' => $product])
             ->assertSee(__('messages.reviews.tap_to_rate'));
     }
@@ -238,11 +238,11 @@ class ProductReviewsTest extends TestCase
     /** @test */
     public function product_reviews_component_can_submit_review(): void
     {
-        $user = User::factory()->create();
+        $customer = Customer::factory()->create();
         $product = Product::factory()->create();
         
         $order = Order::factory()->create([
-            'user_id' => $user->id,
+            'customer_id' => $customer->id,
             'status' => 'delivered',
         ]);
         
@@ -251,7 +251,7 @@ class ProductReviewsTest extends TestCase
             'product_id' => $product->id,
         ]);
         
-        Livewire::actingAs($user)
+        Livewire::actingAs($customer, 'customer')
             ->test(\App\Livewire\Store\ProductReviews::class, ['product' => $product])
             ->call('openForm')
             ->set('rating', 4)
@@ -261,7 +261,7 @@ class ProductReviewsTest extends TestCase
         
         $this->assertDatabaseHas('product_reviews', [
             'product_id' => $product->id,
-            'user_id' => $user->id,
+            'customer_id' => $customer->id,
             'rating' => 4,
             'title' => 'Nice product',
         ]);
@@ -270,9 +270,9 @@ class ProductReviewsTest extends TestCase
     /** @test */
     public function my_reviews_page_renders_for_authenticated_user(): void
     {
-        $user = User::factory()->create();
+        $customer = Customer::factory()->create();
         
-        $this->actingAs($user);
+        $this->actingAs($customer, 'customer');
         
         $response = $this->get(route('account.reviews'));
         $response->assertOk();
@@ -282,16 +282,16 @@ class ProductReviewsTest extends TestCase
     /** @test */
     public function my_reviews_page_shows_user_reviews(): void
     {
-        $user = User::factory()->create();
+        $customer = Customer::factory()->create();
         $product = Product::factory()->create(['name' => 'Test Product Name']);
         
         ProductReview::factory()->create([
-            'user_id' => $user->id,
+            'customer_id' => $customer->id,
             'product_id' => $product->id,
             'title' => 'My Review Title',
         ]);
         
-        Livewire::actingAs($user)
+        Livewire::actingAs($customer, 'customer')
             ->test(\App\Livewire\Store\Account\MyReviews::class)
             ->assertSee('Test Product Name')
             ->assertSee('My Review Title');

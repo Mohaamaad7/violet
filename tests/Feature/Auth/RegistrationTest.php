@@ -2,7 +2,9 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Models\Customer;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Volt\Volt;
 use Tests\TestCase;
 
@@ -29,8 +31,9 @@ class RegistrationTest extends TestCase
 
         $component->call('register');
 
-        $component->assertRedirect(route('dashboard', absolute: false));
+        $component->assertRedirect(route('home', absolute: false));
 
-        $this->assertAuthenticated();
+        $this->assertTrue(Auth::guard('customer')->check());
+        $this->assertDatabaseHas('customers', ['email' => 'test@example.com']);
     }
 }

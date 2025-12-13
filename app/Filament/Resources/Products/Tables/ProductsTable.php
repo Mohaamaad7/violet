@@ -188,7 +188,27 @@ class ProductsTable
                         return $indicators;
                     }),
                 
-                // Low Stock Filter
+                // Stock Status Filter (for widget deep linking)
+                SelectFilter::make('stock_status')
+                    ->label(__('admin.filters.stock_status'))
+                    ->options([
+                        'low' => __('inventory.low_stock_products'),
+                        'out' => __('inventory.out_of_stock'),
+                        'available' => __('inventory.in_stock'),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query->when(
+                            $data['value'] ?? null,
+                            fn (Builder $query, $value): Builder => match ($value) {
+                                'low' => $query->whereColumn('stock', '<=', 'low_stock_threshold'),
+                                'out' => $query->where('stock', 0),
+                                'available' => $query->where('stock', '>', 0)->whereColumn('stock', '>', 'low_stock_threshold'),
+                                default => $query,
+                            }
+                        );
+                    }),
+                
+                // Low Stock Toggle Filter (legacy)
                 Filter::make('low_stock')
                     ->label(__('admin.filters.low_stock_only'))
                     ->query(fn (Builder $query): Builder => 

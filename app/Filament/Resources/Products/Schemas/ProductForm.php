@@ -221,24 +221,15 @@ class ProductForm
                     ->columns(3)
                     ->collapsible(),
                 
-                // Inventory Section
+                // Inventory & Physical Properties Section
                 Section::make(__('admin.products.form.inventory.title'))
                     ->description(__('admin.products.form.inventory.desc'))
                     ->schema([
-                        TextInput::make('stock')
-                            ->label(__('admin.form.stock'))
-                            ->required()
-                            ->numeric()
-                            ->default(0)
-                            ->minValue(0),
-                        
-                        TextInput::make('low_stock_threshold')
-                            ->label(__('admin.products.form.inventory.low_stock_alert'))
-                            ->required()
-                            ->numeric()
-                            ->default(5)
-                            ->minValue(0)
-                            ->helperText(__('admin.products.form.inventory.low_stock_help')),
+                        TextInput::make('barcode')
+                            ->label(__('admin.products.form.inventory.barcode'))
+                            ->maxLength(100)
+                            ->unique(ignoreRecord: true)
+                            ->helperText(__('admin.products.form.inventory.barcode_help')),
                         
                         TextInput::make('weight')
                             ->label(__('admin.products.form.inventory.weight'))
@@ -248,9 +239,23 @@ class ProductForm
                             ->step(0.01)
                             ->helperText(__('admin.products.form.inventory.weight_help')),
                         
-                        TextInput::make('barcode')
-                            ->label(__('admin.products.form.inventory.barcode'))
-                            ->maxLength(100),
+                        TextInput::make('low_stock_threshold')
+                            ->label(__('admin.products.form.inventory.low_stock_alert'))
+                            ->required()
+                            ->numeric()
+                            ->default(5)
+                            ->minValue(0)
+                            ->helperText(__('admin.products.form.inventory.low_stock_help')),
+                        
+                        TextInput::make('stock')
+                            ->label(__('admin.form.stock'))
+                            ->numeric()
+                            ->default(0)
+                            ->minValue(0)
+                            ->disabled()
+                            ->dehydrated(false)
+                            ->helperText(__('admin.products.form.inventory.stock_readonly_help'))
+                            ->suffix(__('admin.unit.units')),
                     ])
                     ->columns(2)
                     ->collapsible(),

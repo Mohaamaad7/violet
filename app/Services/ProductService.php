@@ -501,4 +501,107 @@ class ProductService
             ->active()
             ->get();
     }
+
+    /**
+     * Add stock to product (with optional batch)
+     */
+    public function addStock(int $productId, int $quantity, ?string $notes = null, ?array $batchData = null): Product
+    {
+        $stockMovementService = app(StockMovementService::class);
+        
+        $product = Product::findOrFail($productId);
+        
+        $batchId = null;
+        
+        // Create batch if batch data provided
+        if ($batchData) {
+            $batchService = app(BatchService::class);
+            $batch = $batchService->createBatch(array_merge($batchData, [
+                'product_id' => $productId,
+                'quantity_initial' => $quantity,
+                'quantity_current' => $quantity,
+            ]));
+            $batchId = $batch->id;
+        } else {
+            // Record stock movement without batch
+            $stockMovementService->addStock(
+                $productId,
+                $quantity,
+                'restock',
+                null,
+                $notes,
+                null
+            );
+        }
+        
+        return $product->fresh();
+    }
+
+    /**
+     * Deduct stock from product
+     */
+    public function deductStock(int $productId, int $quantity, $reference = null): Product
+    {
+        $stockMovementService = app(StockMovementService::class);
+        
+        $product = Product::findOrFail($productId);
+        
+        if ($product->stock < $quantity) {
+            throw new \Exception("Insufficient stock for product: {$product->name}. Available: {$product->stock}, Required: {$quantity}");
+        }
+        
+        $stockMovementService->deductStock(
+            $productId,
+            $quantity,
+            $reference,
+            null,
+            null
+        );
+        
+        return $product->fresh();
+    }
+
+    /**
+     * Check stock availability
+     */
+    public function checkStockAvailability(int $productId, int $quantity): bool
+    {
+        $product = Product::find($productId);
+        
+        if (!$product) {
+            return false;
+        }
+        
+        return $product->stock >= $quantity;
+    }
+
+    /**
+     * Get stock status for product
+     */
+    public function getStockStatus(int $productId): array
+    {
+        $product = Product::with(['batches' => function ($query) {
+            $query->where('status', 'active')->orderBy('expiry_date');
+        }])->findOrFail($productId);
+        
+        return [
+            'product_id' => $product->id,
+            'product_name' => $product->name,
+            'current_stock' => $product->stock,
+            'low_stock_threshold' => $product->low_stock_threshold,
+            'is_low_stock' => $product->stock <= $product->low_stock_threshold,
+            'is_out_of_stock' => $product->stock <= 0,
+            'batches_count' => $product->batches->count(),
+            'batches' => $product->batches->map(function ($batch) {
+                return [
+                    'id' => $batch->id,
+                    'batch_number' => $batch->batch_number,
+                    'quantity' => $batch->quantity_current,
+                    'expiry_date' => $batch->expiry_date?->format('Y-m-d'),
+                    'days_until_expiry' => $batch->days_until_expiry,
+                    'alert_level' => $batch->alert_level,
+                ];
+            }),
+        ];
+    }
 }

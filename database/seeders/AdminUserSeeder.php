@@ -20,7 +20,6 @@ class AdminUserSeeder extends Seeder
             'email' => $email,
             'password' => \Illuminate\Support\Facades\Hash::make($password),
             'phone' => '01095932828',
-            'type' => 'admin',
             'status' => 'active',
             'email_verified_at' => now(),
         ]);

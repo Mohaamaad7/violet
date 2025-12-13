@@ -276,6 +276,7 @@ class AdminTranslationsSeeder extends Seeder
 
             // Units
             'admin.unit.kg' => ['ar' => 'كجم', 'en' => 'kg'],
+            'admin.unit.units' => ['ar' => 'وحدة', 'en' => 'units'],
 
             // Status (generic)
             'admin.status.draft' => ['ar' => 'مسودة', 'en' => 'Draft'],
@@ -302,13 +303,15 @@ class AdminTranslationsSeeder extends Seeder
             'admin.products.form.pricing.cost_price' => ['ar' => 'سعر التكلفة', 'en' => 'Cost Price'],
             'admin.products.form.pricing.cost_price_help' => ['ar' => 'تكلفة داخلية لحساب الربح', 'en' => 'Internal cost for profit calculation'],
 
-            'admin.products.form.inventory.title' => ['ar' => 'المخزون', 'en' => 'Inventory'],
-            'admin.products.form.inventory.desc' => ['ar' => 'إدارة المخزون', 'en' => 'Stock management'],
-            'admin.products.form.inventory.low_stock_alert' => ['ar' => 'تنبيه انخفاض المخزون', 'en' => 'Low Stock Alert'],
-            'admin.products.form.inventory.low_stock_help' => ['ar' => 'سيتم تنبيهك عند الوصول لهذا المستوى', 'en' => 'Get notified when stock reaches this level'],
-            'admin.products.form.inventory.weight' => ['ar' => 'الوزن', 'en' => 'Weight'],
-            'admin.products.form.inventory.weight_help' => ['ar' => 'لاحتساب تكلفة الشحن', 'en' => 'For shipping calculations'],
+            'admin.products.form.inventory.title' => ['ar' => 'المخزون والخصائص الفيزيائية', 'en' => 'Inventory & Physical Properties'],
+            'admin.products.form.inventory.desc' => ['ar' => 'الباركود، الوزن، وتنبيهات المخزون', 'en' => 'Barcode, weight, and stock alerts'],
             'admin.products.form.inventory.barcode' => ['ar' => 'الباركود', 'en' => 'Barcode'],
+            'admin.products.form.inventory.barcode_help' => ['ar' => 'الباركود الفريد للمنتج', 'en' => 'Unique barcode for the product'],
+            'admin.products.form.inventory.weight' => ['ar' => 'الوزن', 'en' => 'Weight'],
+            'admin.products.form.inventory.weight_help' => ['ar' => 'لاحتساب تكلفة الشحن (بالكيلوجرام)', 'en' => 'For shipping cost calculations (in kg)'],
+            'admin.products.form.inventory.low_stock_alert' => ['ar' => 'تنبيه انخفاض المخزون', 'en' => 'Low Stock Alert'],
+            'admin.products.form.inventory.low_stock_help' => ['ar' => 'سيتم تنبيهك عندما يصل المخزون لهذا الحد', 'en' => 'You will be notified when stock reaches this threshold'],
+            'admin.products.form.inventory.stock_readonly_help' => ['ar' => 'للقراءة فقط. استخدم زر "إضافة مخزون" لتحديث الكمية', 'en' => 'Read-only. Use "Add Stock" button to update quantity'],
 
             // Detailed Content Section
             'admin.products.form.detailed.title' => ['ar' => 'المحتوى التفصيلي', 'en' => 'Detailed Content'],

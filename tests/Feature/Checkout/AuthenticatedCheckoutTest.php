@@ -5,10 +5,10 @@ namespace Tests\Feature\Checkout;
 use App\Livewire\Store\CheckoutPage;
 use App\Models\Cart;
 use App\Models\CartItem;
+use App\Models\Customer;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\ShippingAddress;
-use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -17,14 +17,14 @@ class AuthenticatedCheckoutTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected User $user;
+    protected Customer $customer;
     protected Product $product;
 
     protected function setUp(): void
     {
         parent::setUp();
         
-        $this->user = User::factory()->create([
+        $this->customer = Customer::factory()->create([
             'email' => 'test@example.com',
             'phone' => '01234567890',
         ]);
@@ -38,19 +38,19 @@ class AuthenticatedCheckoutTest extends TestCase
     }
 
     /**
-     * Test authenticated checkout creates order with user_id set
+     * Test authenticated checkout creates order with customer_id set
      */
     public function test_authenticated_checkout_links_order_to_user(): void
     {
-        // Create cart for the user
-        $cart = Cart::create(['user_id' => $this->user->id]);
+        // Create cart for the customer
+        $cart = Cart::create(['customer_id' => $this->customer->id]);
         CartItem::create([
             'cart_id' => $cart->id,
             'product_id' => $this->product->id,
             'quantity' => 1,
         ]);
 
-        $this->actingAs($this->user);
+        $this->actingAs($this->customer, 'customer');
 
         Livewire::test(CheckoutPage::class)
             ->set('showAddressForm', true)
@@ -64,10 +64,10 @@ class AuthenticatedCheckoutTest extends TestCase
             ->set('paymentMethod', 'cod')
             ->call('placeOrder');
 
-        // Verify order was created with user_id
-        $order = Order::where('user_id', $this->user->id)->first();
-        $this->assertNotNull($order, 'Order should be created with user_id');
-        $this->assertEquals($this->user->id, $order->user_id);
+        // Verify order was created with customer_id
+        $order = Order::where('customer_id', $this->customer->id)->first();
+        $this->assertNotNull($order, 'Order should be created with customer_id');
+        $this->assertEquals($this->customer->id, $order->customer_id);
     }
 
     /**
@@ -76,14 +76,14 @@ class AuthenticatedCheckoutTest extends TestCase
     public function test_authenticated_user_can_create_new_shipping_address(): void
     {
         // Create cart for the user
-        $cart = Cart::create(['user_id' => $this->user->id]);
+        $cart = Cart::create(['customer_id' => $this->customer->id]);
         CartItem::create([
             'cart_id' => $cart->id,
             'product_id' => $this->product->id,
             'quantity' => 1,
         ]);
 
-        $this->actingAs($this->user);
+        $this->actingAs($this->customer);
 
         Livewire::test(CheckoutPage::class)
             ->set('showAddressForm', true)
@@ -98,7 +98,7 @@ class AuthenticatedCheckoutTest extends TestCase
             ->call('placeOrder');
 
         // Verify shipping address was created
-        $address = ShippingAddress::where('user_id', $this->user->id)->first();
+        $address = ShippingAddress::where('customer_id', $this->customer->id)->first();
         $this->assertNotNull($address, 'Shipping address should be created');
         $this->assertEquals('John Doe', $address->full_name);
         $this->assertEquals('test@example.com', $address->email);
@@ -111,7 +111,7 @@ class AuthenticatedCheckoutTest extends TestCase
     {
         // Create saved address for user
         $address = ShippingAddress::create([
-            'user_id' => $this->user->id,
+            'customer_id' => $this->customer->id,
             'full_name' => 'Saved Name',
             'email' => 'saved@example.com',
             'phone' => '01234567890',
@@ -122,14 +122,14 @@ class AuthenticatedCheckoutTest extends TestCase
         ]);
 
         // Create cart for the user
-        $cart = Cart::create(['user_id' => $this->user->id]);
+        $cart = Cart::create(['customer_id' => $this->customer->id]);
         CartItem::create([
             'cart_id' => $cart->id,
             'product_id' => $this->product->id,
             'quantity' => 1,
         ]);
 
-        $this->actingAs($this->user);
+        $this->actingAs($this->customer);
 
         Livewire::test(CheckoutPage::class)
             ->set('selectedAddressId', $address->id)
@@ -137,10 +137,10 @@ class AuthenticatedCheckoutTest extends TestCase
             ->set('paymentMethod', 'cod')
             ->call('placeOrder');
 
-        // Verify order was created with user_id and shipping address
-        $order = Order::where('user_id', $this->user->id)->first();
+        // Verify order was created with customer_id and shipping address
+        $order = Order::where('customer_id', $this->customer->id)->first();
         $this->assertNotNull($order, 'Order should be created');
-        $this->assertEquals($this->user->id, $order->user_id);
+        $this->assertEquals($this->customer->id, $order->customer_id);
         $this->assertEquals($address->id, $order->shipping_address_id);
     }
 
@@ -152,7 +152,7 @@ class AuthenticatedCheckoutTest extends TestCase
         // Create order linked to user
         $order = Order::create([
             'order_number' => 'VLT-TEST123',
-            'user_id' => $this->user->id,
+            'customer_id' => $this->customer->id,
             'status' => 'pending',
             'payment_status' => 'unpaid',
             'payment_method' => 'cod',
@@ -161,10 +161,11 @@ class AuthenticatedCheckoutTest extends TestCase
             'total' => 150,
         ]);
 
-        $this->actingAs($this->user);
+        $this->actingAs($this->customer);
 
         $response = $this->get('/account/orders');
         $response->assertStatus(200);
         $response->assertSee('VLT-TEST123');
     }
 }
+

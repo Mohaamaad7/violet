@@ -125,4 +125,20 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Return Policies
+    |--------------------------------------------------------------------------
+    |
+    | These configuration options determine the return policies for the store.
+    | - return_window_days: Number of days allowed for returns after delivery
+    | - auto_approve_rejections: Whether to automatically approve rejection returns
+    | - refund_shipping_cost: Whether to refund shipping costs on returns
+    |
+    */
+
+    'return_window_days' => env('RETURN_WINDOW_DAYS', 14),
+    'auto_approve_rejections' => env('AUTO_APPROVE_REJECTIONS', false),
+    'refund_shipping_cost' => env('REFUND_SHIPPING_COST', false),
+
 ];

@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Models\Customer;
 use App\Models\ShippingAddress;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -24,7 +24,7 @@ class ShippingAddressFactory extends Factory
         
         return [
             'order_id' => null, // Nullable - for saved addresses without order
-            'user_id' => User::factory(),
+            'customer_id' => Customer::factory(),
             'full_name' => fake()->name(),
             'phone' => fake()->numerify('01#########'),
             'governorate' => fake()->randomElement($governorates),

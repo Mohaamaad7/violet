@@ -34,3 +34,33 @@ if (!function_exists('set_trans')) {
         return app(TranslationService::class)->set($key, $locale, $value, $group, $active, $userId);
     }
 }
+
+if (!function_exists('setting')) {
+    /**
+     * Get a setting value from database.
+     *
+     * @param string $key
+     * @param mixed $default
+     * @return mixed
+     */
+    function setting(string $key, $default = null)
+    {
+        return \App\Models\Setting::get($key, $default);
+    }
+}
+
+if (!function_exists('setting_set')) {
+    /**
+     * Set a setting value in database.
+     *
+     * @param string $key
+     * @param mixed $value
+     * @param string $type
+     * @param string $group
+     * @return \App\Models\Setting
+     */
+    function setting_set(string $key, $value, string $type = 'string', string $group = 'general'): \App\Models\Setting
+    {
+        return \App\Models\Setting::set($key, $value, $type, $group);
+    }
+}

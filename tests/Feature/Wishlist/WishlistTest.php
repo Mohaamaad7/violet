@@ -4,8 +4,8 @@ namespace Tests\Feature\Wishlist;
 
 use App\Livewire\Store\WishlistButton;
 use App\Livewire\Store\WishlistPage;
+use App\Models\Customer;
 use App\Models\Product;
-use App\Models\User;
 use App\Models\Wishlist;
 use App\Services\WishlistService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -16,15 +16,14 @@ class WishlistTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected User $customer;
+    protected Customer $customer;
     protected Product $product;
 
     protected function setUp(): void
     {
         parent::setUp();
         
-        $this->customer = User::factory()->create([
-            'type' => 'customer',
+        $this->customer = Customer::factory()->create([
             'status' => 'active',
         ]);
         
@@ -43,7 +42,7 @@ class WishlistTest extends TestCase
     /** @test */
     public function authenticated_user_can_access_wishlist_page(): void
     {
-        $this->actingAs($this->customer)
+        $this->actingAs($this->customer, 'customer')
             ->get(route('wishlist'))
             ->assertOk()
             ->assertSeeLivewire(WishlistPage::class);
@@ -52,7 +51,7 @@ class WishlistTest extends TestCase
     /** @test */
     public function wishlist_page_shows_empty_state_when_no_items(): void
     {
-        Livewire::actingAs($this->customer)
+        Livewire::actingAs($this->customer, 'customer')
             ->test(WishlistPage::class)
             ->assertSee(__('messages.wishlist.empty'));
     }
@@ -62,12 +61,12 @@ class WishlistTest extends TestCase
     {
         $service = app(WishlistService::class);
         
-        $this->actingAs($this->customer);
+        $this->actingAs($this->customer, 'customer');
         
         $wishlistItem = $service->add($this->product->id);
         
         $this->assertDatabaseHas('wishlists', [
-            'user_id' => $this->customer->id,
+            'customer_id' => $this->customer->id,
             'product_id' => $this->product->id,
         ]);
     }
@@ -77,7 +76,7 @@ class WishlistTest extends TestCase
     {
         $service = app(WishlistService::class);
         
-        $this->actingAs($this->customer);
+        $this->actingAs($this->customer, 'customer');
         
         // First add
         $service->add($this->product->id);
@@ -87,7 +86,7 @@ class WishlistTest extends TestCase
         
         $this->assertTrue($removed);
         $this->assertDatabaseMissing('wishlists', [
-            'user_id' => $this->customer->id,
+            'customer_id' => $this->customer->id,
             'product_id' => $this->product->id,
         ]);
     }
@@ -97,7 +96,7 @@ class WishlistTest extends TestCase
     {
         $service = app(WishlistService::class);
         
-        $this->actingAs($this->customer);
+        $this->actingAs($this->customer, 'customer');
         
         // First toggle - should add
         $result1 = $service->toggle($this->product->id);
@@ -113,7 +112,7 @@ class WishlistTest extends TestCase
     /** @test */
     public function wishlist_button_toggles_state(): void
     {
-        Livewire::actingAs($this->customer)
+        Livewire::actingAs($this->customer, 'customer')
             ->test(WishlistButton::class, ['productId' => $this->product->id])
             ->assertSet('inWishlist', false)
             ->call('toggle')
@@ -136,11 +135,11 @@ class WishlistTest extends TestCase
     {
         // Add product to wishlist
         Wishlist::factory()->create([
-            'user_id' => $this->customer->id,
+            'customer_id' => $this->customer->id,
             'product_id' => $this->product->id,
         ]);
 
-        Livewire::actingAs($this->customer)
+        Livewire::actingAs($this->customer, 'customer')
             ->test(WishlistPage::class)
             ->assertSee($this->product->name);
     }
@@ -149,18 +148,18 @@ class WishlistTest extends TestCase
     public function can_remove_product_from_wishlist_page(): void
     {
         Wishlist::factory()->create([
-            'user_id' => $this->customer->id,
+            'customer_id' => $this->customer->id,
             'product_id' => $this->product->id,
         ]);
 
-        Livewire::actingAs($this->customer)
+        Livewire::actingAs($this->customer, 'customer')
             ->test(WishlistPage::class)
             ->call('removeFromWishlist', $this->product->id)
             ->assertDispatched('wishlist-updated')
             ->assertDispatched('show-toast');
 
         $this->assertDatabaseMissing('wishlists', [
-            'user_id' => $this->customer->id,
+            'customer_id' => $this->customer->id,
             'product_id' => $this->product->id,
         ]);
     }
@@ -169,11 +168,11 @@ class WishlistTest extends TestCase
     public function can_move_product_to_cart_from_wishlist(): void
     {
         Wishlist::factory()->create([
-            'user_id' => $this->customer->id,
+            'customer_id' => $this->customer->id,
             'product_id' => $this->product->id,
         ]);
 
-        Livewire::actingAs($this->customer)
+        Livewire::actingAs($this->customer, 'customer')
             ->test(WishlistPage::class)
             ->call('moveToCart', $this->product->id)
             ->assertDispatched('cart-updated')
@@ -181,7 +180,7 @@ class WishlistTest extends TestCase
 
         // Verify removed from wishlist
         $this->assertDatabaseMissing('wishlists', [
-            'user_id' => $this->customer->id,
+            'customer_id' => $this->customer->id,
             'product_id' => $this->product->id,
         ]);
     }
@@ -191,15 +190,15 @@ class WishlistTest extends TestCase
     {
         // Add multiple products
         Wishlist::factory()->count(3)->create([
-            'user_id' => $this->customer->id,
+            'customer_id' => $this->customer->id,
         ]);
 
-        Livewire::actingAs($this->customer)
+        Livewire::actingAs($this->customer, 'customer')
             ->test(WishlistPage::class)
             ->call('clearWishlist')
             ->assertDispatched('wishlist-updated');
 
-        $this->assertEquals(0, Wishlist::where('user_id', $this->customer->id)->count());
+        $this->assertEquals(0, Wishlist::where('customer_id', $this->customer->id)->count());
     }
 
     /** @test */
@@ -207,14 +206,14 @@ class WishlistTest extends TestCase
     {
         $service = app(WishlistService::class);
         
-        $this->actingAs($this->customer);
+        $this->actingAs($this->customer, 'customer');
         
         // Start with 0
         $this->assertEquals(0, $service->getWishlistCount());
         
         // Add products
         Wishlist::factory()->count(3)->create([
-            'user_id' => $this->customer->id,
+            'customer_id' => $this->customer->id,
         ]);
         
         $this->assertEquals(3, $service->getWishlistCount());
@@ -223,19 +222,19 @@ class WishlistTest extends TestCase
     /** @test */
     public function users_can_only_see_their_own_wishlist(): void
     {
-        $otherUser = User::factory()->create();
+        $otherCustomer = Customer::factory()->create();
         
-        // Create wishlist item for other user
+        // Create wishlist item for other customer
         Wishlist::factory()->create([
-            'user_id' => $otherUser->id,
+            'customer_id' => $otherCustomer->id,
             'product_id' => $this->product->id,
         ]);
 
         $service = app(WishlistService::class);
         
-        $this->actingAs($this->customer);
+        $this->actingAs($this->customer, 'customer');
         
-        // Should not see other user's wishlist
+        // Should not see other customer's wishlist
         $this->assertFalse($service->isInWishlist($this->product->id));
     }
 
@@ -244,14 +243,14 @@ class WishlistTest extends TestCase
     {
         $service = app(WishlistService::class);
         
-        $this->actingAs($this->customer);
+        $this->actingAs($this->customer, 'customer');
         
         // Add twice
         $service->add($this->product->id);
         $service->add($this->product->id);
         
         // Should only have one entry
-        $this->assertEquals(1, Wishlist::where('user_id', $this->customer->id)
+        $this->assertEquals(1, Wishlist::where('customer_id', $this->customer->id)
             ->where('product_id', $this->product->id)
             ->count());
     }

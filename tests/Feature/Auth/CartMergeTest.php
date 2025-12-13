@@ -4,8 +4,8 @@ namespace Tests\Feature\Auth;
 
 use App\Models\Cart;
 use App\Models\CartItem;
+use App\Models\Customer;
 use App\Models\Product;
-use App\Models\User;
 use App\Services\CartService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cookie;
@@ -30,9 +30,9 @@ class CartMergeTest extends TestCase
         $product1 = Product::factory()->create(['stock' => 100, 'status' => 'active', 'price' => 50]);
         $product2 = Product::factory()->create(['stock' => 100, 'status' => 'active', 'price' => 75]);
 
-        // Create user with existing cart
-        $user = User::factory()->create();
-        $userCart = Cart::create(['user_id' => $user->id]);
+        // Create customer with existing cart
+        $customer = Customer::factory()->create();
+        $userCart = Cart::create(['customer_id' => $customer->id]);
         CartItem::create([
             'cart_id' => $userCart->id,
             'product_id' => $product1->id,
@@ -95,9 +95,9 @@ class CartMergeTest extends TestCase
         // Create product with limited stock
         $product = Product::factory()->create(['stock' => 5, 'status' => 'active', 'price' => 50]);
 
-        // Create user with cart containing 3 items
-        $user = User::factory()->create();
-        $userCart = Cart::create(['user_id' => $user->id]);
+        // Create customer with cart containing 3 items
+        $customer = Customer::factory()->create();
+        $userCart = Cart::create(['customer_id' => $customer->id]);
         CartItem::create([
             'cart_id' => $userCart->id,
             'product_id' => $product->id,
@@ -119,12 +119,12 @@ class CartMergeTest extends TestCase
         $this->withCookie('cart_session_id', $guestSessionId);
         
         $component = Volt::test('pages.auth.login')
-            ->set('form.email', $user->email)
+            ->set('form.email', $customer->email)
             ->set('form.password', 'password');
 
         $component->call('login');
         
-        $this->assertAuthenticated();
+        $this->assertTrue(\Auth::guard('customer')->check());
 
         // Refresh cart
         $userCart->refresh();
@@ -150,7 +150,7 @@ class CartMergeTest extends TestCase
             'price' => $product->price,
         ]);
 
-        // Register new user
+        // Register new customer
         $this->withCookie('cart_session_id', $guestSessionId);
 
         $component = Volt::test('pages.auth.register')
@@ -161,14 +161,14 @@ class CartMergeTest extends TestCase
 
         $component->call('register');
         
-        $this->assertAuthenticated();
+        $this->assertTrue(\Auth::guard('customer')->check());
 
-        // Find the new user
-        $newUser = User::where('email', 'newcustomer@example.com')->first();
-        $this->assertNotNull($newUser);
+        // Find the new customer
+        $newCustomer = Customer::where('email', 'newcustomer@example.com')->first();
+        $this->assertNotNull($newCustomer);
 
-        // Check user has a cart with the merged items
-        $userCart = Cart::where('user_id', $newUser->id)->with('items')->first();
+        // Check customer has a cart with the merged items
+        $userCart = Cart::where('customer_id', $newCustomer->id)->with('items')->first();
         $this->assertNotNull($userCart);
         $this->assertEquals(1, $userCart->items->count());
         $this->assertEquals(2, $userCart->items->first()->quantity);
@@ -179,43 +179,7 @@ class CartMergeTest extends TestCase
 
     public function test_login_without_guest_cart_works_normally(): void
     {
-        $user = User::factory()->create();
-
-        $component = Volt::test('pages.auth.login')
-            ->set('form.email', $user->email)
-            ->set('form.password', 'password');
-
-        $component->call('login');
-
-        $component
-            ->assertHasNoErrors()
-            ->assertRedirect(route('home', absolute: false));
-
-        $this->assertAuthenticated();
-    }
-
-    public function test_admin_user_redirects_to_admin_dashboard(): void
-    {
-        $admin = User::factory()->create();
-        $admin->assignRole('admin');
-
-        $component = Volt::test('pages.auth.login')
-            ->set('form.email', $admin->email)
-            ->set('form.password', 'password');
-
-        $component->call('login');
-
-        $component
-            ->assertHasNoErrors()
-            ->assertRedirect(route('filament.admin.pages.dashboard', absolute: false));
-
-        $this->assertAuthenticated();
-    }
-
-    public function test_customer_user_redirects_to_home(): void
-    {
-        $customer = User::factory()->create();
-        $customer->assignRole('customer');
+        $customer = Customer::factory()->create();
 
         $component = Volt::test('pages.auth.login')
             ->set('form.email', $customer->email)
@@ -227,7 +191,42 @@ class CartMergeTest extends TestCase
             ->assertHasNoErrors()
             ->assertRedirect(route('home', absolute: false));
 
-        $this->assertAuthenticated();
+        $this->assertTrue(\Auth::guard('customer')->check());
+    }
+
+    public function test_admin_user_redirects_to_admin_dashboard(): void
+    {
+        // Admin users login through Filament, not customer login page
+        // This test should verify customer login doesn't work for admins
+        $admin = \App\Models\User::factory()->create();
+        $admin->assignRole('admin');
+
+        $component = Volt::test('pages.auth.login')
+            ->set('form.email', $admin->email)
+            ->set('form.password', 'password');
+
+        $component->call('login');
+
+        // Admin credentials should fail on customer login page
+        $component->assertHasErrors();
+        $this->assertTrue(\Auth::guard('customer')->guest());
+    }
+
+    public function test_customer_user_redirects_to_home(): void
+    {
+        $customer = Customer::factory()->create();
+
+        $component = Volt::test('pages.auth.login')
+            ->set('form.email', $customer->email)
+            ->set('form.password', 'password');
+
+        $component->call('login');
+
+        $component
+            ->assertHasNoErrors()
+            ->assertRedirect(route('home', absolute: false));
+
+        $this->assertTrue(\Auth::guard('customer')->check());
     }
 
     public function test_registered_user_gets_customer_role(): void
@@ -240,12 +239,11 @@ class CartMergeTest extends TestCase
 
         $component->call('register');
 
-        $this->assertAuthenticated();
+        $this->assertTrue(\Auth::guard('customer')->check());
 
-        $user = User::where('email', 'testcustomer@example.com')->first();
-        $this->assertTrue($user->hasRole('customer'));
-        $this->assertEquals('customer', $user->type);
-        $this->assertEquals('active', $user->status);
+        $customer = Customer::where('email', 'testcustomer@example.com')->first();
+        $this->assertNotNull($customer);
+        $this->assertEquals('active', $customer->status);
     }
 
     public function test_registered_user_can_have_phone_number(): void
@@ -259,9 +257,9 @@ class CartMergeTest extends TestCase
 
         $component->call('register');
 
-        $this->assertAuthenticated();
+        $this->assertTrue(\Auth::guard('customer')->check());
 
-        $user = User::where('email', 'phonecustomer@example.com')->first();
-        $this->assertEquals('+201234567890', $user->phone);
+        $customer = Customer::where('email', 'phonecustomer@example.com')->first();
+        $this->assertEquals('+201234567890', $customer->phone);
     }
 }

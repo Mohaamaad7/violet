@@ -151,6 +151,7 @@ class OrderService
         
         $previousStatus = $order->status;
 
+        // Update status
         $order->update(['status' => $status]);
 
         // Update status-specific timestamps
@@ -162,20 +163,42 @@ class OrderService
             default => null
         };
 
+        // DIRECT CALL: Handle stock deduction when shipped
+        if ($status === 'shipped' && $previousStatus !== 'shipped') {
+            $stockResult = $this->deductStockForOrder($order);
+            if (!$stockResult['success']) {
+                \Log::warning("Stock deduction failed for Order #{$order->order_number}: {$stockResult['message']}");
+            }
+        }
+
+        // DIRECT CALL: Handle stock restoration when cancelled (if was shipped)
+        if ($status === 'cancelled' && $previousStatus === 'shipped' && $order->stock_deducted_at) {
+            $restockResult = $this->restockRejectedOrder($order);
+            if (!$restockResult['success']) {
+                \Log::warning("Stock restoration failed for Order #{$order->order_number}: {$restockResult['message']}");
+            }
+        }
+        
+        // Reload relationships for the updated order
+        $order->load(['items.product', 'user', 'customer']);
+
         // Add to status history
         $this->addStatusHistory($id, $status, $notes, $changedBy ?? auth()->id());
 
-        // Send status update email to customer (if status actually changed)
+        // Send status update email to customer in background (non-blocking)
         if ($previousStatus !== $status) {
             try {
-                $this->emailService->sendOrderStatusUpdate($order->fresh());
+                // Dispatch email job to queue instead of sending immediately
+                dispatch(function () use ($order) {
+                    app(\App\Services\EmailService::class)->sendOrderStatusUpdate($order);
+                })->afterResponse();
             } catch (\Exception $e) {
                 // Log error but don't fail the status update
                 report($e);
             }
         }
 
-        return $order->fresh();
+        return $order;
     }
 
     /**
@@ -236,10 +259,9 @@ class OrderService
             'cancellation_reason' => $reason,
         ]);
 
-        // Restore product stock
-        foreach ($order->items as $item) {
-            $this->productService->increaseStock($item->product_id, $item->quantity);
-        }
+        // NOTE: Stock restoration is now handled explicitly in updateStatus()
+        // using restockRejectedOrder() method, which checks stock_deducted_at
+        // and creates proper stock movement records
     }
 
     /**
@@ -330,5 +352,232 @@ class OrderService
             ->orderBy('created_at', 'desc')
             ->limit($limit)
             ->get();
+    }
+
+    /**
+     * Deduct stock when order is shipped
+     * 
+     * @param Order $order
+     * @return array ['success' => bool, 'message' => string, 'errors' => array]
+     * @throws \Exception
+     */
+    public function deductStockForOrder(Order $order): array
+    {
+        // Check if stock already deducted
+        if ($order->stock_deducted_at) {
+            return [
+                'success' => false,
+                'message' => 'تم خصم المخزون لهذا الطلب مسبقاً',
+                'errors' => [],
+            ];
+        }
+
+        $stockMovementService = app(StockMovementService::class);
+        $errors = [];
+        $insufficientStock = [];
+
+        // NOTE: No DB::transaction() here because Observer runs inside parent transaction
+        try {
+            // Step 1: Validate stock availability for all items
+            foreach ($order->items as $item) {
+                $product = $item->product;
+                
+                if (!$product) {
+                    $errors[] = "المنتج غير موجود (Item ID: {$item->id})";
+                    continue;
+                }
+
+                $currentStock = $product->stock;
+                $requiredQuantity = $item->quantity;
+
+                if ($currentStock < $requiredQuantity) {
+                    $insufficientStock[] = [
+                        'product' => $product->name,
+                        'sku' => $product->sku,
+                        'required' => $requiredQuantity,
+                        'available' => $currentStock,
+                    ];
+                }
+            }
+
+            // If insufficient stock, return error
+            if (!empty($insufficientStock)) {
+                $errorMessage = 'المخزون غير كافي للمنتجات التالية: ';
+                $details = [];
+                foreach ($insufficientStock as $issue) {
+                    $details[] = "{$issue['product']} (SKU: {$issue['sku']}): مطلوب {$issue['required']}, متوفر {$issue['available']}";
+                }
+                $errorMessage .= implode(' | ', $details);
+
+                return [
+                    'success' => false,
+                    'message' => $errorMessage,
+                    'errors' => $insufficientStock,
+                ];
+            }
+
+            // Step 2: Deduct stock
+            foreach ($order->items as $item) {
+                if ($item->product) {
+                    $stockMovementService->deductStock(
+                        $item->product->id,
+                        $item->quantity,
+                        $order,
+                        "Order #{$order->order_number}"
+                    );
+                }
+            }
+
+            // Step 3: Mark stock as deducted
+            $order->stock_deducted_at = now();
+            $order->save();
+
+            return [
+                'success' => true,
+                'message' => 'تم خصم المخزون بنجاح',
+                'errors' => [],
+            ];
+
+        } catch (\Exception $e) {
+            
+            return [
+                'success' => false,
+                'message' => 'حدث خطأ أثناء خصم المخزون: ' . $e->getMessage(),
+                'errors' => [$e->getMessage()],
+            ];
+        }
+    }
+
+    /**
+     * Restore stock when order is rejected
+     * 
+     * @param Order $order
+     * @return array ['success' => bool, 'message' => string]
+     */
+    public function restockRejectedOrder(Order $order): array
+    {
+        // Check if stock was deducted
+        if (!$order->stock_deducted_at) {
+            return [
+                'success' => false,
+                'message' => 'لم يتم خصم المخزون لهذا الطلب من الأساس',
+            ];
+        }
+
+        // Check if already restocked
+        if ($order->stock_restored_at) {
+            return [
+                'success' => false,
+                'message' => 'تم إرجاع المخزون لهذا الطلب مسبقاً',
+            ];
+        }
+
+        $stockMovementService = app(StockMovementService::class);
+
+        // NOTE: No DB::transaction() here because Observer runs inside parent transaction
+        try {
+            // Restore stock
+            foreach ($order->items as $item) {
+                if ($item->product) {
+                    $stockMovementService->addStock(
+                        $item->product->id,
+                        $item->quantity,
+                        'return',
+                        $order,
+                        "Order #{$order->order_number} (Rejected)"
+                    );
+                }
+            }
+
+            // Mark stock as restored
+            $order->stock_restored_at = now();
+            $order->save();
+
+            return [
+                'success' => true,
+                'message' => 'تم إرجاع المخزون بنجاح',
+            ];
+
+        } catch (\Exception $e) {
+            
+            return [
+                'success' => false,
+                'message' => 'حدث خطأ أثناء إرجاع المخزون: ' . $e->getMessage(),
+            ];
+        }
+    }
+
+    /**
+     * Check if order can be shipped (stock validation)
+     * 
+     * @param Order $order
+     * @return array ['canShip' => bool, 'issues' => array]
+     */
+    public function validateStockForShipment(Order $order): array
+    {
+        $issues = [];
+
+        foreach ($order->items as $item) {
+            $product = $item->product;
+            
+            if (!$product) {
+                $issues[] = [
+                    'product' => $item->product_name ?? 'Unknown',
+                    'sku' => $item->product_sku ?? 'N/A',
+                    'required' => $item->quantity,
+                    'available' => 0,
+                    'message' => 'المنتج غير موجود',
+                ];
+                continue;
+            }
+
+            $currentStock = $product->stock;
+            $requiredQuantity = $item->quantity;
+
+            if ($currentStock < $requiredQuantity) {
+                $issues[] = [
+                    'product' => $product->name,
+                    'sku' => $product->sku,
+                    'required' => $requiredQuantity,
+                    'available' => $currentStock,
+                    'message' => "المخزون غير كافي (متوفر: {$currentStock}, مطلوب: {$requiredQuantity})",
+                ];
+            }
+        }
+
+        return [
+            'canShip' => empty($issues),
+            'issues' => $issues,
+        ];
+    }
+
+    /**
+     * Mark order as rejected
+     */
+    public function markAsRejected(int $orderId, string $reason): Order
+    {
+        return DB::transaction(function () use ($orderId, $reason) {
+            $order = $this->findOrder($orderId);
+
+            if (!in_array($order->status, ['pending', 'processing', 'shipped'])) {
+                throw new \Exception("Order cannot be rejected in current status");
+            }
+
+            // If order was shipped, restock items
+            if ($order->status === 'shipped' && $order->shipped_at) {
+                $this->restockRejectedOrder($order);
+            }
+
+            $order->update([
+                'status' => 'cancelled',
+                'return_status' => 'none',
+                'rejected_at' => now(),
+                'rejection_reason' => $reason,
+            ]);
+
+            $this->addStatusHistory($orderId, 'cancelled', "Rejected: {$reason}", auth()->id());
+
+            return $order->fresh();
+        });
     }
 }

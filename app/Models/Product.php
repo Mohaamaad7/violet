@@ -78,6 +78,16 @@ class Product extends Model implements HasMedia
         return $this->hasMany(ProductReview::class);
     }
 
+    public function batches(): HasMany
+    {
+        return $this->hasMany(Batch::class);
+    }
+
+    public function stockMovements(): HasMany
+    {
+        return $this->hasMany(StockMovement::class);
+    }
+
     // Scopes
     public function scopeActive($query)
     {

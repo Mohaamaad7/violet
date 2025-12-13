@@ -7,11 +7,11 @@ use App\Livewire\Store\Account\Profile;
 use App\Livewire\Store\Account\Addresses;
 use App\Livewire\Store\Account\Orders;
 use App\Livewire\Store\Account\OrderDetails;
+use App\Models\Customer;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\ShippingAddress;
-use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Livewire;
 use Tests\TestCase;
@@ -20,22 +20,15 @@ class CustomerAccountTest extends TestCase
 {
     use RefreshDatabase;
 
-    protected User $customer;
-    protected User $otherCustomer;
+    protected Customer $customer;
+    protected Customer $otherCustomer;
 
     protected function setUp(): void
     {
         parent::setUp();
         
-        $this->customer = User::factory()->create([
-            'type' => 'customer',
-            'status' => 'active',
-        ]);
-        
-        $this->otherCustomer = User::factory()->create([
-            'type' => 'customer',
-            'status' => 'active',
-        ]);
+        $this->customer = Customer::factory()->create();
+        $this->otherCustomer = Customer::factory()->create();
     }
 
     /** @test */
@@ -50,7 +43,7 @@ class CustomerAccountTest extends TestCase
     /** @test */
     public function customer_can_view_dashboard(): void
     {
-        $this->actingAs($this->customer)
+        $this->actingAs($this->customer, 'customer')
             ->get(route('account.dashboard'))
             ->assertOk()
             ->assertSeeLivewire(Dashboard::class);
@@ -60,21 +53,21 @@ class CustomerAccountTest extends TestCase
     public function dashboard_shows_order_statistics(): void
     {
         // Create some orders for customer
-        $address = ShippingAddress::factory()->create(['user_id' => $this->customer->id]);
+        $address = ShippingAddress::factory()->create(['customer_id' => $this->customer->id]);
         
         Order::factory()->count(3)->create([
-            'user_id' => $this->customer->id,
+            'customer_id' => $this->customer->id,
             'status' => 'delivered',
             'shipping_address_id' => $address->id,
         ]);
         
         Order::factory()->create([
-            'user_id' => $this->customer->id,
+            'customer_id' => $this->customer->id,
             'status' => 'pending',
             'shipping_address_id' => $address->id,
         ]);
 
-        Livewire::actingAs($this->customer)
+        Livewire::actingAs($this->customer, 'customer')
             ->test(Dashboard::class)
             ->assertSee('4') // total orders
             ->assertSee('1'); // pending orders
@@ -83,7 +76,7 @@ class CustomerAccountTest extends TestCase
     /** @test */
     public function customer_can_view_profile(): void
     {
-        $this->actingAs($this->customer)
+        $this->actingAs($this->customer, 'customer')
             ->get(route('account.profile'))
             ->assertOk()
             ->assertSeeLivewire(Profile::class);
@@ -92,7 +85,7 @@ class CustomerAccountTest extends TestCase
     /** @test */
     public function customer_can_update_profile(): void
     {
-        Livewire::actingAs($this->customer)
+        Livewire::actingAs($this->customer, 'customer')
             ->test(Profile::class)
             ->set('name', 'Updated Name')
             ->set('email', 'updated@example.com')
@@ -111,7 +104,7 @@ class CustomerAccountTest extends TestCase
     {
         $this->customer->update(['password' => bcrypt('oldpassword')]);
 
-        Livewire::actingAs($this->customer)
+        Livewire::actingAs($this->customer, 'customer')
             ->test(Profile::class)
             ->call('togglePasswordForm')
             ->set('current_password', 'oldpassword')
@@ -125,7 +118,7 @@ class CustomerAccountTest extends TestCase
     /** @test */
     public function customer_can_view_addresses(): void
     {
-        $this->actingAs($this->customer)
+        $this->actingAs($this->customer, 'customer')
             ->get(route('account.addresses'))
             ->assertOk()
             ->assertSeeLivewire(Addresses::class);
@@ -134,7 +127,7 @@ class CustomerAccountTest extends TestCase
     /** @test */
     public function customer_can_add_address(): void
     {
-        Livewire::actingAs($this->customer)
+        Livewire::actingAs($this->customer, 'customer')
             ->test(Addresses::class)
             ->call('openForm')
             ->set('full_name', 'John Doe')
@@ -147,7 +140,7 @@ class CustomerAccountTest extends TestCase
             ->assertDispatched('show-toast');
 
         $this->assertDatabaseHas('shipping_addresses', [
-            'user_id' => $this->customer->id,
+            'customer_id' => $this->customer->id,
             'full_name' => 'John Doe',
             'governorate' => 'Cairo',
             'city' => 'Nasr City',
@@ -159,11 +152,11 @@ class CustomerAccountTest extends TestCase
     public function customer_can_edit_own_address(): void
     {
         $address = ShippingAddress::factory()->create([
-            'user_id' => $this->customer->id,
+            'customer_id' => $this->customer->id,
             'full_name' => 'Original Name',
         ]);
 
-        Livewire::actingAs($this->customer)
+        Livewire::actingAs($this->customer, 'customer')
             ->test(Addresses::class)
             ->call('openForm', $address->id)
             ->assertSet('full_name', 'Original Name')
@@ -181,12 +174,12 @@ class CustomerAccountTest extends TestCase
     public function customer_cannot_edit_other_users_address(): void
     {
         $otherAddress = ShippingAddress::factory()->create([
-            'user_id' => $this->otherCustomer->id,
+            'customer_id' => $this->otherCustomer->id,
         ]);
 
         $this->expectException(\Illuminate\Database\Eloquent\ModelNotFoundException::class);
         
-        Livewire::actingAs($this->customer)
+        Livewire::actingAs($this->customer, 'customer')
             ->test(Addresses::class)
             ->call('openForm', $otherAddress->id);
     }
@@ -195,10 +188,10 @@ class CustomerAccountTest extends TestCase
     public function customer_can_delete_own_address(): void
     {
         $address = ShippingAddress::factory()->create([
-            'user_id' => $this->customer->id,
+            'customer_id' => $this->customer->id,
         ]);
 
-        Livewire::actingAs($this->customer)
+        Livewire::actingAs($this->customer, 'customer')
             ->test(Addresses::class)
             ->call('confirmDelete', $address->id)
             ->call('delete')
@@ -213,16 +206,16 @@ class CustomerAccountTest extends TestCase
     public function customer_can_set_default_address(): void
     {
         $address1 = ShippingAddress::factory()->create([
-            'user_id' => $this->customer->id,
+            'customer_id' => $this->customer->id,
             'is_default' => true,
         ]);
         
         $address2 = ShippingAddress::factory()->create([
-            'user_id' => $this->customer->id,
+            'customer_id' => $this->customer->id,
             'is_default' => false,
         ]);
 
-        Livewire::actingAs($this->customer)
+        Livewire::actingAs($this->customer, 'customer')
             ->test(Addresses::class)
             ->call('setDefault', $address2->id)
             ->assertDispatched('show-toast');
@@ -237,7 +230,7 @@ class CustomerAccountTest extends TestCase
     /** @test */
     public function customer_can_view_orders(): void
     {
-        $this->actingAs($this->customer)
+        $this->actingAs($this->customer, 'customer')
             ->get(route('account.orders'))
             ->assertOk()
             ->assertSeeLivewire(Orders::class);
@@ -246,22 +239,22 @@ class CustomerAccountTest extends TestCase
     /** @test */
     public function customer_only_sees_own_orders(): void
     {
-        $address = ShippingAddress::factory()->create(['user_id' => $this->customer->id]);
-        $otherAddress = ShippingAddress::factory()->create(['user_id' => $this->otherCustomer->id]);
+        $address = ShippingAddress::factory()->create(['customer_id' => $this->customer->id]);
+        $otherAddress = ShippingAddress::factory()->create(['customer_id' => $this->otherCustomer->id]);
         
         $myOrder = Order::factory()->create([
-            'user_id' => $this->customer->id,
+            'customer_id' => $this->customer->id,
             'order_number' => 'ORD-MY-001',
             'shipping_address_id' => $address->id,
         ]);
         
         $otherOrder = Order::factory()->create([
-            'user_id' => $this->otherCustomer->id,
+            'customer_id' => $this->otherCustomer->id,
             'order_number' => 'ORD-OTHER-001',
             'shipping_address_id' => $otherAddress->id,
         ]);
 
-        Livewire::actingAs($this->customer)
+        Livewire::actingAs($this->customer, 'customer')
             ->test(Orders::class)
             ->assertSee('ORD-MY-001')
             ->assertDontSee('ORD-OTHER-001');
@@ -270,23 +263,23 @@ class CustomerAccountTest extends TestCase
     /** @test */
     public function customer_can_filter_orders_by_status(): void
     {
-        $address = ShippingAddress::factory()->create(['user_id' => $this->customer->id]);
+        $address = ShippingAddress::factory()->create(['customer_id' => $this->customer->id]);
         
         Order::factory()->create([
-            'user_id' => $this->customer->id,
+            'customer_id' => $this->customer->id,
             'status' => 'pending',
             'order_number' => 'ORD-PENDING-001',
             'shipping_address_id' => $address->id,
         ]);
         
         Order::factory()->create([
-            'user_id' => $this->customer->id,
+            'customer_id' => $this->customer->id,
             'status' => 'delivered',
             'order_number' => 'ORD-DELIVERED-001',
             'shipping_address_id' => $address->id,
         ]);
 
-        Livewire::actingAs($this->customer)
+        Livewire::actingAs($this->customer, 'customer')
             ->test(Orders::class)
             ->set('status', 'pending')
             ->assertSee('ORD-PENDING-001')
@@ -296,14 +289,14 @@ class CustomerAccountTest extends TestCase
     /** @test */
     public function customer_can_view_own_order_details(): void
     {
-        $address = ShippingAddress::factory()->create(['user_id' => $this->customer->id]);
+        $address = ShippingAddress::factory()->create(['customer_id' => $this->customer->id]);
         
         $order = Order::factory()->create([
-            'user_id' => $this->customer->id,
+            'customer_id' => $this->customer->id,
             'shipping_address_id' => $address->id,
         ]);
 
-        $this->actingAs($this->customer)
+        $this->actingAs($this->customer, 'customer')
             ->get(route('account.orders.show', $order))
             ->assertOk()
             ->assertSeeLivewire(OrderDetails::class);
@@ -312,14 +305,14 @@ class CustomerAccountTest extends TestCase
     /** @test */
     public function customer_cannot_view_other_users_order(): void
     {
-        $otherAddress = ShippingAddress::factory()->create(['user_id' => $this->otherCustomer->id]);
+        $otherAddress = ShippingAddress::factory()->create(['customer_id' => $this->otherCustomer->id]);
         
         $otherOrder = Order::factory()->create([
-            'user_id' => $this->otherCustomer->id,
+            'customer_id' => $this->otherCustomer->id,
             'shipping_address_id' => $otherAddress->id,
         ]);
 
-        $this->actingAs($this->customer)
+        $this->actingAs($this->customer, 'customer')
             ->get(route('account.orders.show', $otherOrder))
             ->assertForbidden();
     }
@@ -327,11 +320,11 @@ class CustomerAccountTest extends TestCase
     /** @test */
     public function order_details_shows_all_order_info(): void
     {
-        $address = ShippingAddress::factory()->create(['user_id' => $this->customer->id]);
+        $address = ShippingAddress::factory()->create(['customer_id' => $this->customer->id]);
         $product = Product::factory()->create(['name' => 'Test Product']);
         
         $order = Order::factory()->create([
-            'user_id' => $this->customer->id,
+            'customer_id' => $this->customer->id,
             'order_number' => 'ORD-TEST-123',
             'total' => 250.00,
             'status' => 'processing',
@@ -346,10 +339,11 @@ class CustomerAccountTest extends TestCase
             'subtotal' => 200.00,
         ]);
 
-        Livewire::actingAs($this->customer)
+        Livewire::actingAs($this->customer, 'customer')
             ->test(OrderDetails::class, ['order' => $order])
             ->assertSee('ORD-TEST-123')
             ->assertSee('Test Product')
             ->assertSee('250.00');
     }
 }
+

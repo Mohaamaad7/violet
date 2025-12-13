@@ -34,7 +34,7 @@ class OrdersTable
                     ->label(__('admin.table.customer'))
                     ->searchable()
                     ->sortable()
-                    ->description(fn ($record) => $record->user?->email)
+                    ->description(fn($record) => $record->user?->email)
                     ->icon('heroicon-o-user'),
 
                 // الإجمالي
@@ -50,7 +50,7 @@ class OrdersTable
                     ->label(__('admin.table.order_status'))
                     ->badge()
                     ->sortable()
-                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                    ->formatStateUsing(fn(string $state): string => match ($state) {
                         'pending' => __('admin.orders.status.pending'),
                         'processing' => __('admin.orders.status.processing'),
                         'shipped' => __('admin.orders.status.shipped'),
@@ -58,7 +58,7 @@ class OrdersTable
                         'cancelled' => __('admin.orders.status.cancelled'),
                         default => $state,
                     })
-                    ->color(fn (string $state): string => match ($state) {
+                    ->color(fn(string $state): string => match ($state) {
                         'pending' => 'info',
                         'processing' => 'warning',
                         'shipped' => 'primary',
@@ -66,7 +66,7 @@ class OrdersTable
                         'cancelled' => 'danger',
                         default => 'gray',
                     })
-                    ->icon(fn (string $state): string => match ($state) {
+                    ->icon(fn(string $state): string => match ($state) {
                         'pending' => 'heroicon-o-clock',
                         'processing' => 'heroicon-o-arrow-path',
                         'shipped' => 'heroicon-o-truck',
@@ -80,21 +80,21 @@ class OrdersTable
                     ->label(__('admin.table.payment_status'))
                     ->badge()
                     ->sortable()
-                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                    ->formatStateUsing(fn(string $state): string => match ($state) {
                         'unpaid' => __('admin.orders.payment.unpaid'),
                         'paid' => __('admin.orders.payment.paid'),
                         'failed' => __('admin.orders.payment.failed'),
                         'refunded' => __('admin.orders.payment.refunded'),
                         default => $state,
                     })
-                    ->color(fn (string $state): string => match ($state) {
+                    ->color(fn(string $state): string => match ($state) {
                         'unpaid' => 'gray',
                         'paid' => 'success',
                         'failed' => 'danger',
                         'refunded' => 'warning',
                         default => 'gray',
                     })
-                    ->icon(fn (string $state): string => match ($state) {
+                    ->icon(fn(string $state): string => match ($state) {
                         'unpaid' => 'heroicon-o-clock',
                         'paid' => 'heroicon-o-check-badge',
                         'failed' => 'heroicon-o-x-circle',
@@ -106,7 +106,7 @@ class OrdersTable
                 TextColumn::make('payment_method')
                     ->label(__('admin.table.payment_method'))
                     ->badge()
-                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                    ->formatStateUsing(fn(string $state): string => match ($state) {
                         'cod' => __('admin.orders.method.cod'),
                         'card' => __('admin.orders.method.card'),
                         'instapay' => 'InstaPay',
@@ -115,12 +115,47 @@ class OrdersTable
                     ->color('info')
                     ->toggleable(),
 
+                // حالة المرتجع (Return Status Badge)
+                TextColumn::make('return_status')
+                    ->label('المرتجع')
+                    ->badge()
+                    ->sortable()
+                    ->placeholder('-')
+                    ->formatStateUsing(fn(string $state): string => match ($state) {
+                        'none' => '',
+                        'requested' => '📝 طلب مرتجع',
+                        'approved' => '✅ موافق عليه',
+                        'completed' => '🔄 مكتمل',
+                        default => $state,
+                    })
+                    ->color(fn(string $state): string => match ($state) {
+                        'none' => 'gray',
+                        'requested' => 'warning',
+                        'approved' => 'info',
+                        'completed' => 'success',
+                        default => 'gray',
+                    })
+                    ->icon(fn(string $state): ?string => match ($state) {
+                        'none' => null,
+                        'requested' => 'heroicon-o-arrow-uturn-left',
+                        'approved' => 'heroicon-o-check-circle',
+                        'completed' => 'heroicon-o-check-badge',
+                        default => 'heroicon-o-arrow-uturn-left',
+                    })
+                    ->tooltip(fn($record) => match ($record->return_status) {
+                        'none' => null,
+                        'requested' => 'يوجد طلب مرتجع قيد المراجعة',
+                        'approved' => 'تمت الموافقة على المرتجع',
+                        'completed' => 'تم اكتمال المرتجع',
+                        default => null,
+                    }),
+
                 // تاريخ الإنشاء
                 TextColumn::make('created_at')
                     ->label(__('admin.table.order_date'))
                     ->dateTime('d M Y, H:i')
                     ->sortable()
-                    ->description(fn ($record) => $record->created_at->diffForHumans())
+                    ->description(fn($record) => $record->created_at->diffForHumans())
                     ->toggleable(),
             ])
             ->filters([
@@ -173,11 +208,11 @@ class OrdersTable
                         return $query
                             ->when(
                                 $data['created_from'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
+                                fn(Builder $query, $date): Builder => $query->whereDate('created_at', '>=', $date),
                             )
                             ->when(
                                 $data['created_until'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
+                                fn(Builder $query, $date): Builder => $query->whereDate('created_at', '<=', $date),
                             );
                     })
                     ->indicateUsing(function (array $data): array {
@@ -204,7 +239,7 @@ class OrdersTable
                     ->query(function (Builder $query, array $data): Builder {
                         return $query->when(
                             $data['customer_search'],
-                            fn (Builder $query, $search): Builder => $query->whereHas('user', function ($q) use ($search) {
+                            fn(Builder $query, $search): Builder => $query->whereHas('user', function ($q) use ($search) {
                                 $q->where('name', 'like', "%{$search}%")
                                     ->orWhere('email', 'like', "%{$search}%");
                             }),
@@ -222,13 +257,13 @@ class OrdersTable
             ->recordActions([
                 ViewAction::make()
                     ->label(__('admin.action.view_details'))
-                    ->visible(fn ($record) => auth()->user()->can('view', $record)),
+                    ->visible(fn($record) => auth()->user()->can('view', $record)),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
                         ->label(__('admin.action.delete_selected'))
-                        ->visible(fn () => auth()->user()->can('delete orders')),
+                        ->visible(fn() => auth()->user()->can('delete orders')),
                 ]),
             ])
             ->defaultSort('created_at', 'desc')
