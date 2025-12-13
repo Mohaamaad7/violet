@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\ReturnStatus;
+use App\Enums\ReturnType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -34,6 +36,8 @@ class OrderReturn extends Model
     ];
 
     protected $casts = [
+        'status' => ReturnStatus::class,
+        'type' => ReturnType::class,
         'refund_amount' => 'decimal:2',
         'approved_at' => 'datetime',
         'rejected_at' => 'datetime',
@@ -101,22 +105,12 @@ class OrderReturn extends Model
 
     public function getStatusBadgeColorAttribute(): string
     {
-        return match($this->status) {
-            'pending' => 'warning',
-            'approved' => 'info',
-            'rejected' => 'danger',
-            'completed' => 'success',
-            default => 'secondary',
-        };
+        return $this->status?->color() ?? 'secondary';
     }
 
     public function getTypeBadgeColorAttribute(): string
     {
-        return match($this->type) {
-            'rejection' => 'danger',
-            'return_after_delivery' => 'warning',
-            default => 'secondary',
-        };
+        return $this->type?->color() ?? 'secondary';
     }
 
     // Methods
@@ -124,14 +118,14 @@ class OrderReturn extends Model
     {
         $date = now()->format('Ymd');
         $lastReturn = self::whereDate('created_at', now())->latest()->first();
-        
+
         if ($lastReturn) {
             $lastNumber = (int) substr($lastReturn->return_number, -4);
             $newNumber = str_pad($lastNumber + 1, 4, '0', STR_PAD_LEFT);
         } else {
             $newNumber = '0001';
         }
-        
+
         return "RET-{$date}-{$newNumber}";
     }
 }

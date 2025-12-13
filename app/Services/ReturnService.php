@@ -2,6 +2,9 @@
 
 namespace App\Services;
 
+use App\Enums\OrderStatus;
+use App\Enums\ReturnStatus;
+use App\Enums\ReturnType;
 use App\Models\Order;
 use App\Models\OrderReturn;
 use App\Models\ReturnItem;
@@ -35,7 +38,7 @@ class ReturnService
                 'order_id' => $orderId,
                 'return_number' => OrderReturn::generateReturnNumber(),
                 'type' => $data['type'],
-                'status' => $autoApprove ? 'approved' : 'pending',
+                'status' => $autoApprove ? ReturnStatus::APPROVED : ReturnStatus::PENDING,
                 'reason' => $data['reason'],
                 'customer_notes' => $data['customer_notes'] ?? null,
                 'approved_at' => $autoApprove ? now() : null,
@@ -101,12 +104,12 @@ class ReturnService
         return DB::transaction(function () use ($returnId, $adminId, $adminNotes) {
             $return = OrderReturn::with(['order', 'items'])->findOrFail($returnId);
 
-            if ($return->status !== 'pending') {
+            if ($return->status !== ReturnStatus::PENDING) {
                 throw new \Exception("Return is not in pending status");
             }
 
             $return->update([
-                'status' => 'approved',
+                'status' => ReturnStatus::APPROVED,
                 'approved_by' => $adminId,
                 'approved_at' => now(),
                 'admin_notes' => $adminNotes,
@@ -126,12 +129,12 @@ class ReturnService
         return DB::transaction(function () use ($returnId, $adminId, $reason) {
             $return = OrderReturn::findOrFail($returnId);
 
-            if ($return->status !== 'pending') {
+            if ($return->status !== ReturnStatus::PENDING) {
                 throw new \Exception("Return is not in pending status");
             }
 
             $return->update([
-                'status' => 'rejected',
+                'status' => ReturnStatus::REJECTED,
                 'rejected_by' => $adminId,
                 'rejected_at' => now(),
                 'admin_notes' => $reason,
@@ -151,7 +154,7 @@ class ReturnService
         return DB::transaction(function () use ($returnId, $itemConditions, $adminId) {
             $return = OrderReturn::with(['order', 'items.product'])->findOrFail($returnId);
 
-            if ($return->status !== 'approved') {
+            if ($return->status !== ReturnStatus::APPROVED) {
                 throw new \Exception("Return must be approved first");
             }
 
@@ -176,7 +179,7 @@ class ReturnService
 
             // Update return
             $return->update([
-                'status' => 'completed',
+                'status' => ReturnStatus::COMPLETED,
                 'processed_by' => $adminId,
                 'processed_at' => now(),
                 'refund_amount' => $refundAmount,
@@ -196,7 +199,7 @@ class ReturnService
     {
         $return = OrderReturn::findOrFail($returnId);
 
-        if ($return->status !== 'completed') {
+        if ($return->status !== ReturnStatus::COMPLETED) {
             throw new \Exception("Return must be processed first");
         }
 
@@ -252,13 +255,13 @@ class ReturnService
     protected function validateReturnRequest(Order $order, string $type): void
     {
         if ($type === 'rejection') {
-            if (!in_array($order->status, ['pending', 'processing', 'shipped'])) {
+            if (!in_array($order->status, [OrderStatus::PENDING, OrderStatus::PROCESSING, OrderStatus::SHIPPED])) {
                 throw new \Exception("Order cannot be rejected in current status");
             }
         }
 
         if ($type === 'return_after_delivery') {
-            if ($order->status !== 'delivered') {
+            if ($order->status !== OrderStatus::DELIVERED) {
                 throw new \Exception("Order must be delivered first");
             }
 
@@ -271,7 +274,7 @@ class ReturnService
         }
 
         // Check if already has pending/approved return
-        if ($order->returns()->whereIn('status', ['pending', 'approved'])->exists()) {
+        if ($order->returns()->whereIn('status', [ReturnStatus::PENDING, ReturnStatus::APPROVED])->exists()) {
             throw new \Exception("Order already has a pending or approved return request");
         }
     }
@@ -343,12 +346,12 @@ class ReturnService
             'total_returns' => $returns->count(),
             'by_status' => $byStatus,
             'by_type' => $byType,
-            'rejection_count' => $returns->where('type', 'rejection')->count(),
-            'return_after_delivery_count' => $returns->where('type', 'return_after_delivery')->count(),
-            'pending_count' => $returns->where('status', 'pending')->count(),
-            'approved_count' => $returns->where('status', 'approved')->count(),
-            'rejected_count' => $returns->where('status', 'rejected')->count(),
-            'completed_count' => $returns->where('status', 'completed')->count(),
+            'rejection_count' => $returns->where('type', ReturnType::REJECTION)->count(),
+            'return_after_delivery_count' => $returns->where('type', ReturnType::RETURN_AFTER_DELIVERY)->count(),
+            'pending_count' => $returns->where('status', ReturnStatus::PENDING)->count(),
+            'approved_count' => $returns->where('status', ReturnStatus::APPROVED)->count(),
+            'rejected_count' => $returns->where('status', ReturnStatus::REJECTED)->count(),
+            'completed_count' => $returns->where('status', ReturnStatus::COMPLETED)->count(),
             'return_rate' => $orders > 0 ? round(($returns->count() / $orders) * 100, 2) : 0,
             'total_refund_amount' => $returns->sum('refund_amount'),
             'average_refund_amount' => $returns->where('refund_amount', '>', 0)->avg('refund_amount') ?? 0,

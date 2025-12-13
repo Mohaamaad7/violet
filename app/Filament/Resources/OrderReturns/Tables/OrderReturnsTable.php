@@ -46,35 +46,25 @@ class OrderReturnsTable
                 TextColumn::make('type')
                     ->label('النوع')
                     ->badge()
-                    ->color(fn(string $state): string => match ($state) {
-                        'rejection' => 'danger',
-                        'return_after_delivery' => 'warning',
-                        default => 'gray',
-                    })
-                    ->formatStateUsing(fn(string $state): string => match ($state) {
-                        'rejection' => '🔴 رفض استلام',
-                        'return_after_delivery' => '🟡 استرجاع بعد التسليم',
-                        default => $state,
-                    })
+                    ->color(fn($state) => $state?->color() ?? 'gray')
+                    ->formatStateUsing(fn($state) => $state ? match ($state->value) {
+                        0 => '🔴 رفض استلام',
+                        1 => '🟡 استرجاع بعد التسليم',
+                        default => $state->label(),
+                    } : '-')
                     ->sortable(),
 
                 TextColumn::make('status')
                     ->label('الحالة')
                     ->badge()
-                    ->color(fn(string $state): string => match ($state) {
-                        'pending' => 'warning',
-                        'approved' => 'info',
-                        'rejected' => 'danger',
-                        'completed' => 'success',
-                        default => 'gray',
-                    })
-                    ->formatStateUsing(fn(string $state): string => match ($state) {
-                        'pending' => '⏳ قيد المراجعة',
-                        'approved' => '✅ تمت الموافقة',
-                        'rejected' => '❌ مرفوض',
-                        'completed' => '✅ مكتمل',
-                        default => $state,
-                    })
+                    ->color(fn($state) => $state?->color() ?? 'gray')
+                    ->formatStateUsing(fn($state) => $state ? match ($state->value) {
+                        0 => '⏳ قيد المراجعة',
+                        1 => '✅ تمت الموافقة',
+                        2 => '❌ مرفوض',
+                        3 => '✅ مكتمل',
+                        default => $state->label(),
+                    } : '-')
                     ->sortable(),
 
                 TextColumn::make('refund_amount')
@@ -120,10 +110,10 @@ class OrderReturnsTable
                 SelectFilter::make('status')
                     ->label('الحالة')
                     ->options([
-                        'pending' => '⏳ قيد المراجعة',
-                        'approved' => '✅ تمت الموافقة',
-                        'rejected' => '❌ مرفوض',
-                        'completed' => '✅ مكتمل',
+                        0 => '⏳ قيد المراجعة',
+                        1 => '✅ تمت الموافقة',
+                        2 => '❌ مرفوض',
+                        3 => '✅ مكتمل',
                     ])
                     ->multiple()
                     ->preload(),
@@ -131,8 +121,8 @@ class OrderReturnsTable
                 SelectFilter::make('type')
                     ->label('النوع')
                     ->options([
-                        'rejection' => '🔴 رفض استلام',
-                        'return_after_delivery' => '🟡 استرجاع بعد التسليم',
+                        0 => '🔴 رفض استلام',
+                        1 => '🟡 استرجاع بعد التسليم',
                     ])
                     ->multiple()
                     ->preload(),

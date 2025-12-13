@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\OrderStatus;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\OrderStatusHistory;
@@ -14,7 +15,8 @@ class OrderService
     public function __construct(
         protected ProductService $productService,
         protected EmailService $emailService
-    ) {}
+    ) {
+    }
 
     /**
      * Get all orders with filters and pagination
@@ -107,7 +109,7 @@ class OrderService
             $order = Order::create([
                 'order_number' => $orderNumber,
                 'user_id' => $data['user_id'],
-                'status' => 'pending',
+                'status' => OrderStatus::PENDING,
                 'payment_status' => 'pending',
                 'payment_method' => $data['payment_method'],
                 'subtotal' => $data['subtotal'],
@@ -148,7 +150,7 @@ class OrderService
     public function updateStatus(int $id, string $status, ?string $notes = null, ?int $changedBy = null): Order
     {
         $order = $this->findOrder($id);
-        
+
         $previousStatus = $order->status;
 
         // Update status
@@ -164,7 +166,7 @@ class OrderService
         };
 
         // DIRECT CALL: Handle stock deduction when shipped
-        if ($status === 'shipped' && $previousStatus !== 'shipped') {
+        if ($status === 'shipped' && $previousStatus !== OrderStatus::SHIPPED) {
             $stockResult = $this->deductStockForOrder($order);
             if (!$stockResult['success']) {
                 \Log::warning("Stock deduction failed for Order #{$order->order_number}: {$stockResult['message']}");
@@ -172,13 +174,13 @@ class OrderService
         }
 
         // DIRECT CALL: Handle stock restoration when cancelled (if was shipped)
-        if ($status === 'cancelled' && $previousStatus === 'shipped' && $order->stock_deducted_at) {
+        if ($status === 'cancelled' && $previousStatus === OrderStatus::SHIPPED && $order->stock_deducted_at) {
             $restockResult = $this->restockRejectedOrder($order);
             if (!$restockResult['success']) {
                 \Log::warning("Stock restoration failed for Order #{$order->order_number}: {$restockResult['message']}");
             }
         }
-        
+
         // Reload relationships for the updated order
         $order->load(['items.product', 'user', 'customer']);
 
@@ -228,12 +230,12 @@ class OrderService
     {
         $order = $this->findOrder($id);
 
-        if (in_array($order->status, ['delivered', 'cancelled'])) {
-            throw new \Exception("Cannot cancel order with status: {$order->status}");
+        if (in_array($order->status, [OrderStatus::DELIVERED, OrderStatus::CANCELLED])) {
+            throw new \Exception("Cannot cancel order with status: {$order->status->toString()}");
         }
 
         $order->update([
-            'status' => 'cancelled',
+            'status' => OrderStatus::CANCELLED,
             'cancelled_at' => now(),
             'cancellation_reason' => $reason,
         ]);
@@ -381,7 +383,7 @@ class OrderService
             // Step 1: Validate stock availability for all items
             foreach ($order->items as $item) {
                 $product = $item->product;
-                
+
                 if (!$product) {
                     $errors[] = "المنتج غير موجود (Item ID: {$item->id})";
                     continue;
@@ -439,7 +441,7 @@ class OrderService
             ];
 
         } catch (\Exception $e) {
-            
+
             return [
                 'success' => false,
                 'message' => 'حدث خطأ أثناء خصم المخزون: ' . $e->getMessage(),
@@ -499,7 +501,7 @@ class OrderService
             ];
 
         } catch (\Exception $e) {
-            
+
             return [
                 'success' => false,
                 'message' => 'حدث خطأ أثناء إرجاع المخزون: ' . $e->getMessage(),
@@ -519,7 +521,7 @@ class OrderService
 
         foreach ($order->items as $item) {
             $product = $item->product;
-            
+
             if (!$product) {
                 $issues[] = [
                     'product' => $item->product_name ?? 'Unknown',
@@ -559,17 +561,17 @@ class OrderService
         return DB::transaction(function () use ($orderId, $reason) {
             $order = $this->findOrder($orderId);
 
-            if (!in_array($order->status, ['pending', 'processing', 'shipped'])) {
+            if (!in_array($order->status, [OrderStatus::PENDING, OrderStatus::PROCESSING, OrderStatus::SHIPPED])) {
                 throw new \Exception("Order cannot be rejected in current status");
             }
 
             // If order was shipped, restock items
-            if ($order->status === 'shipped' && $order->shipped_at) {
+            if ($order->status === OrderStatus::SHIPPED && $order->shipped_at) {
                 $this->restockRejectedOrder($order);
             }
 
             $order->update([
-                'status' => 'cancelled',
+                'status' => OrderStatus::CANCELLED,
                 'return_status' => 'none',
                 'rejected_at' => now(),
                 'rejection_reason' => $reason,

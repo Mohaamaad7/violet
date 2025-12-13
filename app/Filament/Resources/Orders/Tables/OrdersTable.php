@@ -50,30 +50,9 @@ class OrdersTable
                     ->label(__('admin.table.order_status'))
                     ->badge()
                     ->sortable()
-                    ->formatStateUsing(fn(string $state): string => match ($state) {
-                        'pending' => __('admin.orders.status.pending'),
-                        'processing' => __('admin.orders.status.processing'),
-                        'shipped' => __('admin.orders.status.shipped'),
-                        'delivered' => __('admin.orders.status.delivered'),
-                        'cancelled' => __('admin.orders.status.cancelled'),
-                        default => $state,
-                    })
-                    ->color(fn(string $state): string => match ($state) {
-                        'pending' => 'info',
-                        'processing' => 'warning',
-                        'shipped' => 'primary',
-                        'delivered' => 'success',
-                        'cancelled' => 'danger',
-                        default => 'gray',
-                    })
-                    ->icon(fn(string $state): string => match ($state) {
-                        'pending' => 'heroicon-o-clock',
-                        'processing' => 'heroicon-o-arrow-path',
-                        'shipped' => 'heroicon-o-truck',
-                        'delivered' => 'heroicon-o-check-circle',
-                        'cancelled' => 'heroicon-o-x-circle',
-                        default => 'heroicon-o-question-mark-circle',
-                    }),
+                    ->formatStateUsing(fn($state) => $state?->label() ?? '-')
+                    ->color(fn($state) => $state?->color() ?? 'gray')
+                    ->icon(fn($state) => $state?->icon() ?? 'heroicon-o-question-mark-circle'),
 
                 // حالة الدفع (Payment Status Badge)
                 TextColumn::make('payment_status')
@@ -164,11 +143,11 @@ class OrdersTable
                     ->label(__('admin.table.order_status'))
                     ->multiple()
                     ->options([
-                        'pending' => __('admin.orders.status.pending'),
-                        'processing' => __('admin.orders.status.processing'),
-                        'shipped' => __('admin.orders.status.shipped'),
-                        'delivered' => __('admin.orders.status.delivered'),
-                        'cancelled' => __('admin.orders.status.cancelled'),
+                        0 => __('admin.orders.status.pending'),
+                        1 => __('admin.orders.status.processing'),
+                        2 => __('admin.orders.status.shipped'),
+                        3 => __('admin.orders.status.delivered'),
+                        4 => __('admin.orders.status.cancelled'),
                     ])
                     ->placeholder(__('admin.filter.all')),
 
