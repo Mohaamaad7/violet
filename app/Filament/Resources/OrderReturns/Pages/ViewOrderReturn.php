@@ -121,8 +121,19 @@ class ViewOrderReturn extends ViewRecord
                 ->modalIcon('heroicon-o-cog-6-tooth')
                 ->modalWidth('xl')
                 ->schema(function () {
+                    // Force load items
+                    $this->record->load('items.product');
                     $items = $this->record->items;
                     $fields = [];
+
+                    if ($items->isEmpty()) {
+                        // Show message if no items
+                        return [
+                            Section::make('لا توجد أصناف')
+                                ->description('لم يتم إضافة أصناف لهذا المرتجع. تحقق من إنشاء المرتجع بشكل صحيح.')
+                                ->schema([])
+                        ];
+                    }
 
                     foreach ($items as $item) {
                         $fields[] = Section::make($item->product_name)
