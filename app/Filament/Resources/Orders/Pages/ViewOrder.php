@@ -504,12 +504,6 @@ class ViewOrder extends ViewRecord
                                             ->height(60)
                                             ->width(60)
                                             ->getStateUsing(function ($record) {
-                                                \Log::info('ImageEntry Debug', [
-                                                    'order_item_id' => $record->id,
-                                                    'product_id' => $record->product_id,
-                                                    'product_exists' => $record->product ? 'yes' : 'no',
-                                                ]);
-
                                                 // Explicitly load media if not already loaded
                                                 if ($record->product) {
                                                     // Load media if not already loaded
@@ -517,25 +511,18 @@ class ViewOrder extends ViewRecord
                                                         $record->product->load('media');
                                                     }
 
-                                                    $mediaCount = $record->product->getMedia('images')->count();
-                                                    $imageUrl = $record->product->getFirstMediaUrl('images', 'thumb');
-
-                                                    \Log::info('Product Media Debug', [
-                                                        'product_id' => $record->product->id,
-                                                        'media_count' => $mediaCount,
-                                                        'image_url' => $imageUrl,
-                                                        'has_media' => $record->product->hasMedia('images') ? 'yes' : 'no',
-                                                    ]);
+                                                    // Get thumbnail URL from Spatie Media Library
+                                                    $imageUrl = $record->product->getFirstMediaUrl('product-images', 'thumbnail');
 
                                                     if ($imageUrl) {
                                                         return $imageUrl;
                                                     }
                                                 }
 
-                                                \Log::info('Using default image');
-                                                return asset('storage/products/default-product.svg');
+                                                // Fallback to default image
+                                                return asset('images/default-product.svg');
                                             })
-                                            ->defaultImageUrl(asset('storage/products/default-product.svg'))
+                                            ->defaultImageUrl(asset('images/default-product.svg'))
                                             ->extraAttributes(['class' => 'rounded-lg']),
 
                                         TextEntry::make('product_name')

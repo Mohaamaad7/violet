@@ -24,7 +24,7 @@
                     : ($primaryMedia->hasGeneratedConversion('preview')
                         ? $primaryMedia->getUrl('preview')
                         : $primaryMedia->getUrl()))
-                : asset('images/default-product.png');
+                : asset('images/default-product.svg');
         @endphp
 
         <img src="{{ $imagePath }}" alt="{{ $product->name }}"

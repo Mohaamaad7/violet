@@ -73,7 +73,7 @@
             window.imageGallery = function() {
                 return {
                     currentIndex: 0,
-                    currentImageUrl: '{{ $allMedia->first() ? $allMedia->first()->getUrl() : asset("images/default-product.png") }}',
+                    currentImageUrl: '{{ $allMedia->first() ? $allMedia->first()->getUrl() : asset("images/default-product.svg") }}',
                     driftInstance: null,
                     gallery: @json($allMedia->map(function($media) {
                         return [

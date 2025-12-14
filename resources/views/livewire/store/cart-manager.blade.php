@@ -66,7 +66,7 @@
                                                 ? ($primaryMedia->hasGeneratedConversion('thumbnail') 
                                                     ? $primaryMedia->getUrl('thumbnail') 
                                                     : $primaryMedia->getUrl())
-                                                : asset('images/default-product.png');
+                                                : asset('images/default-product.svg');
                                         @endphp
                                         <img 
                                             src="{{ $imagePath }}" 

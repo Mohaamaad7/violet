@@ -1,0 +1,24 @@
+<svg width="400" height="400" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="400" height="400" fill="#f3f4f6"/>
+  
+  <!-- Icon Container -->
+  <g transform="translate(150, 120)">
+    <!-- Package Box Icon -->
+    <rect x="10" y="40" width="80" height="80" fill="#9ca3af" stroke="#6b7280" stroke-width="2" rx="4"/>
+    
+    <!-- Tape Line -->
+    <line x1="10" y1="80" x2="90" y2="80" stroke="#6b7280" stroke-width="3"/>
+    
+    <!-- Handle -->
+    <ellipse cx="50" cy="100" rx="15" ry="8" fill="none" stroke="#6b7280" stroke-width="2"/>
+  </g>
+  
+  <!-- Text -->
+  <text x="200" y="260" text-anchor="middle" fill="#6b7280" font-family="Arial, sans-serif" font-size="16" font-weight="500">
+    لا توجد صورة
+  </text>
+  <text x="200" y="285" text-anchor="middle" fill="#9ca3af" font-family="Arial, sans-serif" font-size="14">
+    No Image Available
+  </text>
+</svg>

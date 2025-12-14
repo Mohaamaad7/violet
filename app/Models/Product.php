@@ -153,7 +153,7 @@ class Product extends Model implements HasMedia
         }
         
         // Final fallback to placeholder
-        return asset('images/default-product.png');
+        return asset('images/default-product.svg');
     }
 
     public function getIsInStockAttribute()
