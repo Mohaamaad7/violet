@@ -16,34 +16,51 @@ class ProductList extends Component
     // Filters with URL binding
     #[Url(except: [])]
     public array $selectedCategories = [];
-    
+
     #[Url(except: '')]
     public string $minPrice = '';
-    
+
     #[Url(except: '')]
     public string $maxPrice = '';
-    
+
     #[Url(except: null)]
     public ?int $selectedRating = null;
-    
+
     #[Url(except: [])]
     public array $selectedBrands = [];
-    
+
     #[Url(except: false)]
     public bool $onSaleOnly = false;
-    
+
     #[Url(except: 'all')]
     public string $stockStatus = 'all'; // all, in_stock, out_of_stock
-    
+
     #[Url(except: 'default')]
     public string $sortBy = 'default';
-    
+
     // Search
     #[Url(except: '')]
     public string $search = '';
-    
+
     // Pagination
     public int $perPage = 12;
+
+    // Incoming Category Slug from URL
+    #[Url]
+    public ?string $category = null;
+
+    public function mount()
+    {
+        // If 'category' slug is provided in URL, pre-select it
+        if ($this->category) {
+            $categoryModel = Category::where('slug', $this->category)->first();
+            if ($categoryModel) {
+                if (!in_array($categoryModel->id, $this->selectedCategories)) {
+                    $this->selectedCategories[] = $categoryModel->id;
+                }
+            }
+        }
+    }
 
     /**
      * Get available brands from products
@@ -69,7 +86,7 @@ class ProductList extends Component
         $stats = Product::where('status', 'active')
             ->selectRaw('MIN(COALESCE(sale_price, price)) as min_price, MAX(COALESCE(sale_price, price)) as max_price')
             ->first();
-        
+
         return [
             'min' => (int) ($stats->min_price ?? 0),
             'max' => (int) ($stats->max_price ?? 10000),
@@ -82,9 +99,9 @@ class ProductList extends Component
     #[Computed]
     public function hasActiveFilters(): bool
     {
-        return !empty($this->selectedCategories) 
-            || $this->minPrice !== '' 
-            || $this->maxPrice !== '' 
+        return !empty($this->selectedCategories)
+            || $this->minPrice !== ''
+            || $this->maxPrice !== ''
             || $this->selectedRating !== null
             || !empty($this->selectedBrands)
             || $this->onSaleOnly
@@ -117,7 +134,7 @@ class ProductList extends Component
         // Convert to integers and remove empty values
         $this->selectedCategories = array_values(
             array_filter(
-                array_map('intval', (array) $value), 
+                array_map('intval', (array) $value),
                 fn($v) => $v > 0
             )
         );
@@ -130,7 +147,7 @@ class ProductList extends Component
     public function toggleCategory(int $categoryId): void
     {
         $key = array_search($categoryId, $this->selectedCategories);
-        
+
         if ($key !== false) {
             // Remove category
             unset($this->selectedCategories[$key]);
@@ -139,7 +156,7 @@ class ProductList extends Component
             // Add category
             $this->selectedCategories[] = $categoryId;
         }
-        
+
         $this->resetPage();
     }
 
@@ -149,7 +166,7 @@ class ProductList extends Component
     public function toggleBrand(string $brand): void
     {
         $key = array_search($brand, $this->selectedBrands);
-        
+
         if ($key !== false) {
             // Remove brand
             unset($this->selectedBrands[$key]);
@@ -158,7 +175,7 @@ class ProductList extends Component
             // Add brand
             $this->selectedBrands[] = $brand;
         }
-        
+
         $this->resetPage();
     }
 
@@ -205,7 +222,7 @@ class ProductList extends Component
     {
         $this->resetPage();
     }
-    
+
 
 
     /**
@@ -264,6 +281,7 @@ class ProductList extends Component
     public function clearFilters(): void
     {
         $this->selectedCategories = [];
+        $this->category = null;
         $this->minPrice = '';
         $this->maxPrice = '';
         $this->selectedRating = null;
@@ -289,30 +307,30 @@ class ProductList extends Component
             $searchTerm = '%' . $this->search . '%';
             $query->where(function ($q) use ($searchTerm) {
                 $q->where('name', 'like', $searchTerm)
-                  ->orWhere('description', 'like', $searchTerm)
-                  ->orWhere('sku', 'like', $searchTerm)
-                  ->orWhere('brand', 'like', $searchTerm);
+                    ->orWhere('description', 'like', $searchTerm)
+                    ->orWhere('sku', 'like', $searchTerm)
+                    ->orWhere('brand', 'like', $searchTerm);
             });
         }
 
         // Filter by categories (including children categories)
         if (!empty($this->selectedCategories)) {
             $categoryIds = $this->selectedCategories;
-            
+
             foreach ($this->selectedCategories as $categoryId) {
                 $category = Category::find($categoryId);
                 if ($category && method_exists($category, 'getDescendantIds')) {
                     $categoryIds = array_merge($categoryIds, $category->getDescendantIds());
                 }
             }
-            
+
             $query->whereIn('category_id', array_unique($categoryIds));
         }
 
         // Filter by price range
         $minPrice = is_numeric($this->minPrice) && $this->minPrice !== '' ? (float) $this->minPrice : null;
         $maxPrice = is_numeric($this->maxPrice) && $this->maxPrice !== '' ? (float) $this->maxPrice : null;
-        
+
         if ($minPrice !== null || $maxPrice !== null) {
             $query->where(function ($q) use ($minPrice, $maxPrice) {
                 $q->where(function ($sq) use ($minPrice, $maxPrice) {
@@ -350,7 +368,7 @@ class ProductList extends Component
         // Filter by on sale
         if ($this->onSaleOnly) {
             $query->whereNotNull('sale_price')
-                  ->whereColumn('sale_price', '<', 'price');
+                ->whereColumn('sale_price', '<', 'price');
         }
 
         // Filter by stock status
@@ -380,8 +398,8 @@ class ProductList extends Component
             default:
                 // Featured first, then by sales count (popularity), then newest
                 $query->orderBy('is_featured', 'desc')
-                      ->orderBy('sales_count', 'desc')
-                      ->latest('created_at');
+                    ->orderBy('sales_count', 'desc')
+                    ->latest('created_at');
                 break;
         }
 
