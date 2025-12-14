@@ -10,7 +10,7 @@ Route::get('/language/{locale}', [LanguageController::class, 'switch'])->name('l
 Route::get('/locale/{locale}', [LanguageController::class, 'switch'])->name('locale.switch');
 
 // Store Front
-Route::get('/', [App\Http\Controllers\Store\HomeController::class, 'index'])->name('home');
+Route::get('/', App\Livewire\Store\Home::class)->name('home');
 
 // Cosmetics Theme Landing Page (Task 9.8)
 Route::get('/cosmetics', App\Livewire\Cosmetics\HomePage::class)->name('cosmetics.home');

@@ -80,14 +80,14 @@
             <div class="flex items-center gap-1.5">
                 @if($product->is_on_sale)
                     <span class="text-base font-bold text-violet-600">
-                        ${{ number_format($product->sale_price, 2) }}
+                        {{ number_format($product->sale_price, 2) }} {{ __('messages.egp') ?? 'EGP' }}
                     </span>
                     <span class="text-xs text-gray-400 line-through">
-                        ${{ number_format($product->price, 2) }}
+                        {{ number_format($product->price, 2) }}
                     </span>
                 @else
                     <span class="text-base font-bold text-gray-900">
-                        ${{ number_format($product->price, 2) }}
+                        {{ number_format($product->price, 2) }} {{ __('messages.egp') ?? 'EGP' }}
                     </span>
                 @endif
             </div>
