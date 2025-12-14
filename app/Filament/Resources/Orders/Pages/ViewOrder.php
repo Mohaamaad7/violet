@@ -501,15 +501,17 @@ class ViewOrder extends ViewRecord
                                     ->schema([
                                         ImageEntry::make('product_image')
                                             ->label('الصورة')
-                                            ->disk('public')
                                             ->height(60)
                                             ->width(60)
                                             ->state(function ($record) {
-                                                // Get first product image or return default
-                                                if ($record->product && $record->product->images->isNotEmpty()) {
-                                                    return $record->product->images->first()->image_path;
+                                                // Get first product image using Spatie Media Library
+                                                if ($record->product) {
+                                                    $imageUrl = $record->product->getFirstMediaUrl('images', 'thumb');
+                                                    if ($imageUrl) {
+                                                        return $imageUrl;
+                                                    }
                                                 }
-                                                return 'products/default-product.svg';
+                                                return asset('storage/products/default-product.svg');
                                             })
                                             ->defaultImageUrl(asset('storage/products/default-product.svg'))
                                             ->extraAttributes(['class' => 'rounded-lg']),
