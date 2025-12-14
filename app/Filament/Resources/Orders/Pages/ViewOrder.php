@@ -499,11 +499,11 @@ class ViewOrder extends ViewRecord
                             ->schema([
                                 Grid::make(6)
                                     ->schema([
-                                        ImageEntry::make('product_image')
+                                        ImageEntry::make('image')
                                             ->label('الصورة')
                                             ->height(60)
                                             ->width(60)
-                                            ->state(function ($record) {
+                                            ->getStateUsing(function ($record) {
                                                 \Log::info('ImageEntry Debug', [
                                                     'order_item_id' => $record->id,
                                                     'product_id' => $record->product_id,
