@@ -504,8 +504,13 @@ class ViewOrder extends ViewRecord
                                             ->height(60)
                                             ->width(60)
                                             ->state(function ($record) {
-                                                // Get first product image using Spatie Media Library
+                                                // Explicitly load media if not already loaded
                                                 if ($record->product) {
+                                                    // Load media if not already loaded
+                                                    if (!$record->product->relationLoaded('media')) {
+                                                        $record->product->load('media');
+                                                    }
+
                                                     $imageUrl = $record->product->getFirstMediaUrl('images', 'thumb');
                                                     if ($imageUrl) {
                                                         return $imageUrl;
