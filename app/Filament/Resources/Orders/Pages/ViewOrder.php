@@ -199,10 +199,10 @@ class ViewOrder extends ViewRecord
                         }),
 
                     Textarea::make('reason')
-                        ->label(fn() => $this->record->status === 'shipped' ? 'سبب رفض الاستلام' : 'سبب المرتجع')
+                        ->label(fn() => $this->record->status === OrderStatus::SHIPPED ? 'سبب رفض الاستلام' : 'سبب المرتجع')
                         ->required()
                         ->rows(3)
-                        ->placeholder(fn() => $this->record->status === 'shipped'
+                        ->placeholder(fn() => $this->record->status === OrderStatus::SHIPPED
                             ? 'اذكر سبب رفض العميل للاستلام (مثل: تأخير الشحن، العميل لا يرد، ألغى الطلب...)'
                             : 'اذكر سبب المرتجع بالتفصيل...')
                         ->maxLength(500),
@@ -220,7 +220,7 @@ class ViewOrder extends ViewRecord
                                 </p>
                             </div>
                         '))
-                        ->visible(fn() => $this->record->status === 'shipped'),
+                        ->visible(fn() => $this->record->status === OrderStatus::SHIPPED),
 
                     // استخدام Repeater بدلاً من CheckboxList لدعم الكميات الجزئية
                     // يظهر فقط في حالة الاسترجاع بعد التسليم (delivered)
@@ -303,8 +303,8 @@ class ViewOrder extends ViewRecord
                         )
                         ->helperText('اختر المنتجات والكميات التي يرغب العميل في إرجاعها')
                         ->minItems(1)
-                        ->required(fn() => $this->record->status === 'delivered')
-                        ->visible(fn() => $this->record->status === 'delivered'),
+                        ->required(fn() => $this->record->status === OrderStatus::DELIVERED)
+                        ->visible(fn() => $this->record->status === OrderStatus::DELIVERED),
 
                     Textarea::make('customer_notes')
                         ->label('ملاحظات العميل')
