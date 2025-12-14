@@ -80,45 +80,42 @@
     @if($categories->count() > 0)
     <section class="py-20 bg-white">
         <div class="container mx-auto px-4">
-            <div class="text-center mb-14">
-                <h2 class="text-4xl font-bold text-gray-900 section-header mb-4">{{ __('messages.all_categories') }}</h2>
-                <p class="text-gray-500 text-lg max-w-2xl mx-auto">{{ app()->getLocale() === 'ar' ? 'تصفح منتجاتنا المميزة حسب القسم وتجد ما يناسب ذوقك' : 'Browse through our premium categories and find your perfect match' }}</p>
+            <div class="text-center mb-10">
+                <h2 class="text-3xl font-bold text-gray-900 section-header mb-2">{{ __('messages.all_categories') }}</h2>
             </div>
             
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
                 @foreach($categories as $category)
-                    <a href="/categories/{{ $category->slug }}" class="group block h-full">
-                        <div class="bg-white rounded-2xl p-6 shadow-sm hover:shadow-xl transition-all duration-300 transform group-hover:-translate-y-2 text-center h-full border border-gray-100 relative overflow-hidden">
-                            <div class="absolute inset-0 bg-violet-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                            <div class="relative z-10">
-                                <div class="mb-4 flex justify-center text-5xl text-violet-600 transition-transform duration-300 group-hover:scale-110 drop-shadow-sm">
-                                    @if($category->icon)
-                                    @if(Str::startsWith($category->icon, 'heroicon'))
-                                        @svg($category->icon, 'w-14 h-14')
+                    <a href="/categories/{{ $category->slug }}" class="group block text-center">
+                        <div class="relative overflow-hidden rounded-full aspect-square mb-4 shadow-sm group-hover:shadow-md transition-all duration-300 border border-gray-100 bg-gray-50">
+                            @php
+                                $imageUrl = $category->getFirstMediaUrl('category-images', 'card');
+                                if (!$imageUrl) {
+                                    $imageUrl = asset('images/default-category.png'); // Fallback handled by onerror
+                                }
+                            @endphp
+                            
+                            @if($category->hasMedia('category-images'))
+                                <img src="{{ $imageUrl }}" 
+                                     alt="{{ $category->name }}" 
+                                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                            @else
+                                {{-- Fallback to Icon if no image uploaded yet --}}
+                                <div class="w-full h-full flex items-center justify-center bg-violet-50 text-violet-300 group-hover:text-violet-500 transition-colors">
+                                    @if($category->icon && Str::startsWith($category->icon, 'heroicon'))
+                                        @svg($category->icon, 'w-16 h-16')
                                     @else
-                                        <div class="{{ $category->icon }}"></div>
+                                        <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
                                     @endif
-                                @else
-                                    <span>📦</span>
-                                @endif
                                 </div>
-                                <h3 class="font-bold text-lg text-gray-800 group-hover:text-violet-700 transition mb-2 font-heading">
-                                    {{ $category->name }}
-                                </h3>
-                                <div class="w-12 h-1 bg-violet-100 group-hover:bg-violet-500 rounded-full mx-auto transition-colors duration-300 mb-3"></div>
-                                <p class="text-sm text-gray-500 font-medium">
-                                    {{ $category->products_count }} {{ app()->getLocale() === 'ar' ? 'منتج' : 'products' }}
-                                </p>
-                            </div>
+                            @endif
                         </div>
+                        
+                        <h3 class="font-bold text-lg text-gray-900 group-hover:text-violet-700 transition font-heading">
+                            {{ $category->name }} &rarr;
+                        </h3>
                     </a>
                 @endforeach
-            </div>
-            
-            <div class="mt-12 text-center">
-                <a href="/categories" class="inline-flex items-center justify-center px-8 py-3 border border-transparent text-base font-medium rounded-md text-violet-600 bg-violet-100 hover:bg-violet-200 md:text-lg transition-colors duration-300">
-                    {{ app()->getLocale() === 'ar' ? 'عرض جميع الأقسام' : 'View All Categories' }}
-                </a>
             </div>
         </div>
     </section>

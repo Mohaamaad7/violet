@@ -8,9 +8,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Category extends Model
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
+
+class Category extends Model implements HasMedia
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, InteractsWithMedia;
 
     protected $fillable = [
         'parent_id',
@@ -58,7 +61,7 @@ class Category extends Model
     }
 
     // Helper Methods
-    
+
     /**
      * Get total active products count including all children categories recursively
      */
@@ -66,12 +69,12 @@ class Category extends Model
     {
         // Count products directly in this category
         $count = $this->products()->where('status', 'active')->count();
-        
+
         // Recursively count products from all children
         foreach ($this->children as $child) {
             $count += $child->getTotalActiveProductsCount();
         }
-        
+
         return $count;
     }
 
@@ -81,12 +84,30 @@ class Category extends Model
     public function getDescendantIds(): array
     {
         $ids = [];
-        
+
         foreach ($this->children as $child) {
             $ids[] = $child->id;
             $ids = array_merge($ids, $child->getDescendantIds());
         }
-        
+
         return $ids;
+    }
+
+    public function registerMediaCollections(): void
+    {
+        $this->addMediaCollection('category-images')
+            ->singleFile() // Categories only need one main image
+            ->registerMediaConversions(function () {
+                $this->addMediaConversion('thumb')
+                    ->width(200)
+                    ->height(200)
+                    ->sharpen(10);
+
+                $this->addMediaConversion('card')
+                    ->width(400)
+                    ->height(400)
+                    ->sharpen(10)
+                    ->quality(90);
+            });
     }
 }

@@ -56,9 +56,7 @@ Route::get('/test-cart-debug', function () {
     return view('debug.cart-test');
 })->name('debug.cart');
 
-Route::get('/categories/{category:slug}', function () {
-    return 'Category page (Coming soon)';
-})->name('category.show');
+Route::get('/categories/{category:slug}', App\Livewire\Store\CategoryShow::class)->name('category.show');
 
 // Admin Dashboard (for users table - staff/admins)
 Route::middleware(['auth'])->group(function () {

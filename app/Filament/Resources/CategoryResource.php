@@ -14,6 +14,8 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
 use Filament\Schemas\Components\Utilities\Set;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
+use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 
 class CategoryResource extends Resource
 {
@@ -55,12 +57,19 @@ class CategoryResource extends Resource
             ->schema([
                 Components\Section::make()
                     ->schema([
+                        SpatieMediaLibraryFileUpload::make('image')
+                            ->label('صورة القسم')
+                            ->collection('category-images')
+                            ->image()
+                            ->imageEditor()
+                            ->columnSpanFull(),
+
                         Forms\Components\TextInput::make('name')
                             ->label(__('admin.form.name'))
                             ->required()
                             ->maxLength(255)
                             ->live(onBlur: true)
-                            ->afterStateUpdated(fn (Set $set, ?string $state) => $set('slug', Str::slug($state))),
+                            ->afterStateUpdated(fn(Set $set, ?string $state) => $set('slug', Str::slug($state))),
 
                         Forms\Components\TextInput::make('slug')
                             ->label('Slug')
@@ -146,6 +155,12 @@ class CategoryResource extends Resource
     {
         return $table
             ->columns([
+                SpatieMediaLibraryImageColumn::make('image')
+                    ->label('الصورة')
+                    ->collection('category-images')
+                    ->conversion('thumb')
+                    ->circular(),
+
                 Tables\Columns\TextColumn::make('name')
                     ->label(__('admin.table.name'))
                     ->searchable()
@@ -175,7 +190,7 @@ class CategoryResource extends Resource
 
                 Tables\Columns\ToggleColumn::make('is_active')
                     ->label('نشط')
-                    ->disabled(fn ($record) => !auth()->user()->can('update', $record)),
+                    ->disabled(fn($record) => !auth()->user()->can('update', $record)),
 
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('تاريخ الإنشاء')
@@ -192,18 +207,18 @@ class CategoryResource extends Resource
 
                 Tables\Filters\Filter::make('parent')
                     ->label('فئة رئيسية فقط')
-                    ->query(fn (Builder $query): Builder => $query->whereNull('parent_id')),
+                    ->query(fn(Builder $query): Builder => $query->whereNull('parent_id')),
             ])
             ->actions([
                 Actions\EditAction::make()
-                    ->visible(fn ($record) => auth()->user()->can('update', $record)),
+                    ->visible(fn($record) => auth()->user()->can('update', $record)),
                 Actions\DeleteAction::make()
-                    ->visible(fn ($record) => auth()->user()->can('delete', $record)),
+                    ->visible(fn($record) => auth()->user()->can('delete', $record)),
             ])
             ->bulkActions([
                 Actions\BulkActionGroup::make([
                     Actions\DeleteBulkAction::make()
-                        ->visible(fn () => auth()->user()->can('delete categories')),
+                        ->visible(fn() => auth()->user()->can('delete categories')),
                 ]),
             ]);
     }
