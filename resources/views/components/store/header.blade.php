@@ -183,7 +183,7 @@
                     </button>
                     {{-- Dynamic Mega Menu with ALL Categories --}}
                     <div
-                        class="absolute left-0 top-full mt-2 w-screen max-w-6xl bg-white shadow-xl rounded-lg p-6 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                        class="absolute {{ app()->getLocale() === 'ar' ? 'right-0' : 'left-0' }} top-full mt-2 w-screen max-w-6xl bg-white shadow-xl rounded-lg p-6 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                         <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
                             @foreach(\App\Models\Category::with('children')->whereNull('parent_id')->where('is_active', true)->orderBy('order')->get() as $parentCategory)
                                 <div>
