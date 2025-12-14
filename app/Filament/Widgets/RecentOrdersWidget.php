@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Enums\OrderStatus;
 use App\Models\Order;
 use Filament\Tables;
 use Filament\Actions\Action;
@@ -28,7 +29,7 @@ class RecentOrdersWidget extends BaseWidget
     /**
      * Number of rows to display per page
      */
-    protected int | string | array $defaultPaginationPageOption = 10;
+    protected int|string|array $defaultPaginationPageOption = 10;
 
     /**
      * Configure the table
@@ -63,22 +64,8 @@ class RecentOrdersWidget extends BaseWidget
                 Tables\Columns\TextColumn::make('status')
                     ->label(__('admin.widgets.recent_orders.status'))
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
-                        'pending' => 'warning',
-                        'processing' => 'info',
-                        'shipped' => 'primary',
-                        'delivered' => 'success',
-                        'cancelled' => 'danger',
-                        default => 'gray',
-                    })
-                    ->formatStateUsing(fn (string $state): string => match ($state) {
-                        'pending' => __('admin.orders.status.pending'),
-                        'processing' => __('admin.orders.status.processing'),
-                        'shipped' => __('admin.orders.status.shipped'),
-                        'delivered' => __('admin.orders.status.delivered'),
-                        'cancelled' => __('admin.orders.status.cancelled'),
-                        default => $state,
-                    }),
+                    ->color(fn($state): string => $state instanceof OrderStatus ? $state->color() : 'gray')
+                    ->formatStateUsing(fn($state): string => $state instanceof OrderStatus ? $state->label() : $state),
 
                 // Column 4: Total
                 Tables\Columns\TextColumn::make('total')
@@ -92,7 +79,7 @@ class RecentOrdersWidget extends BaseWidget
                 Action::make('view')
                     ->label(__('admin.action.view'))
                     ->icon('heroicon-o-eye')
-                    ->url(fn (Order $record): string => route('filament.admin.resources.orders.view', ['record' => $record->id]))
+                    ->url(fn(Order $record): string => route('filament.admin.resources.orders.view', ['record' => $record->id]))
                     ->color('primary'),
             ])
             ->headerActions([
