@@ -16,16 +16,19 @@
             </div>
             
             @php
-                $statusColors = [
+                $statusColorMap = [
                     'pending' => 'bg-yellow-100 text-yellow-800 border-yellow-200',
                     'processing' => 'bg-blue-100 text-blue-800 border-blue-200',
                     'shipped' => 'bg-purple-100 text-purple-800 border-purple-200',
                     'delivered' => 'bg-green-100 text-green-800 border-green-200',
                     'cancelled' => 'bg-red-100 text-red-800 border-red-200',
+                    'rejected' => 'bg-red-100 text-red-800 border-red-200',
                 ];
+                $statusKey = $order->status?->toString() ?? 'pending';
+                $statusLabel = $order->status?->label() ?? __('messages.account.status.pending');
             @endphp
-            <span class="self-start px-4 py-2 text-sm font-semibold rounded-full border {{ $statusColors[$order->status] ?? 'bg-gray-100 text-gray-800 border-gray-200' }}">
-                {{ __('messages.account.status.' . $order->status) }}
+            <span class="self-start px-4 py-2 text-sm font-semibold rounded-full border {{ $statusColorMap[$statusKey] ?? 'bg-gray-100 text-gray-800 border-gray-200' }}">
+                {{ $statusLabel }}
             </span>
         </div>
         
@@ -35,8 +38,9 @@
             
             @php
                 $steps = ['pending', 'processing', 'shipped', 'delivered'];
-                $currentIndex = array_search($order->status, $steps);
-                if ($order->status === 'cancelled') $currentIndex = -1;
+                $currentStatusKey = $order->status?->toString() ?? 'pending';
+                $currentIndex = array_search($currentStatusKey, $steps);
+                if ($currentStatusKey === 'cancelled' || $currentStatusKey === 'rejected') $currentIndex = -1;
             @endphp
             
             <div class="relative">
@@ -72,7 +76,7 @@
                 </div>
             </div>
             
-            @if($order->status === 'cancelled')
+            @if($currentStatusKey === 'cancelled' || $currentStatusKey === 'rejected')
                 <div class="mt-6 p-4 bg-red-50 rounded-lg border border-red-100">
                     <p class="text-sm text-red-800">
                         <span class="font-semibold">{{ __('messages.account.order_cancelled') }}:</span>

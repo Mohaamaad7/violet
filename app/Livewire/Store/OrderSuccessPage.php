@@ -21,17 +21,17 @@ class OrderSuccessPage extends Component
     public function mount(Order $order)
     {
         // Security check - prevent viewing other users' orders
-        if (auth()->check()) {
-            // Authenticated user - must own the order
-            if ($order->user_id !== auth()->id()) {
+        if (auth('customer')->check()) {
+            // Authenticated customer - must own the order
+            $customerId = auth('customer')->id();
+            if ($order->customer_id !== $customerId) {
                 abort(403, 'You are not authorized to view this order.');
             }
         } else {
-            // Guest - verify by guest_email stored in order
-            // For extra security, we also check if order was created in the last hour
+            // Guest - verify by checking if order was created recently
             // This prevents URL sharing abuse while allowing legitimate guest access
             $isRecentOrder = $order->created_at->diffInMinutes(now()) < 60;
-            
+
             if (!$isRecentOrder) {
                 abort(403, 'This order confirmation has expired. Please contact support.');
             }
