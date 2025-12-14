@@ -4,9 +4,7 @@ namespace App\Livewire\Store;
 
 use App\Models\Category;
 use Livewire\Component;
-use Livewire\Attributes\Layout;
 
-#[Layout('layouts.store')]
 class CategoryShow extends Component
 {
     public Category $category;
@@ -33,6 +31,6 @@ class CategoryShow extends Component
 
         return view('livewire.store.category-show', [
             'children' => $children,
-        ]);
+        ])->layout('layouts.store');
     }
 }
