@@ -59,6 +59,14 @@ class ReturnService
             } else {
                 // استرجاع بعد التسليم: استخدام الأصناف المختارة من النموذج
                 $items = $data['items'] ?? [];
+
+                // Log for debugging
+                \Log::info('Return items data:', ['items' => $items, 'data' => $data]);
+
+                // If items is empty for return_after_delivery, throw error
+                if (empty($items)) {
+                    throw new \Exception('يجب اختيار منتج واحد على الأقل للإرجاع');
+                }
             }
 
             foreach ($items as $itemData) {
