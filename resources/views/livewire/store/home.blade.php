@@ -1,21 +1,7 @@
+```
 <div>
     <!-- Hero Section -->
-    <section class="bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-20">
-        <div class="container mx-auto px-4">
-            <div class="max-w-3xl {{ app()->getLocale() === 'ar' ? 'mr-auto' : 'mx-auto' }} text-center">
-                <h1 class="text-5xl font-bold mb-6">
-                    {{ __('messages.welcome') }}
-                </h1>
-                <p class="text-xl mb-8 text-purple-100">
-                    {{ app()->getLocale() === 'ar' ? 'اكتشف أفضل المنتجات بأفضل الأسعار' : 'Discover the best products at the best prices' }}
-                </p>
-                <a href="/products"
-                    class="inline-block bg-white text-purple-600 px-8 py-3 rounded-lg font-semibold hover:bg-gray-100 transition shadow-lg">
-                    {{ __('messages.shop_now') }}
-                </a>
-            </div>
-        </div>
-    </section>
+    <livewire:store.hero-slider />
 
     <!-- 2. Featured Products -->
     @if($featuredProducts->count() > 0)
@@ -24,7 +10,8 @@
                 <div class="flex justify-between items-center mb-8">
                     <div>
                         <h2 class="text-2xl font-bold text-gray-800">
-                            {{ __('messages.featured_products') ?? 'Featured Products' }}</h2>
+                            {{ __('messages.featured_products') ?? 'Featured Products' }}
+                        </h2>
                         <p class="text-gray-500 text-sm mt-1">
                             {{ app()->getLocale() === 'ar' ? 'اختياراتنا المميزة لك' : 'Our handpicked selection for you' }}
                         </p>
@@ -53,7 +40,8 @@
                         <h2 class="text-2xl font-bold text-gray-800">{{ __('messages.new_arrivals') ?? 'New Arrivals' }}
                         </h2>
                         <p class="text-gray-500 text-sm mt-1">
-                            {{ app()->getLocale() === 'ar' ? 'أحدث المنتجات المضافة' : 'Specifically sorted for you' }}</p>
+                            {{ app()->getLocale() === 'ar' ? 'أحدث المنتجات المضافة' : 'Specifically sorted for you' }}
+                        </p>
                     </div>
                     <a href="/products?sort=latest"
                         class="text-purple-600 hover:text-purple-700 font-semibold text-sm flex items-center gap-1">
