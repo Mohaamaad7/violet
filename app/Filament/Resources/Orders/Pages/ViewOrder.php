@@ -30,7 +30,7 @@ class ViewOrder extends ViewRecord
     {
         // Eager load relations for better performance
         $this->record->load([
-            'items.product.images',
+            'items.product.media',
             'user',
             'shippingAddress',
             'statusHistory.user',
