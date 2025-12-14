@@ -3,10 +3,12 @@
 namespace App\Livewire\Store;
 
 use App\Models\Order;
+use Livewire\Attributes\Layout;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
 #[Title('Order Confirmed - Violet Store')]
+#[Layout('layouts.store')]
 class OrderSuccessPage extends Component
 {
     public Order $order;
@@ -15,8 +17,8 @@ class OrderSuccessPage extends Component
      * Mount the component with order verification
      * 
      * Security: Ensure user can only view their own orders
-     * - Authenticated users: order must belong to them
-     * - Guests: order must have matching guest_email in session OR be recently created
+     * - Authenticated customers: order must belong to them
+     * - Guests: order must be recently created (< 1 hour)
      */
     public function mount(Order $order)
     {
@@ -33,7 +35,9 @@ class OrderSuccessPage extends Component
             $isRecentOrder = $order->created_at->diffInMinutes(now()) < 60;
 
             if (!$isRecentOrder) {
-                abort(403, 'This order confirmation has expired. Please contact support.');
+                // Redirect to track order page with helpful message
+                session()->flash('info', 'This order confirmation link has expired. Please track your order using the form below.');
+                return redirect()->route('track-order');
             }
         }
 
@@ -42,7 +46,6 @@ class OrderSuccessPage extends Component
 
     public function render()
     {
-        return view('livewire.store.order-success-page')
-            ->layout('layouts.store');
+        return view('livewire.store.order-success-page');
     }
 }

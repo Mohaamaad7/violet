@@ -19,6 +19,14 @@ new #[Layout('layouts.auth')] class extends Component {
     public string $password_confirmation = '';
 
     /**
+     * Pre-fill email if provided in query string
+     */
+    public function mount(): void
+    {
+        $this->email = request()->query('email', '');
+    }
+
+    /**
      * Handle an incoming registration request.
      * Creates a Customer (not User) and uses customer guard.
      * Includes cart merge and guest orders migration.

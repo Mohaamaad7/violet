@@ -132,6 +132,41 @@
             </div>
         </div>
 
+        {{-- Guest CTA - Create Account --}}
+        @guest('customer')
+            <div style="background: linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #f59e0b 100%);" class="rounded p-4 p-md-5 mb-4 text-center shadow-lg">
+                <div class="mx-auto" style="max-width: 700px;">
+                    <h2 class="h3 fw-bold text-white mb-3">
+                        🎁 {{ __('messages.order_success.create_account_title') ?? 'Track Your Orders Anytime!' }}
+                    </h2>
+                    <p class="text-white mb-4" style="opacity: 0.95;">
+                        {{ __('messages.order_success.create_account_desc') ?? 'Create an account to easily track all your orders, save addresses, and enjoy a faster checkout next time!' }}
+                    </p>
+                    <div class="d-flex flex-column flex-sm-row justify-content-center" style="gap: 16px;">
+                        <a href="{{ route('register') }}?email={{ urlencode($order->guest_email) }}" 
+                           class="btn btn-lg text-decoration-none" 
+                           style="background-color: #fff; color: #7c3aed; font-weight: 700; padding: 12px 32px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border: none; transition: all 0.3s; margin: 8px;">
+                            <svg class="me-2" style="width: 20px; height: 20px; display: inline-block; vertical-align: middle;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+                            </svg>
+                            {{ __('messages.order_success.create_account_btn') ?? 'Create Free Account' }}
+                        </a>
+                        <a href="{{ route('track-order') }}" 
+                           class="btn btn-lg text-decoration-none"
+                           style="background-color: rgba(255,255,255,0.2); color: #fff; font-weight: 600; padding: 12px 32px; border-radius: 12px; border: 2px solid rgba(255,255,255,0.4); backdrop-filter: blur(10px); transition: all 0.3s; margin: 8px;">
+                            <svg class="me-2" style="width: 20px; height: 20px; display: inline-block; vertical-align: middle;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                            {{ __('messages.order_success.track_order_btn') ?? 'Track Order' }}
+                        </a>
+                    </div>
+                    <p class="text-white small mt-3 mb-0" style="opacity: 0.85;">
+                        💡 {{ __('messages.order_success.migration_note') ?? 'Your current order will be automatically linked to your new account!' }}
+                    </p>
+                </div>
+            </div>
+        @endguest
+
         {{-- Action Buttons --}}
         <div class="flex flex-col sm:flex-row gap-4 justify-center">
             <a href="{{ route('home') }}" 
