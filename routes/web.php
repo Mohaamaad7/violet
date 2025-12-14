@@ -60,9 +60,12 @@ Route::get('/categories/{category:slug}', function () {
     return 'Category page (Coming soon)';
 })->name('category.show');
 
-Route::view('profile', 'profile')
-    ->middleware(['auth'])
-    ->name('profile');
+// Admin Dashboard (for users table - staff/admins)
+Route::middleware(['auth'])->group(function () {
+    Route::redirect('/dashboard', '/admin')->name('dashboard');
+    Route::redirect('/profile', '/admin/profile')->name('profile');
+});
+
 
 // Admin Product Image Management Routes
 Route::prefix('admin/products')->middleware(['auth'])->name('admin.products.')->group(function () {
