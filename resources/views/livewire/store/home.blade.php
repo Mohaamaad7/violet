@@ -1,4 +1,3 @@
-```
 <div>
     <!-- Hero Section -->
     <livewire:store.hero-slider />
