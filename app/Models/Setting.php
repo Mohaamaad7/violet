@@ -16,9 +16,8 @@ class Setting extends Model
         'group',
     ];
 
-    protected $casts = [
-        'value' => 'string',
-    ];
+    // Removed 'value' cast - let accessor/mutator handle type conversion
+
 
     public static function get(string $key, $default = null)
     {
@@ -36,11 +35,16 @@ class Setting extends Model
 
     public function getValueAttribute($value)
     {
+        // Handle 'false' string explicitly
+        if ($value === 'false' || $value === false) {
+            $value = null;
+        }
+
         return match ($this->type) {
             'boolean' => (bool) $value,
             'integer' => (int) $value,
-            'array', 'json' => json_decode($value, true),
-            default => $value,
+            'array', 'json' => json_decode($value, true) ?? [],
+            default => $value,  // image type returns string like default
         };
     }
 
@@ -49,7 +53,8 @@ class Setting extends Model
         $this->attributes['value'] = match ($this->type) {
             'boolean' => $value ? '1' : '0',
             'array', 'json' => json_encode($value),
-            default => (string) $value,
+            'image' => is_array($value) ? ($value[0] ?? null) : ($value ?: null),  // Extract from array if needed, handle empty values
+            default => $value !== null ? (string) $value : null,
         };
     }
 }

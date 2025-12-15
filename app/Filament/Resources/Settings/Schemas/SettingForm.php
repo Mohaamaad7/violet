@@ -2,10 +2,12 @@
 
 namespace App\Filament\Resources\Settings\Schemas;
 
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Illuminate\Support\Facades\Storage;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
@@ -22,7 +24,7 @@ class SettingForm
                             ->required()
                             ->unique(ignoreRecord: true)
                             ->maxLength(255)
-                            ->disabled(fn ($record) => $record !== null)
+                            ->disabled(fn($record) => $record !== null)
                             ->helperText('المفتاح الفريد للإعداد (لا يمكن تعديله بعد الإنشاء)'),
 
                         TextInput::make('display_name')
@@ -63,6 +65,7 @@ class SettingForm
                                 'boolean' => 'صح/خطأ',
                                 'json' => 'JSON',
                                 'array' => 'مصفوفة',
+                                'image' => 'صورة',
                             ])
                             ->required()
                             ->native(false)
@@ -70,17 +73,29 @@ class SettingForm
                             ->reactive()
                             ->helperText('نوع البيانات المخزنة'),
 
+                        FileUpload::make('image_value')
+                            ->label('الصورة')
+                            ->disk('public_dir')
+                            ->directory('images/logos')
+                            ->image()
+                            ->imageEditor()
+                            ->maxSize(2048)
+                            ->default([])
+                            ->visible(fn($get) => $get('type') === 'image')
+                            ->helperText('ارفع صورة اللوجو. الحد الأقصى: 2 ميجابايت')
+                            ->columnSpanFull(),
+
                         Textarea::make('value')
                             ->label('القيمة')
                             ->rows(3)
                             ->maxLength(65535)
-                            ->visible(fn ($get) => $get('type') !== 'boolean')
+                            ->visible(fn($get) => $get('type') !== 'boolean' && $get('type') !== 'image')
                             ->helperText('قيمة الإعداد')
                             ->columnSpanFull(),
 
                         Toggle::make('value')
                             ->label('القيمة')
-                            ->visible(fn ($get) => $get('type') === 'boolean')
+                            ->visible(fn($get) => $get('type') === 'boolean')
                             ->helperText('تفعيل/تعطيل')
                             ->columnSpanFull(),
 
