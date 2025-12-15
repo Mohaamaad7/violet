@@ -37,6 +37,12 @@ Route::get('/checkout/success/{order}', App\Livewire\Store\OrderSuccessPage::cla
 // Guest Order Tracking (Task 4.4 - Phase 4)
 Route::get('/track-order', App\Livewire\Store\TrackOrder::class)->name('track-order');
 
+// About Us Page (Static Page)
+Route::view('/about', 'pages.about')->name('about');
+
+// Contact Us Page (Static Page with Livewire Form)
+Route::view('/contact', 'pages.contact')->name('contact');
+
 // Customer Account Area (Task 4.2 - Phase 4)
 // Uses customer guard for authentication
 Route::middleware(['auth:customer'])->prefix('account')->name('account.')->group(function () {
