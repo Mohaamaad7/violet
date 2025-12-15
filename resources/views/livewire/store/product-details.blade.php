@@ -213,12 +213,12 @@
         <div class="border-t border-b border-gray-200 py-4">
             <div class="flex items-baseline gap-3">
                 <span class="text-4xl font-bold text-violet-700">
-                    ${{ number_format($this->getCurrentPrice(), 2) }}
+                    {{ number_format($this->getCurrentPrice(), 2) }} ج.م
                 </span>
                 
                 @if($product->is_on_sale && !$selectedVariant)
                     <span class="text-2xl text-gray-400 line-through">
-                        ${{ number_format($product->price, 2) }}
+                        {{ number_format($product->price, 2) }} ج.م
                     </span>
                 @endif
             </div>
