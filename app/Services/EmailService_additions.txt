@@ -1,0 +1,175 @@
+﻿
+    /**
+     * Send return request received email (to customer).
+     */
+    public function sendReturnRequestReceived(
+        \App\Models\OrderReturn $return,
+        ?string $locale = null
+    ): ?EmailLog {
+        $order = $return->order;
+        $recipientEmail = $order->user?->email ?? $order->guest_email;
+        $recipientName = $order->user?->name ?? $order->guest_name;
+
+        if (!$recipientEmail) {
+            Log::warning('No email address for return request', ['return_id' => $return->id]);
+            return null;
+        }
+
+        $variables = $this->getReturnVariables($return);
+
+        return $this->send(
+            templateSlug: 'return-request-received',
+            recipientEmail: $recipientEmail,
+            variables: $variables,
+            recipientName: $recipientName,
+            related: $return,
+            locale: $locale ?? $order->user?->locale ?? 'ar'
+        );
+    }
+
+    /**
+     * Send return approved email (to customer).
+     */
+    public function sendReturnApproved(
+        \App\Models\OrderReturn $return,
+        ?string $locale = null
+    ): ?EmailLog {
+        $order = $return->order;
+        $recipientEmail = $order->user?->email ?? $order->guest_email;
+        $recipientName = $order->user?->name ?? $order->guest_name;
+
+        if (!$recipientEmail) {
+            Log::warning('No email address for return approval', ['return_id' => $return->id]);
+            return null;
+        }
+
+        $variables = $this->getReturnVariables($return);
+
+        return $this->send(
+            templateSlug: 'return-approved',
+            recipientEmail: $recipientEmail,
+            variables: $variables,
+            recipientName: $recipientName,
+            related: $return,
+            locale: $locale ?? $order->user?->locale ?? 'ar'
+        );
+    }
+
+    /**
+     * Send return rejected email (to customer).
+     */
+    public function sendReturnRejected(
+        \App\Models\OrderReturn $return,
+        ?string $locale = null
+    ): ?EmailLog {
+        $order = $return->order;
+        $recipientEmail = $order->user?->email ?? $order->guest_email;
+        $recipientName = $order->user?->name ?? $order->guest_name;
+
+        if (!$recipientEmail) {
+            Log::warning('No email address for return rejection', ['return_id' => $return->id]);
+            return null;
+        }
+
+        $variables = $this->getReturnVariables($return);
+
+        return $this->send(
+            templateSlug: 'return-rejected',
+            recipientEmail: $recipientEmail,
+            variables: $variables,
+            recipientName: $recipientName,
+            related: $return,
+            locale: $locale ?? $order->user?->locale ?? 'ar'
+        );
+    }
+
+    /**
+     * Send return completed email (to customer).
+     */
+    public function sendReturnCompleted(
+        \App\Models\OrderReturn $return,
+        ?string $locale = null
+    ): ?EmailLog {
+        $order = $return->order;
+        $recipientEmail = $order->user?->email ?? $order->guest_email;
+        $recipientName = $order->user?->name ?? $order->guest_name;
+
+        if (!$recipientEmail) {
+            Log::warning('No email address for return completion', ['return_id' => $return->id]);
+            return null;
+        }
+
+        $variables = $this->getReturnVariables($return);
+
+        return $this->send(
+            templateSlug: 'return-completed',
+            recipientEmail: $recipientEmail,
+            variables: $variables,
+            recipientName: $recipientName,
+            related: $return,
+            locale: $locale ?? $order->user?->locale ?? 'ar'
+        );
+    }
+
+    /**
+     * Send admin notification for new return request.
+     */
+    public function sendAdminNewReturnNotification(
+        \App\Models\OrderReturn $return
+    ): ?EmailLog {
+        // Get admin email from config or use a default
+        $adminEmail = config('mail.admin_email', config('mail.from.address'));
+
+        if (!$adminEmail) {
+            Log::warning('No admin email configured for return notifications');
+            return null;
+        }
+
+        $variables = $this->getReturnVariables($return);
+
+        return $this->send(
+            templateSlug: 'admin-new-return',
+            recipientEmail: $adminEmail,
+            variables: $variables,
+            recipientName: 'Admin',
+            related: $return,
+            locale: 'ar'
+        );
+    }
+
+    /**
+     * Get return variables for email templates.
+     */
+    protected function getReturnVariables(\App\Models\OrderReturn $return): array
+    {
+        $order = $return->order;
+        
+        return [
+            'return_number' => $return->return_number,
+            'order_number' => $order->order_number,
+            'return_type' => $return->type?->label() ?? 'غير محدد',
+            'return_reason' => $return->reason ?? '',
+            'customer_notes' => $return->customer_notes ?? '',
+            'admin_notes' => $return->admin_notes ?? '',
+            'rejection_reason' => $return->admin_notes ?? '',
+            'items_count' => (string) $return->items->count(),
+            'total_amount' => number_format($return->refund_amount ?? 0, 2) . ' ج.م',
+            'refund_amount' => number_format($return->refund_amount ?? 0, 2) . ' ج.م',
+            'refund_status' => $return->refund_status ?? 'pending',
+            'refund_method' => 'نفس طريقة الدفع الأصلية',
+            'approved_at' => $return->approved_at?->format('Y/m/d h:i A') ?? '',
+            'rejected_at' => $return->rejected_at?->format('Y/m/d h:i A') ?? '',
+            'completed_at' => $return->completed_at?->format('Y/m/d h:i A') ?? '',
+            'next_steps' => 'سيتم التواصل معك لتحديد موعد استلام المنتجات.',
+            'customer_name' => $order->user?->name ?? $order->guest_name,
+            'customer_email' => $order->user?->email ?? $order->guest_email,
+            'customer_phone' => $order->user?->phone ?? $order->guest_phone,
+            'user_name' => $order->user?->name ?? $order->guest_name,
+            'track_url' => config('app.url') . '/account/returns/' . $return->id,
+            'admin_panel_url' => route('filament.admin.resources.order-returns.view', $return),
+            'app_name' => config('app.name'),
+            'app_url' => config('app.url'),
+            'support_email' => config('mail.from.address'),
+            'current_year' => date('Y'),
+        ];
+    }

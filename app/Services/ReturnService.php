@@ -15,7 +15,8 @@ use Illuminate\Support\Facades\DB;
 class ReturnService
 {
     public function __construct(
-        protected StockMovementService $stockMovementService
+        protected StockMovementService $stockMovementService,
+        protected EmailService $emailService
     ) {
     }
 
@@ -103,6 +104,22 @@ class ReturnService
             // Update order return status
             $order->update(['return_status' => 'requested']);
 
+            // Send email notifications
+            try {
+                // Send email to customer
+                $this->emailService->sendReturnRequestReceived($return->fresh(['items', 'order']));
+                
+                // Send email to admin
+                $this->emailService->sendAdminNewReturnNotification($return->fresh(['items', 'order']));
+            } catch (\Exception $e) {
+                // Log error but don't fail the transaction
+                \Log::error('Failed to send return request emails', [
+                    'return_id' => $return->id,
+                    'error' => $e->getMessage()
+                ]);
+            }
+
+
             return $return->fresh(['items', 'order']);
         });
     }
@@ -128,6 +145,17 @@ class ReturnService
 
             $return->order->update(['return_status' => 'approved']);
 
+            // Send email notification
+            try {
+                $this->emailService->sendReturnApproved($return->fresh());
+            } catch (\Exception $e) {
+                \Log::error('Failed to send return approved email', [
+                    'return_id' => $return->id,
+                    'error' => $e->getMessage()
+                ]);
+            }
+
+
             return $return->fresh();
         });
     }
@@ -152,6 +180,17 @@ class ReturnService
             ]);
 
             $return->order->update(['return_status' => 'none']);
+
+            // Send email notification
+            try {
+                $this->emailService->sendReturnRejected($return->fresh());
+            } catch (\Exception $e) {
+                \Log::error('Failed to send return rejected email', [
+                    'return_id' => $return->id,
+                    'error' => $e->getMessage()
+                ]);
+            }
+
 
             return $return->fresh();
         });
@@ -198,6 +237,17 @@ class ReturnService
             ]);
 
             $return->order->update(['return_status' => 'completed']);
+
+            // Send email notification
+            try {
+                $this->emailService->sendReturnCompleted($return->fresh());
+            } catch (\Exception $e) {
+                \Log::error('Failed to send return completed email', [
+                    'return_id' => $return->id,
+                    'error' => $e->getMessage()
+                ]);
+            }
+
 
             return $return->fresh();
         });
