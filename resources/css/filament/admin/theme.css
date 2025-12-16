@@ -297,3 +297,19 @@ body, .fi-body, .fi-main, .fi-sidebar, .fi-topbar {
 [class*='widget'] { 
   @apply shadow-lg; 
 }
+
+/* ============================================
+   Navigation Badge Custom Styling
+   ============================================ */
+
+/* Out of Stock Badge - Violet to Gold Gradient */
+.fi-sidebar .fi-sidebar-item .fi-badge,
+.fi-sidebar .fi-sidebar-item-badge,
+.fi-sidebar .fi-badge-label {
+  background: linear-gradient(135deg, #7c3aed 0%, #a855f7 50%, #d97706 100%) !important;
+  color: white !important;
+  font-weight: 600 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2) !important;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15) !important;
+}
