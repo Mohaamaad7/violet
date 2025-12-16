@@ -41,11 +41,11 @@ class SearchBar extends Component
                 $query->where('name', 'like', $searchTerm)
                     ->orWhere('description', 'like', $searchTerm)
                     ->orWhere('sku', 'like', $searchTerm)
-                    ->orWhereHas('categories', function ($q) use ($searchTerm) {
+                    ->orWhereHas('category', function ($q) use ($searchTerm) {
                         $q->where('name', 'like', $searchTerm);
                     });
             })
-            ->with(['media', 'categories'])
+            ->with(['media', 'category'])
             ->take(8)
             ->get()
             ->map(function ($product) {
@@ -57,7 +57,7 @@ class SearchBar extends Component
                     'original_price' => $product->price,
                     'is_on_sale' => $product->is_on_sale,
                     'image' => $product->getFirstMediaUrl('product-images', 'thumbnail') ?: asset('images/default-product.svg'),
-                    'category' => $product->categories->first()?->name ?? '',
+                    'category' => $product->category?->name ?? '',
                     'rating' => $product->average_rating ?? 0,
                     'in_stock' => $product->stock > 0,
                 ];
