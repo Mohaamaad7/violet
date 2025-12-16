@@ -97,8 +97,8 @@ class EmailService
         \App\Models\Order $order,
         ?string $locale = null
     ): ?EmailLog {
-        $recipientEmail = $order->user?->email ?? $order->guest_email;
-        $recipientName = $order->user?->name ?? $order->guest_name;
+        $recipientEmail = $order->customer?->email ?? $order->guest_email;
+        $recipientName = $order->customer?->name ?? $order->guest_name;
 
         if (!$recipientEmail) {
             Log::warning('No email address for order confirmation', ['order_id' => $order->id]);
@@ -113,7 +113,7 @@ class EmailService
             variables: $variables,
             recipientName: $recipientName,
             related: $order,
-            locale: $locale ?? $order->user?->locale ?? 'ar'
+            locale: $locale ?? $order->customer?->locale ?? 'ar'
         );
     }
 
@@ -124,8 +124,8 @@ class EmailService
         \App\Models\Order $order,
         ?string $locale = null
     ): ?EmailLog {
-        $recipientEmail = $order->user?->email ?? $order->guest_email;
-        $recipientName = $order->user?->name ?? $order->guest_name;
+        $recipientEmail = $order->customer?->email ?? $order->guest_email;
+        $recipientName = $order->customer?->name ?? $order->guest_name;
 
         if (!$recipientEmail) {
             return null;
@@ -139,7 +139,7 @@ class EmailService
             variables: $variables,
             recipientName: $recipientName,
             related: $order,
-            locale: $locale ?? $order->user?->locale ?? 'ar'
+            locale: $locale ?? $order->customer?->locale ?? 'ar'
         );
     }
 
@@ -228,9 +228,9 @@ class EmailService
             'order_discount' => number_format($order->discount_amount, 2) . ' ج.م',
             'order_date' => $order->created_at->format('Y/m/d'),
             'order_items_count' => (string) $order->items->count(),
-            'user_name' => $order->user?->name ?? $order->guest_name,
-            'user_email' => $order->user?->email ?? $order->guest_email,
-            'user_phone' => $order->user?->phone ?? $order->guest_phone,
+            'user_name' => $order->customer?->name ?? $order->guest_name,
+            'user_email' => $order->customer?->email ?? $order->guest_email,
+            'user_phone' => $order->customer?->phone ?? $order->guest_phone,
             'shipping_name' => $order->shippingAddress?->full_name ?? $order->guest_name,
             'shipping_address' => $order->shippingAddress?->address ?? $order->guest_address,
             'shipping_city' => $order->shippingAddress?->city ?? $order->guest_city,
@@ -248,8 +248,8 @@ class EmailService
         ?string $locale = null
     ): ?EmailLog {
         $order = $return->order;
-        $recipientEmail = $order->user?->email ?? $order->guest_email;
-        $recipientName = $order->user?->name ?? $order->guest_name;
+        $recipientEmail = $order->customer?->email ?? $order->guest_email;
+        $recipientName = $order->customer?->name ?? $order->guest_name;
 
         if (!$recipientEmail) {
             Log::warning('No email address for return request', ['return_id' => $return->id]);
@@ -264,7 +264,7 @@ class EmailService
             variables: $variables,
             recipientName: $recipientName,
             related: $return,
-            locale: $locale ?? $order->user?->locale ?? 'ar'
+            locale: $locale ?? $order->customer?->locale ?? 'ar'
         );
     }
 
@@ -276,8 +276,8 @@ class EmailService
         ?string $locale = null
     ): ?EmailLog {
         $order = $return->order;
-        $recipientEmail = $order->user?->email ?? $order->guest_email;
-        $recipientName = $order->user?->name ?? $order->guest_name;
+        $recipientEmail = $order->customer?->email ?? $order->guest_email;
+        $recipientName = $order->customer?->name ?? $order->guest_name;
 
         if (!$recipientEmail) {
             Log::warning('No email address for return approval', ['return_id' => $return->id]);
@@ -292,7 +292,7 @@ class EmailService
             variables: $variables,
             recipientName: $recipientName,
             related: $return,
-            locale: $locale ?? $order->user?->locale ?? 'ar'
+            locale: $locale ?? $order->customer?->locale ?? 'ar'
         );
     }
 
@@ -304,8 +304,8 @@ class EmailService
         ?string $locale = null
     ): ?EmailLog {
         $order = $return->order;
-        $recipientEmail = $order->user?->email ?? $order->guest_email;
-        $recipientName = $order->user?->name ?? $order->guest_name;
+        $recipientEmail = $order->customer?->email ?? $order->guest_email;
+        $recipientName = $order->customer?->name ?? $order->guest_name;
 
         if (!$recipientEmail) {
             Log::warning('No email address for return rejection', ['return_id' => $return->id]);
@@ -320,7 +320,7 @@ class EmailService
             variables: $variables,
             recipientName: $recipientName,
             related: $return,
-            locale: $locale ?? $order->user?->locale ?? 'ar'
+            locale: $locale ?? $order->customer?->locale ?? 'ar'
         );
     }
 
@@ -332,8 +332,8 @@ class EmailService
         ?string $locale = null
     ): ?EmailLog {
         $order = $return->order;
-        $recipientEmail = $order->user?->email ?? $order->guest_email;
-        $recipientName = $order->user?->name ?? $order->guest_name;
+        $recipientEmail = $order->customer?->email ?? $order->guest_email;
+        $recipientName = $order->customer?->name ?? $order->guest_name;
 
         if (!$recipientEmail) {
             Log::warning('No email address for return completion', ['return_id' => $return->id]);
@@ -348,7 +348,7 @@ class EmailService
             variables: $variables,
             recipientName: $recipientName,
             related: $return,
-            locale: $locale ?? $order->user?->locale ?? 'ar'
+            locale: $locale ?? $order->customer?->locale ?? 'ar'
         );
     }
 
@@ -402,10 +402,10 @@ class EmailService
             'rejected_at' => $return->rejected_at?->format('Y/m/d h:i A') ?? '',
             'completed_at' => $return->completed_at?->format('Y/m/d h:i A') ?? '',
             'next_steps' => 'سيتم التواصل معك لتحديد موعد استلام المنتجات.',
-            'customer_name' => $order->user?->name ?? $order->guest_name,
-            'customer_email' => $order->user?->email ?? $order->guest_email,
-            'customer_phone' => $order->user?->phone ?? $order->guest_phone,
-            'user_name' => $order->user?->name ?? $order->guest_name,
+            'customer_name' => $order->customer?->name ?? $order->guest_name,
+            'customer_email' => $order->customer?->email ?? $order->guest_email,
+            'customer_phone' => $order->customer?->phone ?? $order->guest_phone,
+            'user_name' => $order->customer?->name ?? $order->guest_name,
             'track_url' => config('app.url') . '/account/returns/' . $return->id,
             'admin_panel_url' => route('filament.admin.resources.order-returns.view', $return),
             'app_name' => config('app.name'),
