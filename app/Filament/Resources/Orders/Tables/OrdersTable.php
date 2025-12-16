@@ -30,12 +30,30 @@ class OrdersTable
                     ->icon('heroicon-o-hashtag'),
 
                 // اسم العميل
-                TextColumn::make('user.name')
+                TextColumn::make('customer_name')
                     ->label(__('admin.table.customer'))
-                    ->searchable()
-                    ->sortable()
-                    ->description(fn($record) => $record->user?->email)
-                    ->icon('heroicon-o-user'),
+                    ->searchable(['customer.name', 'guest_name', 'customer.email', 'guest_email'])
+                    ->sortable(query: function ($query, $direction) {
+                        return $query->orderBy('guest_name', $direction)
+                            ->orderBy('customer_id', $direction);
+                    })
+                    ->formatStateUsing(function ($record) {
+                        $isGuest = !$record->customer_id;
+                        $name = $isGuest ? $record->guest_name : $record->customer?->name;
+                        $email = $isGuest ? $record->guest_email : $record->customer?->email;
+
+                        return $name ?? $email ?? __('admin.common.unknown');
+                    })
+                    ->description(function ($record) {
+                        $isGuest = !$record->customer_id;
+                        return $isGuest ? $record->guest_email : $record->customer?->email;
+                    })
+                    ->badge()
+                    ->color(fn($record) => $record->customer_id ? 'success' : 'info')
+                    ->icon(fn($record) => $record->customer_id ? 'heroicon-o-user' : 'heroicon-o-user-group')
+                    ->suffix(function ($record) {
+                        return $record->customer_id ? ' [مسجل]' : ' [زائر]';
+                    }),
 
                 // الإجمالي
                 TextColumn::make('total')
@@ -218,10 +236,15 @@ class OrdersTable
                     ->query(function (Builder $query, array $data): Builder {
                         return $query->when(
                             $data['customer_search'],
-                            fn(Builder $query, $search): Builder => $query->whereHas('user', function ($q) use ($search) {
-                                $q->where('name', 'like', "%{$search}%")
-                                    ->orWhere('email', 'like', "%{$search}%");
-                            }),
+                            fn(Builder $query, $search): Builder => $query
+                                ->where(function ($q) use ($search) {
+                                    $q->whereHas('customer', function ($customerQuery) use ($search) {
+                                        $customerQuery->where('name', 'like', "%{$search}%")
+                                            ->orWhere('email', 'like', "%{$search}%");
+                                    })
+                                        ->orWhere('guest_name', 'like', "%{$search}%")
+                                        ->orWhere('guest_email', 'like', "%{$search}%");
+                                })
                         );
                     })
                     ->indicateUsing(function (array $data): ?string {
