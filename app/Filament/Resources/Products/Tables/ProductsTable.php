@@ -34,33 +34,33 @@ class ProductsTable
                         $primaryMedia = $record->getMedia('product-images')
                             ->filter(fn($media) => $media->getCustomProperty('is_primary') === true)
                             ->first();
-                        
+
                         if (!$primaryMedia) {
                             $primaryMedia = $record->getFirstMedia('product-images');
                         }
-                        
+
                         if ($primaryMedia) {
-                            return $primaryMedia->hasGeneratedConversion('thumbnail') 
+                            return $primaryMedia->hasGeneratedConversion('thumbnail')
                                 ? $primaryMedia->getUrl('thumbnail')
                                 : $primaryMedia->getUrl();
                         }
-                        
+
                         // Fallback to old system
                         $primaryImage = $record->images()->where('is_primary', true)->first();
-                        return $primaryImage?->image_path 
-                            ? asset('storage/' . $primaryImage->image_path) 
+                        return $primaryImage?->image_path
+                            ? asset('storage/' . $primaryImage->image_path)
                             : asset('images/default-product.png');
                     })
                     ->size(50)
                     ->circular(),
-                
+
                 TextColumn::make('name')
                     ->label(__('admin.table.name'))
                     ->searchable()
                     ->sortable()
                     ->weight('bold')
                     ->wrap(),
-                
+
                 TextColumn::make('sku')
                     ->label(__('admin.table.sku'))
                     ->searchable()
@@ -68,53 +68,53 @@ class ProductsTable
                     ->copyable()
                     ->copyMessage('SKU copied!')
                     ->toggleable(),
-                
+
                 TextColumn::make('category.name')
                     ->label(__('admin.table.category'))
                     ->searchable()
                     ->sortable()
                     ->badge()
                     ->color('info'),
-                
+
                 TextColumn::make('price')
                     ->label(__('admin.table.price'))
-                    ->money('USD')
+                    ->money('EGP')
                     ->sortable()
                     ->weight('bold')
                     ->color('success'),
-                
+
                 TextColumn::make('sale_price')
                     ->label(__('admin.table.sale'))
-                    ->money('USD')
+                    ->money('EGP')
                     ->sortable()
                     ->color('warning')
                     ->toggleable()
                     ->default('—'),
-                
+
                 TextColumn::make('stock')
                     ->label(__('admin.table.stock'))
                     ->numeric()
                     ->sortable()
-                    ->color(fn (int $state): string => match (true) {
+                    ->color(fn(int $state): string => match (true) {
                         $state === 0 => 'danger',
                         $state < 10 => 'warning',
                         default => 'success',
                     })
-                    ->icon(fn (int $state): string => match (true) {
+                    ->icon(fn(int $state): string => match (true) {
                         $state === 0 => 'heroicon-o-x-circle',
                         $state < 10 => 'heroicon-o-exclamation-triangle',
                         default => 'heroicon-o-check-circle',
                     }),
-                
+
                 TextColumn::make('status')
                     ->label(__('admin.table.status'))
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
+                    ->color(fn(string $state): string => match ($state) {
                         'active' => 'success',
                         'draft' => 'gray',
                         'inactive' => 'danger',
                     }),
-                
+
                 IconColumn::make('is_featured')
                     ->label(__('admin.table.featured'))
                     ->boolean()
@@ -122,7 +122,7 @@ class ProductsTable
                     ->falseIcon('heroicon-o-star')
                     ->trueColor('warning')
                     ->toggleable(),
-                
+
                 TextColumn::make('created_at')
                     ->label(__('admin.table.created_at'))
                     ->dateTime('M d, Y')
@@ -137,7 +137,7 @@ class ProductsTable
                     ->preload()
                     ->multiple()
                     ->label(__('admin.table.category')),
-                
+
                 // Status Filter
                 SelectFilter::make('status')
                     ->options([
@@ -147,13 +147,13 @@ class ProductsTable
                     ])
                     ->multiple()
                     ->label(__('admin.table.status')),
-                
+
                 // Is Active/Featured Filter
                 Filter::make('is_featured')
                     ->label(__('admin.filters.featured_only'))
-                    ->query(fn (Builder $query): Builder => $query->where('is_featured', true))
+                    ->query(fn(Builder $query): Builder => $query->where('is_featured', true))
                     ->toggle(),
-                
+
                 // Price Range Filter
                 Filter::make('price_range')
                     ->form([
@@ -170,11 +170,11 @@ class ProductsTable
                         return $query
                             ->when(
                                 $data['price_from'],
-                                fn (Builder $query, $price): Builder => $query->where('price', '>=', $price),
+                                fn(Builder $query, $price): Builder => $query->where('price', '>=', $price),
                             )
                             ->when(
                                 $data['price_to'],
-                                fn (Builder $query, $price): Builder => $query->where('price', '<=', $price),
+                                fn(Builder $query, $price): Builder => $query->where('price', '<=', $price),
                             );
                     })
                     ->indicateUsing(function (array $data): array {
@@ -187,7 +187,7 @@ class ProductsTable
                         }
                         return $indicators;
                     }),
-                
+
                 // Stock Status Filter (for widget deep linking)
                 SelectFilter::make('stock_status')
                     ->label(__('admin.filters.stock_status'))
@@ -199,7 +199,7 @@ class ProductsTable
                     ->query(function (Builder $query, array $data): Builder {
                         return $query->when(
                             $data['value'] ?? null,
-                            fn (Builder $query, $value): Builder => match ($value) {
+                            fn(Builder $query, $value): Builder => match ($value) {
                                 'low' => $query->whereColumn('stock', '<=', 'low_stock_threshold'),
                                 'out' => $query->where('stock', 0),
                                 'available' => $query->where('stock', '>', 0)->whereColumn('stock', '>', 'low_stock_threshold'),
@@ -207,24 +207,25 @@ class ProductsTable
                             }
                         );
                     }),
-                
+
                 // Low Stock Toggle Filter (legacy)
                 Filter::make('low_stock')
                     ->label(__('admin.filters.low_stock_only'))
-                    ->query(fn (Builder $query): Builder => 
+                    ->query(
+                        fn(Builder $query): Builder =>
                         $query->whereColumn('stock', '<=', 'low_stock_threshold')
                     )
                     ->toggle(),
-                
+
                 // Trashed Filter
                 TrashedFilter::make(),
             ])
             ->recordActions([
                 EditAction::make()
-                    ->visible(fn ($record) => auth()->user()->can('update', $record)),
+                    ->visible(fn($record) => auth()->user()->can('update', $record)),
                 ReplicateAction::make()
                     ->label(__('admin.action.duplicate'))
-                    ->visible(fn ($record) => auth()->user()->can('create', $record))
+                    ->visible(fn($record) => auth()->user()->can('create', $record))
                     ->excludeAttributes(['sku', 'slug'])
                     ->beforeReplicaSaved(function (Product $replica): void {
                         $replica->name = $replica->name . ' (Copy)';
@@ -233,7 +234,7 @@ class ProductsTable
                         $replica->status = 'draft';
                     }),
                 DeleteAction::make()
-                    ->visible(fn ($record) => auth()->user()->can('delete', $record)),
+                    ->visible(fn($record) => auth()->user()->can('delete', $record)),
             ])
             ->bulkActions([
                 BulkActionGroup::make([
@@ -242,56 +243,56 @@ class ProductsTable
                         ->label(__('admin.action.publish_selected'))
                         ->icon('heroicon-o-check-circle')
                         ->color('success')
-                        ->visible(fn () => auth()->user()->can('edit products'))
+                        ->visible(fn() => auth()->user()->can('edit products'))
                         ->requiresConfirmation()
                         ->action(function (Collection $records) {
                             $records->each->update(['status' => 'active']);
                         })
                         ->deselectRecordsAfterCompletion()
                         ->successNotificationTitle(__('admin.message.published')),
-                    
+
                     BulkAction::make('unpublish')
                         ->label(__('admin.action.unpublish_selected'))
                         ->icon('heroicon-o-x-circle')
                         ->color('warning')
-                        ->visible(fn () => auth()->user()->can('edit products'))
+                        ->visible(fn() => auth()->user()->can('edit products'))
                         ->requiresConfirmation()
                         ->action(function (Collection $records) {
                             $records->each->update(['status' => 'inactive']);
                         })
                         ->deselectRecordsAfterCompletion()
                         ->successNotificationTitle(__('admin.message.unpublished')),
-                    
+
                     BulkAction::make('set_featured')
                         ->label(__('admin.action.mark_featured'))
                         ->icon('heroicon-o-star')
                         ->color('warning')
-                        ->visible(fn () => auth()->user()->can('edit products'))
+                        ->visible(fn() => auth()->user()->can('edit products'))
                         ->requiresConfirmation()
                         ->action(function (Collection $records) {
                             $records->each->update(['is_featured' => true]);
                         })
                         ->deselectRecordsAfterCompletion()
                         ->successNotificationTitle(__('admin.message.featured')),
-                    
+
                     BulkAction::make('unset_featured')
                         ->label(__('admin.action.remove_featured'))
                         ->icon('heroicon-o-minus-circle')
                         ->color('gray')
-                        ->visible(fn () => auth()->user()->can('edit products'))
+                        ->visible(fn() => auth()->user()->can('edit products'))
                         ->requiresConfirmation()
                         ->action(function (Collection $records) {
                             $records->each->update(['is_featured' => false]);
                         })
                         ->deselectRecordsAfterCompletion()
                         ->successNotificationTitle(__('admin.message.unfeatured')),
-                    
+
                     DeleteBulkAction::make()
-                        ->visible(fn () => auth()->user()->can('delete products')),
+                        ->visible(fn() => auth()->user()->can('delete products')),
                     ForceDeleteBulkAction::make()
-                        ->visible(fn () => auth()->user()->can('delete products')),
+                        ->visible(fn() => auth()->user()->can('delete products')),
                     RestoreBulkAction::make()
-                        ->visible(fn () => auth()->user()->can('edit products')),
+                        ->visible(fn() => auth()->user()->can('edit products')),
                 ]),
             ])
             ->defaultSort('created_at', 'desc')

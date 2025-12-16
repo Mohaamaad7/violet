@@ -89,7 +89,7 @@ class LowStockProductResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->limit(40)
-                    ->url(fn (Product $record): string => route('filament.admin.resources.products.edit', $record)),
+                    ->url(fn(Product $record): string => route('filament.admin.resources.products.edit', $record)),
 
                 TextColumn::make('sku')
                     ->label(__('admin.table.sku'))
@@ -113,7 +113,7 @@ class LowStockProductResource extends Resource
 
                 TextColumn::make('price')
                     ->label(__('admin.table.price'))
-                    ->money('SAR')
+                    ->money('EGP')
                     ->sortable(),
 
                 TextColumn::make('category.name')

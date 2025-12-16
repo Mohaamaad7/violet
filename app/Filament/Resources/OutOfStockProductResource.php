@@ -111,7 +111,7 @@ class OutOfStockProductResource extends Resource
 
                 TextColumn::make('price')
                     ->label(__('admin.table.price'))
-                    ->money('SAR')
+                    ->money('EGP')
                     ->sortable(),
 
                 TextColumn::make('category.name')

@@ -42,7 +42,7 @@ class ProductInfolist
                                     ->imageHeight(200)
                                     ->extraImgAttributes(['class' => 'rounded-lg shadow-sm']),
                             ]),
-                            
+
                         // Quick Stats
                         Section::make(__('admin.products.statistics'))
                             ->icon('heroicon-o-chart-bar')
@@ -80,17 +80,17 @@ class ProductInfolist
                                     ->size(TextSize::Large)
                                     ->weight(FontWeight::Bold)
                                     ->columnSpanFull(),
-                                    
+
                                 TextEntry::make('category.name')
                                     ->label(__('admin.products.category'))
                                     ->badge()
                                     ->color('violet'),
-                                    
+
                                 TextEntry::make('brand')
                                     ->label(__('admin.products.brand'))
                                     ->placeholder(__('admin.common.not_specified'))
                                     ->icon('heroicon-o-building-storefront'),
-                                    
+
                                 TextEntry::make('sku')
                                     ->label(__('admin.products.sku'))
                                     ->copyable()
@@ -98,19 +98,19 @@ class ProductInfolist
                                     ->fontFamily('mono')
                                     ->badge()
                                     ->color('gray'),
-                                    
+
                                 TextEntry::make('barcode')
                                     ->label(__('admin.products.barcode'))
                                     ->placeholder(__('admin.common.not_specified'))
                                     ->copyable()
                                     ->fontFamily('mono'),
-                                    
+
                                 TextEntry::make('slug')
                                     ->label(__('admin.products.slug'))
                                     ->icon('heroicon-o-link')
                                     ->copyable()
                                     ->color('gray'),
-                                    
+
                                 TextEntry::make('status')
                                     ->label(__('admin.products.status'))
                                     ->badge(),
@@ -123,20 +123,20 @@ class ProductInfolist
                             ->schema([
                                 TextEntry::make('price')
                                     ->label(__('admin.products.price'))
-                                    ->money('SAR', locale: 'ar')
+                                    ->money('EGP', locale: 'ar')
                                     ->size(TextSize::Large)
                                     ->weight(FontWeight::Bold)
                                     ->color('primary'),
-                                    
+
                                 TextEntry::make('sale_price')
                                     ->label(__('admin.products.sale_price'))
-                                    ->money('SAR', locale: 'ar')
+                                    ->money('EGP', locale: 'ar')
                                     ->placeholder(__('admin.common.no_sale'))
                                     ->color('danger'),
-                                    
+
                                 TextEntry::make('cost_price')
                                     ->label(__('admin.products.cost_price'))
-                                    ->money('SAR', locale: 'ar')
+                                    ->money('EGP', locale: 'ar')
                                     ->placeholder(__('admin.common.not_specified'))
                                     ->color('gray'),
                             ]),
@@ -150,17 +150,18 @@ class ProductInfolist
                                     ->label(__('admin.products.stock'))
                                     ->numeric()
                                     ->badge()
-                                    ->color(fn (Product $record): string => 
-                                        $record->stock <= 0 ? 'danger' : 
+                                    ->color(
+                                        fn(Product $record): string =>
+                                        $record->stock <= 0 ? 'danger' :
                                         ($record->stock <= ($record->low_stock_threshold ?? 5) ? 'warning' : 'success')
                                     ),
-                                    
+
                                 TextEntry::make('low_stock_threshold')
                                     ->label(__('admin.products.low_stock_threshold'))
                                     ->numeric()
                                     ->placeholder('5')
                                     ->icon('heroicon-o-exclamation-triangle'),
-                                    
+
                                 TextEntry::make('weight')
                                     ->label(__('admin.products.weight'))
                                     ->numeric()
@@ -208,7 +209,7 @@ class ProductInfolist
                                     ->falseIcon('heroicon-o-x-mark')
                                     ->trueColor('warning')
                                     ->falseColor('gray'),
-                                    
+
                                 IconEntry::make('is_active')
                                     ->label(__('admin.products.is_active'))
                                     ->boolean()
@@ -229,12 +230,12 @@ class ProductInfolist
                                     ->label(__('admin.products.meta_title'))
                                     ->placeholder(__('admin.common.not_specified'))
                                     ->icon('heroicon-o-tag'),
-                                    
+
                                 TextEntry::make('meta_description')
                                     ->label(__('admin.products.meta_description'))
                                     ->placeholder(__('admin.common.not_specified'))
                                     ->columnSpanFull(),
-                                    
+
                                 TextEntry::make('meta_keywords')
                                     ->label(__('admin.products.meta_keywords'))
                                     ->placeholder(__('admin.common.not_specified'))
@@ -252,18 +253,18 @@ class ProductInfolist
                                     ->label(__('admin.common.created_at'))
                                     ->dateTime('M d, Y H:i')
                                     ->icon('heroicon-o-calendar'),
-                                    
+
                                 TextEntry::make('updated_at')
                                     ->label(__('admin.common.updated_at'))
                                     ->dateTime('M d, Y H:i')
                                     ->icon('heroicon-o-arrow-path'),
-                                    
+
                                 TextEntry::make('deleted_at')
                                     ->label(__('admin.common.deleted_at'))
                                     ->dateTime('M d, Y H:i')
                                     ->icon('heroicon-o-trash')
                                     ->color('danger')
-                                    ->visible(fn (Product $record): bool => $record->trashed()),
+                                    ->visible(fn(Product $record): bool => $record->trashed()),
                             ]),
                     ]),
             ]);

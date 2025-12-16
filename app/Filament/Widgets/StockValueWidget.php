@@ -32,13 +32,13 @@ class StockValueWidget extends StatsOverviewWidget
             ->sum('stock');
 
         return [
-            Stat::make(__('inventory.total_stock_value'), 'SAR ' . number_format($totalValue, 2))
+            Stat::make(__('inventory.total_stock_value'), 'EGP ' . number_format($totalValue, 2))
                 ->description(__('inventory.current_stock_value'))
                 ->descriptionIcon('heroicon-o-currency-dollar')
                 ->color('success')
                 ->chart([50000, 60000, 55000, 70000, 65000, 75000, $totalValue]),
 
-            Stat::make(__('inventory.potential_profit'), 'SAR ' . number_format($potentialProfit, 2))
+            Stat::make(__('inventory.potential_profit'), 'EGP ' . number_format($potentialProfit, 2))
                 ->description(__('inventory.if_all_sold'))
                 ->descriptionIcon('heroicon-o-chart-bar')
                 ->color($potentialProfit > 0 ? 'success' : 'danger')
