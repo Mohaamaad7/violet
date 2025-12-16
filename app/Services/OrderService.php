@@ -102,12 +102,12 @@ class OrderService
     public function createOrder(array $data): Order
     {
         return DB::transaction(function () use ($data) {
-            // Generate order number
-            $orderNumber = $this->generateOrderNumber();
+            // Generate temporary order number
+            $tempOrderNumber = 'TEMP-' . uniqid();
 
             // Create order
             $order = Order::create([
-                'order_number' => $orderNumber,
+                'order_number' => $tempOrderNumber,
                 'user_id' => $data['user_id'],
                 'status' => OrderStatus::PENDING,
                 'payment_status' => 'pending',
@@ -139,6 +139,14 @@ class OrderService
 
             // Create initial status history
             $this->addStatusHistory($order->id, 'pending', 'Order created', auth()->id());
+
+            // Update order number with actual ID
+            $date = date('Ymd');  // 20251216
+            $time = date('His');  // 142500
+            $orderId = str_pad($order->id, 6, '0', STR_PAD_LEFT);  // 000123
+            $finalOrderNumber = "VLT-{$date}-{$time}-{$orderId}";
+
+            $order->update(['order_number' => $finalOrderNumber]);
 
             return $order->fresh();
         });

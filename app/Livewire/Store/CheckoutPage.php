@@ -341,12 +341,12 @@ class CheckoutPage extends Component
 
         try {
             $order = DB::transaction(function () use ($cart, $shippingAddress, $guestAddressData) {
-                // Generate unique order number
-                $orderNumber = 'VLT-' . strtoupper(Str::random(8)) . '-' . now()->format('ymd');
+                // Generate temporary order number (will be updated after creation)
+                $tempOrderNumber = 'TEMP-' . uniqid();
 
                 // Create Order
                 $order = Order::create([
-                    'order_number' => $orderNumber,
+                    'order_number' => $tempOrderNumber,
                     'customer_id' => $this->getCustomerId(),
                     'shipping_address_id' => $shippingAddress?->id,
                     'guest_name' => $guestAddressData['name'] ?? null,
@@ -404,6 +404,14 @@ class CheckoutPage extends Component
                 // Clear cart
                 $cart->items()->delete();
                 $cart->delete();
+
+                // Update order number with actual ID
+                $date = date('Ymd');  // 20251216
+                $time = date('His');  // 142500
+                $orderId = str_pad($order->id, 6, '0', STR_PAD_LEFT);  // 000123
+                $finalOrderNumber = "VLT-{$date}-{$time}-{$orderId}";
+
+                $order->update(['order_number' => $finalOrderNumber]);
 
                 // Clear cart session cookie for guests
                 if (!$this->getCustomer()) {
