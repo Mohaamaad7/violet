@@ -60,8 +60,7 @@ class OutOfStockProductResource extends Resource
 
     public static function getNavigationBadgeColor(): ?string
     {
-        $count = static::getNavigationBadge();
-        return $count > 0 ? 'danger' : null;
+        return null; // Black/default color
     }
 
     public static function getEloquentQuery(): Builder
@@ -87,7 +86,7 @@ class OutOfStockProductResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->limit(40)
-                    ->url(fn (Product $record): string => route('filament.admin.resources.products.edit', $record)),
+                    ->url(fn(Product $record): string => route('filament.admin.resources.products.edit', $record)),
 
                 TextColumn::make('sku')
                     ->label(__('admin.table.sku'))
@@ -102,7 +101,7 @@ class OutOfStockProductResource extends Resource
                     ->sortable()
                     ->badge()
                     ->color('danger')
-                    ->formatStateUsing(fn (): string => '0'),
+                    ->formatStateUsing(fn(): string => '0'),
 
                 TextColumn::make('low_stock_threshold')
                     ->label(__('inventory.low_stock_threshold'))
