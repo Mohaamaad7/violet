@@ -26,7 +26,7 @@ class OrderSuccessPage extends Component
         if (auth('customer')->check()) {
             // Authenticated customer - must own the order
             $customerId = auth('customer')->id();
-            if ($order->customer_id !== $customerId) {
+            if ($order->customer_id != $customerId) {
                 abort(403, 'You are not authorized to view this order.');
             }
         } else {
