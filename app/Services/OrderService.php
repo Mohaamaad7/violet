@@ -284,11 +284,17 @@ class OrderService
 
     /**
      * Generate unique order number
+     * Format: VLT-DATE-TIME-UNIQUEID
+     * Example: VLT-20251216-140530-A3F9B2
      */
     protected function generateOrderNumber(): string
     {
         do {
-            $orderNumber = 'ORD-' . date('Ymd') . '-' . strtoupper(substr(md5(uniqid()), 0, 6));
+            $date = date('Ymd');  // 20251216
+            $time = date('His');  // 140530
+            $uniqueId = strtoupper(substr(md5(uniqid(mt_rand(), true)), 0, 6));  // A3F9B2
+
+            $orderNumber = "VLT-{$date}-{$time}-{$uniqueId}";
         } while (Order::where('order_number', $orderNumber)->exists());
 
         return $orderNumber;

@@ -48,12 +48,8 @@ class OrdersTable
                         $isGuest = !$record->customer_id;
                         return $isGuest ? $record->guest_email : $record->customer?->email;
                     })
-                    ->badge()
-                    ->color(fn($record) => $record->customer_id ? 'success' : 'info')
-                    ->icon(fn($record) => $record->customer_id ? 'heroicon-o-user' : 'heroicon-o-user-group')
-                    ->suffix(function ($record) {
-                        return $record->customer_id ? ' [مسجل]' : ' [زائر]';
-                    }),
+                    ->icon(fn($record) => $record->customer_id ? 'heroicon-s-check-badge' : null)
+                    ->iconColor(fn($record) => $record->customer_id ? 'info' : null),
 
                 // الإجمالي
                 TextColumn::make('total')
@@ -96,8 +92,8 @@ class OrdersTable
                         'paid' => 'heroicon-o-check-badge',
                         'failed' => 'heroicon-o-x-circle',
                         'refunded' => 'heroicon-o-arrow-uturn-left',
-                        default => 'heroicon-o-question-mark-circle',
-                    }),
+                    })
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 // طريقة الدفع
                 TextColumn::make('payment_method')
@@ -145,7 +141,8 @@ class OrdersTable
                         'approved' => 'تمت الموافقة على المرتجع',
                         'completed' => 'تم اكتمال المرتجع',
                         default => null,
-                    }),
+                    })
+                    ->toggleable(isToggledHiddenByDefault: true),
 
                 // تاريخ الإنشاء
                 TextColumn::make('created_at')
