@@ -316,3 +316,40 @@ body,
   font-weight: 600 !important;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.15) !important;
 }
+
+/* ============================================
+   Dashboard Widgets Grid Layout
+   ============================================ */
+
+/* Force widgets to display in consistent 3-column grid */
+.fi-wi-stats-overview-stats-ctn,
+.fi-stats-overview {
+  display: grid !important;
+  grid-template-columns: repeat(3, 1fr) !important;
+  gap: 1rem !important;
+}
+
+/* Each stat card takes full width of its grid cell */
+.fi-wi-stats-overview-stat,
+.fi-stats-overview>* {
+  width: 100% !important;
+  min-width: 0 !important;
+}
+
+/* Responsive: 2 columns on tablets */
+@media (max-width: 1024px) {
+
+  .fi-wi-stats-overview-stats-ctn,
+  .fi-stats-overview {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+/* Responsive: 1 column on mobile */
+@media (max-width: 640px) {
+
+  .fi-wi-stats-overview-stats-ctn,
+  .fi-stats-overview {
+    grid-template-columns: 1fr !important;
+  }
+}
