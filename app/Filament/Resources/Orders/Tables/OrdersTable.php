@@ -164,7 +164,8 @@ class OrdersTable
                         3 => __('admin.orders.status.delivered'),
                         4 => __('admin.orders.status.cancelled'),
                     ])
-                    ->placeholder(__('admin.filter.all')),
+                    ->placeholder(__('admin.filter.all'))
+                    ->columnSpan(1),
 
                 // فلتر حالة الدفع
                 SelectFilter::make('payment_status')
@@ -176,7 +177,8 @@ class OrdersTable
                         'failed' => __('admin.orders.payment.failed'),
                         'refunded' => __('admin.orders.payment.refunded'),
                     ])
-                    ->placeholder(__('admin.filter.all')),
+                    ->placeholder(__('admin.filter.all'))
+                    ->columnSpan(1),
 
                 // فلتر طريقة الدفع
                 SelectFilter::make('payment_method')
@@ -186,7 +188,8 @@ class OrdersTable
                         'card' => __('admin.orders.method.card'),
                         'instapay' => __('admin.orders.method.instapay'),
                     ])
-                    ->placeholder(__('admin.filter.all')),
+                    ->placeholder(__('admin.filter.all'))
+                    ->columnSpan(1),
 
                 // فلتر بالتاريخ (Date Range)
                 Filter::make('created_at')
@@ -221,7 +224,8 @@ class OrdersTable
                         }
 
                         return $indicators;
-                    }),
+                    })
+                    ->columnSpan(2),
 
                 // فلتر بالعميل (البحث بالاسم أو الإيميل)
                 Filter::make('customer')
@@ -250,9 +254,10 @@ class OrdersTable
                         }
 
                         return __('admin.table.customer') . ': ' . $data['customer_search'];
-                    }),
+                    })
+                    ->columnSpan(1),
             ], layout: FiltersLayout::AboveContent)
-            ->filtersFormColumns(4)
+            ->filtersFormColumns(6)
             ->recordActions([
                 ViewAction::make()
                     ->label(__('admin.action.view_details'))
