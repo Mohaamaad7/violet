@@ -125,7 +125,7 @@
                                                         <input type="checkbox" wire:click="toggleCategory({{ $childCategory->id }})"
                                                             :checked="$wire.selectedCategories.includes({{ $childCategory->id }})"
                                                             class="peer w-4 h-4 text-violet-600 border-2 border-gray-400 rounded focus:ring-2 focus:ring-violet-500 transition-all duration-200 cursor-pointer checked:border-violet-600">
-                                                    </div>ss="fas fa-circle text-[4px] text-gray-400"></i>
+                                                    </div>
                                                     <span
                                                         class="text-sm text-gray-700 group-hover:text-violet-700 font-medium transition-colors duration-200 flex-1">
                                                         {{ $childCategory->name }}
@@ -319,7 +319,7 @@
                                     <div class="flex items-center gap-1.5 flex-1">
                                         @for($i = 1; $i <= 5; $i++)
                                             <i class="fas fa-star text-sm {{ $i <= $rating ? 'text-yellow-400' : 'text-gray-300' }} 
-                                               group-hover:scale-110 transition-transform duration-200"></i>
+                                                       group-hover:scale-110 transition-transform duration-200"></i>
                                         @endfor
                                         <span
                                             class="text-sm font-medium text-gray-800 group-hover:text-violet-700 ltr:ml-1 rtl:mr-1 transition-colors duration-200">
