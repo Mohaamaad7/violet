@@ -154,7 +154,7 @@ class ReviewService
     {
         // Verify ownership
         $customerId = $this->getCustomerId();
-        if ($review->customer_id !== $customerId) {
+        if ($review->customer_id != $customerId) {
             throw new \Exception(__('messages.reviews.unauthorized'));
         }
 
@@ -176,7 +176,7 @@ class ReviewService
     {
         // Verify ownership
         $customerId = $this->getCustomerId();
-        if ($review->customer_id !== $customerId) {
+        if ($review->customer_id != $customerId) {
             throw new \Exception(__('messages.reviews.unauthorized'));
         }
 

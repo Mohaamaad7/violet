@@ -15,7 +15,7 @@ class OrderDetails extends Component
         // Authorization: only owner customer can view
         $customerId = Auth::guard('customer')->check() ? Auth::guard('customer')->id() : null;
 
-        if (!$customerId || $order->customer_id !== $customerId) {
+        if (!$customerId || $order->customer_id != $customerId) {
             abort(403, __('messages.account.unauthorized'));
         }
 
