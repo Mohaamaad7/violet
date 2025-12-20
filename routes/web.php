@@ -79,6 +79,14 @@ Route::prefix('admin/products')->middleware(['auth'])->name('admin.products.')->
     Route::post('{product}/images/update-order', [App\Http\Controllers\Admin\ProductImageController::class, 'updateOrder'])->name('images.update-order');
 });
 
+// Stock Count Reports (Admin)
+Route::prefix('admin/stock-counts')->middleware(['auth'])->name('admin.stock-counts.')->group(function () {
+    Route::get('{stockCount}/count-sheet', [App\Http\Controllers\StockCountReportController::class, 'countSheet'])->name('count-sheet');
+    Route::get('{stockCount}/results', [App\Http\Controllers\StockCountReportController::class, 'results'])->name('results');
+    Route::get('{stockCount}/shortage', [App\Http\Controllers\StockCountReportController::class, 'shortage'])->name('shortage');
+    Route::get('{stockCount}/excess', [App\Http\Controllers\StockCountReportController::class, 'excess'])->name('excess');
+});
+
 require __DIR__ . '/auth.php';
 
 // Public API Routes

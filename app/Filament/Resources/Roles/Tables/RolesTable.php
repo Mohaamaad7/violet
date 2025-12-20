@@ -18,19 +18,19 @@ class RolesTable
                     ->label(__('admin.table.name'))
                     ->searchable()
                     ->sortable(),
-                    
+
                 TextColumn::make('permissions_count')
                     ->label(__('admin.table.permissions_count'))
                     ->counts('permissions')
                     ->sortable()
                     ->badge()
                     ->color('success'),
-                    
+
                 TextColumn::make('guard_name')
                     ->label(__('admin.table.guard'))
                     ->badge()
                     ->sortable(),
-                    
+
                 TextColumn::make('created_at')
                     ->label(__('admin.table.created_at'))
                     ->dateTime('Y-m-d H:i')
@@ -40,14 +40,23 @@ class RolesTable
             ->filters([
                 //
             ])
+            ->headerActions([
+                \pxlrbt\FilamentExcel\Actions\Tables\ExportAction::make()
+                    ->label('تصدير Excel')
+                    ->exports([
+                        \pxlrbt\FilamentExcel\Exports\ExcelExport::make()
+                            ->fromTable()
+                            ->withFilename('roles-' . now()->format('Y-m-d'))
+                    ]),
+            ])
             ->recordActions([
                 EditAction::make()
-                    ->visible(fn ($record) => auth()->user()->can('update', $record)),
+                    ->visible(fn($record) => auth()->user()->can('update', $record)),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
-                        ->visible(fn () => auth()->user()->can('delete roles')),
+                        ->visible(fn() => auth()->user()->can('delete roles')),
                 ]),
             ])
             ->defaultSort('name', 'asc');

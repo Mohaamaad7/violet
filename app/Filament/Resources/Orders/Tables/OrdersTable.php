@@ -258,6 +258,15 @@ class OrdersTable
                     ->columnSpan(1),
             ], layout: FiltersLayout::AboveContent)
             ->filtersFormColumns(6)
+            ->headerActions([
+                \pxlrbt\FilamentExcel\Actions\Tables\ExportAction::make()
+                    ->label('تصدير Excel')
+                    ->exports([
+                        \pxlrbt\FilamentExcel\Exports\ExcelExport::make()
+                            ->fromTable()
+                            ->withFilename('orders-' . now()->format('Y-m-d'))
+                    ]),
+            ])
             ->recordActions([
                 ViewAction::make()
                     ->label(__('admin.action.view_details'))

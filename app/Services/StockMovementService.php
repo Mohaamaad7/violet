@@ -20,14 +20,28 @@ class StockMovementService
         int $quantity,
         ?Model $reference = null,
         ?string $notes = null,
-        ?int $batchId = null
+        ?int $batchId = null,
+        ?int $variantId = null,
+        ?int $warehouseId = null,
+        ?string $reasonType = null,
+        ?int $responsibleId = null,
+        ?float $unitCost = null
     ): StockMovement {
-        $product = Product::findOrFail($productId);
-        $stockBefore = $product->stock;
-        $stockAfter = $stockBefore + $quantity;
+        // Get current stock (from variant or product)
+        if ($variantId) {
+            $variant = \App\Models\ProductVariant::findOrFail($variantId);
+            $stockBefore = $variant->stock;
+            $stockAfter = $stockBefore + $quantity;
+        } else {
+            $product = Product::findOrFail($productId);
+            $stockBefore = $product->stock;
+            $stockAfter = $stockBefore + $quantity;
+        }
 
         $movement = StockMovement::create([
             'product_id' => $productId,
+            'variant_id' => $variantId,
+            'warehouse_id' => $warehouseId,
             'batch_id' => $batchId,
             'type' => $type,
             'quantity' => $quantity,
@@ -37,10 +51,21 @@ class StockMovementService
             'reference_id' => $reference?->id,
             'created_by' => auth()->id(),
             'notes' => $notes,
+            'reason_type' => $reasonType,
+            'responsible_id' => $responsibleId,
+            'unit_cost' => $unitCost,
         ]);
 
-        // Update product stock
-        $product->update(['stock' => $stockAfter]);
+        // Update stock in variant or product (not here - done by caller for stock_count)
+        // For other types, update stock directly
+        if ($type !== 'stock_count') {
+            if ($variantId) {
+                $variant->update(['stock' => $stockAfter]);
+            } else {
+                $product = Product::findOrFail($productId);
+                $product->update(['stock' => $stockAfter]);
+            }
+        }
 
         // Update batch quantity if batch is specified
         if ($batchId) {
@@ -194,7 +219,7 @@ class StockMovementService
         }
 
         $movements = $query->get();
-        
+
         // Group by type for detailed breakdown
         $byType = $movements->groupBy('type')->map(function ($items) {
             return [

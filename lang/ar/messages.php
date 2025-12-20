@@ -11,7 +11,7 @@ return [
     'login' => 'تسجيل الدخول',
     'register' => 'إنشاء حساب',
     'logout' => 'تسجيل الخروج',
-    
+
     // Home page
     'welcome' => 'مرحباً بك في Violet',
     'shop_now' => 'تسوق الآن',
@@ -19,7 +19,7 @@ return [
     'on_sale' => 'عروض خاصة',
     'new_arrivals' => 'وصل حديثاً',
     'all_categories' => 'جميع الفئات',
-    
+
     // Products
     'product_details' => 'تفاصيل المنتج',
     'price' => 'السعر',
@@ -32,7 +32,7 @@ return [
     'category' => 'الفئة',
     'description' => 'الوصف',
     'specifications' => 'المواصفات',
-    
+
     // Cart
     'your_cart' => 'سلة التسوق',
     'cart_empty' => 'سلة التسوق فارغة',
@@ -42,7 +42,7 @@ return [
     'subtotal' => 'المجموع الفرعي',
     'total' => 'الإجمالي',
     'proceed_to_checkout' => 'إتمام الطلب',
-    
+
     // Checkout
     'billing_details' => 'بيانات الفاتورة',
     'full_name' => 'الاسم الكامل',
@@ -56,7 +56,7 @@ return [
     'place_order' => 'إرسال الطلب',
     'payment_method' => 'طريقة الدفع',
     'cash_on_delivery' => 'الدفع عند الاستلام',
-    
+
     // Checkout Page (Task 9.7)
     'checkout' => [
         'title' => 'إتمام الطلب',
@@ -98,7 +98,7 @@ return [
         'insufficient_stock' => ':name يتوفر منه :available قطعة فقط.',
         'order_failed' => 'فشل في إرسال الطلب. يرجى المحاولة مرة أخرى.',
     ],
-    
+
     // Order Success Page
     'order_success' => [
         'thank_you' => 'شكراً لطلبك!',
@@ -113,10 +113,10 @@ return [
         'view_orders' => 'عرض طلباتي',
         'help_text' => 'تحتاج مساعدة؟ تواصل معنا على',
     ],
-    
+
     // Currency
     'currency' => 'ج.م',
-    
+
     // Search & Filters
     'search' => 'بحث',
     'search_products' => 'ابحث عن منتج...',
@@ -128,7 +128,7 @@ return [
     'name_desc' => 'الاسم: ي-أ',
     'newest' => 'الأحدث',
     'show_results' => 'عرض :count نتيجة',
-    
+
     // Advanced Filters (Task 5.1)
     'filters' => 'التصفية',
     'clear_all' => 'مسح الكل',
@@ -155,7 +155,7 @@ return [
     'products' => 'منتج',
     'no_products_found' => 'لا توجد منتجات',
     'no_products_message' => 'لم نتمكن من العثور على منتجات تطابق معايير البحث. جرب تعديل خيارات التصفية.',
-    
+
     // Sorting Options
     'sort_featured' => 'المميزة',
     'sort_newest' => 'الأحدث وصولاً',
@@ -163,7 +163,7 @@ return [
     'sort_price_high' => 'السعر: من الأعلى للأقل',
     'sort_rating' => 'الأعلى تقييماً',
     'sort_popular' => 'الأكثر مبيعاً',
-    
+
     // Footer
     'about_us' => 'من نحن',
     'contact_us' => 'اتصل بنا',
@@ -172,7 +172,7 @@ return [
     'customer_service' => 'خدمة العملاء',
     'follow_us' => 'تابعنا',
     'all_rights_reserved' => 'جميع الحقوق محفوظة',
-    
+
     // Common
     'egp' => 'ج.م',
     'save' => 'حفظ',
@@ -314,7 +314,7 @@ return [
         'no_orders_filter' => 'لا توجد طلبات تطابق الفلاتر.',
         'items' => 'عناصر',
         'my_reviews' => 'تقييماتي',
-        
+
         // Profile
         'profile' => 'الملف الشخصي',
         'profile_subtitle' => 'تحديث معلوماتك الشخصية وكلمة المرور.',
@@ -333,7 +333,7 @@ return [
         'update_password' => 'تحديث كلمة المرور',
         'password_updated' => 'تم تحديث كلمة المرور بنجاح.',
         'back_to_dashboard' => 'العودة للوحة التحكم',
-        
+
         // Addresses
         'addresses' => 'العناوين',
         'addresses_subtitle' => 'إدارة عناوين الشحن الخاصة بك.',
@@ -367,7 +367,7 @@ return [
         'address_in_use' => 'هذا العنوان مستخدم في طلبات ولا يمكن حذفه.',
         'edit' => 'تعديل',
         'delete' => 'حذف',
-        
+
         // Orders
         'orders' => 'طلباتي',
         'orders_subtitle' => 'عرض وتتبع سجل طلباتك.',
@@ -393,7 +393,7 @@ return [
         'total' => 'الإجمالي',
         'free' => 'مجاني',
         'product_unavailable' => 'المنتج لم يعد متاحاً',
-        
+
         // Shipping & Payment
         'shipping_address' => 'عنوان الشحن',
         'payment_info' => 'معلومات الدفع',
@@ -402,14 +402,14 @@ return [
         'paid_on' => 'تاريخ الدفع',
         'order_notes' => 'ملاحظات الطلب',
         'status_history' => 'سجل الحالات',
-        
+
         // Payment Methods
         'payment_methods' => [
             'cod' => 'الدفع عند الاستلام',
             'credit_card' => 'بطاقة ائتمان',
             'paypal' => 'باي بال',
         ],
-        
+
         // Payment Statuses
         'payment_statuses' => [
             'pending' => 'قيد الانتظار',
@@ -417,7 +417,7 @@ return [
             'failed' => 'فشل',
             'refunded' => 'مسترد',
         ],
-        
+
         // Order Statuses
         'status' => [
             'pending' => 'قيد الانتظار',
@@ -426,7 +426,7 @@ return [
             'delivered' => 'تم التسليم',
             'cancelled' => 'ملغي',
         ],
-        
+
         // Help
         'need_help' => 'تحتاج مساعدة؟',
         'contact_support' => 'فريق دعم العملاء لدينا هنا لمساعدتك.',
@@ -533,4 +533,52 @@ return [
             'helpful' => 'الأكثر فائدة',
         ],
     ],
+
+    // Stock Count (Inventory)
+    'stock_count' => [
+        'status' => [
+            'draft' => 'مسودة',
+            'in_progress' => 'قيد التنفيذ',
+            'completed' => 'مكتمل',
+            'approved' => 'معتمد',
+            'cancelled' => 'ملغي',
+        ],
+        'type' => [
+            'full' => 'جرد كامل',
+            'partial' => 'جرد جزئي',
+            'full_desc' => 'جرد جميع المنتجات في المخزن',
+            'partial_desc' => 'جرد فئة أو منتجات محددة',
+        ],
+        'scope' => [
+            'all' => 'جميع المنتجات',
+            'category' => 'فئة محددة',
+            'products' => 'منتجات محددة',
+            'all_desc' => 'جرد كل المنتجات النشطة',
+            'category_desc' => 'جرد منتجات فئة معينة',
+            'products_desc' => 'جرد منتجات محددة بالاختيار',
+        ],
+        'errors' => [
+            'cannot_edit' => 'لا يمكن تعديل هذا الجرد في حالته الحالية',
+            'invalid_status_transition' => 'لا يمكن الانتقال لهذه الحالة',
+            'uncounted_items' => 'يوجد :count صنف لم يتم عدهم بعد',
+            'must_complete_first' => 'يجب إكمال الجرد أولاً قبل الاعتماد',
+            'cannot_cancel' => 'لا يمكن إلغاء هذا الجرد',
+        ],
+        'adjustment_note' => 'تعديل جرد :code - النظام: :system، المعدود: :counted',
+        'cancelled_note' => 'سبب الإلغاء',
+    ],
+
+    // Stock Movement
+    'stock_movement' => [
+        'type' => [
+            'restock' => 'إضافة مخزون',
+            'sale' => 'بيع',
+            'return' => 'مرتجع',
+            'adjustment' => 'تعديل',
+            'stock_count' => 'تعديل جرد',
+            'expired' => 'منتهي الصلاحية',
+            'damaged' => 'تالف',
+        ],
+    ],
 ];
+

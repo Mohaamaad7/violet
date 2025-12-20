@@ -220,6 +220,15 @@ class ProductsTable
                 // Trashed Filter
                 TrashedFilter::make(),
             ])
+            ->headerActions([
+                \pxlrbt\FilamentExcel\Actions\Tables\ExportAction::make()
+                    ->label('تصدير Excel')
+                    ->exports([
+                        \pxlrbt\FilamentExcel\Exports\ExcelExport::make()
+                            ->fromTable()
+                            ->withFilename('products-' . now()->format('Y-m-d'))
+                    ]),
+            ])
             ->recordActions([
                 EditAction::make()
                     ->visible(fn($record) => auth()->user()->can('update', $record)),

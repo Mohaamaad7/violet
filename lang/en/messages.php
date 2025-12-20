@@ -11,7 +11,7 @@ return [
     'login' => 'Login',
     'register' => 'Register',
     'logout' => 'Logout',
-    
+
     // Home page
     'welcome' => 'Welcome to Violet',
     'shop_now' => 'Shop Now',
@@ -19,7 +19,7 @@ return [
     'on_sale' => 'On Sale',
     'new_arrivals' => 'New Arrivals',
     'all_categories' => 'All Categories',
-    
+
     // Products
     'product_details' => 'Product Details',
     'price' => 'Price',
@@ -32,7 +32,7 @@ return [
     'category' => 'Category',
     'description' => 'Description',
     'specifications' => 'Specifications',
-    
+
     // Cart
     'your_cart' => 'Your Cart',
     'cart_empty' => 'Your cart is empty',
@@ -42,7 +42,7 @@ return [
     'subtotal' => 'Subtotal',
     'total' => 'Total',
     'proceed_to_checkout' => 'Proceed to Checkout',
-    
+
     // Checkout
     'billing_details' => 'Billing Details',
     'full_name' => 'Full Name',
@@ -56,7 +56,7 @@ return [
     'place_order' => 'Place Order',
     'payment_method' => 'Payment Method',
     'cash_on_delivery' => 'Cash on Delivery',
-    
+
     // Checkout Page (Task 9.7)
     'checkout' => [
         'title' => 'Checkout',
@@ -98,7 +98,7 @@ return [
         'insufficient_stock' => ':name has only :available items in stock.',
         'order_failed' => 'Failed to place order. Please try again.',
     ],
-    
+
     // Order Success Page
     'order_success' => [
         'thank_you' => 'Thank You for Your Order!',
@@ -113,10 +113,10 @@ return [
         'view_orders' => 'View My Orders',
         'help_text' => 'Need help? Contact us at',
     ],
-    
+
     // Currency
     'currency' => 'EGP',
-    
+
     // Search & Filters
     'search' => 'Search',
     'search_products' => 'Search for products...',
@@ -128,7 +128,7 @@ return [
     'name_desc' => 'Name: Z-A',
     'newest' => 'Newest',
     'show_results' => 'Showing :count results',
-    
+
     // Advanced Filters (Task 5.1)
     'filters' => 'Filters',
     'clear_all' => 'Clear All',
@@ -155,7 +155,7 @@ return [
     'products' => 'products',
     'no_products_found' => 'No Products Found',
     'no_products_message' => 'We couldn\'t find any products matching your filters. Try adjusting your search criteria.',
-    
+
     // Sorting Options
     'sort_featured' => 'Featured',
     'sort_newest' => 'Newest Arrivals',
@@ -163,7 +163,7 @@ return [
     'sort_price_high' => 'Price: High to Low',
     'sort_rating' => 'Highest Rated',
     'sort_popular' => 'Most Popular',
-    
+
     // Footer
     'about_us' => 'About Us',
     'contact_us' => 'Contact Us',
@@ -172,7 +172,7 @@ return [
     'customer_service' => 'Customer Service',
     'follow_us' => 'Follow Us',
     'all_rights_reserved' => 'All rights reserved',
-    
+
     // Common
     'egp' => 'EGP',
     'save' => 'Save',
@@ -315,7 +315,7 @@ return [
         'no_orders_filter' => 'No orders match your filters.',
         'items' => 'items',
         'my_reviews' => 'My Reviews',
-        
+
         // Profile
         'profile' => 'Profile',
         'profile_subtitle' => 'Update your personal information and password.',
@@ -334,7 +334,7 @@ return [
         'update_password' => 'Update Password',
         'password_updated' => 'Password updated successfully.',
         'back_to_dashboard' => 'Back to Dashboard',
-        
+
         // Addresses
         'addresses' => 'Addresses',
         'addresses_subtitle' => 'Manage your shipping addresses.',
@@ -368,7 +368,7 @@ return [
         'address_in_use' => 'This address is used in orders and cannot be deleted.',
         'edit' => 'Edit',
         'delete' => 'Delete',
-        
+
         // Orders
         'orders' => 'My Orders',
         'orders_subtitle' => 'View and track your order history.',
@@ -394,7 +394,7 @@ return [
         'total' => 'Total',
         'free' => 'Free',
         'product_unavailable' => 'Product no longer available',
-        
+
         // Shipping & Payment
         'shipping_address' => 'Shipping Address',
         'payment_info' => 'Payment Information',
@@ -403,14 +403,14 @@ return [
         'paid_on' => 'Paid On',
         'order_notes' => 'Order Notes',
         'status_history' => 'Status History',
-        
+
         // Payment Methods
         'payment_methods' => [
             'cod' => 'Cash on Delivery',
             'credit_card' => 'Credit Card',
             'paypal' => 'PayPal',
         ],
-        
+
         // Payment Statuses
         'payment_statuses' => [
             'pending' => 'Pending',
@@ -418,7 +418,7 @@ return [
             'failed' => 'Failed',
             'refunded' => 'Refunded',
         ],
-        
+
         // Order Statuses
         'status' => [
             'pending' => 'Pending',
@@ -427,7 +427,7 @@ return [
             'delivered' => 'Delivered',
             'cancelled' => 'Cancelled',
         ],
-        
+
         // Help
         'need_help' => 'Need Help?',
         'contact_support' => 'Our customer support team is here to assist you.',
@@ -534,4 +534,52 @@ return [
             'helpful' => 'Most Helpful',
         ],
     ],
+
+    // Stock Count (Inventory)
+    'stock_count' => [
+        'status' => [
+            'draft' => 'Draft',
+            'in_progress' => 'In Progress',
+            'completed' => 'Completed',
+            'approved' => 'Approved',
+            'cancelled' => 'Cancelled',
+        ],
+        'type' => [
+            'full' => 'Full Count',
+            'partial' => 'Partial Count',
+            'full_desc' => 'Count all products in warehouse',
+            'partial_desc' => 'Count specific category or products',
+        ],
+        'scope' => [
+            'all' => 'All Products',
+            'category' => 'Specific Category',
+            'products' => 'Specific Products',
+            'all_desc' => 'Count all active products',
+            'category_desc' => 'Count products in a specific category',
+            'products_desc' => 'Count manually selected products',
+        ],
+        'errors' => [
+            'cannot_edit' => 'Cannot edit this stock count in its current status',
+            'invalid_status_transition' => 'Cannot transition to this status',
+            'uncounted_items' => 'There are :count items that have not been counted yet',
+            'must_complete_first' => 'Must complete the count before approving',
+            'cannot_cancel' => 'Cannot cancel this stock count',
+        ],
+        'adjustment_note' => 'Stock count adjustment :code - System: :system, Counted: :counted',
+        'cancelled_note' => 'Cancellation reason',
+    ],
+
+    // Stock Movement
+    'stock_movement' => [
+        'type' => [
+            'restock' => 'Restock',
+            'sale' => 'Sale',
+            'return' => 'Return',
+            'adjustment' => 'Adjustment',
+            'stock_count' => 'Stock Count Adjustment',
+            'expired' => 'Expired',
+            'damaged' => 'Damaged',
+        ],
+    ],
 ];
+

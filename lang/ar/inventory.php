@@ -22,7 +22,7 @@ return [
     'user' => 'المستخدم',
     'date' => 'التاريخ',
     'system' => 'النظام',
-    
+
     // Movement Types
     'restock' => 'إعادة تخزين',
     'sale' => 'بيع',
@@ -30,7 +30,7 @@ return [
     'expired' => 'منتهي الصلاحية',
     'damaged' => 'تالف',
     'adjustment' => 'تعديل',
-    
+
     // Messages
     'no_stock_movements_yet' => 'لا توجد حركات مخزون بعد',
     'stock_movements_description' => 'ستظهر حركات المخزون هنا عند إعادة التخزين أو البيع أو التعديل.',
@@ -51,17 +51,17 @@ return [
     'approved_by' => 'تمت الموافقة بواسطة',
     'approved_at' => 'تاريخ الموافقة',
     'created_at' => 'تاريخ الإنشاء',
-    
+
     // Return Types
     'rejection' => 'رفض',
     'return_after_delivery' => 'إرجاع بعد التسليم',
-    
+
     // Return Status
     'pending' => 'قيد الانتظار',
     'approved' => 'موافق عليه',
     'rejected' => 'مرفوض',
     'completed' => 'مكتمل',
-    
+
     // Return Actions
     'approve' => 'موافقة',
     'reject' => 'رفض',
@@ -70,7 +70,7 @@ return [
     'return_approved_successfully' => 'تمت الموافقة على المرتجع بنجاح',
     'return_rejected_successfully' => 'تم رفض المرتجع بنجاح',
     'return_completed_successfully' => 'تم إكمال المرتجع بنجاح',
-    
+
     // Return Messages
     'no_returns_yet' => 'لا توجد مرتجعات بعد',
     'returns_description' => 'ستظهر المرتجعات هنا عندما يطلبها العملاء.',
@@ -98,4 +98,84 @@ return [
     'last_7_days' => 'آخر 7 أيام',
     'last_14_days' => 'آخر 14 يوم',
     'last_30_days' => 'آخر 30 يوم',
+
+    // Warehouses
+    'warehouses' => 'المستودعات',
+    'warehouse' => 'المستودع',
+    'warehouse_info' => 'معلومات المستودع',
+    'warehouse_name' => 'اسم المستودع',
+    'warehouse_code' => 'كود المستودع',
+    'is_default_warehouse' => 'المستودع الافتراضي',
+    'default_warehouse_hint' => 'سيتم استخدام هذا المستودع افتراضياً للطلبات الجديدة',
+    'default' => 'افتراضي',
+    'cannot_delete_default' => 'لا يمكن حذف المستودع الافتراضي',
+
+    // Stock Counts
+    'stock_counts' => 'جلسات الجرد',
+    'stock_count' => 'جلسة جرد',
+    'stock_count_info' => 'معلومات الجرد',
+    'count_code' => 'رقم الجرد',
+    'count_type' => 'نوع الجرد',
+    'count_scope' => 'نطاق الجرد',
+    'select_categories' => 'اختر الفئات',
+    'select_products' => 'اختر المنتجات',
+    'scope_selection' => 'تحديد النطاق',
+    'total_items' => 'إجمالي الأصناف',
+    'counted_items' => 'تم عدها',
+    'progress' => 'التقدم',
+    'items_with_difference' => 'فروقات',
+    'summary' => 'الملخص',
+    'total_shortage' => 'إجمالي العجز',
+    'total_surplus' => 'إجمالي الزيادة',
+    'difference_value' => 'قيمة الفروقات',
+    'sku' => 'SKU',
+    'system_qty' => 'كمية النظام',
+    'counted_qty' => 'الكمية المعدودة',
+    'difference' => 'الفرق',
+    'item_updated' => 'تم تحديث الصنف',
+    'completed_at' => 'تاريخ الإكمال',
+
+    // Stock Count Actions
+    'print_count_sheet' => 'طباعة ورقة الجرد',
+    'start_count' => 'بدء الجرد',
+    'complete_count' => 'إنهاء الجرد',
+    'approve_count' => 'اعتماد الجرد',
+    'cancel_count' => 'إلغاء الجرد',
+    'export_report' => 'تصدير التقرير',
+    'confirm_approve' => 'تأكيد الاعتماد',
+    'approve_warning' => 'سيتم تحديث المخزون بناءً على نتائج الجرد. هذا الإجراء لا يمكن التراجع عنه.',
+    'count_started' => 'تم بدء الجرد',
+    'count_completed' => 'تم إنهاء الجرد',
+    'count_approved' => 'تم اعتماد الجرد',
+    'count_cancelled' => 'تم إلغاء الجرد',
+    'stock_updated' => 'تم تحديث المخزون بنجاح',
+
+    // Hierarchical Warehouses
+    'parent_warehouse' => 'المستودع الأب',
+    'parent_warehouse_hint' => 'اتركه فارغاً للمستودع الرئيسي',
+    'root_warehouse' => 'مستودع رئيسي (بدون أب)',
+    'scope_for_partial' => 'حدد النطاق للجرد الجزئي',
+    'select_categories' => 'اختر الأقسام',
+    'select_products' => 'اختر المنتجات',
+    'select_items' => 'اختر العناصر',
+
+    // Variance Reasons (Accountability)
+    'variance_reason' => 'سبب الفرق',
+    'company_loss' => 'خسارة الشركة (تلف/انتهاء صلاحية)',
+    'employee_liability' => 'مسؤولية موظف (عجز غير مبرر)',
+    'measurement_error' => 'خطأ قياس',
+    'company_gain' => 'مكسب للشركة',
+    'previous_count_error' => 'خطأ جرد سابق',
+    'responsible_employee' => 'الموظف المسؤول',
+    'select_reason_for_variance' => 'حدد سبب الفرق',
+    'shortage_report' => 'تقرير العجز',
+    'excess_report' => 'تقرير الزيادة',
+    'unit_cost_at_time' => 'سعر التكلفة وقت الجرد',
+    'variance_items' => 'الأصناف ذات الفروقات',
+    'no_variance_items' => 'لا توجد أصناف بها فروقات',
+    'approve_with_reasons' => 'اعتماد مع تحديد الأسباب',
+    'total_shortage_value' => 'إجمالي قيمة العجز',
+    'total_excess_value' => 'إجمالي قيمة الزيادة',
 ];
+
+

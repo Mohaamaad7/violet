@@ -20,29 +20,29 @@ class SlidersTable
                     ->label(__('admin.table.image'))
                     ->disk('public')
                     ->height(50),
-                
+
                 TextColumn::make('title')
                     ->label(__('admin.table.title'))
                     ->searchable()
                     ->sortable()
-                    ->description(fn ($record) => $record->subtitle),
-                
+                    ->description(fn($record) => $record->subtitle),
+
                 TextColumn::make('link_url')
                     ->label(__('admin.table.link'))
                     ->limit(30)
                     ->toggleable()
                     ->placeholder(__('admin.table.no_link')),
-                
+
                 TextColumn::make('order')
                     ->label(__('admin.table.order'))
                     ->sortable()
                     ->badge()
                     ->color('info'),
-                
+
                 ToggleColumn::make('is_active')
                     ->label(__('admin.table.active'))
                     ->sortable(),
-                
+
                 TextColumn::make('created_at')
                     ->label(__('admin.table.created_at'))
                     ->dateTime()
@@ -51,6 +51,15 @@ class SlidersTable
             ])
             ->filters([
                 //
+            ])
+            ->headerActions([
+                \pxlrbt\FilamentExcel\Actions\Tables\ExportAction::make()
+                    ->label('تصدير Excel')
+                    ->exports([
+                        \pxlrbt\FilamentExcel\Exports\ExcelExport::make()
+                            ->fromTable()
+                            ->withFilename('sliders-' . now()->format('Y-m-d'))
+                    ]),
             ])
             ->recordActions([
                 EditAction::make(),

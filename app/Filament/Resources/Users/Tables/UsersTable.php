@@ -27,7 +27,7 @@ class UsersTable
                     ->label(__('admin.table.name'))
                     ->searchable()
                     ->sortable(),
-                
+
                 TextColumn::make('email')
                     ->label(__('admin.table.email'))
                     ->searchable()
@@ -37,13 +37,13 @@ class UsersTable
                     ->label(__('admin.table.phone'))
                     ->searchable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                
+
                 TextColumn::make('roles.name')
                     ->label(__('admin.table.role'))
                     ->badge()
                     ->color('success')
-                    ->formatStateUsing(fn ($state): string => $state ?? __('admin.table.no_role')),
-                
+                    ->formatStateUsing(fn($state): string => $state ?? __('admin.table.no_role')),
+
                 TextColumn::make('created_at')
                     ->label(__('admin.table.created_at'))
                     ->dateTime('Y-m-d H:i')
@@ -53,18 +53,27 @@ class UsersTable
             ->filters([
                 TrashedFilter::make(),
             ])
+            ->headerActions([
+                \pxlrbt\FilamentExcel\Actions\Tables\ExportAction::make()
+                    ->label('تصدير Excel')
+                    ->exports([
+                        \pxlrbt\FilamentExcel\Exports\ExcelExport::make()
+                            ->fromTable()
+                            ->withFilename('users-' . now()->format('Y-m-d'))
+                    ]),
+            ])
             ->recordActions([
                 EditAction::make()
-                    ->visible(fn ($record) => auth()->user()->can('update', $record)),
+                    ->visible(fn($record) => auth()->user()->can('update', $record)),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
-                        ->visible(fn () => auth()->user()->can('delete users')),
+                        ->visible(fn() => auth()->user()->can('delete users')),
                     RestoreBulkAction::make()
-                        ->visible(fn () => auth()->user()->can('edit users')),
+                        ->visible(fn() => auth()->user()->can('edit users')),
                     ForceDeleteBulkAction::make()
-                        ->visible(fn () => auth()->user()->can('delete users')),
+                        ->visible(fn() => auth()->user()->can('delete users')),
                 ]),
             ])
             ->defaultSort('name', 'asc');

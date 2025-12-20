@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HasFullAudit;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,7 +13,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 
 class Product extends Model implements HasMedia
 {
-    use HasFactory, SoftDeletes, InteractsWithMedia;
+    use HasFactory, SoftDeletes, InteractsWithMedia, HasFullAudit;
 
     protected $fillable = [
         'category_id',
@@ -125,7 +126,7 @@ class Product extends Model implements HasMedia
         if (!$this->is_on_sale) {
             return 0;
         }
-        
+
         return round((($this->price - $this->sale_price) / $this->price) * 100);
     }
 
@@ -135,23 +136,23 @@ class Product extends Model implements HasMedia
         $primaryMedia = $this->getMedia('product-images')
             ->filter(fn($media) => $media->getCustomProperty('is_primary') === true)
             ->first();
-            
+
         if ($primaryMedia) {
             return $primaryMedia->getUrl();
         }
-        
+
         // Fallback to first media
         $firstMedia = $this->getFirstMedia('product-images');
         if ($firstMedia) {
             return $firstMedia->getUrl();
         }
-        
+
         // Fallback to old system (for backwards compatibility)
         $primary = $this->images()->where('is_primary', true)->first();
         if ($primary && $primary->image_path) {
             return asset('storage/' . $primary->image_path);
         }
-        
+
         // Final fallback to placeholder
         return asset('images/default-product.svg');
     }
@@ -165,7 +166,7 @@ class Product extends Model implements HasMedia
     {
         return $this->is_in_stock ? 'In Stock' : 'Out of Stock';
     }
-    
+
     /**
      * Register media collections for Spatie Media Library
      */
@@ -181,7 +182,7 @@ class Product extends Model implements HasMedia
                     ->width(150)
                     ->height(150)
                     ->sharpen(10);
-                
+
                 // Card-sized image for product listings (optimized for cards)
                 $this
                     ->addMediaConversion('card')
@@ -189,7 +190,7 @@ class Product extends Model implements HasMedia
                     ->height(400)
                     ->sharpen(10)
                     ->quality(90);
-                    
+
                 // Preview for product detail page
                 $this
                     ->addMediaConversion('preview')

@@ -28,7 +28,7 @@ class StockMovementResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('admin.nav.catalog');
+        return __('admin.nav.inventory');
     }
 
     public static function getNavigationLabel(): string

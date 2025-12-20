@@ -165,6 +165,15 @@ class OrderReturnsTable
                         return $indicators;
                     }),
             ])
+            ->headerActions([
+                \pxlrbt\FilamentExcel\Actions\Tables\ExportAction::make()
+                    ->label('تصدير Excel')
+                    ->exports([
+                        \pxlrbt\FilamentExcel\Exports\ExcelExport::make()
+                            ->fromTable()
+                            ->withFilename('order-returns-' . now()->format('Y-m-d'))
+                    ]),
+            ])
             ->recordActions([
                 ViewAction::make()
                     ->label('عرض'),

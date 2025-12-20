@@ -33,8 +33,8 @@ return [
         'create' => 'إنشاء',
     ],
 
-    // Status
-    'status' => [
+    // Status Values
+    'status_values' => [
         'active' => 'نشط',
         'inactive' => 'غير نشط',
         'draft' => 'مسودة',
@@ -48,4 +48,16 @@ return [
         'min' => 'الحد الأدنى',
         'max' => 'الحد الأقصى',
     ],
+
+    // Common Fields
+    'address' => 'العنوان',
+    'phone' => 'الهاتف',
+    'notes' => 'ملاحظات',
+    'active' => 'نشط',
+    'created_by' => 'أنشأه',
+    'created_at' => 'تاريخ الإنشاء',
+    'status' => 'الحالة',
+    'error' => 'خطأ',
+    'category' => 'الفئة',
 ];
+

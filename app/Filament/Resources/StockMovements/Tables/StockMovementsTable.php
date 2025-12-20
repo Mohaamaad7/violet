@@ -17,7 +17,7 @@ class StockMovementsTable
                 TextColumn::make('type')
                     ->label(__('inventory.type'))
                     ->badge()
-                    ->color(fn (string $state): string => match ($state) {
+                    ->color(fn(string $state): string => match ($state) {
                         'restock' => 'success',
                         'sale' => 'info',
                         'return' => 'warning',
@@ -26,7 +26,7 @@ class StockMovementsTable
                         'adjustment' => 'gray',
                         default => 'gray',
                     })
-                    ->formatStateUsing(fn (string $state): string => __('inventory.' . $state))
+                    ->formatStateUsing(fn(string $state): string => __('inventory.' . $state))
                     ->sortable(),
 
                 TextColumn::make('product.name')
@@ -39,8 +39,8 @@ class StockMovementsTable
                     ->label(__('inventory.quantity'))
                     ->numeric()
                     ->sortable()
-                    ->formatStateUsing(fn ($state, $record) => ($record->type === 'restock' || $record->type === 'return' ? '+' : '') . $state)
-                    ->color(fn ($record) => match ($record->type) {
+                    ->formatStateUsing(fn($state, $record) => ($record->type === 'restock' || $record->type === 'return' ? '+' : '') . $state)
+                    ->color(fn($record) => match ($record->type) {
                         'restock', 'return' => 'success',
                         'sale', 'expired', 'damaged' => 'danger',
                         default => 'gray',
@@ -60,7 +60,7 @@ class StockMovementsTable
 
                 TextColumn::make('reference_type')
                     ->label(__('inventory.reference'))
-                    ->formatStateUsing(fn ($state, $record) => $state ? class_basename($state) . ' #' . $record->reference_id : '-')
+                    ->formatStateUsing(fn($state, $record) => $state ? class_basename($state) . ' #' . $record->reference_id : '-')
                     ->searchable()
                     ->toggleable(),
 
@@ -73,7 +73,7 @@ class StockMovementsTable
                 TextColumn::make('notes')
                     ->label(__('inventory.notes'))
                     ->limit(50)
-                    ->tooltip(fn ($record) => $record->notes)
+                    ->tooltip(fn($record) => $record->notes)
                     ->searchable()
                     ->toggleable()
                     ->toggledHiddenByDefault(),
@@ -101,6 +101,15 @@ class StockMovementsTable
                     ->relationship('product', 'name')
                     ->searchable()
                     ->preload(),
+            ])
+            ->headerActions([
+                \pxlrbt\FilamentExcel\Actions\Tables\ExportAction::make()
+                    ->label('تصدير Excel')
+                    ->exports([
+                        \pxlrbt\FilamentExcel\Exports\ExcelExport::make()
+                            ->fromTable()
+                            ->withFilename('stock-movements-' . now()->format('Y-m-d'))
+                    ]),
             ])
             ->recordActions([
                 ViewAction::make(),
