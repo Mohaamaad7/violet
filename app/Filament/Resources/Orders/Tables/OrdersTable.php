@@ -75,6 +75,7 @@ class OrdersTable
                     ->sortable()
                     ->formatStateUsing(fn(string $state): string => match ($state) {
                         'unpaid' => __('admin.orders.payment.unpaid'),
+                        'pending' => 'في انتظار الدفع',
                         'paid' => __('admin.orders.payment.paid'),
                         'failed' => __('admin.orders.payment.failed'),
                         'refunded' => __('admin.orders.payment.refunded'),
@@ -82,6 +83,7 @@ class OrdersTable
                     })
                     ->color(fn(string $state): string => match ($state) {
                         'unpaid' => 'gray',
+                        'pending' => 'info',
                         'paid' => 'success',
                         'failed' => 'danger',
                         'refunded' => 'warning',
@@ -89,9 +91,11 @@ class OrdersTable
                     })
                     ->icon(fn(string $state): string => match ($state) {
                         'unpaid' => 'heroicon-o-clock',
+                        'pending' => 'heroicon-o-credit-card',
                         'paid' => 'heroicon-o-check-badge',
                         'failed' => 'heroicon-o-x-circle',
                         'refunded' => 'heroicon-o-arrow-uturn-left',
+                        default => 'heroicon-o-question-mark-circle',
                     })
                     ->toggleable(isToggledHiddenByDefault: true),
 
@@ -173,6 +177,7 @@ class OrdersTable
                     ->multiple()
                     ->options([
                         'unpaid' => __('admin.orders.payment.unpaid'),
+                        'pending' => 'في انتظار الدفع',
                         'paid' => __('admin.orders.payment.paid'),
                         'failed' => __('admin.orders.payment.failed'),
                         'refunded' => __('admin.orders.payment.refunded'),
