@@ -62,7 +62,7 @@ class KashierService
             'currency' => $currency,
             'hash' => $hash,
             'mode' => $this->isLiveMode ? 'live' : 'test',
-            'redirectUrl' => $callbackUrl,
+            'merchantRedirect' => $callbackUrl,
             'serverWebhook' => route('payment.webhook'),
             'display' => 'ar', // Arabic
             'brandColor' => '#8B5CF6', // Violet theme
