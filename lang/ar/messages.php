@@ -97,6 +97,8 @@ return [
         'product_unavailable' => ':name لم يعد متاحاً.',
         'insufficient_stock' => ':name يتوفر منه :available قطعة فقط.',
         'order_failed' => 'فشل في إرسال الطلب. يرجى المحاولة مرة أخرى.',
+        'card_payment' => 'بطاقة ائتمان',
+        'wallet_payment' => 'محفظة إلكترونية',
     ],
 
     // Order Success Page
@@ -110,6 +112,8 @@ return [
         'discount' => 'الخصم',
         'shipping_to' => 'عنوان الشحن',
         'cod_note' => 'ادفع عند استلام طلبك',
+        'card_note' => 'تم الدفع بنجاح',
+        'wallet_note' => 'تم الدفع عبر المحفظة الإلكترونية',
         'view_orders' => 'عرض طلباتي',
         'help_text' => 'تحتاج مساعدة؟ تواصل معنا على',
     ],

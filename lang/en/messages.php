@@ -97,6 +97,8 @@ return [
         'product_unavailable' => ':name is no longer available.',
         'insufficient_stock' => ':name has only :available items in stock.',
         'order_failed' => 'Failed to place order. Please try again.',
+        'card_payment' => 'Credit Card',
+        'wallet_payment' => 'E-Wallet',
     ],
 
     // Order Success Page
@@ -110,6 +112,8 @@ return [
         'discount' => 'Discount',
         'shipping_to' => 'Shipping To',
         'cod_note' => 'Pay when you receive your order',
+        'card_note' => 'Payment successful',
+        'wallet_note' => 'Paid via e-wallet',
         'view_orders' => 'View My Orders',
         'help_text' => 'Need help? Contact us at',
     ],
