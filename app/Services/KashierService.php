@@ -37,7 +37,7 @@ class KashierService
 
         $path = "/?payment={$this->merchantId}.{$orderId}.{$amountFormatted}.{$currency}";
 
-        return hash_hmac('sha256', $path, $this->secretKey);
+        return hash_hmac('sha256', $path, $this->apiKey);
     }
 
     /**
