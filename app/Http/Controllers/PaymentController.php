@@ -91,9 +91,9 @@ class PaymentController extends Controller
         $payment = $result['payment'];
         $order = $payment->order;
 
-        if ($result['success'] || $result['status'] === 'completed') {
+        if ($result['success'] || ($result['status'] ?? '') === 'completed') {
             // Success - redirect to success page
-            return redirect()->route('payment.success', $order->id);
+            return redirect()->route('checkout.success', $order->id);
         }
 
         // Failed - redirect to failed page

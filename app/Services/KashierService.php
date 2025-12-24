@@ -113,33 +113,38 @@ class KashierService
 
     /**
      * Validate callback/webhook signature
-     * Uses SECRET KEY
+     * Uses API KEY (not Secret Key!)
+     * Per Kashier docs: build query string from all params except signature and mode
      */
     public function validateSignature(array $data): bool
     {
-        $signature = $data['signature'] ?? $data['paymentStatus.signature'] ?? null;
+        $signature = $data['signature'] ?? null;
 
         if (!$signature) {
             Log::warning('Kashier: No signature in callback', $data);
             return false;
         }
 
-        // Build signature string: orderId.amount.currency.paymentStatus
-        $orderId = $data['orderId'] ?? $data['merchantOrderId'] ?? '';
-        $amount = $data['amount'] ?? '';
-        $currency = $data['currency'] ?? 'EGP';
-        $paymentStatus = $data['paymentStatus'] ?? '';
+        // Build query string from all parameters except signature and mode
+        // Per Kashier docs: key1=value1&key2=value2...
+        $queryParts = [];
+        foreach ($data as $key => $value) {
+            if ($key === 'signature' || $key === 'mode') {
+                continue;
+            }
+            $queryParts[] = "{$key}={$value}";
+        }
 
-        $stringToHash = "{$orderId}.{$amount}.{$currency}.{$paymentStatus}";
-        $calculatedSignature = hash_hmac('sha256', $stringToHash, $this->secretKey);
+        $queryString = implode('&', $queryParts);
+        $calculatedSignature = hash_hmac('sha256', $queryString, $this->apiKey);
 
-        $isValid = hash_equals($calculatedSignature, $signature);
+        $isValid = hash_equals(strtolower($calculatedSignature), strtolower($signature));
 
         if (!$isValid) {
             Log::warning('Kashier: Invalid signature', [
                 'received' => $signature,
                 'calculated' => $calculatedSignature,
-                'string' => $stringToHash,
+                'query_string' => $queryString,
             ]);
         }
 
