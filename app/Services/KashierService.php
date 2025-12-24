@@ -101,7 +101,7 @@ class KashierService
             $params['metaData'] = json_encode($metadata);
         }
 
-        Log::channel('payments')->info('Kashier checkout URL generated', [
+        Log::info('Kashier checkout URL generated', [
             'order_id' => $orderId,
             'amount' => $amountFormatted,
             'mode' => $params['mode'],
@@ -200,7 +200,7 @@ class KashierService
                         'reason' => $reason ?? 'Customer request',
                     ]);
 
-            Log::channel('payments')->info('Kashier refund request', [
+            Log::info('Kashier refund request', [
                 'transaction_id' => $transactionId,
                 'amount' => $amount,
                 'status' => $response->status(),

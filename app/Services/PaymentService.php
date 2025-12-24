@@ -77,7 +77,7 @@ class PaymentService
                 'gateway_order_id' => $payment->reference,
             ]);
 
-            Log::channel('payments')->info('Payment initiated', [
+            Log::info('Payment initiated', [
                 'payment_id' => $payment->id,
                 'order_id' => $order->id,
                 'amount' => $order->total,
@@ -107,13 +107,22 @@ class PaymentService
         }
 
         // Find payment by reference
-        $orderId = $data['orderId'] ?? $data['merchantOrderId'] ?? null;
-        $payment = Payment::where('reference', $orderId)
-            ->orWhere('gateway_order_id', $orderId)
+        // merchantOrderId = our payment reference (PAY-xxx)
+        // orderId = Kashier's internal order ID
+        $merchantOrderId = $data['merchantOrderId'] ?? null;
+        $kashierOrderId = $data['orderId'] ?? null;
+
+        $payment = Payment::where('reference', $merchantOrderId)
+            ->orWhere('reference', $kashierOrderId)
+            ->orWhere('gateway_order_id', $merchantOrderId)
+            ->orWhere('gateway_order_id', $kashierOrderId)
             ->first();
 
         if (!$payment) {
-            Log::error('Payment not found for callback', ['order_id' => $orderId]);
+            Log::error('Payment not found for callback', [
+                'merchant_order_id' => $merchantOrderId,
+                'kashier_order_id' => $kashierOrderId,
+            ]);
             return [
                 'success' => false,
                 'error' => 'Payment not found',
@@ -159,7 +168,7 @@ class PaymentService
                 ]);
             }
 
-            Log::channel('payments')->info('Payment completed', [
+            Log::info('Payment completed', [
                 'payment_id' => $payment->id,
                 'transaction_id' => $transactionId,
             ]);
@@ -175,7 +184,7 @@ class PaymentService
             $failCode = $data['errorCode'] ?? null;
             $payment->markAsFailed($failReason, $failCode, $data);
 
-            Log::channel('payments')->warning('Payment failed', [
+            Log::warning('Payment failed', [
                 'payment_id' => $payment->id,
                 'reason' => $failReason,
             ]);
@@ -257,7 +266,7 @@ class PaymentService
             'status' => 'expired',
         ]);
 
-        Log::channel('payments')->info('Payment expired', [
+        Log::info('Payment expired', [
             'payment_id' => $payment->id,
         ]);
 

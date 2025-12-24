@@ -78,7 +78,7 @@ class PaymentController extends Controller
      */
     public function callback(Request $request)
     {
-        Log::channel('payments')->info('Kashier callback received', $request->all());
+        Log::info('Kashier callback received', $request->all());
 
         $result = $this->paymentService->handleCallback($request->all());
 
@@ -106,7 +106,7 @@ class PaymentController extends Controller
      */
     public function webhook(Request $request)
     {
-        Log::channel('payments')->info('Kashier webhook received', $request->all());
+        Log::info('Kashier webhook received', $request->all());
 
         // Validate signature
         if (!$this->kashierService->validateSignature($request->all())) {
