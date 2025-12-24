@@ -87,6 +87,37 @@ Route::prefix('admin/stock-counts')->middleware(['auth'])->name('admin.stock-cou
     Route::get('{stockCount}/excess', [App\Http\Controllers\StockCountReportController::class, 'excess'])->name('excess');
 });
 
+// ========================================
+// Payment Routes (Kashier Integration)
+// ========================================
+Route::prefix('payment')->name('payment.')->group(function () {
+    // Select payment method page
+    Route::get('/checkout/{order}', [App\Http\Controllers\PaymentController::class, 'selectMethod'])
+        ->name('select');
+
+    // Process payment - redirect to Kashier
+    Route::match(['get', 'post'], '/process/{order}', [App\Http\Controllers\PaymentController::class, 'process'])
+        ->name('process')
+        ->middleware('throttle:5,1'); // Rate limit: 5 requests/minute
+
+    // Callback from Kashier (user redirect)
+    Route::get('/callback', [App\Http\Controllers\PaymentController::class, 'callback'])
+        ->name('callback');
+
+    // Success page
+    Route::get('/success/{order}', [App\Http\Controllers\PaymentController::class, 'success'])
+        ->name('success');
+
+    // Failed page
+    Route::get('/failed/{order}', [App\Http\Controllers\PaymentController::class, 'failed'])
+        ->name('failed');
+});
+
+// Kashier Webhook (no CSRF, async notification)
+Route::post('/webhooks/kashier', [App\Http\Controllers\PaymentController::class, 'webhook'])
+    ->name('payment.webhook')
+    ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
+
 require __DIR__ . '/auth.php';
 
 // Public API Routes

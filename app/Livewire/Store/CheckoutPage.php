@@ -10,6 +10,7 @@ use App\Models\Product;
 use App\Models\ShippingAddress;
 use App\Services\CartService;
 use App\Services\EmailService;
+use App\Models\PaymentSetting;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\DB;
@@ -197,7 +198,58 @@ class CheckoutPage extends Component
         return view('livewire.store.checkout-page', [
             'savedAddresses' => $savedAddresses,
             'governorates' => $egyptGovernorates,
+            'paymentMethods' => $this->getPaymentMethods(),
         ])->layout('layouts.store');
+    }
+
+    /**
+     * Get enabled payment methods from settings
+     */
+    protected function getPaymentMethods(): array
+    {
+        $methods = [];
+
+        // Cash on Delivery
+        if (PaymentSetting::get('payment_cod_enabled', true)) {
+            $methods[] = [
+                'key' => 'cod',
+                'name' => 'الدفع عند الاستلام',
+                'description' => 'ادفع نقداً عند استلام الطلب',
+                'icon' => '💵',
+            ];
+        }
+
+        // Card Payment
+        if (PaymentSetting::get('payment_card_enabled', false)) {
+            $methods[] = [
+                'key' => 'card',
+                'name' => 'البطاقة البنكية',
+                'description' => 'Visa, Mastercard, Meeza',
+                'icon' => '💳',
+            ];
+        }
+
+        // Vodafone Cash
+        if (PaymentSetting::get('payment_vodafone_cash_enabled', false)) {
+            $methods[] = [
+                'key' => 'vodafone_cash',
+                'name' => 'فودافون كاش',
+                'description' => 'ادفع عبر محفظة فودافون',
+                'icon' => '📱',
+            ];
+        }
+
+        // Meeza
+        if (PaymentSetting::get('payment_meeza_enabled', false)) {
+            $methods[] = [
+                'key' => 'meeza',
+                'name' => 'ميزة',
+                'description' => 'ادفع ببطاقة ميزة',
+                'icon' => '🏦',
+            ];
+        }
+
+        return $methods;
     }
 
     /**
@@ -273,14 +325,18 @@ class CheckoutPage extends Component
             }
         }
 
-        // Validate payment method (COD only for now)
-        if ($this->paymentMethod !== 'cod') {
+        // Validate payment method
+        $validMethods = ['cod', 'card', 'vodafone_cash', 'meeza', 'orange_money', 'etisalat_cash'];
+        if (!in_array($this->paymentMethod, $validMethods)) {
             $this->dispatch('show-toast', [
                 'message' => __('messages.checkout.invalid_payment'),
                 'type' => 'error'
             ]);
             return;
         }
+
+        // For online payments, create order first then redirect to payment gateway
+        $isOnlinePayment = $this->paymentMethod !== 'cod';
 
         // =============================================
         // STEP 2: STOCK VERIFICATION (Race Condition Protection)
@@ -440,12 +496,21 @@ class CheckoutPage extends Component
             }
 
             // =============================================
-            // STEP 5: SUCCESS - Redirect to confirmation page
+            // STEP 5: SUCCESS - Redirect based on payment method
             // =============================================
 
             // Dispatch cart update event for header counter
             $this->dispatch('cart-updated', count: 0);
 
+            // Online payment: redirect to payment processor
+            if ($isOnlinePayment) {
+                return redirect()->route('payment.process', [
+                    'order' => $order->id,
+                    'method' => $this->paymentMethod
+                ]);
+            }
+
+            // COD: redirect to success page
             return redirect()->route('checkout.success', ['order' => $order->id]);
 
         } catch (\Exception $e) {

@@ -221,7 +221,7 @@
                         @endif
                     </div>
 
-                    {{-- Payment Method Section (Placeholder) --}}
+                    {{-- Payment Method Section --}}
                     <div class="bg-white rounded-lg shadow-md p-6">
                         <h2 class="text-xl font-semibold text-gray-900 mb-4 flex items-center">
                             <svg class="w-6 h-6 me-2 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -230,26 +230,24 @@
                             {{ __('messages.checkout.payment_method') }}
                         </h2>
 
-                        <div class="p-4 border-2 border-violet-600 bg-violet-50 rounded-lg">
-                            <div class="flex items-center">
-                                <input 
-                                    type="radio" 
-                                    name="payment" 
-                                    value="cod"
-                                    checked
-                                    disabled
-                                    class="text-violet-600 focus:ring-violet-500"
-                                >
-                                <div class="ms-3">
-                                    <p class="font-medium text-gray-900">{{ __('messages.checkout.cash_on_delivery') }}</p>
-                                    <p class="text-sm text-gray-600 mt-1">{{ __('messages.checkout.cod_description') }}</p>
-                                </div>
-                            </div>
+                        <div class="space-y-3">
+                            @foreach($paymentMethods as $method)
+                                <label class="flex items-center p-4 border-2 rounded-lg cursor-pointer transition-colors
+                                    {{ $paymentMethod === $method['key'] ? 'border-violet-600 bg-violet-50' : 'border-gray-200 hover:border-violet-300' }}">
+                                    <input 
+                                        type="radio" 
+                                        name="payment_method" 
+                                        value="{{ $method['key'] }}"
+                                        wire:model.live="paymentMethod"
+                                        class="text-violet-600 focus:ring-violet-500"
+                                    >
+                                    <div class="ms-3">
+                                        <p class="font-medium text-gray-900">{{ $method['icon'] }} {{ $method['name'] }}</p>
+                                        <p class="text-sm text-gray-600 mt-1">{{ $method['description'] }}</p>
+                                    </div>
+                                </label>
+                            @endforeach
                         </div>
-                        <p class="mt-3 text-xs text-gray-500">
-                            <span class="inline-block w-2 h-2 bg-yellow-400 rounded-full me-1"></span>
-                            {{ __('messages.checkout.payment_placeholder') }}
-                        </p>
                     </div>
                 </div>
 

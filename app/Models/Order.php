@@ -152,6 +152,11 @@ class Order extends Model
         return $this->hasMany(OrderReturn::class);
     }
 
+    public function payments(): HasMany
+    {
+        return $this->hasMany(Payment::class);
+    }
+
     // Scopes
     public function scopePending($query)
     {
