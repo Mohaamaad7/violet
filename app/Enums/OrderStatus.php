@@ -5,6 +5,7 @@ namespace App\Enums;
 enum OrderStatus: int
 {
     case PENDING = 0;
+    case PENDING_PAYMENT = 6; // Awaiting online payment
     case PROCESSING = 1;
     case SHIPPED = 2;
     case DELIVERED = 3;
@@ -16,8 +17,9 @@ enum OrderStatus: int
      */
     public function label(): string
     {
-        return match($this) {
+        return match ($this) {
             self::PENDING => 'قيد الانتظار',
+            self::PENDING_PAYMENT => 'في انتظار الدفع',
             self::PROCESSING => 'قيد التجهيز',
             self::SHIPPED => 'تم الشحن',
             self::DELIVERED => 'تم التسليم',
@@ -31,8 +33,9 @@ enum OrderStatus: int
      */
     public function color(): string
     {
-        return match($this) {
+        return match ($this) {
             self::PENDING => 'warning',
+            self::PENDING_PAYMENT => 'info',
             self::PROCESSING => 'info',
             self::SHIPPED => 'primary',
             self::DELIVERED => 'success',
@@ -46,8 +49,9 @@ enum OrderStatus: int
      */
     public function icon(): string
     {
-        return match($this) {
+        return match ($this) {
             self::PENDING => 'heroicon-o-clock',
+            self::PENDING_PAYMENT => 'heroicon-o-credit-card',
             self::PROCESSING => 'heroicon-o-cog',
             self::SHIPPED => 'heroicon-o-truck',
             self::DELIVERED => 'heroicon-o-check-circle',
@@ -73,8 +77,9 @@ enum OrderStatus: int
      */
     public static function fromString(string $status): self
     {
-        return match(strtolower($status)) {
+        return match (strtolower($status)) {
             'pending' => self::PENDING,
+            'pending_payment' => self::PENDING_PAYMENT,
             'processing' => self::PROCESSING,
             'shipped' => self::SHIPPED,
             'delivered' => self::DELIVERED,
@@ -89,8 +94,9 @@ enum OrderStatus: int
      */
     public function toString(): string
     {
-        return match($this) {
+        return match ($this) {
             self::PENDING => 'pending',
+            self::PENDING_PAYMENT => 'pending_payment',
             self::PROCESSING => 'processing',
             self::SHIPPED => 'shipped',
             self::DELIVERED => 'delivered',

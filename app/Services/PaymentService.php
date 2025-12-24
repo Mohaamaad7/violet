@@ -137,13 +137,27 @@ class PaymentService
             // Mark as completed
             $payment->markAsCompleted($transactionId, $data);
 
-            // Update order
+            // Update order status and payment info
             $payment->order->update([
+                'status' => \App\Enums\OrderStatus::PENDING, // Ready for processing
                 'payment_status' => 'paid',
                 'payment_method' => $payment->payment_method,
                 'payment_transaction_id' => $transactionId,
                 'paid_at' => now(),
             ]);
+
+            // Send confirmation emails now that payment is successful
+            try {
+                $emailService = app(\App\Services\EmailService::class);
+                $emailService->sendOrderConfirmation($payment->order);
+                $emailService->sendAdminNewOrderNotification($payment->order);
+            } catch (\Exception $e) {
+                // Log but don't fail
+                Log::error('Failed to send payment confirmation emails', [
+                    'order_id' => $payment->order->id,
+                    'error' => $e->getMessage(),
+                ]);
+            }
 
             Log::channel('payments')->info('Payment completed', [
                 'payment_id' => $payment->id,

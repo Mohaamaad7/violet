@@ -396,9 +396,12 @@ class CheckoutPage extends Component
         // =============================================
 
         try {
-            $order = DB::transaction(function () use ($cart, $shippingAddress, $guestAddressData) {
+            $order = DB::transaction(function () use ($cart, $shippingAddress, $guestAddressData, $isOnlinePayment) {
                 // Generate temporary order number (will be updated after creation)
                 $tempOrderNumber = 'TEMP-' . uniqid();
+
+                // Determine payment status based on payment method
+                $paymentStatus = $isOnlinePayment ? 'pending' : 'unpaid';
 
                 // Create Order
                 $order = Order::create([
@@ -411,9 +414,9 @@ class CheckoutPage extends Component
                     'guest_governorate' => $guestAddressData['governorate'] ?? null,
                     'guest_city' => $guestAddressData['city'] ?? null,
                     'guest_address' => $guestAddressData['address'] ?? null,
-                    'status' => OrderStatus::PENDING,
-                    'payment_status' => 'unpaid', // COD = unpaid until delivery
-                    'payment_method' => 'cod',
+                    'status' => $isOnlinePayment ? OrderStatus::PENDING_PAYMENT : OrderStatus::PENDING,
+                    'payment_status' => $paymentStatus,
+                    'payment_method' => $this->paymentMethod, // Use actual selected method
                     'subtotal' => $this->subtotal,
                     'shipping_cost' => $this->shippingCost,
                     'discount_amount' => 0, // TODO: Implement discount codes
@@ -478,21 +481,24 @@ class CheckoutPage extends Component
             });
 
             // =============================================
-            // STEP 4: SEND CONFIRMATION EMAILS
+            // STEP 4: SEND CONFIRMATION EMAILS (COD only)
+            // Online payments will send emails after successful payment callback
             // =============================================
 
-            try {
-                $emailService = app(EmailService::class);
+            if (!$isOnlinePayment) {
+                try {
+                    $emailService = app(EmailService::class);
 
-                // Send order confirmation to customer
-                $emailService->sendOrderConfirmation($order);
+                    // Send order confirmation to customer
+                    $emailService->sendOrderConfirmation($order);
 
-                // Send notification to admin
-                $emailService->sendAdminNewOrderNotification($order);
+                    // Send notification to admin
+                    $emailService->sendAdminNewOrderNotification($order);
 
-            } catch (\Exception $e) {
-                // Log email error but don't fail the order
-                report($e);
+                } catch (\Exception $e) {
+                    // Log email error but don't fail the order
+                    report($e);
+                }
             }
 
             // =============================================
