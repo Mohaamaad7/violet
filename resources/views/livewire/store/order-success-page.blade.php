@@ -119,14 +119,45 @@
             <div class="p-6">
                 <h3 class="font-semibold text-gray-900 mb-3">{{ __('messages.checkout.payment_method') }}</h3>
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-amber-100 rounded-full flex items-center justify-center">
-                        <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                        </svg>
+                    @php
+                        $paymentIcons = [
+                            'cod' => '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>',
+                            'card' => '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>',
+                            'vodafone_cash' => '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>',
+                        ];
+                        $paymentColors = [
+                            'cod' => 'bg-amber-100 text-amber-600',
+                            'card' => 'bg-blue-100 text-blue-600',
+                            'vodafone_cash' => 'bg-red-100 text-red-600',
+                            'orange_money' => 'bg-orange-100 text-orange-600',
+                            'etisalat_cash' => 'bg-green-100 text-green-600',
+                        ];
+                        $paymentLabels = [
+                            'cod' => __('messages.checkout.cash_on_delivery'),
+                            'card' => __('messages.checkout.card_payment') ?? 'بطاقة ائتمان',
+                            'vodafone_cash' => 'فودافون كاش',
+                            'orange_money' => 'أورانج كاش',
+                            'etisalat_cash' => 'اتصالات كاش',
+                        ];
+                        $paymentNotes = [
+                            'cod' => __('messages.order_success.cod_note'),
+                            'card' => __('messages.order_success.card_note') ?? 'تم الدفع بنجاح',
+                            'vodafone_cash' => 'تم الدفع عبر المحفظة الإلكترونية',
+                            'orange_money' => 'تم الدفع عبر المحفظة الإلكترونية',
+                            'etisalat_cash' => 'تم الدفع عبر المحفظة الإلكترونية',
+                        ];
+                        $method = $order->payment_method ?? 'cod';
+                        $icon = $paymentIcons[$method] ?? $paymentIcons['card'];
+                        $colorClass = $paymentColors[$method] ?? 'bg-gray-100 text-gray-600';
+                        $label = $paymentLabels[$method] ?? ucfirst($method);
+                        $note = $paymentNotes[$method] ?? '';
+                    @endphp
+                    <div class="w-10 h-10 {{ $colorClass }} rounded-full flex items-center justify-center">
+                        {!! $icon !!}
                     </div>
                     <div>
-                        <p class="font-medium text-gray-900">{{ __('messages.checkout.cash_on_delivery') }}</p>
-                        <p class="text-sm text-gray-500">{{ __('messages.order_success.cod_note') }}</p>
+                        <p class="font-medium text-gray-900">{{ $label }}</p>
+                        <p class="text-sm text-gray-500">{{ $note }}</p>
                     </div>
                 </div>
             </div>
