@@ -84,7 +84,7 @@ class PaymentController extends Controller
 
         if (!$result['success'] && !isset($result['payment'])) {
             // No payment found - redirect to home
-            return redirect()->route('store.index')
+            return redirect()->route('home')
                 ->with('error', 'حدث خطأ في عملية الدفع');
         }
 
