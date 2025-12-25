@@ -9,6 +9,7 @@ use App\Models\OrderItem;
 use App\Models\Product;
 use App\Models\ShippingAddress;
 use App\Services\CartService;
+use App\Services\CouponService;
 use App\Services\EmailService;
 use App\Models\PaymentSetting;
 use Illuminate\Support\Facades\Auth;
@@ -22,6 +23,8 @@ use Livewire\Component;
 class CheckoutPage extends Component
 {
     protected CartService $cartService;
+    protected CouponService $couponService;
+
     // Address Selection (for authenticated users)
     public $selectedAddressId = null;
     public $showAddressForm = false;
@@ -38,15 +41,22 @@ class CheckoutPage extends Component
     // Payment Method (Placeholder for Part 2)
     public $paymentMethod = 'cod'; // Cash on Delivery default
 
+    // Coupon
+    public $couponCode = '';
+    public $appliedCoupon = null;
+    public $couponDiscount = 0;
+    public $couponError = '';
+
     // Cart Data
     public $cartItems = [];
     public $subtotal = 0;
     public $shippingCost = 0; // Placeholder
     public $total = 0;
 
-    public function boot(CartService $cartService)
+    public function boot(CartService $cartService, CouponService $couponService)
     {
         $this->cartService = $cartService;
+        $this->couponService = $couponService;
     }
 
     /**
@@ -114,13 +124,93 @@ class CheckoutPage extends Component
 
             $this->subtotal = collect($this->cartItems)->sum('subtotal');
             $this->shippingCost = 50; // Placeholder - will be dynamic in Part 2
-            $this->total = $this->subtotal + $this->shippingCost;
+            $this->recalculateTotal();
         } else {
             $this->cartItems = [];
             $this->subtotal = 0;
             $this->shippingCost = 0;
             $this->total = 0;
         }
+    }
+
+    /**
+     * Recalculate total with coupon discount
+     */
+    protected function recalculateTotal(): void
+    {
+        $this->total = $this->subtotal + $this->shippingCost - $this->couponDiscount;
+    }
+
+    /**
+     * Apply coupon code
+     */
+    public function applyCoupon(): void
+    {
+        $this->couponError = '';
+
+        if (empty($this->couponCode)) {
+            return;
+        }
+
+        // Prepare cart items for validation
+        $cartItemsForValidation = collect($this->cartItems)->map(function ($item) {
+            return [
+                'product_id' => $item['product_id'],
+                'category_id' => null, // TODO: Add category_id to cart items
+                'price' => $item['price'],
+                'quantity' => $item['quantity'],
+            ];
+        })->toArray();
+
+        // Validate coupon
+        $result = $this->couponService->validateCoupon(
+            $this->couponCode,
+            $cartItemsForValidation,
+            $this->getCustomerId()
+        );
+
+        if (!$result['valid']) {
+            $this->couponError = $result['error'];
+            $this->appliedCoupon = null;
+            $this->couponDiscount = 0;
+            $this->recalculateTotal();
+            return;
+        }
+
+        // Calculate discount
+        $coupon = $result['coupon'];
+        $discountResult = $this->couponService->calculateDiscount(
+            $coupon,
+            $cartItemsForValidation,
+            $this->shippingCost
+        );
+
+        $this->appliedCoupon = $coupon;
+        $this->couponDiscount = $discountResult['discount'] + $discountResult['shipping_discount'];
+        $this->recalculateTotal();
+
+        // Show success message
+        $this->dispatch('show-toast', [
+            'message' => __('messages.coupon_success.applied'),
+            'type' => 'success'
+        ]);
+    }
+
+    /**
+     * Remove applied coupon
+     */
+    public function removeCoupon(): void
+    {
+        $this->couponCode = '';
+        $this->appliedCoupon = null;
+        $this->couponDiscount = 0;
+        $this->couponError = '';
+        $this->recalculateTotal();
+
+        $this->dispatch('show-toast', [
+            'message' => __('messages.coupon_success.removed'),
+            'type' => 'info'
+        ]);
     }
 
     public function selectAddress($addressId)

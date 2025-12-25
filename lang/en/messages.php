@@ -81,7 +81,12 @@ return [
         'order_summary' => 'Order Summary',
         'subtotal' => 'Subtotal',
         'shipping' => 'Shipping',
+        'discount' => 'Discount',
         'total' => 'Total',
+        'have_coupon' => 'Have a coupon code?',
+        'enter_coupon' => 'Enter coupon code',
+        'apply' => 'Apply',
+        'remove_coupon' => 'Remove',
         'place_order' => 'Place Order',
         'place_order_part2' => 'Place Order button will be enabled in Part 2',
         'empty_cart' => 'Cart is Empty',
@@ -120,6 +125,24 @@ return [
 
     // Currency
     'currency' => 'EGP',
+
+    // Coupon Errors
+    'coupon_errors' => [
+        'invalid' => 'Invalid discount code',
+        'expired' => 'This discount code has expired',
+        'not_started' => 'This discount code is not active yet',
+        'usage_limit_reached' => 'This code has reached its usage limit',
+        'already_used' => 'You have already used this code',
+        'min_order_not_met' => 'Minimum order amount is :amount',
+        'not_applicable' => 'This code does not apply to items in your cart',
+    ],
+
+    // Coupon Success
+    'coupon_success' => [
+        'applied' => 'Discount code applied successfully!',
+        'removed' => 'Discount code removed',
+        'free_shipping' => 'Free shipping applied!',
+    ],
 
     // Search & Filters
     'search' => 'Search',

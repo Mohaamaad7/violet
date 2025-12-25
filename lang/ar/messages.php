@@ -81,7 +81,12 @@ return [
         'order_summary' => 'ملخص الطلب',
         'subtotal' => 'المجموع الفرعي',
         'shipping' => 'الشحن',
+        'discount' => 'الخصم',
         'total' => 'الإجمالي',
+        'have_coupon' => 'لديك كود خصم؟',
+        'enter_coupon' => 'أدخل كود الخصم',
+        'apply' => 'تطبيق',
+        'remove_coupon' => 'إزالة',
         'place_order' => 'إرسال الطلب',
         'place_order_part2' => 'سيتم تفعيل زر الدفع في المرحلة الثانية',
         'empty_cart' => 'السلة فارغة',
@@ -120,6 +125,24 @@ return [
 
     // Currency
     'currency' => 'ج.م',
+
+    // Coupon Errors
+    'coupon_errors' => [
+        'invalid' => 'كود الخصم غير صالح',
+        'expired' => 'كود الخصم منتهي الصلاحية',
+        'not_started' => 'كود الخصم لم يبدأ بعد',
+        'usage_limit_reached' => 'تم الوصول للحد الأقصى للاستخدام',
+        'already_used' => 'لقد استخدمت هذا الكود من قبل',
+        'min_order_not_met' => 'الحد الأدنى للطلب يجب أن يكون :amount',
+        'not_applicable' => 'الكوبون لا ينطبق على منتجات السلة',
+    ],
+
+    // Coupon Success
+    'coupon_success' => [
+        'applied' => 'تم تطبيق كود الخصم بنجاح!',
+        'removed' => 'تم إزالة كود الخصم',
+        'free_shipping' => 'تم تطبيق الشحن المجاني!',
+    ],
 
     // Search & Filters
     'search' => 'بحث',

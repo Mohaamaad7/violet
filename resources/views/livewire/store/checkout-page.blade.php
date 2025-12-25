@@ -285,6 +285,51 @@
                             @endforeach
                         </div>
 
+                        {{-- Coupon Code Section --}}
+                        <div class="border-t border-gray-200 pt-4 mb-4">
+                            <h3 class="text-sm font-medium text-gray-900 mb-3">{{ __('messages.checkout.have_coupon') }}</h3>
+                            
+                            @if($appliedCoupon)
+                                {{-- Applied Coupon Display --}}
+                                <div class="flex items-center justify-between p-3 bg-green-50 border border-green-200 rounded-lg">
+                                    <div class="flex items-center">
+                                        <svg class="w-5 h-5 text-green-600 me-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                        <span class="font-medium text-green-800">{{ $appliedCoupon->code }}</span>
+                                    </div>
+                                    <button 
+                                        wire:click="removeCoupon"
+                                        type="button"
+                                        class="text-red-600 hover:text-red-800 text-sm font-medium"
+                                    >
+                                        {{ __('messages.checkout.remove_coupon') }}
+                                    </button>
+                                </div>
+                            @else
+                                {{-- Coupon Input Form --}}
+                                <div class="flex gap-2">
+                                    <input 
+                                        type="text" 
+                                        wire:model="couponCode"
+                                        placeholder="{{ __('messages.checkout.enter_coupon') }}"
+                                        class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent text-sm
+                                            @if($couponError) border-red-500 @endif"
+                                    >
+                                    <button 
+                                        wire:click="applyCoupon"
+                                        type="button"
+                                        class="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition-colors text-sm font-medium"
+                                    >
+                                        {{ __('messages.checkout.apply') }}
+                                    </button>
+                                </div>
+                                @if($couponError)
+                                    <p class="mt-2 text-sm text-red-600">{{ $couponError }}</p>
+                                @endif
+                            @endif
+                        </div>
+
                         {{-- Summary Calculations --}}
                         <div class="space-y-3 border-t border-gray-200 pt-4">
                             <div class="flex justify-between text-sm">
@@ -295,6 +340,12 @@
                                 <span class="text-gray-600">{{ __('messages.checkout.shipping') }}</span>
                                 <span class="font-medium text-gray-900">{{ number_format($shippingCost, 2) }} {{ __('messages.currency') }}</span>
                             </div>
+                            @if($couponDiscount > 0)
+                                <div class="flex justify-between text-sm text-green-600">
+                                    <span>{{ __('messages.checkout.discount') }}</span>
+                                    <span class="font-medium">-{{ number_format($couponDiscount, 2) }} {{ __('messages.currency') }}</span>
+                                </div>
+                            @endif
                             <div class="flex justify-between text-lg font-bold pt-3 border-t border-gray-200">
                                 <span class="text-gray-900">{{ __('messages.checkout.total') }}</span>
                                 <span class="text-violet-600">{{ number_format($total, 2) }} {{ __('messages.currency') }}</span>

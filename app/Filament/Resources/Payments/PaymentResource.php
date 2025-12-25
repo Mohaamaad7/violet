@@ -14,6 +14,9 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Notifications\Notification;
 use App\Services\KashierService;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
 
 class PaymentResource extends Resource
@@ -28,7 +31,7 @@ class PaymentResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return 'المبيعات';
+        return __('admin.nav.sales');
     }
 
     public static function getNavigationLabel(): string
@@ -49,6 +52,111 @@ class PaymentResource extends Resource
     public static function getNavigationBadge(): ?string
     {
         return (string) static::getModel()::pending()->count() ?: null;
+    }
+
+    public static function infolist(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                Section::make('بيانات الدفعة')
+                    ->schema([
+                        Grid::make(3)->schema([
+                            TextEntry::make('reference')
+                                ->label('المرجع')
+                                ->copyable(),
+                            TextEntry::make('status')
+                                ->label('الحالة')
+                                ->badge()
+                                ->color(fn($state) => match ($state) {
+                                    'completed' => 'success',
+                                    'pending' => 'warning',
+                                    'failed' => 'danger',
+                                    'refunded' => 'gray',
+                                    default => 'primary',
+                                })
+                                ->formatStateUsing(fn($state) => match ($state) {
+                                    'completed' => 'مكتمل',
+                                    'pending' => 'معلق',
+                                    'failed' => 'فاشل',
+                                    'refunded' => 'مسترد',
+                                    default => $state,
+                                }),
+                            TextEntry::make('amount')
+                                ->label('المبلغ')
+                                ->money('EGP'),
+                        ]),
+                        Grid::make(3)->schema([
+                            TextEntry::make('payment_method')
+                                ->label('طريقة الدفع')
+                                ->formatStateUsing(fn($state) => match ($state) {
+                                    'card' => 'بطاقة ائتمان',
+                                    'vodafone_cash' => 'فودافون كاش',
+                                    'instapay' => 'InstaPay',
+                                    default => $state,
+                                }),
+                            TextEntry::make('gateway')
+                                ->label('بوابة الدفع'),
+                            TextEntry::make('created_at')
+                                ->label('تاريخ الإنشاء')
+                                ->dateTime('d/m/Y H:i'),
+                        ]),
+                    ]),
+
+                Section::make('بيانات الطلب')
+                    ->schema([
+                        Grid::make(3)->schema([
+                            TextEntry::make('order.order_number')
+                                ->label('رقم الطلب')
+                                ->url(fn($record) => $record->order_id
+                                    ? route('filament.admin.resources.orders.view', $record->order_id)
+                                    : null),
+                            TextEntry::make('customer.name')
+                                ->label('العميل'),
+                            TextEntry::make('customer.email')
+                                ->label('البريد الإلكتروني'),
+                        ]),
+                    ]),
+
+                Section::make('بيانات البوابة')
+                    ->schema([
+                        Grid::make(2)->schema([
+                            TextEntry::make('transaction_id')
+                                ->label('رقم العملية')
+                                ->copyable(),
+                            TextEntry::make('gateway_transaction_id')
+                                ->label('رقم عملية البوابة')
+                                ->copyable(),
+                        ]),
+                        TextEntry::make('paid_at')
+                            ->label('تاريخ الدفع')
+                            ->dateTime('d/m/Y H:i'),
+                    ])
+                    ->collapsed(),
+
+                Section::make('بيانات الاسترداد')
+                    ->schema([
+                        Grid::make(3)->schema([
+                            TextEntry::make('refunded_amount')
+                                ->label('المبلغ المسترد')
+                                ->money('EGP'),
+                            TextEntry::make('refund_reference')
+                                ->label('مرجع الاسترداد'),
+                            TextEntry::make('refunded_at')
+                                ->label('تاريخ الاسترداد')
+                                ->dateTime('d/m/Y H:i'),
+                        ]),
+                    ])
+                    ->visible(fn($record) => $record->refunded_amount > 0),
+
+                Section::make('سبب الفشل')
+                    ->schema([
+                        TextEntry::make('failure_reason')
+                            ->label('السبب'),
+                        TextEntry::make('failure_code')
+                            ->label('كود الخطأ'),
+                    ])
+                    ->visible(fn($record) => $record->status === 'failed'),
+            ]);
     }
 
     public static function table(Table $table): Table
@@ -140,9 +248,9 @@ class PaymentResource extends Resource
                     ]),
             ])
             ->actions([
-                \Filament\Tables\Actions\ViewAction::make(),
+                \Filament\Actions\ViewAction::make(),
 
-                \Filament\Tables\Actions\Action::make('refund')
+                \Filament\Actions\Action::make('refund')
                     ->label('استرداد')
                     ->icon('heroicon-o-arrow-uturn-left')
                     ->color('danger')

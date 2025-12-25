@@ -25,7 +25,7 @@ class OrderReturnResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return __('Orders');
+        return __('admin.nav.sales');
     }
 
     public static function getNavigationLabel(): string
