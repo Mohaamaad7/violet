@@ -14,6 +14,9 @@ class ShippingAddress extends Model
     protected $fillable = [
         'customer_id',
         'order_id',
+        'country_id',
+        'governorate_id',
+        'city_id',
         'full_name',
         'email',
         'phone',
@@ -32,6 +35,7 @@ class ShippingAddress extends Model
         'is_default' => 'boolean',
     ];
 
+    // Relationships
     public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
@@ -42,6 +46,22 @@ class ShippingAddress extends Model
         return $this->hasMany(Order::class);
     }
 
+    public function country(): BelongsTo
+    {
+        return $this->belongsTo(Country::class);
+    }
+
+    public function governorateRelation(): BelongsTo
+    {
+        return $this->belongsTo(Governorate::class, 'governorate_id');
+    }
+
+    public function cityRelation(): BelongsTo
+    {
+        return $this->belongsTo(City::class, 'city_id');
+    }
+
+    // Accessors
     public function getFullAddressAttribute(): string
     {
         $parts = array_filter([
@@ -55,5 +75,21 @@ class ShippingAddress extends Model
         ]);
 
         return implode('، ', $parts);
+    }
+
+    /**
+     * Get effective shipping cost from city/governorate relationship
+     */
+    public function getEffectiveShippingCostAttribute(): ?float
+    {
+        if ($this->cityRelation) {
+            return $this->cityRelation->effective_shipping_cost;
+        }
+
+        if ($this->governorateRelation) {
+            return $this->governorateRelation->shipping_cost;
+        }
+
+        return null;
     }
 }

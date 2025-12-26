@@ -34,6 +34,13 @@ class CheckoutPage extends Component
     public $last_name = '';
     public $email = '';
     public $phone = '';
+    
+    // Geographic Location (New System)
+    public $country_id = null;
+    public $governorate_id = null;
+    public $city_id = null;
+    
+    // Old fields (kept for backward compatibility during transition)
     public $governorate = '';
     public $city = '';
     public $address_details = '';
@@ -52,6 +59,23 @@ class CheckoutPage extends Component
     public $subtotal = 0;
     public $shippingCost = 0; // Placeholder
     public $total = 0;
+
+    /**
+     * Validation rules for address form
+     */
+    protected function rules()
+    {
+        return [
+            'first_name' => 'required|string|max:100',
+            'last_name' => 'required|string|max:100',
+            'email' => 'required|email|max:255',
+            'phone' => 'required|regex:/^[0-9]{10,15}$/',
+            'country_id' => 'required|exists:countries,id',
+            'governorate_id' => 'required|exists:governorates,id',
+            'city_id' => 'required|exists:cities,id',
+            'address_details' => 'required|string|max:500',
+        ];
+    }
 
     public function boot(CartService $cartService, CouponService $couponService)
     {
@@ -102,6 +126,112 @@ class CheckoutPage extends Component
             // Guest user - show form directly
             $this->showAddressForm = true;
         }
+        
+        // Auto-select Egypt as default country
+        if (!$this->country_id) {
+            $egypt = \App\Models\Country::where('code', 'EG')->first();
+            if ($egypt) {
+                $this->country_id = $egypt->id;
+            }
+        }
+    }
+
+    /**
+     * Update country - triggered when user selects a country
+     */
+    public function updatedCountryId($value)
+    {
+        // Reset governorate and city when country changes
+        $this->governorate_id = null;
+        $this->city_id = null;
+        
+        // Reset shipping cost
+        $this->calculateShippingCost();
+    }
+
+    /**
+     * Update governorate - triggered when user selects a governorate
+     */
+    public function updatedGovernorateId($value)
+    {
+        // Reset city when governorate changes
+        $this->city_id = null;
+        
+        // Calculate shipping cost from governorate
+        $this->calculateShippingCost();
+    }
+
+    /**
+     * Update city - triggered when user selects a city
+     */
+    public function updatedCityId($value)
+    {
+        // Recalculate shipping cost (city may have custom cost)
+        $this->calculateShippingCost();
+    }
+
+    /**
+     * Calculate shipping cost based on selected governorate/city
+     */
+    protected function calculateShippingCost(): void
+    {
+        $this->shippingCost = 50; // Default fallback
+        
+        if ($this->city_id) {
+            $city = \App\Models\City::find($this->city_id);
+            if ($city) {
+                // Use city's custom shipping cost if available, otherwise use governorate's
+                $this->shippingCost = $city->shipping_cost ?? $city->governorate->shipping_cost ?? 50;
+            }
+        } elseif ($this->governorate_id) {
+            $governorate = \App\Models\Governorate::find($this->governorate_id);
+            if ($governorate) {
+                $this->shippingCost = $governorate->shipping_cost ?? 50;
+            }
+        }
+        
+        // Recalculate total
+        $this->recalculateTotal();
+    }
+
+    /**
+     * Get list of countries
+     */
+    public function getCountriesProperty()
+    {
+        return \App\Models\Country::where('is_active', true)
+            ->orderBy('name_ar')
+            ->get();
+    }
+
+    /**
+     * Get list of governorates for the selected country
+     */
+    public function getGovernoratesProperty()
+    {
+        if (!$this->country_id) {
+            return [];
+        }
+        
+        return \App\Models\Governorate::where('country_id', $this->country_id)
+            ->where('is_active', true)
+            ->orderBy('name_ar')
+            ->get();
+    }
+
+    /**
+     * Get list of cities for the selected governorate
+     */
+    public function getCitiesProperty()
+    {
+        if (!$this->governorate_id) {
+            return [];
+        }
+        
+        return \App\Models\City::where('governorate_id', $this->governorate_id)
+            ->where('is_active', true)
+            ->orderBy('name_ar')
+            ->get();
     }
 
     protected function loadCart()
@@ -123,7 +253,7 @@ class CheckoutPage extends Component
             })->toArray();
 
             $this->subtotal = collect($this->cartItems)->sum('subtotal');
-            $this->shippingCost = 50; // Placeholder - will be dynamic in Part 2
+            $this->calculateShippingCost(); // Dynamic shipping calculation
             $this->recalculateTotal();
         } else {
             $this->cartItems = [];
@@ -227,19 +357,6 @@ class CheckoutPage extends Component
         }
     }
 
-    protected function rules()
-    {
-        return [
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'email' => 'required|email|max:255',
-            'phone' => 'required|regex:/^[0-9]{10,15}$/',
-            'governorate' => 'required|string|max:255',
-            'city' => 'required|string|max:255',
-            'address_details' => 'required|string|max:500',
-        ];
-    }
-
     public function validateAddressForm()
     {
         $this->validate();
@@ -255,39 +372,8 @@ class CheckoutPage extends Component
             ? ShippingAddress::where('customer_id', $customer->id)->get()
             : collect();
 
-        $egyptGovernorates = [
-            'Cairo' => 'القاهرة',
-            'Giza' => 'الجيزة',
-            'Alexandria' => 'الإسكندرية',
-            'Dakahlia' => 'الدقهلية',
-            'Red Sea' => 'البحر الأحمر',
-            'Beheira' => 'البحيرة',
-            'Fayoum' => 'الفيوم',
-            'Gharbia' => 'الغربية',
-            'Ismailia' => 'الإسماعيلية',
-            'Menofia' => 'المنوفية',
-            'Minya' => 'المنيا',
-            'Qaliubiya' => 'القليوبية',
-            'New Valley' => 'الوادي الجديد',
-            'Suez' => 'السويس',
-            'Aswan' => 'أسوان',
-            'Assiut' => 'أسيوط',
-            'Beni Suef' => 'بني سويف',
-            'Port Said' => 'بورسعيد',
-            'Damietta' => 'دمياط',
-            'Sharkia' => 'الشرقية',
-            'South Sinai' => 'جنوب سيناء',
-            'Kafr Al Sheikh' => 'كفر الشيخ',
-            'Matrouh' => 'مطروح',
-            'Luxor' => 'الأقصر',
-            'Qena' => 'قنا',
-            'North Sinai' => 'شمال سيناء',
-            'Sohag' => 'سوهاج',
-        ];
-
         return view('livewire.store.checkout-page', [
             'savedAddresses' => $savedAddresses,
-            'governorates' => $egyptGovernorates,
             'paymentMethods' => $this->getPaymentMethods(),
         ])->layout('layouts.store');
     }
@@ -388,13 +474,17 @@ class CheckoutPage extends Component
             // Guest OR authenticated user creating new address
             $this->validate();
 
+            // Get governorate and city names for backward compatibility
+            $governorate = \App\Models\Governorate::find($this->governorate_id);
+            $city = \App\Models\City::find($this->city_id);
+
             // Prepare guest address data
             $guestAddressData = [
                 'name' => $this->first_name . ' ' . $this->last_name,
                 'email' => $this->email,
                 'phone' => $this->phone,
-                'governorate' => $this->governorate,
-                'city' => $this->city,
+                'governorate' => $governorate?->name_ar ?? '',
+                'city' => $city?->name_ar ?? '',
                 'address' => $this->address_details,
             ];
 
@@ -403,6 +493,9 @@ class CheckoutPage extends Component
             if ($customer) {
                 $shippingAddress = ShippingAddress::create([
                     'customer_id' => $customer->id,
+                    'country_id' => $this->country_id,
+                    'governorate_id' => $this->governorate_id,
+                    'city_id' => $this->city_id,
                     'full_name' => $guestAddressData['name'],
                     'email' => $guestAddressData['email'],
                     'phone' => $guestAddressData['phone'],

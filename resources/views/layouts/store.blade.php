@@ -220,6 +220,9 @@
             searchBar.classList.toggle('hidden');
         };
     </script>
+
+    {{-- Additional Scripts --}}
+    @stack('scripts')
 </body>
 
 </html>

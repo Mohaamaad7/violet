@@ -143,6 +143,27 @@
                                     </div>
                                 </div>
 
+                                {{-- Country Selection --}}
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                                        {{ __('messages.checkout.country') }} <span class="text-red-500">*</span>
+                                    </label>
+                                    <select 
+                                        wire:model.live="country_id"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent
+                                            @error('country_id') border-red-500 @enderror"
+                                        required
+                                    >
+                                        <option value="">{{ __('messages.checkout.select_country') }}</option>
+                                        @foreach($this->countries as $country)
+                                            <option value="{{ $country->id }}">{{ app()->getLocale() === 'ar' ? $country->name_ar : $country->name_en }}</option>
+                                        @endforeach
+                                    </select>
+                                    @error('country_id') 
+                                        <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
+
                                 {{-- Location Row --}}
                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div>
@@ -150,17 +171,17 @@
                                             {{ __('messages.checkout.governorate') }} <span class="text-red-500">*</span>
                                         </label>
                                         <select 
-                                            wire:model="governorate"
+                                            wire:model.live="governorate_id"
                                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent
-                                                @error('governorate') border-red-500 @enderror"
+                                                @error('governorate_id') border-red-500 @enderror"
                                             required
                                         >
                                             <option value="">{{ __('messages.checkout.select_governorate') }}</option>
-                                            @foreach($governorates as $key => $value)
-                                                <option value="{{ $key }}">{{ app()->getLocale() === 'ar' ? $value : $key }}</option>
+                                            @foreach($this->governorates as $gov)
+                                                <option value="{{ $gov->id }}">{{ app()->getLocale() === 'ar' ? $gov->name_ar : $gov->name_en }}</option>
                                             @endforeach
                                         </select>
-                                        @error('governorate') 
+                                        @error('governorate_id') 
                                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                         @enderror
                                     </div>
@@ -168,16 +189,26 @@
                                         <label class="block text-sm font-medium text-gray-700 mb-1">
                                             {{ __('messages.checkout.city') }} <span class="text-red-500">*</span>
                                         </label>
-                                        <input 
-                                            type="text" 
-                                            wire:model="city"
+                                        <select 
+                                            wire:model.live="city_id"
                                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-transparent
-                                                @error('city') border-red-500 @enderror"
+                                                @error('city_id') border-red-500 @enderror"
+                                            {{ !$governorate_id ? 'disabled' : '' }}
                                             required
                                         >
-                                        @error('city') 
+                                            <option value="">{{ __('messages.checkout.select_city') }}</option>
+                                            @if($governorate_id)
+                                                @foreach($this->cities as $city)
+                                                    <option value="{{ $city->id }}">{{ app()->getLocale() === 'ar' ? $city->name_ar : $city->name_en }}</option>
+                                                @endforeach
+                                            @endif
+                                        </select>
+                                        @error('city_id') 
                                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                         @enderror
+                                        @if(!$governorate_id)
+                                            <p class="mt-1 text-xs text-gray-500">{{ __('messages.checkout.select_governorate_first') }}</p>
+                                        @endif
                                     </div>
                                 </div>
 
