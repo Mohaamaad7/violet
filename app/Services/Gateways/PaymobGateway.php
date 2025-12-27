@@ -79,28 +79,30 @@ class PaymobGateway implements PaymentGatewayInterface
             ];
         }
 
-        // Test by making a simple API call
+        // Test by making an authenticated API call to verify credentials
         try {
-            $response = Http::withHeaders([
-                'Authorization' => 'Token ' . $this->secretKey,
-                'Content-Type' => 'application/json',
-            ])->get($this->baseUrl . '/api/ecommerce/orders');
+            // Use the /api/auth/tokens endpoint to verify secret key
+            $response = Http::timeout(10)->post($this->baseUrl . '/api/auth/tokens', [
+                'api_key' => $this->secretKey,
+            ]);
 
-            if ($response->successful() || $response->status() === 401) {
-                // 401 means keys are format correct but may need proper auth
-                // successful means API is reachable
+            if ($response->successful() && isset($response->json()['token'])) {
+                // Credentials are valid
                 return [
                     'success' => true,
-                    'message' => 'الاتصال ناجح',
+                    'message' => 'الاتصال ناجح - المفاتيح صحيحة',
                     'has_card_integration' => !empty($this->integrationIdCard),
                     'has_wallet_integration' => !empty($this->integrationIdWallet),
                     'has_kiosk_integration' => !empty($this->integrationIdKiosk),
                 ];
             }
 
+            // Check for specific error messages
+            $errorMessage = $response->json()['message'] ?? $response->json()['detail'] ?? 'بيانات غير صحيحة';
+
             return [
                 'success' => false,
-                'message' => 'فشل الاتصال: ' . ($response->json()['message'] ?? 'خطأ غير معروف'),
+                'message' => 'فشل التحقق: ' . $errorMessage,
             ];
         } catch (\Exception $e) {
             return [
