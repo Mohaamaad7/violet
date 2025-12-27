@@ -18,10 +18,14 @@ class PaymentSetting extends Model
      * Keys that should be encrypted
      */
     protected static array $encryptedKeys = [
+        // Kashier Keys
         'kashier_test_secret_key',
         'kashier_test_api_key',
         'kashier_live_secret_key',
         'kashier_live_api_key',
+        // Paymob Keys
+        'paymob_secret_key',
+        'paymob_hmac_secret',
     ];
 
     // ==================== Get Setting ====================
@@ -126,7 +130,7 @@ class PaymentSetting extends Model
      */
     public static function getEnabledMethods(): array
     {
-        $methods = ['card', 'vodafone_cash', 'orange_money', 'etisalat_cash', 'meeza', 'valu'];
+        $methods = ['card', 'vodafone_cash', 'orange_money', 'etisalat_cash', 'meeza', 'valu', 'kiosk', 'instapay'];
         $enabled = [];
 
         foreach ($methods as $method) {
@@ -152,6 +156,41 @@ class PaymentSetting extends Model
             'merchant_id' => self::get("kashier_{$mode}_mid") ?? env('KASHIER_TEST_MID'),
             'secret_key' => self::get("kashier_{$mode}_secret_key") ?? env('KASHIER_TEST_SECRET_KEY'),
             'api_key' => self::get("kashier_{$mode}_api_key") ?? env('KASHIER_TEST_API_KEY'),
+        ];
+    }
+
+    // ==================== Gateway Selection ====================
+
+    /**
+     * Get the active payment gateway name
+     */
+    public static function getActiveGateway(): string
+    {
+        return self::get('active_gateway', 'kashier');
+    }
+
+    /**
+     * Set the active payment gateway
+     */
+    public static function setActiveGateway(string $gateway): void
+    {
+        self::set('active_gateway', $gateway, 'general');
+    }
+
+    // ==================== Paymob Config ====================
+
+    /**
+     * Get Paymob configuration
+     */
+    public static function getPaymobConfig(): array
+    {
+        return [
+            'secret_key' => self::get('paymob_secret_key'),
+            'public_key' => self::get('paymob_public_key'),
+            'hmac_secret' => self::get('paymob_hmac_secret'),
+            'integration_id_card' => self::get('paymob_integration_id_card'),
+            'integration_id_wallet' => self::get('paymob_integration_id_wallet'),
+            'integration_id_kiosk' => self::get('paymob_integration_id_kiosk'),
         ];
     }
 }

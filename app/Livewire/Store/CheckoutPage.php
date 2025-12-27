@@ -11,6 +11,7 @@ use App\Models\ShippingAddress;
 use App\Services\CartService;
 use App\Services\CouponService;
 use App\Services\EmailService;
+use App\Services\PaymentService;
 use App\Models\PaymentSetting;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cookie;
@@ -24,6 +25,7 @@ class CheckoutPage extends Component
 {
     protected CartService $cartService;
     protected CouponService $couponService;
+    protected PaymentService $paymentService;
 
     // Address Selection (for authenticated users)
     public $selectedAddressId = null;
@@ -34,12 +36,12 @@ class CheckoutPage extends Component
     public $last_name = '';
     public $email = '';
     public $phone = '';
-    
+
     // Geographic Location (New System)
     public $country_id = null;
     public $governorate_id = null;
     public $city_id = null;
-    
+
     // Old fields (kept for backward compatibility during transition)
     public $governorate = '';
     public $city = '';
@@ -77,10 +79,11 @@ class CheckoutPage extends Component
         ];
     }
 
-    public function boot(CartService $cartService, CouponService $couponService)
+    public function boot(CartService $cartService, CouponService $couponService, PaymentService $paymentService)
     {
         $this->cartService = $cartService;
         $this->couponService = $couponService;
+        $this->paymentService = $paymentService;
     }
 
     /**
@@ -126,7 +129,7 @@ class CheckoutPage extends Component
             // Guest user - show form directly
             $this->showAddressForm = true;
         }
-        
+
         // Auto-select Egypt as default country
         if (!$this->country_id) {
             $egypt = \App\Models\Country::where('code', 'EG')->first();
@@ -144,7 +147,7 @@ class CheckoutPage extends Component
         // Reset governorate and city when country changes
         $this->governorate_id = null;
         $this->city_id = null;
-        
+
         // Reset shipping cost
         $this->calculateShippingCost();
     }
@@ -156,7 +159,7 @@ class CheckoutPage extends Component
     {
         // Reset city when governorate changes
         $this->city_id = null;
-        
+
         // Calculate shipping cost from governorate
         $this->calculateShippingCost();
     }
@@ -176,7 +179,7 @@ class CheckoutPage extends Component
     protected function calculateShippingCost(): void
     {
         $this->shippingCost = 50; // Default fallback
-        
+
         if ($this->city_id) {
             $city = \App\Models\City::find($this->city_id);
             if ($city) {
@@ -189,7 +192,7 @@ class CheckoutPage extends Component
                 $this->shippingCost = $governorate->shipping_cost ?? 50;
             }
         }
-        
+
         // Recalculate total
         $this->recalculateTotal();
     }
@@ -212,7 +215,7 @@ class CheckoutPage extends Component
         if (!$this->country_id) {
             return [];
         }
-        
+
         return \App\Models\Governorate::where('country_id', $this->country_id)
             ->where('is_active', true)
             ->orderBy('name_ar')
@@ -227,7 +230,7 @@ class CheckoutPage extends Component
         if (!$this->governorate_id) {
             return [];
         }
-        
+
         return \App\Models\City::where('governorate_id', $this->governorate_id)
             ->where('is_active', true)
             ->orderBy('name_ar')
@@ -379,13 +382,13 @@ class CheckoutPage extends Component
     }
 
     /**
-     * Get enabled payment methods from settings
+     * Get enabled payment methods from the active payment gateway
      */
     protected function getPaymentMethods(): array
     {
         $methods = [];
 
-        // Cash on Delivery
+        // Cash on Delivery (always available if enabled)
         if (PaymentSetting::get('payment_cod_enabled', true)) {
             $methods[] = [
                 'key' => 'cod',
@@ -395,37 +398,42 @@ class CheckoutPage extends Component
             ];
         }
 
-        // Card Payment
-        if (PaymentSetting::get('payment_card_enabled', false)) {
-            $methods[] = [
-                'key' => 'card',
-                'name' => 'البطاقة البنكية',
-                'description' => 'Visa, Mastercard, Meeza',
-                'icon' => '💳',
-            ];
-        }
+        // Get online payment methods from the active gateway
+        try {
+            $gatewayMethods = $this->paymentService->getEnabledMethods();
 
-        // Vodafone Cash
-        if (PaymentSetting::get('payment_vodafone_cash_enabled', false)) {
-            $methods[] = [
-                'key' => 'vodafone_cash',
-                'name' => 'فودافون كاش',
-                'description' => 'ادفع عبر محفظة فودافون',
-                'icon' => '📱',
-            ];
-        }
-
-        // Meeza
-        if (PaymentSetting::get('payment_meeza_enabled', false)) {
-            $methods[] = [
-                'key' => 'meeza',
-                'name' => 'ميزة',
-                'description' => 'ادفع ببطاقة ميزة',
-                'icon' => '🏦',
-            ];
+            foreach ($gatewayMethods as $key => $method) {
+                $methods[] = [
+                    'key' => $key,
+                    'name' => $method['name'],
+                    'description' => $method['description'] ?? '',
+                    'icon' => $this->getMethodIcon($key),
+                ];
+            }
+        } catch (\Exception $e) {
+            // If gateway not configured, only show COD
+            \Log::warning('Could not get payment methods from gateway', ['error' => $e->getMessage()]);
         }
 
         return $methods;
+    }
+
+    /**
+     * Get icon for payment method
+     */
+    protected function getMethodIcon(string $method): string
+    {
+        return match ($method) {
+            'card' => '💳',
+            'meeza' => '🏦',
+            'vodafone_cash', 'wallet' => '📱',
+            'orange_money' => '🍊',
+            'etisalat_cash' => '📞',
+            'valu' => '🛒',
+            'kiosk' => '🏪',
+            'instapay' => '🏛️',
+            default => '💳',
+        };
     }
 
     /**
@@ -508,8 +516,8 @@ class CheckoutPage extends Component
             }
         }
 
-        // Validate payment method
-        $validMethods = ['cod', 'card', 'vodafone_cash', 'meeza', 'orange_money', 'etisalat_cash'];
+        // Validate payment method - allow COD and any method from the active gateway
+        $validMethods = ['cod', 'card', 'meeza', 'vodafone_cash', 'wallet', 'orange_money', 'etisalat_cash', 'kiosk', 'instapay', 'valu'];
         if (!in_array($this->paymentMethod, $validMethods)) {
             $this->dispatch('show-toast', [
                 'message' => __('messages.checkout.invalid_payment'),
@@ -693,14 +701,16 @@ class CheckoutPage extends Component
 
             // Online payment: redirect to payment processor
             if ($isOnlinePayment) {
-                return redirect()->route('payment.process', [
+                // Use Livewire's redirect method
+                $this->redirectRoute('payment.process', [
                     'order' => $order->id,
                     'method' => $this->paymentMethod
                 ]);
+                return;
             }
 
             // COD: redirect to success page
-            return redirect()->route('checkout.success', ['order' => $order->id]);
+            $this->redirectRoute('checkout.success', ['order' => $order->id]);
 
         } catch (\Exception $e) {
             // Transaction automatically rolled back

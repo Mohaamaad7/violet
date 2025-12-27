@@ -88,19 +88,38 @@ Route::prefix('admin/stock-counts')->middleware(['auth'])->name('admin.stock-cou
 });
 
 // ========================================
-// Payment Routes (Kashier Integration)
+// Payment Routes (Multi-Gateway Support)
 // ========================================
 Route::prefix('payment')->name('payment.')->group(function () {
     // Select payment method page
     Route::get('/checkout/{order}', [App\Http\Controllers\PaymentController::class, 'selectMethod'])
         ->name('select');
 
-    // Process payment - redirect to Kashier
+    // Process payment - redirect to active gateway
     Route::match(['get', 'post'], '/process/{order}', [App\Http\Controllers\PaymentController::class, 'process'])
         ->name('process')
-        ->middleware('throttle:5,1'); // Rate limit: 5 requests/minute
+        ->middleware('throttle:5,1');
 
-    // Callback from Kashier (user redirect)
+    // ============ Kashier Callbacks ============
+    Route::prefix('kashier')->name('kashier.')->group(function () {
+        Route::get('/callback', [App\Http\Controllers\PaymentController::class, 'kashierCallback'])
+            ->name('callback');
+        Route::post('/webhook', [App\Http\Controllers\PaymentController::class, 'kashierWebhook'])
+            ->name('webhook')
+            ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
+    });
+
+    // ============ Paymob Callbacks ============
+    Route::prefix('paymob')->name('paymob.')->group(function () {
+        Route::get('/callback', [App\Http\Controllers\PaymentController::class, 'paymobCallback'])
+            ->name('callback');
+        Route::post('/webhook', [App\Http\Controllers\PaymentController::class, 'paymobWebhook'])
+            ->name('webhook')
+            ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
+    });
+
+    // ============ Legacy Callbacks (Backwards Compatibility) ============
+    // @deprecated - Use gateway-specific callbacks instead
     Route::get('/callback', [App\Http\Controllers\PaymentController::class, 'callback'])
         ->name('callback');
 
@@ -113,7 +132,8 @@ Route::prefix('payment')->name('payment.')->group(function () {
         ->name('failed');
 });
 
-// Kashier Webhook (no CSRF, async notification)
+// Legacy Webhook Route (backwards compatibility)
+// @deprecated - Use gateway-specific webhooks instead
 Route::post('/webhooks/kashier', [App\Http\Controllers\PaymentController::class, 'webhook'])
     ->name('payment.webhook')
     ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
