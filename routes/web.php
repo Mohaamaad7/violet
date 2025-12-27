@@ -111,8 +111,10 @@ Route::prefix('payment')->name('payment.')->group(function () {
 
     // ============ Paymob Callbacks ============
     Route::prefix('paymob')->name('paymob.')->group(function () {
-        Route::get('/callback', [App\Http\Controllers\PaymentController::class, 'paymobCallback'])
-            ->name('callback');
+        // Callback can be GET or POST depending on Paymob configuration
+        Route::match(['get', 'post'], '/callback', [App\Http\Controllers\PaymentController::class, 'paymobCallback'])
+            ->name('callback')
+            ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
         Route::post('/webhook', [App\Http\Controllers\PaymentController::class, 'paymobWebhook'])
             ->name('webhook')
             ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);

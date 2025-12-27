@@ -103,13 +103,37 @@ class OrdersTable
                 TextColumn::make('payment_method')
                     ->label(__('admin.table.payment_method'))
                     ->badge()
-                    ->formatStateUsing(fn(string $state): string => match ($state) {
+                    ->formatStateUsing(fn(?string $state): string => match ($state) {
                         'cod' => __('admin.orders.method.cod'),
                         'card' => __('admin.orders.method.card'),
+                        'wallet' => 'محفظة إلكترونية',
+                        'vodafone_cash' => 'فودافون كاش',
+                        'orange_money' => 'أورانج موني',
+                        'etisalat_cash' => 'اتصالات كاش',
+                        'kiosk' => 'فوري/أمان',
+                        'meeza' => 'ميزة',
                         'instapay' => 'InstaPay',
+                        'valu' => 'ڤاليو',
+                        null => '-',
                         default => $state,
                     })
-                    ->color('info')
+                    ->icon(fn(?string $state): ?string => match ($state) {
+                        'cod' => 'heroicon-o-banknotes',
+                        'card' => 'heroicon-o-credit-card',
+                        'wallet', 'vodafone_cash', 'orange_money', 'etisalat_cash' => 'heroicon-o-device-phone-mobile',
+                        'kiosk' => 'heroicon-o-building-storefront',
+                        'meeza' => 'heroicon-o-credit-card',
+                        'instapay' => 'heroicon-o-building-library',
+                        default => null,
+                    })
+                    ->color(fn(?string $state): string => match ($state) {
+                        'cod' => 'gray',
+                        'card', 'meeza' => 'info',
+                        'wallet', 'vodafone_cash', 'orange_money', 'etisalat_cash' => 'success',
+                        'kiosk' => 'warning',
+                        'instapay' => 'primary',
+                        default => 'gray',
+                    })
                     ->toggleable(),
 
                 // حالة المرتجع (Return Status Badge)
@@ -191,7 +215,11 @@ class OrdersTable
                     ->options([
                         'cod' => __('admin.orders.method.cod'),
                         'card' => __('admin.orders.method.card'),
-                        'instapay' => __('admin.orders.method.instapay'),
+                        'wallet' => 'محفظة إلكترونية',
+                        'vodafone_cash' => 'فودافون كاش',
+                        'kiosk' => 'فوري/أمان',
+                        'meeza' => 'ميزة',
+                        'instapay' => 'InstaPay',
                     ])
                     ->placeholder(__('admin.filter.all'))
                     ->columnSpan(1),
