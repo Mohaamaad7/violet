@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\Log;
  */
 class PaymobGateway implements PaymentGatewayInterface
 {
+    protected string $apiKey;
     protected string $secretKey;
     protected string $publicKey;
     protected string $hmacSecret;
@@ -33,6 +34,7 @@ class PaymobGateway implements PaymentGatewayInterface
     {
         $config = PaymentSetting::getPaymobConfig();
 
+        $this->apiKey = $config['api_key'] ?? '';
         $this->secretKey = $config['secret_key'] ?? '';
         $this->publicKey = $config['public_key'] ?? '';
         $this->hmacSecret = $config['hmac_secret'] ?? '';
@@ -64,7 +66,7 @@ class PaymobGateway implements PaymentGatewayInterface
      */
     public function isConfigured(): bool
     {
-        return !empty($this->secretKey) && !empty($this->publicKey);
+        return !empty($this->apiKey) && !empty($this->secretKey) && !empty($this->publicKey);
     }
 
     /**
@@ -75,15 +77,15 @@ class PaymobGateway implements PaymentGatewayInterface
         if (!$this->isConfigured()) {
             return [
                 'success' => false,
-                'message' => 'بيانات Paymob غير مكتملة (Secret Key و Public Key مطلوبين)',
+                'message' => 'بيانات Paymob غير مكتملة (API Key و Secret Key و Public Key مطلوبين)',
             ];
         }
 
         // Test by making an authenticated API call to verify credentials
         try {
-            // Use the /api/auth/tokens endpoint to verify secret key
+            // Use the /api/auth/tokens endpoint to verify API key
             $response = Http::timeout(10)->post($this->baseUrl . '/api/auth/tokens', [
-                'api_key' => $this->secretKey,
+                'api_key' => $this->apiKey,
             ]);
 
             if ($response->successful() && isset($response->json()['token'])) {

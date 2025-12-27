@@ -57,6 +57,7 @@ class PaymentSettings extends Page implements HasForms
             'kashier_live_api_key' => PaymentSetting::get('kashier_live_api_key'),
 
             // Paymob Settings
+            'paymob_api_key' => PaymentSetting::get('paymob_api_key'),
             'paymob_secret_key' => PaymentSetting::get('paymob_secret_key'),
             'paymob_public_key' => PaymentSetting::get('paymob_public_key'),
             'paymob_hmac_secret' => PaymentSetting::get('paymob_hmac_secret'),
@@ -174,14 +175,21 @@ class PaymentSettings extends Page implements HasForms
                     ->description('بيانات الاتصال ببوابة الدفع Paymob (Accept)')
                     ->schema([
                         Section::make('مفاتيح API')
-                            ->description('احصل على هذه المفاتيح من لوحة تحكم Paymob')
+                            ->description('احصل على هذه المفاتيح من لوحة تحكم Paymob → Settings → Account Info')
                             ->schema([
+                                TextInput::make('paymob_api_key')
+                                    ->label('API Key')
+                                    ->password()
+                                    ->revealable()
+                                    ->helperText('مفتاح API للمصادقة (Legacy APIs)')
+                                    ->columnSpan(2),
+
                                 TextInput::make('paymob_secret_key')
                                     ->label('Secret Key')
                                     ->password()
                                     ->revealable()
                                     ->placeholder('sk_...')
-                                    ->helperText('المفتاح السري من Dashboard → API Settings')
+                                    ->helperText('المفتاح السري للـ Intention API')
                                     ->columnSpan(1),
 
                                 TextInput::make('paymob_public_key')
@@ -296,6 +304,9 @@ class PaymentSettings extends Page implements HasForms
         }
 
         // Paymob Settings (only save if present in form data)
+        if (array_key_exists('paymob_api_key', $data)) {
+            PaymentSetting::set('paymob_api_key', $data['paymob_api_key'], 'paymob');
+        }
         if (array_key_exists('paymob_secret_key', $data)) {
             PaymentSetting::set('paymob_secret_key', $data['paymob_secret_key'], 'paymob');
         }

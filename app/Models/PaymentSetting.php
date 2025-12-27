@@ -24,6 +24,7 @@ class PaymentSetting extends Model
         'kashier_live_secret_key',
         'kashier_live_api_key',
         // Paymob Keys
+        'paymob_api_key',
         'paymob_secret_key',
         'paymob_hmac_secret',
     ];
@@ -185,6 +186,7 @@ class PaymentSetting extends Model
     public static function getPaymobConfig(): array
     {
         return [
+            'api_key' => self::get('paymob_api_key'),
             'secret_key' => self::get('paymob_secret_key'),
             'public_key' => self::get('paymob_public_key'),
             'hmac_secret' => self::get('paymob_hmac_secret'),
