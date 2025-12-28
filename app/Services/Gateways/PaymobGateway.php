@@ -249,10 +249,11 @@ class PaymobGateway implements PaymentGatewayInterface
      */
     public function handleCallback(array $data): array
     {
-        Log::info('Paymob: Processing callback', ['data' => $data]);
+        // Log ALL received data for debugging
+        Log::info('Paymob: Raw callback data', ['all_data' => $data, 'keys' => array_keys($data)]);
 
-        // Validate HMAC signature
-        if (!$this->validateSignature($data)) {
+        // Validate HMAC signature (skip if no hmac - some callbacks don't have it)
+        if (isset($data['hmac']) && !$this->validateSignature($data)) {
             Log::warning('Paymob: Invalid callback HMAC', $data);
             return [
                 'success' => false,
@@ -261,23 +262,42 @@ class PaymobGateway implements PaymentGatewayInterface
         }
 
         // Extract payment info from callback
-        // Paymob sends data in query params or as JSON
-        $success = $data['success'] ?? $data['data_message'] === 'Approved' ?? false;
+        // Paymob Unified Checkout sends data in various formats
+        $success = $data['success'] ?? false;
         $transactionId = $data['id'] ?? $data['transaction_id'] ?? null;
         $orderId = $data['order'] ?? $data['order_id'] ?? null;
         $merchantOrderId = $data['merchant_order_id'] ?? $data['special_reference'] ?? null;
         $amountCents = $data['amount_cents'] ?? null;
 
-        // Find payment by merchant_order_id or reference
+        // Also try to get intention_id from the URL parameters
+        $intentionId = $data['intention'] ?? $data['payment_intention'] ?? null;
+
+        Log::info('Paymob: Parsed callback values', [
+            'success' => $success,
+            'transactionId' => $transactionId,
+            'orderId' => $orderId,
+            'merchantOrderId' => $merchantOrderId,
+            'intentionId' => $intentionId,
+        ]);
+
+        // Find payment by multiple criteria
         $payment = Payment::where('reference', $merchantOrderId)
-            ->orWhere('gateway_order_id', $orderId)
-            ->orWhereJsonContains('metadata->intention_id', $orderId)
+            ->when($orderId, fn($q) => $q->orWhere('gateway_order_id', $orderId))
+            ->when($intentionId, fn($q) => $q->orWhereJsonContains('metadata->intention_id', $intentionId))
             ->first();
+
+        // If still not found, try to find by gateway_order_id matching any of the IDs
+        if (!$payment && $transactionId) {
+            $payment = Payment::where('gateway_transaction_id', $transactionId)->first();
+        }
 
         if (!$payment) {
             Log::error('Paymob: Payment not found for callback', [
                 'merchant_order_id' => $merchantOrderId,
                 'order_id' => $orderId,
+                'transaction_id' => $transactionId,
+                'intention_id' => $intentionId,
+                'all_keys' => array_keys($data),
             ]);
             return [
                 'success' => false,
