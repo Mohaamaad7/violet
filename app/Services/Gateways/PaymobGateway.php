@@ -514,7 +514,8 @@ class PaymobGateway implements PaymentGatewayInterface
      */
     public function getCallbackUrl(): string
     {
-        return route('payment.paymob.callback');
+        // Use url() instead of route() to ensure correct domain
+        return url('/payment/paymob/callback');
     }
 
     /**
@@ -522,7 +523,7 @@ class PaymobGateway implements PaymentGatewayInterface
      */
     public function getWebhookUrl(): string
     {
-        return route('payment.paymob.webhook');
+        return url('/payment/paymob/webhook');
     }
 
     // ==================== Helper Methods ====================
