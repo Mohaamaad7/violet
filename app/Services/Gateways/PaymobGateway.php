@@ -672,6 +672,14 @@ class PaymobGateway implements PaymentGatewayInterface
             'notification_url' => $this->getWebhookUrl(),
         ];
 
+        Log::info('Paymob: Intention payload being sent', [
+            'redirection_url' => $payload['redirection_url'],
+            'notification_url' => $payload['notification_url'],
+            'special_reference' => $payload['special_reference'],
+            'amount' => $payload['amount'],
+            'integration_id' => $integrationId,
+        ]);
+
         try {
             $response = Http::withHeaders([
                 'Authorization' => 'Token ' . $this->secretKey,
