@@ -218,11 +218,11 @@ class PaymobGateway implements PaymentGatewayInterface
                 // (Paymob Unified Checkout doesn't send query params in redirect)
                 session(['pending_payment_reference' => $payment->reference]);
 
-                Log::info('Paymob: Payment initiated', [
+                Log::error('Paymob: Payment initiated', [ // Changed to error
                     'payment_id' => $payment->id,
                     'order_id' => $order->id,
                     'amount' => $order->total,
-                    'amount_cents' => $this->toCents($order->total),
+                    'amount_cents' => $this->toCents((float) $order->total),
                     'method' => $method,
                     'integration_id' => $integrationId,
                     'session_ref' => $payment->reference,

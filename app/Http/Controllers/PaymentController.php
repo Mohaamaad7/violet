@@ -115,7 +115,7 @@ class PaymentController extends Controller
      */
     public function paymobCallback(Request $request)
     {
-        Log::info('Paymob callback received', [
+        Log::error('Paymob callback received', [
             'query_string' => $request->getQueryString(),
             'all_data' => $request->all(),
             'session_payment_ref' => session('pending_payment_reference'),
@@ -141,7 +141,7 @@ class PaymentController extends Controller
                 ->first();
 
             if ($payment) {
-                Log::info('Paymob: Found payment from session', [
+                Log::error('Paymob: Found payment from session', [
                     'payment_id' => $payment->id,
                     'reference' => $paymentReference,
                     'status' => $payment->status,
@@ -179,7 +179,7 @@ class PaymentController extends Controller
         }
 
         // No payment found - redirect to home with error
-        Log::warning('Paymob: No payment found for callback redirect');
+        Log::error('Paymob: No payment found for callback redirect - FALLBACK FAILED');
 
         return redirect()->route('home')
             ->with('error', 'لم نتمكن من العثور على الطلب. يرجى التحقق من حسابك.');
@@ -190,7 +190,7 @@ class PaymentController extends Controller
      */
     public function paymobWebhook(Request $request)
     {
-        Log::info('Paymob webhook received', $request->all());
+        Log::error('Paymob webhook received', $request->all());
 
         $result = $this->paymentService->handleWebhook('paymob', $request->all());
 
