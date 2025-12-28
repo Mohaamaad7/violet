@@ -263,7 +263,7 @@ class PaymobGateway implements PaymentGatewayInterface
 
         // Validate HMAC signature (skip if no hmac - Unified Checkout may not send it in redirect)
         if (isset($data['hmac']) && !$this->validateSignature($data)) {
-            Log::warning('Paymob: Invalid callback HMAC', $data);
+            Log::error('Paymob: Invalid callback HMAC', $data);
             return [
                 'success' => false,
                 'error' => 'Invalid HMAC signature',
@@ -277,7 +277,7 @@ class PaymobGateway implements PaymentGatewayInterface
         $paymentKeyClaims = null;
         if (isset($data['payment_key_claims']) && is_string($data['payment_key_claims'])) {
             $paymentKeyClaims = json_decode($data['payment_key_claims'], true);
-            Log::info('Paymob: Decoded payment_key_claims', ['claims' => $paymentKeyClaims]);
+            Log::error('Paymob: Decoded payment_key_claims', ['claims' => $paymentKeyClaims]);
         }
 
         // Extract values with fallbacks
@@ -290,7 +290,7 @@ class PaymobGateway implements PaymentGatewayInterface
         $intentionId = $data['intention'] ?? $data['payment_intention'] ?? null;
         $amountCents = $data['amount_cents'] ?? ($paymentKeyClaims['amount_cents'] ?? null);
 
-        Log::info('Paymob: Parsed callback values', [
+        Log::error('Paymob: Parsed callback values', [
             'success' => $success,
             'transactionId' => $transactionId,
             'orderId' => $orderId,
@@ -306,7 +306,7 @@ class PaymobGateway implements PaymentGatewayInterface
         if ($merchantOrderId) {
             $payment = Payment::where('reference', $merchantOrderId)->first();
             if ($payment) {
-                Log::info('Paymob: Found payment by reference', ['payment_id' => $payment->id]);
+                Log::error('Paymob: Found payment by reference', ['payment_id' => $payment->id]);
             }
         }
 
@@ -314,7 +314,7 @@ class PaymobGateway implements PaymentGatewayInterface
         if (!$payment && $orderId) {
             $payment = Payment::where('gateway_order_id', $orderId)->first();
             if ($payment) {
-                Log::info('Paymob: Found payment by gateway_order_id', ['payment_id' => $payment->id]);
+                Log::error('Paymob: Found payment by gateway_order_id', ['payment_id' => $payment->id]);
             }
         }
 
@@ -322,7 +322,7 @@ class PaymobGateway implements PaymentGatewayInterface
         if (!$payment && $intentionId) {
             $payment = Payment::whereJsonContains('metadata->intention_id', $intentionId)->first();
             if ($payment) {
-                Log::info('Paymob: Found payment by intention_id', ['payment_id' => $payment->id]);
+                Log::error('Paymob: Found payment by intention_id', ['payment_id' => $payment->id]);
             }
         }
 
@@ -332,7 +332,7 @@ class PaymobGateway implements PaymentGatewayInterface
                 ->orWhere('gateway_transaction_id', $transactionId)
                 ->first();
             if ($payment) {
-                Log::info('Paymob: Found payment by transaction_id', ['payment_id' => $payment->id]);
+                Log::error('Paymob: Found payment by transaction_id', ['payment_id' => $payment->id]);
             }
         }
 
@@ -346,7 +346,7 @@ class PaymobGateway implements PaymentGatewayInterface
                 ->orderBy('created_at', 'desc')
                 ->first();
             if ($payment) {
-                Log::warning('Paymob: Found payment by amount fallback', [
+                Log::error('Paymob: Found payment by amount fallback', [
                     'payment_id' => $payment->id,
                     'amount' => $amountEgp,
                 ]);
@@ -376,7 +376,7 @@ class PaymobGateway implements PaymentGatewayInterface
 
         // Idempotency check
         if ($payment->status === 'completed') {
-            Log::info('Paymob: Payment already completed (idempotency)', ['payment_id' => $payment->id]);
+            Log::error('Paymob: Payment already completed (idempotency)', ['payment_id' => $payment->id]);
             return [
                 'success' => true,
                 'payment' => $payment,
@@ -404,7 +404,7 @@ class PaymobGateway implements PaymentGatewayInterface
             // Send confirmation emails
             $this->sendConfirmationEmails($payment);
 
-            Log::info('Paymob: Payment completed', [
+            Log::error('Paymob: Payment completed', [
                 'payment_id' => $payment->id,
                 'transaction_id' => $transactionId,
             ]);
@@ -421,7 +421,7 @@ class PaymobGateway implements PaymentGatewayInterface
             $failCode = $data['txn_response_code'] ?? null;
             $payment->markAsFailed($failReason, $failCode, $data);
 
-            Log::warning('Paymob: Payment failed', [
+            Log::error('Paymob: Payment failed', [
                 'payment_id' => $payment->id,
                 'reason' => $failReason,
             ]);
