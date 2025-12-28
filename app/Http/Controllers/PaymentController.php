@@ -115,39 +115,74 @@ class PaymentController extends Controller
      */
     public function paymobCallback(Request $request)
     {
-        // Log EVERYTHING for debugging
-        Log::info('Paymob callback - RAW DEBUG', [
-            'full_url' => $request->fullUrl(),
+        Log::info('Paymob callback received', [
             'query_string' => $request->getQueryString(),
-            'method' => $request->method(),
-            'raw_content' => $request->getContent(),
-            'query_params' => $request->query(),
-            'post_data' => $request->post(),
             'all_data' => $request->all(),
-            'server_query' => $_SERVER['QUERY_STRING'] ?? 'not-set',
-            'request_uri' => $_SERVER['REQUEST_URI'] ?? 'not-set',
+            'session_payment_ref' => session('pending_payment_reference'),
         ]);
 
-        // Try to parse query string manually if all() is empty
         $data = $request->all();
 
-        if (empty($data) && !empty($request->getQueryString())) {
-            parse_str($request->getQueryString(), $data);
-            Log::info('Paymob: Manually parsed query string', ['parsed_data' => $data]);
+        // If we have query parameters, use them
+        if (!empty($data)) {
+            $result = $this->paymentService->handleCallback('paymob', $data);
+            return $this->handleCallbackResult($result);
         }
 
-        // Also try from REQUEST_URI
-        if (empty($data) && isset($_SERVER['REQUEST_URI'])) {
-            $urlParts = parse_url($_SERVER['REQUEST_URI']);
-            if (isset($urlParts['query'])) {
-                parse_str($urlParts['query'], $data);
-                Log::info('Paymob: Parsed from REQUEST_URI', ['parsed_data' => $data]);
+        // Paymob Unified Checkout does NOT send query parameters in redirect!
+        // We need to find the payment another way:
+
+        // Option 1: Use session-stored payment reference
+        $paymentReference = session('pending_payment_reference');
+
+        if ($paymentReference) {
+            $payment = \App\Models\Payment::where('reference', $paymentReference)
+                ->where('gateway', 'paymob')
+                ->first();
+
+            if ($payment) {
+                Log::info('Paymob: Found payment from session', [
+                    'payment_id' => $payment->id,
+                    'reference' => $paymentReference,
+                    'status' => $payment->status,
+                ]);
+
+                // Clear session
+                session()->forget('pending_payment_reference');
+
+                // If payment is already completed (by webhook), redirect to success
+                if ($payment->status === 'completed') {
+                    return redirect()->route('checkout.success', $payment->order_id);
+                }
+
+                // If still pending, wait a moment for webhook then redirect
+                // The webhook should update the status - we just show waiting page or redirect
+                return redirect()->route('checkout.success', $payment->order_id)
+                    ->with('payment_pending', true);
             }
         }
 
-        $result = $this->paymentService->handleCallback('paymob', $data);
+        // Option 2: Find most recent pending payment for this session/user
+        $recentPayment = \App\Models\Payment::where('gateway', 'paymob')
+            ->whereIn('status', ['pending', 'processing', 'completed'])
+            ->where('created_at', '>', now()->subMinutes(30))
+            ->orderBy('created_at', 'desc')
+            ->first();
 
-        return $this->handleCallbackResult($result);
+        if ($recentPayment) {
+            Log::info('Paymob: Found recent payment', [
+                'payment_id' => $recentPayment->id,
+                'status' => $recentPayment->status,
+            ]);
+
+            return redirect()->route('checkout.success', $recentPayment->order_id);
+        }
+
+        // No payment found - redirect to home with error
+        Log::warning('Paymob: No payment found for callback redirect');
+
+        return redirect()->route('home')
+            ->with('error', 'لم نتمكن من العثور على الطلب. يرجى التحقق من حسابك.');
     }
 
     /**
