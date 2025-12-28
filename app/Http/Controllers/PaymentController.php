@@ -115,20 +115,37 @@ class PaymentController extends Controller
      */
     public function paymobCallback(Request $request)
     {
-        // Log ALL request data for debugging Unified Checkout
-        Log::info('Paymob callback - FULL DEBUG', [
+        // Log EVERYTHING for debugging
+        Log::info('Paymob callback - RAW DEBUG', [
+            'full_url' => $request->fullUrl(),
+            'query_string' => $request->getQueryString(),
+            'method' => $request->method(),
+            'raw_content' => $request->getContent(),
             'query_params' => $request->query(),
             'post_data' => $request->post(),
             'all_data' => $request->all(),
-            'url' => $request->fullUrl(),
-            'method' => $request->method(),
-            'headers' => [
-                'content-type' => $request->header('Content-Type'),
-                'user-agent' => $request->header('User-Agent'),
-            ],
+            'server_query' => $_SERVER['QUERY_STRING'] ?? 'not-set',
+            'request_uri' => $_SERVER['REQUEST_URI'] ?? 'not-set',
         ]);
 
-        $result = $this->paymentService->handleCallback('paymob', $request->all());
+        // Try to parse query string manually if all() is empty
+        $data = $request->all();
+
+        if (empty($data) && !empty($request->getQueryString())) {
+            parse_str($request->getQueryString(), $data);
+            Log::info('Paymob: Manually parsed query string', ['parsed_data' => $data]);
+        }
+
+        // Also try from REQUEST_URI
+        if (empty($data) && isset($_SERVER['REQUEST_URI'])) {
+            $urlParts = parse_url($_SERVER['REQUEST_URI']);
+            if (isset($urlParts['query'])) {
+                parse_str($urlParts['query'], $data);
+                Log::info('Paymob: Parsed from REQUEST_URI', ['parsed_data' => $data]);
+            }
+        }
+
+        $result = $this->paymentService->handleCallback('paymob', $data);
 
         return $this->handleCallbackResult($result);
     }
