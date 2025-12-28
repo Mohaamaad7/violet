@@ -251,7 +251,7 @@ class PaymobGateway implements PaymentGatewayInterface
     {
         // Log ALL received data for debugging
         Log::info('Paymob: Raw callback data', [
-            'all_data' => $data, 
+            'all_data' => $data,
             'keys' => array_keys($data),
             'data_types' => array_map('gettype', $data),
         ]);
@@ -267,20 +267,20 @@ class PaymobGateway implements PaymentGatewayInterface
 
         // Extract payment info from callback
         // Paymob Unified Checkout sends data in query parameters
-        
+
         // Try to extract from payment_key_claims (new Unified Checkout format)
         $paymentKeyClaims = null;
         if (isset($data['payment_key_claims']) && is_string($data['payment_key_claims'])) {
             $paymentKeyClaims = json_decode($data['payment_key_claims'], true);
             Log::info('Paymob: Decoded payment_key_claims', ['claims' => $paymentKeyClaims]);
         }
-        
+
         // Extract values with fallbacks
-        $success = $data['success'] ?? ($data['txn_response_code'] == '200' ?? false);
+        $success = $data['success'] ?? (isset($data['txn_response_code']) && $data['txn_response_code'] == '200') ?? false;
         $transactionId = $data['id'] ?? $data['transaction_id'] ?? $data['txn_id'] ?? null;
         $orderId = $data['order'] ?? $data['order_id'] ?? ($paymentKeyClaims['order_id'] ?? null);
-        $merchantOrderId = $data['merchant_order_id'] 
-            ?? $data['special_reference'] 
+        $merchantOrderId = $data['merchant_order_id']
+            ?? $data['special_reference']
             ?? ($paymentKeyClaims['merchant_order_id'] ?? null);
         $intentionId = $data['intention'] ?? $data['payment_intention'] ?? null;
         $amountCents = $data['amount_cents'] ?? ($paymentKeyClaims['amount_cents'] ?? null);
@@ -296,7 +296,7 @@ class PaymobGateway implements PaymentGatewayInterface
 
         // Find payment by multiple criteria with better query logic
         $payment = null;
-        
+
         // Try 1: Find by merchant_order_id (payment reference)
         if ($merchantOrderId) {
             $payment = Payment::where('reference', $merchantOrderId)->first();
@@ -304,7 +304,7 @@ class PaymobGateway implements PaymentGatewayInterface
                 Log::info('Paymob: Found payment by reference', ['payment_id' => $payment->id]);
             }
         }
-        
+
         // Try 2: Find by order_id in gateway_order_id
         if (!$payment && $orderId) {
             $payment = Payment::where('gateway_order_id', $orderId)->first();
@@ -312,7 +312,7 @@ class PaymobGateway implements PaymentGatewayInterface
                 Log::info('Paymob: Found payment by gateway_order_id', ['payment_id' => $payment->id]);
             }
         }
-        
+
         // Try 3: Find by intention_id in metadata
         if (!$payment && $intentionId) {
             $payment = Payment::whereJsonContains('metadata->intention_id', $intentionId)->first();
@@ -320,7 +320,7 @@ class PaymobGateway implements PaymentGatewayInterface
                 Log::info('Paymob: Found payment by intention_id', ['payment_id' => $payment->id]);
             }
         }
-        
+
         // Try 4: Find by transaction_id
         if (!$payment && $transactionId) {
             $payment = Payment::where('transaction_id', $transactionId)
@@ -330,7 +330,7 @@ class PaymobGateway implements PaymentGatewayInterface
                 Log::info('Paymob: Found payment by transaction_id', ['payment_id' => $payment->id]);
             }
         }
-        
+
         // Try 5: Last resort - find recent pending payment for same amount
         if (!$payment && $amountCents) {
             $amountEgp = $amountCents / 100;
