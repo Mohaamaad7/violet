@@ -1,0 +1,17 @@
+--- a/app/Http/Controllers/PaymentController.php
++++ b/app/Http/Controllers/PaymentController.php
+@@ -115,7 +115,14 @@ class PaymentController extends Controller
+      */
+     public function paymobCallback(Request $request)
+     {
+-        Log::info('Paymob callback received', $request->all());
++        // Log ALL request data for debugging
++        Log::info('Paymob callback - FULL DEBUG', [
++            'query_params' => $request->query(),
++            'post_data' => $request->post(),
++            'all_data' => $request->all(),
++            'url' => $request->fullUrl(),
++            'method' => $request->method(),
++        ]);
+ 
+         $result = $this->paymentService->handleCallback('paymob', $request->all());

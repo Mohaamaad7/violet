@@ -250,9 +250,13 @@ class PaymobGateway implements PaymentGatewayInterface
     public function handleCallback(array $data): array
     {
         // Log ALL received data for debugging
-        Log::info('Paymob: Raw callback data', ['all_data' => $data, 'keys' => array_keys($data)]);
+        Log::info('Paymob: Raw callback data', [
+            'all_data' => $data, 
+            'keys' => array_keys($data),
+            'data_types' => array_map('gettype', $data),
+        ]);
 
-        // Validate HMAC signature (skip if no hmac - some callbacks don't have it)
+        // Validate HMAC signature (skip if no hmac - Unified Checkout may not send it in redirect)
         if (isset($data['hmac']) && !$this->validateSignature($data)) {
             Log::warning('Paymob: Invalid callback HMAC', $data);
             return [
@@ -262,15 +266,24 @@ class PaymobGateway implements PaymentGatewayInterface
         }
 
         // Extract payment info from callback
-        // Paymob Unified Checkout sends data in various formats
-        $success = $data['success'] ?? false;
-        $transactionId = $data['id'] ?? $data['transaction_id'] ?? null;
-        $orderId = $data['order'] ?? $data['order_id'] ?? null;
-        $merchantOrderId = $data['merchant_order_id'] ?? $data['special_reference'] ?? null;
-        $amountCents = $data['amount_cents'] ?? null;
-
-        // Also try to get intention_id from the URL parameters
+        // Paymob Unified Checkout sends data in query parameters
+        
+        // Try to extract from payment_key_claims (new Unified Checkout format)
+        $paymentKeyClaims = null;
+        if (isset($data['payment_key_claims']) && is_string($data['payment_key_claims'])) {
+            $paymentKeyClaims = json_decode($data['payment_key_claims'], true);
+            Log::info('Paymob: Decoded payment_key_claims', ['claims' => $paymentKeyClaims]);
+        }
+        
+        // Extract values with fallbacks
+        $success = $data['success'] ?? ($data['txn_response_code'] == '200' ?? false);
+        $transactionId = $data['id'] ?? $data['transaction_id'] ?? $data['txn_id'] ?? null;
+        $orderId = $data['order'] ?? $data['order_id'] ?? ($paymentKeyClaims['order_id'] ?? null);
+        $merchantOrderId = $data['merchant_order_id'] 
+            ?? $data['special_reference'] 
+            ?? ($paymentKeyClaims['merchant_order_id'] ?? null);
         $intentionId = $data['intention'] ?? $data['payment_intention'] ?? null;
+        $amountCents = $data['amount_cents'] ?? ($paymentKeyClaims['amount_cents'] ?? null);
 
         Log::info('Paymob: Parsed callback values', [
             'success' => $success,
@@ -278,26 +291,77 @@ class PaymobGateway implements PaymentGatewayInterface
             'orderId' => $orderId,
             'merchantOrderId' => $merchantOrderId,
             'intentionId' => $intentionId,
+            'amountCents' => $amountCents,
         ]);
 
-        // Find payment by multiple criteria
-        $payment = Payment::where('reference', $merchantOrderId)
-            ->when($orderId, fn($q) => $q->orWhere('gateway_order_id', $orderId))
-            ->when($intentionId, fn($q) => $q->orWhereJsonContains('metadata->intention_id', $intentionId))
-            ->first();
-
-        // If still not found, try to find by gateway_order_id matching any of the IDs
+        // Find payment by multiple criteria with better query logic
+        $payment = null;
+        
+        // Try 1: Find by merchant_order_id (payment reference)
+        if ($merchantOrderId) {
+            $payment = Payment::where('reference', $merchantOrderId)->first();
+            if ($payment) {
+                Log::info('Paymob: Found payment by reference', ['payment_id' => $payment->id]);
+            }
+        }
+        
+        // Try 2: Find by order_id in gateway_order_id
+        if (!$payment && $orderId) {
+            $payment = Payment::where('gateway_order_id', $orderId)->first();
+            if ($payment) {
+                Log::info('Paymob: Found payment by gateway_order_id', ['payment_id' => $payment->id]);
+            }
+        }
+        
+        // Try 3: Find by intention_id in metadata
+        if (!$payment && $intentionId) {
+            $payment = Payment::whereJsonContains('metadata->intention_id', $intentionId)->first();
+            if ($payment) {
+                Log::info('Paymob: Found payment by intention_id', ['payment_id' => $payment->id]);
+            }
+        }
+        
+        // Try 4: Find by transaction_id
         if (!$payment && $transactionId) {
-            $payment = Payment::where('gateway_transaction_id', $transactionId)->first();
+            $payment = Payment::where('transaction_id', $transactionId)
+                ->orWhere('gateway_transaction_id', $transactionId)
+                ->first();
+            if ($payment) {
+                Log::info('Paymob: Found payment by transaction_id', ['payment_id' => $payment->id]);
+            }
+        }
+        
+        // Try 5: Last resort - find recent pending payment for same amount
+        if (!$payment && $amountCents) {
+            $amountEgp = $amountCents / 100;
+            $payment = Payment::where('gateway', 'paymob')
+                ->where('status', 'pending')
+                ->where('amount', $amountEgp)
+                ->where('created_at', '>', now()->subHours(2))
+                ->orderBy('created_at', 'desc')
+                ->first();
+            if ($payment) {
+                Log::warning('Paymob: Found payment by amount fallback', [
+                    'payment_id' => $payment->id,
+                    'amount' => $amountEgp,
+                ]);
+            }
         }
 
         if (!$payment) {
-            Log::error('Paymob: Payment not found for callback', [
+            Log::error('Paymob: Payment not found for callback - ALL ATTEMPTS FAILED', [
                 'merchant_order_id' => $merchantOrderId,
                 'order_id' => $orderId,
                 'transaction_id' => $transactionId,
                 'intention_id' => $intentionId,
-                'all_keys' => array_keys($data),
+                'amount_cents' => $amountCents,
+                'all_data_keys' => array_keys($data),
+                'sample_payments' => Payment::where('gateway', 'paymob')
+                    ->where('status', 'pending')
+                    ->orderBy('created_at', 'desc')
+                    ->limit(3)
+                    ->get(['id', 'reference', 'gateway_order_id', 'created_at'])
+                    ->toArray(),
             ]);
             return [
                 'success' => false,

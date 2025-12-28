@@ -140,6 +140,43 @@ Route::post('/webhooks/kashier', [App\Http\Controllers\PaymentController::class,
     ->name('payment.webhook')
     ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
 
+// ========================================
+// Temporary Diagnostic Routes (DELETE AFTER TESTING)
+// ========================================
+Route::get('/test-paymob-callback', function () {
+    \Illuminate\Support\Facades\Log::info('TEST: Paymob callback route is accessible', [
+        'timestamp' => now(),
+        'ip' => request()->ip(),
+        'query' => request()->query(),
+    ]);
+    
+    return response()->json([
+        'status' => 'ok',
+        'message' => 'Paymob callback route is working',
+        'timestamp' => now(),
+        'received_params' => request()->query(),
+    ]);
+})->name('test.paymob.callback');
+
+Route::match(['get', 'post'], '/test-paymob-full', function () {
+    \Illuminate\Support\Facades\Log::info('TEST: Paymob full callback test', [
+        'method' => request()->method(),
+        'query' => request()->query(),
+        'post' => request()->post(),
+        'all' => request()->all(),
+        'ip' => request()->ip(),
+        'timestamp' => now(),
+    ]);
+    
+    return response()->json([
+        'status' => 'ok',
+        'message' => 'Full callback test successful',
+        'method' => request()->method(),
+        'received_data' => request()->all(),
+        'timestamp' => now(),
+    ]);
+})->name('test.paymob.full');
+
 require __DIR__ . '/auth.php';
 
 // Public API Routes

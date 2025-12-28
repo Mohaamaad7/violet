@@ -115,7 +115,18 @@ class PaymentController extends Controller
      */
     public function paymobCallback(Request $request)
     {
-        Log::info('Paymob callback received', $request->all());
+        // Log ALL request data for debugging Unified Checkout
+        Log::info('Paymob callback - FULL DEBUG', [
+            'query_params' => $request->query(),
+            'post_data' => $request->post(),
+            'all_data' => $request->all(),
+            'url' => $request->fullUrl(),
+            'method' => $request->method(),
+            'headers' => [
+                'content-type' => $request->header('Content-Type'),
+                'user-agent' => $request->header('User-Agent'),
+            ],
+        ]);
 
         $result = $this->paymentService->handleCallback('paymob', $request->all());
 
