@@ -170,7 +170,7 @@ class PaymentController extends Controller
             ->first();
 
         if ($recentPayment) {
-            Log::info('Paymob: Found recent payment', [
+            Log::error('Paymob: Found recent payment', [
                 'payment_id' => $recentPayment->id,
                 'status' => $recentPayment->status,
             ]);
@@ -178,8 +178,26 @@ class PaymentController extends Controller
             return redirect()->route('checkout.success', $recentPayment->order_id);
         }
 
+        // Option 3: Find most recent order with pending_payment status
+        // This is the last resort fallback for wallet payments where session is lost
+        $recentOrder = \App\Models\Order::where('status', \App\Enums\OrderStatus::PENDING_PAYMENT)
+            ->where('payment_method', '!=', 'cod')
+            ->where('created_at', '>', now()->subMinutes(30))
+            ->orderBy('created_at', 'desc')
+            ->first();
+
+        if ($recentOrder) {
+            Log::error('Paymob: Found recent pending order (fallback)', [
+                'order_id' => $recentOrder->id,
+                'order_number' => $recentOrder->order_number,
+            ]);
+
+            return redirect()->route('checkout.success', $recentOrder->id)
+                ->with('payment_pending', true);
+        }
+
         // No payment found - redirect to home with error
-        Log::error('Paymob: No payment found for callback redirect - FALLBACK FAILED');
+        Log::error('Paymob: No payment found for callback redirect - ALL FALLBACKS FAILED');
 
         return redirect()->route('home')
             ->with('error', 'لم نتمكن من العثور على الطلب. يرجى التحقق من حسابك.');
@@ -187,9 +205,16 @@ class PaymentController extends Controller
 
     /**
      * Handle webhook from Paymob (server-to-server)
+     * Also handles GET redirects from Paymob wallet (which sometimes redirects to webhook URL)
      */
     public function paymobWebhook(Request $request)
     {
+        // If this is a GET request (user redirect), handle it as a callback
+        if ($request->isMethod('get')) {
+            Log::error('Paymob webhook received GET request - redirecting to callback handler');
+            return $this->paymobCallback($request);
+        }
+
         Log::error('Paymob webhook received', $request->all());
 
         $result = $this->paymentService->handleWebhook('paymob', $request->all());

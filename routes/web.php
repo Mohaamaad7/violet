@@ -115,7 +115,8 @@ Route::prefix('payment')->name('payment.')->group(function () {
         Route::match(['get', 'post'], '/callback', [App\Http\Controllers\PaymentController::class, 'paymobCallback'])
             ->name('callback')
             ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
-        Route::post('/webhook', [App\Http\Controllers\PaymentController::class, 'paymobWebhook'])
+        // Webhook accepts both GET and POST - Paymob wallet sometimes redirects to webhook URL
+        Route::match(['get', 'post'], '/webhook', [App\Http\Controllers\PaymentController::class, 'paymobWebhook'])
             ->name('webhook')
             ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
     });
@@ -149,7 +150,7 @@ Route::get('/test-paymob-callback', function () {
         'ip' => request()->ip(),
         'query' => request()->query(),
     ]);
-    
+
     return response()->json([
         'status' => 'ok',
         'message' => 'Paymob callback route is working',
@@ -167,7 +168,7 @@ Route::match(['get', 'post'], '/test-paymob-full', function () {
         'ip' => request()->ip(),
         'timestamp' => now(),
     ]);
-    
+
     return response()->json([
         'status' => 'ok',
         'message' => 'Full callback test successful',
