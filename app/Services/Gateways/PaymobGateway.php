@@ -262,12 +262,12 @@ class PaymobGateway implements PaymentGatewayInterface
         ]);
 
         // Validate HMAC signature
-        // TEMPORARY: Skip HMAC validation - there's a mismatch between webhook and callback formats
-        // TODO: Fix HMAC validation to handle different data structures
-        if (isset($data['hmac'])) {
-            Log::error('Paymob: HMAC validation temporarily disabled - received hmac: ' . substr($data['hmac'], 0, 20) . '...');
-            // Skip validation for now to complete the flow
-            // The callback IS coming from Paymob's redirect URL, so we trust it
+        if (isset($data['hmac']) && !$this->validateSignature($data)) {
+            Log::error('Paymob: Invalid callback HMAC - rejecting request');
+            return [
+                'success' => false,
+                'error' => 'Invalid HMAC signature',
+            ];
         }
 
         // Extract payment info from callback
@@ -534,65 +534,88 @@ class PaymobGateway implements PaymentGatewayInterface
      * 
      * Paymob HMAC validation
      * https://developers.paymob.com/egypt/hmac-calculation
+     * 
+     * Handles both:
+     * - Webhook (server-to-server): uses nested keys like 'order.id', 'source_data.pan'
+     * - Callback redirect: uses flattened keys like 'order', 'source_data_pan'
      */
     public function validateSignature(array $data): bool
     {
         $hmac = $data['hmac'] ?? null;
 
         if (!$hmac) {
-            // If no HMAC in data, try to calculate from transaction response
-            // Some callbacks might not have HMAC
-            Log::info('Paymob: No HMAC in callback, skipping validation');
-            return true; // Or return false for strict validation
+            Log::error('Paymob: No HMAC in callback, skipping validation');
+            return true;
         }
 
         if (empty($this->hmacSecret)) {
-            Log::warning('Paymob: HMAC secret not configured');
+            Log::error('Paymob: HMAC secret not configured');
             return false;
         }
 
-        // Paymob HMAC calculation
-        // The HMAC is calculated from specific fields in a specific order
-        $hmacFields = [
-            'amount_cents',
-            'created_at',
-            'currency',
-            'error_occured',
-            'has_parent_transaction',
-            'id',
-            'integration_id',
-            'is_3d_secure',
-            'is_auth',
-            'is_capture',
-            'is_refunded',
-            'is_standalone_payment',
-            'is_voided',
-            'order.id',
-            'owner',
-            'pending',
-            'source_data.pan',
-            'source_data.sub_type',
-            'source_data.type',
-            'success',
+        // Paymob HMAC calculation - fields in specific order
+        // The concatenation order is critical and must match Paymob's specification
+        $hmacFieldMappings = [
+            'amount_cents' => ['amount_cents'],
+            'created_at' => ['created_at'],
+            'currency' => ['currency'],
+            'error_occured' => ['error_occured'],
+            'has_parent_transaction' => ['has_parent_transaction'],
+            'id' => ['id'],
+            'integration_id' => ['integration_id'],
+            'is_3d_secure' => ['is_3d_secure'],
+            'is_auth' => ['is_auth'],
+            'is_capture' => ['is_capture'],
+            'is_refunded' => ['is_refunded'],
+            'is_standalone_payment' => ['is_standalone_payment'],
+            'is_voided' => ['is_voided'],
+            // order.id for webhook, order for callback redirect
+            'order' => ['order.id', 'order'],
+            'owner' => ['owner'],
+            'pending' => ['pending'],
+            // source_data fields: nested for webhook, underscore for callback
+            'source_data.pan' => ['source_data.pan', 'source_data_pan'],
+            'source_data.sub_type' => ['source_data.sub_type', 'source_data_sub_type'],
+            'source_data.type' => ['source_data.type', 'source_data_type'],
+            'success' => ['success'],
         ];
 
         $hmacString = '';
-        foreach ($hmacFields as $field) {
-            $value = $this->getNestedValue($data, $field);
+        $debugValues = [];
+
+        foreach ($hmacFieldMappings as $fieldName => $possibleKeys) {
+            $value = null;
+            foreach ($possibleKeys as $key) {
+                $value = $this->getNestedValue($data, $key);
+                if ($value !== null) {
+                    break;
+                }
+            }
+
             if ($value !== null) {
+                // Convert boolean values to lowercase string
+                if ($value === true || $value === 'true' || $value === '1') {
+                    $value = 'true';
+                } elseif ($value === false || $value === 'false' || $value === '0' || $value === '') {
+                    $value = 'false';
+                }
                 $hmacString .= $value;
+                $debugValues[$fieldName] = $value;
             }
         }
 
         $calculatedHmac = hash_hmac('sha512', $hmacString, $this->hmacSecret);
-
         $isValid = hash_equals(strtolower($calculatedHmac), strtolower($hmac));
 
         if (!$isValid) {
-            Log::warning('Paymob: Invalid HMAC', [
-                'received' => $hmac,
-                'calculated' => $calculatedHmac,
+            Log::error('Paymob: HMAC validation failed', [
+                'received' => substr($hmac, 0, 32) . '...',
+                'calculated' => substr($calculatedHmac, 0, 32) . '...',
+                'hmac_string_length' => strlen($hmacString),
+                'field_values' => $debugValues,
             ]);
+        } else {
+            Log::error('Paymob: HMAC validation successful');
         }
 
         return $isValid;
