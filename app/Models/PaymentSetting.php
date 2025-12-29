@@ -186,13 +186,13 @@ class PaymentSetting extends Model
     public static function getPaymobConfig(): array
     {
         return [
-            'api_key' => self::get('paymob_api_key'),
-            'secret_key' => self::get('paymob_secret_key'),
-            'public_key' => self::get('paymob_public_key'),
-            'hmac_secret' => self::get('paymob_hmac_secret'),
-            'integration_id_card' => self::get('paymob_integration_id_card'),
-            'integration_id_wallet' => self::get('paymob_integration_id_wallet'),
-            'integration_id_kiosk' => self::get('paymob_integration_id_kiosk'),
+            'api_key' => self::get('paymob_api_key') ?? env('PAYMOB_API_KEY'),
+            'secret_key' => self::get('paymob_secret_key') ?? env('PAYMOB_SECRET_KEY'),
+            'public_key' => self::get('paymob_public_key') ?? env('PAYMOB_PUBLIC_KEY'),
+            'hmac_secret' => self::get('paymob_hmac_secret') ?? env('PAYMOB_HMAC_SECRET'),
+            'integration_id_card' => self::get('paymob_integration_id_card') ?? env('PAYMOB_INTEGRATION_ID_CARD'),
+            'integration_id_wallet' => self::get('paymob_integration_id_wallet') ?? env('PAYMOB_INTEGRATION_ID_WALLET'),
+            'integration_id_kiosk' => self::get('paymob_integration_id_kiosk') ?? env('PAYMOB_INTEGRATION_ID_KIOSK'),
         ];
     }
 }
