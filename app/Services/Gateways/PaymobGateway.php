@@ -6,6 +6,7 @@ use App\Contracts\PaymentGatewayInterface;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\PaymentSetting;
+use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -218,7 +219,12 @@ class PaymobGateway implements PaymentGatewayInterface
                 // (Paymob Unified Checkout doesn't send query params in redirect)
                 session(['pending_payment_reference' => $payment->reference]);
 
-                Log::error('Paymob: Payment initiated', [ // Changed to error
+                // Also store order ID in cookie - survives cross-domain redirects (wallet payments)
+                // Cookie lasts 30 minutes, same as payment timeout
+                Cookie::queue('pending_order_id', $order->id, 30);
+                Cookie::queue('pending_payment_ref', $payment->reference, 30);
+
+                Log::error('Paymob: Payment initiated', [
                     'payment_id' => $payment->id,
                     'order_id' => $order->id,
                     'amount' => $order->total,
@@ -226,6 +232,7 @@ class PaymobGateway implements PaymentGatewayInterface
                     'method' => $method,
                     'integration_id' => $integrationId,
                     'session_ref' => $payment->reference,
+                    'cookie_set' => true,
                 ]);
 
                 return [

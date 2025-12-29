@@ -7,6 +7,7 @@ use App\Models\Payment;
 use App\Services\PaymentService;
 use App\Services\PaymentGatewayManager;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Log;
 
 /**
@@ -115,10 +116,13 @@ class PaymentController extends Controller
      */
     public function paymobCallback(Request $request)
     {
+        // Log all available identifiers
         Log::error('Paymob callback received', [
             'query_string' => $request->getQueryString(),
             'all_data' => $request->all(),
             'session_payment_ref' => session('pending_payment_reference'),
+            'cookie_order_id' => $request->cookie('pending_order_id'),
+            'cookie_payment_ref' => $request->cookie('pending_payment_ref'),
         ]);
 
         $data = $request->all();
@@ -131,6 +135,26 @@ class PaymentController extends Controller
 
         // Paymob Unified Checkout does NOT send query parameters in redirect!
         // We need to find the payment another way:
+
+        // Option 0: Use cookie-stored order ID (survives cross-domain redirects for wallet payments)
+        $cookieOrderId = $request->cookie('pending_order_id');
+        if ($cookieOrderId) {
+            $order = \App\Models\Order::find($cookieOrderId);
+            if ($order) {
+                Log::error('Paymob: Found order from cookie', [
+                    'order_id' => $order->id,
+                    'order_number' => $order->order_number,
+                    'status' => $order->status,
+                ]);
+
+                // Clear cookies
+                Cookie::queue(Cookie::forget('pending_order_id'));
+                Cookie::queue(Cookie::forget('pending_payment_ref'));
+
+                return redirect()->route('checkout.success', $order->id)
+                    ->with('payment_pending', true);
+            }
+        }
 
         // Option 1: Use session-stored payment reference
         $paymentReference = session('pending_payment_reference');
