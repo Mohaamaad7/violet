@@ -163,18 +163,27 @@ class PaymobGateway implements PaymentGatewayInterface
     public function initiatePayment(Order $order, string $method): array
     {
         return DB::transaction(function () use ($order, $method) {
+            Log::error('Paymob: Initiating payment', [
+                'order_id' => $order->id,
+                'method' => $method,
+                'config_wallet_id' => $this->integrationIdWallet,
+                'config_card_id' => $this->integrationIdCard,
+            ]);
+
             // Get Integration ID based on method
             $integrationId = $this->getIntegrationId($method);
 
             if (!$integrationId) {
+                Log::error('Paymob: Integration ID missing', ['method' => $method]);
                 return [
                     'success' => false,
-                    'error' => 'طريقة الدفع غير مُعدّة',
+                    'error' => 'طريقة الدفع غير مُعدّة (ID مفقود)',
                 ];
             }
 
             // Check if configured
             if (!$this->isConfigured()) {
+                Log::error('Paymob: Gateway not configured');
                 return [
                     'success' => false,
                     'error' => 'بوابة Paymob غير مُعدّة',
