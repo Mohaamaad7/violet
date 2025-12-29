@@ -68,11 +68,9 @@ class PaymentSettings extends Page implements HasForms
             // Payment Methods
             'payment_cod_enabled' => (bool) PaymentSetting::get('payment_cod_enabled', true),
             'payment_card_enabled' => (bool) PaymentSetting::get('payment_card_enabled', false),
-            'payment_vodafone_cash_enabled' => (bool) PaymentSetting::get('payment_vodafone_cash_enabled', false),
-            'payment_orange_money_enabled' => (bool) PaymentSetting::get('payment_orange_money_enabled', false),
-            'payment_etisalat_cash_enabled' => (bool) PaymentSetting::get('payment_etisalat_cash_enabled', false),
             'payment_meeza_enabled' => (bool) PaymentSetting::get('payment_meeza_enabled', false),
             'payment_valu_enabled' => (bool) PaymentSetting::get('payment_valu_enabled', false),
+            'payment_wallet_enabled' => (bool) PaymentSetting::get('payment_wallet_enabled', false),
             'payment_kiosk_enabled' => (bool) PaymentSetting::get('payment_kiosk_enabled', false),
             'payment_instapay_enabled' => (bool) PaymentSetting::get('payment_instapay_enabled', false),
         ]);
@@ -249,17 +247,12 @@ class PaymentSettings extends Page implements HasForms
                         Toggle::make('payment_meeza_enabled')
                             ->label('🏦 ميزة'),
 
-                        Toggle::make('payment_vodafone_cash_enabled')
-                            ->label('📱 فودافون كاش'),
-
-                        Toggle::make('payment_orange_money_enabled')
-                            ->label('🍊 أورانج موني'),
-
-                        Toggle::make('payment_etisalat_cash_enabled')
-                            ->label('📞 اتصالات كاش'),
-
                         Toggle::make('payment_valu_enabled')
                             ->label('🛒 ڤاليو (تقسيط)'),
+
+                        Toggle::make('payment_wallet_enabled')
+                            ->label('📱 المحفظة الإلكترونية')
+                            ->helperText('فودافون كاش، أورانج موني، اتصالات كاش - كلها عبر Paymob'),
 
                         Toggle::make('payment_kiosk_enabled')
                             ->label('🏪 فوري / أمان'),
@@ -330,10 +323,8 @@ class PaymentSettings extends Page implements HasForms
         PaymentSetting::set('payment_cod_enabled', $data['payment_cod_enabled'] ?? false, 'methods');
         PaymentSetting::set('payment_card_enabled', $data['payment_card_enabled'] ?? false, 'methods');
         PaymentSetting::set('payment_meeza_enabled', $data['payment_meeza_enabled'] ?? false, 'methods');
-        PaymentSetting::set('payment_vodafone_cash_enabled', $data['payment_vodafone_cash_enabled'] ?? false, 'methods');
-        PaymentSetting::set('payment_orange_money_enabled', $data['payment_orange_money_enabled'] ?? false, 'methods');
-        PaymentSetting::set('payment_etisalat_cash_enabled', $data['payment_etisalat_cash_enabled'] ?? false, 'methods');
         PaymentSetting::set('payment_valu_enabled', $data['payment_valu_enabled'] ?? false, 'methods');
+        PaymentSetting::set('payment_wallet_enabled', $data['payment_wallet_enabled'] ?? false, 'methods');
         PaymentSetting::set('payment_kiosk_enabled', $data['payment_kiosk_enabled'] ?? false, 'methods');
         PaymentSetting::set('payment_instapay_enabled', $data['payment_instapay_enabled'] ?? false, 'methods');
 

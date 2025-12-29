@@ -133,15 +133,13 @@ class PaymobGateway implements PaymentGatewayInterface
         }
 
         // Wallet payments
-        if (!empty($this->integrationIdWallet)) {
-            if (PaymentSetting::isMethodEnabled('vodafone_cash')) {
-                $methods['wallet'] = [
-                    'name' => 'محفظة إلكترونية',
-                    'name_en' => 'Mobile Wallet',
-                    'icon' => 'wallet',
-                    'description' => 'فودافون كاش، أورانج، اتصالات',
-                ];
-            }
+        if (!empty($this->integrationIdWallet) && PaymentSetting::isMethodEnabled('wallet')) {
+            $methods['wallet'] = [
+                'name' => 'محفظة إلكترونية',
+                'name_en' => 'Mobile Wallet',
+                'icon' => 'wallet',
+                'description' => 'فودافون كاش، أورانج، اتصالات',
+            ];
         }
 
         // Kiosk payments (Fawry/Aman)
