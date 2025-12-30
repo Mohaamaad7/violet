@@ -4,10 +4,6 @@ namespace App\Filament\Resources\Customers\Actions;
 
 use App\Models\Customer;
 use Filament\Actions\Action;
-use Filament\Infolists\Components\Grid;
-use Filament\Infolists\Components\ImageEntry;
-use Filament\Infolists\Components\RepeatableEntry;
-use Filament\Infolists\Components\TextEntry;
 
 class ViewWishlistAction
 {

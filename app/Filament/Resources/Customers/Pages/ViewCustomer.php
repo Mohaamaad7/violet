@@ -10,12 +10,12 @@ use App\Models\Customer;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
+use Filament\Infolists\Components\ImageEntry;
+use Filament\Infolists\Components\RepeatableEntry;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Components\Grid;
-use Filament\Schemas\Components\ImageEntry;
-use Filament\Schemas\Components\RepeatableEntry;
 use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\TextEntry;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
 
@@ -67,7 +67,8 @@ class ViewCustomer extends ViewRecord
                                     ->label(trans_db('admin.customers.fields.profile_photo'))
                                     ->circular()
                                     ->defaultImageUrl(fn($record) => 'https://ui-avatars.com/api/?name=' . urlencode($record->name) . '&color=7F9CF5&background=EBF4FF')
-                                    ->size(100),
+                                    ->height(100)
+                                    ->width(100),
                                 
                                 TextEntry::make('name')
                                     ->label(trans_db('admin.customers.fields.name'))
