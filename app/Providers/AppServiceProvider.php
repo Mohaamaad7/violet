@@ -22,6 +22,23 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Configure password reset URL for customers
+        \Illuminate\Auth\Notifications\ResetPassword::createUrlUsing(function ($user, string $token) {
+            // Check if user is a Customer model
+            if ($user instanceof \App\Models\Customer) {
+                return url(route('password.reset', [
+                    'token' => $token,
+                    'email' => $user->getEmailForPasswordReset(),
+                ], false));
+            }
+
+            // Default URL for other user types (admin users, etc.)
+            return url(route('password.reset', [
+                'token' => $token,
+                'email' => $user->getEmailForPasswordReset(),
+            ], false));
+        });
+
         // Register observers
         // TEMPORARILY DISABLED - OrderObserver causing infinite loop
         // \App\Models\Order::observe(\App\Observers\OrderObserver::class);
