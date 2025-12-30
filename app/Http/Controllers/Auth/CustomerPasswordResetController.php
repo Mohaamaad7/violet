@@ -36,6 +36,29 @@ class CustomerPasswordResetController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
+        // Debug: Log the request data
+        \Log::info('Password Reset Attempt', [
+            'email' => $request->email,
+            'token' => $request->token,
+            'broker' => 'customers',
+        ]);
+
+        // Check if customer exists
+        $customer = Customer::where('email', $request->email)->first();
+        \Log::info('Customer Lookup', [
+            'found' => $customer ? true : false,
+            'customer_id' => $customer?->id,
+        ]);
+
+        // Check if token exists
+        $tokenRecord = \DB::table('customer_password_reset_tokens')
+            ->where('email', $request->email)
+            ->first();
+        \Log::info('Token Lookup', [
+            'found' => $tokenRecord ? true : false,
+            'token_exists' => $tokenRecord ? substr($tokenRecord->token, 0, 10) . '...' : null,
+        ]);
+
         // Reset the password
         $status = Password::broker('customers')->reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
@@ -49,6 +72,11 @@ class CustomerPasswordResetController extends Controller
                 event(new PasswordReset($customer));
             }
         );
+
+        \Log::info('Password Reset Status', [
+            'status' => $status,
+            'translation' => __($status),
+        ]);
 
         if ($status === Password::PASSWORD_RESET) {
             return redirect()->route('home')->with('status', __($status));
