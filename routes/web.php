@@ -57,6 +57,15 @@ Route::middleware(['auth:customer'])->prefix('account')->name('account.')->group
 // Legacy route redirect
 Route::middleware(['auth:customer'])->get('/orders', fn() => redirect()->route('account.orders'))->name('store.orders.index');
 
+// ========================================
+// Customer Password Reset Routes
+// ========================================
+Route::get('/reset-password/{token}', [App\Http\Controllers\Auth\CustomerPasswordResetController::class, 'showResetForm'])
+    ->name('password.reset');
+
+Route::post('/reset-password', [App\Http\Controllers\Auth\CustomerPasswordResetController::class, 'reset'])
+    ->name('password.update');
+
 // Debug Route (Temporary - for troubleshooting)
 Route::get('/test-cart-debug', function () {
     return view('debug.cart-test');
