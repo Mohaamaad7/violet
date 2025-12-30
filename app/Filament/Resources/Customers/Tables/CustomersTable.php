@@ -63,7 +63,10 @@ class CustomersTable
                 TextColumn::make('last_order_at')
                     ->label(trans_db('admin.customers.fields.last_order_at'))
                     ->dateTime('d/m/Y')
-                    ->sortable()
+                    ->getStateUsing(function (Customer $record) {
+                        // استخدام العلاقة المحملة من eager loading
+                        return $record->orders->first()?->created_at;
+                    })
                     ->placeholder(trans_db('messages.no_orders_yet')),
 
                 TextColumn::make('status')
