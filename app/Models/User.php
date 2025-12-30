@@ -87,4 +87,14 @@ class User extends Authenticatable implements FilamentUser
     {
         return $query->where('status', 'active');
     }
+
+    // ==================== Dashboard Customization Relationships ====================
+
+    /**
+     * User-specific widget preferences
+     */
+    public function widgetPreferences(): HasMany
+    {
+        return $this->hasMany(UserWidgetPreference::class);
+    }
 }
