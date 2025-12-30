@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Traits\HasFullAudit;
+use Illuminate\Auth\Passwords\CanResetPassword;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -12,7 +13,7 @@ use Illuminate\Notifications\Notifiable;
 
 class Customer extends Authenticatable
 {
-    use HasFactory, Notifiable, SoftDeletes, HasFullAudit;
+    use HasFactory, Notifiable, SoftDeletes, HasFullAudit, CanResetPassword;
 
     /**
      * The table associated with the model.
