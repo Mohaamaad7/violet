@@ -623,5 +623,67 @@ return [
     'no' => 'No',
     'copied' => 'Copied',
     'added_on' => 'Added on',
-];
 
+    // Payment Pages
+    'payment' => [
+        // Success Page
+        'success_title' => 'Payment Successful',
+        'success_heading' => 'Payment Successful!',
+        'success_message' => 'Thank you, your payment has been received and your order is being prepared',
+        'order_number' => 'Order Number',
+        'amount_paid' => 'Amount Paid',
+        'payment_method' => 'Payment Method',
+        'order_status' => 'Order Status',
+        'processing' => 'Processing',
+        'order_items' => 'Order Items',
+        'quantity' => 'Quantity',
+        'track_order' => 'Track Order',
+        'continue_shopping' => 'Continue Shopping',
+        'egp' => 'EGP',
+
+        // Failed Page
+        'failed_title' => 'Payment Failed',
+        'failed_heading' => 'Payment Failed',
+        'failed_message' => 'Sorry, we could not complete your payment',
+        'error_reason' => 'Error Reason',
+        'amount' => 'Amount',
+        'try_again' => 'Try Again',
+        'contact_support' => 'Contact Support',
+
+        // Select Method Page
+        'select_title' => 'Select Payment Method',
+        'select_heading' => 'Select Payment Method',
+        'online_payment' => 'Online Payment',
+        'cod_payment' => 'Cash on Delivery',
+        'cod_option' => 'Pay Cash on Delivery',
+        'cod_description' => 'Pay the courier when you receive your order',
+        'proceed_payment' => 'Proceed to Payment',
+        'processing_payment' => 'Processing...',
+
+        // Payment Methods
+        'methods' => [
+            'cod' => 'Cash on Delivery',
+            'card' => 'Credit Card',
+            'wallet' => 'E-Wallet',
+            'kiosk' => 'Fawry',
+            'instapay' => 'InstaPay',
+        ],
+    ],
+
+    // Cart Manager
+    'cart_manager' => [
+        'title' => 'Shopping Cart',
+        'remove' => 'Remove',
+        'removing' => 'Removing...',
+        'empty_title' => 'Cart is Empty',
+        'empty_message' => 'Start adding products to your cart',
+        'browse_products' => 'Browse Products',
+        'continue_shopping' => 'Continue Shopping',
+        'subtotal' => 'Subtotal',
+        'checkout' => 'Checkout',
+        'view_full_cart' => 'View Full Cart',
+        'clear_cart' => 'Clear Cart',
+        'clear_cart_confirm' => 'Are you sure you want to clear the cart?',
+        'shipping_note' => 'Shipping and taxes calculated at checkout',
+    ],
+];

@@ -25,7 +25,7 @@
 
                 {{-- Free Shipping Message --}}
                 <div class="mx-auto md:mx-0 text-center md:text-left">
-                    <span class="font-medium">🚚 {{ __('store.header.free_shipping') }}</span>
+                    <span class="font-medium">🚚 {{ trans_db('store.header.free_shipping') }}</span>
                 </div>
 
                 {{-- Language Switcher --}}
@@ -99,7 +99,7 @@
                             d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                     <span
-                        class="hidden md:block text-sm font-medium text-gray-700 group-hover:text-violet-600 transition">{{ __('store.header.account') }}</span>
+                        class="hidden md:block text-sm font-medium text-gray-700 group-hover:text-violet-600 transition">{{ trans_db('store.header.account') }}</span>
                 </a>
 
                 {{-- Wishlist (Livewire Component) --}}
@@ -108,7 +108,7 @@
                 {{-- Cart --}}
                 <button type="button" onclick="openCart()"
                     class="relative p-2 hover:bg-gray-100 rounded-lg transition group"
-                    title="{{ __('store.cart.shopping_cart') }}">
+                    title="{{ trans_db('store.cart.shopping_cart') }}">
                     <svg class="w-6 h-6 text-gray-700 group-hover:text-violet-600 transition" fill="none"
                         stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -156,17 +156,17 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                         </svg>
-                        {{ __('store.header.home') }}
+                        {{ trans_db('store.header.home') }}
                     </a>
                 </li>
                 <li>
                     <a href="/products" class="text-gray-700 hover:text-violet-600 font-medium transition">
-                        {{ __('store.header.products') }}
+                        {{ trans_db('store.header.products') }}
                     </a>
                 </li>
                 <li class="relative group">
                     <button class="text-gray-700 hover:text-violet-600 font-medium transition flex items-center gap-1">
-                        {{ __('store.header.categories') }}
+                        {{ trans_db('store.header.categories') }}
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                         </svg>
@@ -204,7 +204,8 @@
                                                 <li>
                                                     <a href="{{ route('category.show', $parentCategory->slug) }}"
                                                         class="text-violet-600 hover:text-violet-700 font-semibold text-xs">
-                                                        {{ __('store.header.view_all') }} ({{ $parentCategory->children->count() }})
+                                                        {{ trans_db('store.header.view_all') }}
+                                                        ({{ $parentCategory->children->count() }})
                                                     </a>
                                                 </li>
                                             @endif
@@ -212,7 +213,7 @@
                                     @else
                                         <a href="{{ route('category.show', $parentCategory->slug) }}"
                                             class="text-sm text-violet-600 hover:text-violet-700">
-                                            {{ __('store.header.view_products') }}
+                                            {{ trans_db('store.header.view_products') }}
                                         </a>
                                     @endif
                                 </div>
@@ -222,7 +223,7 @@
                             <a href="/products"
                                 class="text-violet-600 hover:text-violet-700 font-semibold flex items-center gap-2">
                                 <i class="fas fa-th"></i>
-                                {{ __('store.header.view_all_products') }}
+                                {{ trans_db('store.header.view_all_products') }}
                                 <i class="fas fa-arrow-right text-xs"></i>
                             </a>
                         </div>
@@ -231,17 +232,17 @@
                 <li>
                     <a href="/offers"
                         class="text-red-600 hover:text-red-700 font-bold transition flex items-center gap-1">
-                        🔥 {{ __('store.header.offers') }}
+                        🔥 {{ trans_db('store.header.offers') }}
                     </a>
                 </li>
                 <li>
                     <a href="/about" class="text-gray-700 hover:text-violet-600 font-medium transition">
-                        {{ __('store.header.about') }}
+                        {{ trans_db('store.header.about') }}
                     </a>
                 </li>
                 <li>
                     <a href="/contact" class="text-gray-700 hover:text-violet-600 font-medium transition">
-                        {{ __('store.header.contact') }}
+                        {{ trans_db('store.header.contact') }}
                     </a>
                 </li>
             </ul>
@@ -254,37 +255,37 @@
             <ul class="space-y-3">
                 <li>
                     <a href="/" class="block py-2 text-gray-700 hover:text-violet-600 font-medium transition">
-                        🏠 {{ __('store.header.home') }}
+                        🏠 {{ trans_db('store.header.home') }}
                     </a>
                 </li>
                 <li>
                     <a href="/products" class="block py-2 text-gray-700 hover:text-violet-600 font-medium transition">
-                        {{ __('store.header.products') }}
+                        {{ trans_db('store.header.products') }}
                     </a>
                 </li>
                 <li>
                     <a href="/categories" class="block py-2 text-gray-700 hover:text-violet-600 font-medium transition">
-                        {{ __('store.header.categories') }}
+                        {{ trans_db('store.header.categories') }}
                     </a>
                 </li>
                 <li>
                     <a href="/offers" class="block py-2 text-red-600 hover:text-red-700 font-bold transition">
-                        🔥 {{ __('store.header.offers') }}
+                        🔥 {{ trans_db('store.header.offers') }}
                     </a>
                 </li>
                 <li>
                     <a href="/about" class="block py-2 text-gray-700 hover:text-violet-600 font-medium transition">
-                        {{ __('store.header.about') }}
+                        {{ trans_db('store.header.about') }}
                     </a>
                 </li>
                 <li>
                     <a href="/contact" class="block py-2 text-gray-700 hover:text-violet-600 font-medium transition">
-                        {{ __('store.header.contact') }}
+                        {{ trans_db('store.header.contact') }}
                     </a>
                 </li>
                 <li class="pt-3 border-t border-gray-200">
                     <a href="/account" class="block py-2 text-gray-700 hover:text-violet-600 font-medium transition">
-                        👤 {{ __('store.header.my_account') }}
+                        👤 {{ trans_db('store.header.my_account') }}
                     </a>
                 </li>
             </ul>
@@ -292,11 +293,7 @@
     </div>
 </header>
 
-<script>
-    /**
-     * Open Cart Slide-Over (Task 9.5 Cart Integration)
-     * Finds CartManager Livewire component and opens the slide-over panel
-     */
+<script>     /**      * Open Cart Slide-Over (Task 9.5 Cart Integration)      * Finds CartManager Livewire component and opens the slide-over panel      */
     window.openCart = function () {
         const components = window.Livewire.all();
         const cartManager = components.find(c => c.name === 'store.cart-manager');
@@ -310,10 +307,7 @@
             );
         }
     };
-
-    /**
-     * Toggle Mobile Menu
-     */
+     /**      * Toggle Mobile Menu      */
     function toggleMobileMenu() {
         const menu = document.getElementById('mobile-menu');
         const icon = document.getElementById('mobile-menu-icon');
@@ -325,10 +319,7 @@
             close.classList.toggle('hidden');
         }
     }
-
-    /**
-     * Toggle Mobile Search Bar
-     */
+     /**      * Toggle Mobile Search Bar      */
     function toggleMobileSearch() {
         const searchBar = document.getElementById('mobile-search-bar');
         if (searchBar) {

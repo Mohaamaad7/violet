@@ -1,6 +1,6 @@
 @extends('layouts.store')
 
-@section('title', 'فشل الدفع')
+@section('title', trans_db('messages.payment.failed_title'))
 
 @section('content')
     <div class="min-h-screen bg-gradient-to-b from-red-50 to-white py-16" dir="rtl">
@@ -13,13 +13,13 @@
             </div>
 
             {{-- Failed Message --}}
-            <h1 class="text-3xl font-bold text-gray-900 mb-2">فشلت عملية الدفع</h1>
-            <p class="text-gray-600 mb-4">عذراً، لم نتمكن من إتمام عملية الدفع</p>
+            <h1 class="text-3xl font-bold text-gray-900 mb-2">{{ trans_db('messages.payment.failed_heading') }}</h1>
+            <p class="text-gray-600 mb-4">{{ trans_db('messages.payment.failed_message') }}</p>
 
             {{-- Error Details --}}
             @if($error)
                 <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-8 text-right">
-                    <p class="font-medium">سبب الفشل:</p>
+                    <p class="font-medium">{{ trans_db('messages.payment.error_reason') }}:</p>
                     <p class="text-sm">{{ $error }}</p>
                 </div>
             @endif
@@ -27,13 +27,14 @@
             {{-- Order Info --}}
             <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8 text-right">
                 <div class="flex justify-between items-center border-b border-gray-100 pb-4 mb-4">
-                    <span class="text-gray-500">رقم الطلب</span>
+                    <span class="text-gray-500">{{ trans_db('messages.payment.order_number') }}</span>
                     <span class="font-semibold text-gray-900">{{ $order->order_number }}</span>
                 </div>
 
                 <div class="flex justify-between items-center">
-                    <span class="text-gray-500">المبلغ</span>
-                    <span class="font-semibold text-gray-900">{{ number_format($order->total, 2) }} جنيه</span>
+                    <span class="text-gray-500">{{ trans_db('messages.payment.amount') }}</span>
+                    <span class="font-semibold text-gray-900">{{ number_format($order->total, 2) }}
+                        {{ trans_db('messages.payment.egp') }}</span>
                 </div>
             </div>
 
@@ -41,17 +42,17 @@
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
                 <a href="{{ route('payment.select', $order) }}"
                     class="inline-flex items-center justify-center px-6 py-3 bg-violet-600 text-white font-semibold rounded-xl hover:bg-violet-700 transition-all">
-                    إعادة المحاولة
+                    {{ trans_db('messages.payment.try_again') }}
                 </a>
                 <a href="{{ route('checkout') }}"
                     class="inline-flex items-center justify-center px-6 py-3 bg-gray-100 text-gray-700 font-semibold rounded-xl hover:bg-gray-200 transition-all">
-                    العودة للسلة
+                    {{ trans_db('messages.payment.continue_shopping') }}
                 </a>
             </div>
 
             {{-- Help Text --}}
             <p class="text-sm text-gray-500 mt-8">
-                إذا استمرت المشكلة، يرجى التواصل مع خدمة العملاء
+                {{ trans_db('messages.payment.contact_support') }}
             </p>
         </div>
     </div>

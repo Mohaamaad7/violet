@@ -622,5 +622,67 @@ return [
     'no' => 'لا',
     'copied' => 'تم النسخ',
     'added_on' => 'أُضيف في',
-];
 
+    // Payment Pages
+    'payment' => [
+        // Success Page
+        'success_title' => 'تم الدفع بنجاح',
+        'success_heading' => 'تم الدفع بنجاح!',
+        'success_message' => 'شكراً لك، تم استلام دفعتك وجاري تجهيز طلبك',
+        'order_number' => 'رقم الطلب',
+        'amount_paid' => 'المبلغ المدفوع',
+        'payment_method' => 'طريقة الدفع',
+        'order_status' => 'حالة الطلب',
+        'processing' => 'قيد التجهيز',
+        'order_items' => 'منتجات الطلب',
+        'quantity' => 'الكمية',
+        'track_order' => 'تتبع الطلب',
+        'continue_shopping' => 'متابعة التسوق',
+        'egp' => 'جنيه',
+
+        // Failed Page
+        'failed_title' => 'فشل الدفع',
+        'failed_heading' => 'فشلت عملية الدفع',
+        'failed_message' => 'عذراً، لم نتمكن من إتمام عملية الدفع',
+        'error_reason' => 'سبب الخطأ',
+        'amount' => 'المبلغ',
+        'try_again' => 'المحاولة مرة أخرى',
+        'contact_support' => 'تواصل مع الدعم',
+
+        // Select Method Page
+        'select_title' => 'اختيار طريقة الدفع',
+        'select_heading' => 'اختر طريقة الدفع',
+        'online_payment' => 'الدفع الإلكتروني',
+        'cod_payment' => 'الدفع عند الاستلام',
+        'cod_option' => 'الدفع نقداً عند الاستلام',
+        'cod_description' => 'ادفع للمندوب عند استلام طلبك',
+        'proceed_payment' => 'متابعة الدفع',
+        'processing_payment' => 'جاري المعالجة...',
+
+        // Payment Methods
+        'methods' => [
+            'cod' => 'الدفع عند الاستلام',
+            'card' => 'بطاقة ائتمان',
+            'wallet' => 'محفظة إلكترونية',
+            'kiosk' => 'فوري',
+            'instapay' => 'إنستاباي',
+        ],
+    ],
+
+    // Cart Manager
+    'cart_manager' => [
+        'title' => 'سلة التسوق',
+        'remove' => 'إزالة',
+        'removing' => 'جاري الحذف...',
+        'empty_title' => 'السلة فارغة',
+        'empty_message' => 'ابدأ بإضافة منتجات إلى سلتك',
+        'browse_products' => 'تصفح المنتجات',
+        'continue_shopping' => 'متابعة التسوق',
+        'subtotal' => 'المجموع الفرعي',
+        'checkout' => 'إتمام الطلب',
+        'view_full_cart' => 'عرض السلة الكاملة',
+        'clear_cart' => 'تفريغ السلة',
+        'clear_cart_confirm' => 'هل أنت متأكد من تفريغ السلة؟',
+        'shipping_note' => 'الشحن والضرائب سيتم حسابها عند الدفع',
+    ],
+];
