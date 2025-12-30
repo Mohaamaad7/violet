@@ -141,6 +141,53 @@ public function roleNavigationGroups(): HasMany
 
 ---
 
+## ✅ Phase 4: Service Layer & Commands (COMPLETED - 30 Dec 2025)
+
+### تم إنشاء:
+
+#### 1. DashboardConfigurationService.php
+الموقع: `app/Services/DashboardConfigurationService.php`
+
+**الـ Methods الرئيسية:**
+- `getWidgetsForUser(User $user)` - جلب Widgets للمستخدم
+- `getWidgetClassesForUser(User $user)` - جلب أسماء الـ classes فقط
+- `getResourcesForUser(User $user)` - جلب Resources مع الصلاحيات
+- `getVisibleResourceClassesForUser(User $user)` - جلب Resources الظاهرة فقط
+- `canUserAccessResource(User $user, string $resourceClass, string $action)` - التحقق من الصلاحية
+- `getNavigationGroupsForUser(User $user)` - جلب Navigation Groups
+- `discoverWidgets()` - اكتشاف تلقائي للـ Widgets
+- `discoverResources()` - اكتشاف تلقائي للـ Resources
+- `discoverNavigationGroups()` - اكتشاف Navigation Groups من ملفات الترجمة
+- `clearUserCache(User $user)` - مسح cache المستخدم
+- `clearAllCaches()` - مسح كل الـ cache
+
+#### 2. Artisan Commands
+
+| Command | الوصف |
+|---------|-------|
+| `php artisan dashboard:discover` | اكتشاف وتسجيل Widgets, Resources, Navigation Groups |
+| `php artisan dashboard:sync-roles` | ربط الأدوار بالعناصر المكتشفة |
+| `php artisan dashboard:reset-user {user}` | إعادة تعيين تفضيلات المستخدم |
+
+#### 3. نتائج التشغيل:
+
+```
+📁 Discovering navigation groups... ✅ Registered 8 new navigation groups
+🧩 Discovering widgets... ✅ Registered 8 new widgets
+📦 Discovering resources... ✅ Registered 24 new resources
+
+🔄 Syncing role configurations...
+   ✅ Synced role: super-admin
+   ✅ Synced role: admin
+   ✅ Synced role: manager
+   ✅ Synced role: sales
+   ✅ Synced role: accountant
+   ✅ Synced role: content-manager
+   ✅ Synced role: customer
+```
+
+---
+
 ## ⚠️ ملاحظات مهمة
 
 1. **Table Headers**: لا تزال بعض Table Headers داخل الـ Tables بالعربي hardcoded - هذه مهمة منفصلة ولا تؤثر على المهمة الرئيسية.

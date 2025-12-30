@@ -15,6 +15,11 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(\App\Services\TranslationService::class, function ($app) {
             return new \App\Services\TranslationService();
         });
+
+        // Bind DashboardConfigurationService as a singleton
+        $this->app->singleton(\App\Services\DashboardConfigurationService::class, function ($app) {
+            return new \App\Services\DashboardConfigurationService();
+        });
     }
 
     /**
