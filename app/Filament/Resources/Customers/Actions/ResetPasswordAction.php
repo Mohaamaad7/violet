@@ -31,7 +31,7 @@ class ResetPasswordAction
                         Notification::make()
                             ->success()
                             ->title(trans_db('admin.customers.password.sent_success'))
-                            ->body(trans_db('admin.customers.password.sent_to', ['email' => $record->email]))
+                            ->body(__('admin.customers.password.sent_to', ['email' => $record->email]))
                             ->send();
                     } else {
                         throw new \Exception(trans_db('admin.customers.password.sent_failed'));

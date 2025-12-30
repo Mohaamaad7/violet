@@ -51,7 +51,7 @@ class SendEmailAction
                     Notification::make()
                         ->success()
                         ->title(trans_db('admin.customers.email.sent_success'))
-                        ->body(trans_db('admin.customers.email.sent_to', ['email' => $record->email]))
+                        ->body(__('admin.customers.email.sent_to', ['email' => $record->email]))
                         ->send();
 
                 } catch (\Exception $e) {
