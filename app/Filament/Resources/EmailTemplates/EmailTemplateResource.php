@@ -25,13 +25,16 @@ class EmailTemplateResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
-    protected static UnitEnum|string|null $navigationGroup = 'الإعدادات';
-
     protected static ?string $modelLabel = 'قالب بريد';
 
     protected static ?string $pluralModelLabel = 'قوالب البريد';
 
     protected static ?int $navigationSort = 10;
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('admin.nav.settings');
+    }
 
     public static function form(Schema $schema): Schema
     {

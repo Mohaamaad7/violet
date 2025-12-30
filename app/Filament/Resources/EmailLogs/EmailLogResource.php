@@ -20,13 +20,16 @@ class EmailLogResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'recipient_email';
 
-    protected static UnitEnum|string|null $navigationGroup = 'الإعدادات';
-
     protected static ?string $modelLabel = 'سجل بريد';
 
     protected static ?string $pluralModelLabel = 'سجلات البريد';
 
     protected static ?int $navigationSort = 11;
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('admin.nav.settings');
+    }
 
     public static function canCreate(): bool
     {

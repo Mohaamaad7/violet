@@ -29,9 +29,12 @@ class CountryResource extends Resource
 
     protected static ?string $pluralModelLabel = 'الدول';
 
-    protected static UnitEnum|string|null $navigationGroup = 'الإعدادات الجغرافية';
-
     protected static ?int $navigationSort = 1;
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('admin.nav.geography');
+    }
 
     public static function form(Schema $schema): Schema
     {

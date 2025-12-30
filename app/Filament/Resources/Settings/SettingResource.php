@@ -28,7 +28,7 @@ class SettingResource extends Resource
 
     public static function getNavigationGroup(): ?string
     {
-        return 'النظام';
+        return __('admin.nav.system');
     }
 
     public static function getNavigationLabel(): string

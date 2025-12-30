@@ -29,9 +29,12 @@ class CityResource extends Resource
 
     protected static ?string $pluralModelLabel = 'المدن';
 
-    protected static UnitEnum|string|null $navigationGroup = 'الإعدادات الجغرافية';
-
     protected static ?int $navigationSort = 3;
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('admin.nav.geography');
+    }
 
     public static function form(Schema $schema): Schema
     {

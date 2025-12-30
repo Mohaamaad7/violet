@@ -3,12 +3,14 @@
 return [
     // Navigation Groups
     'nav' => [
-        'inventory' => 'Inventory',
-        'products' => 'Products',
-        'orders' => 'Orders',
-        'sales' => 'Sales',
-        'customers' => 'Customers',
-        'settings' => 'Settings',
+        'catalog' => 'Catalog',                      // Products and Categories
+        'sales' => 'Sales',                          // Orders, Payments, Coupons, Returns
+        'inventory' => 'Inventory',                  // Warehouses, Stock Movements, Stock Counts
+        'customers' => 'Customers',                  // Customer Management
+        'content' => 'Content',                      // Sliders and Banners
+        'geography' => 'Geographic Settings',        // Countries, Governorates, Cities
+        'settings' => 'Settings',                    // System Settings and Email Templates
+        'system' => 'System',                        // Users, Roles, Permissions, Translations
     ],
 
     // Table Headers
