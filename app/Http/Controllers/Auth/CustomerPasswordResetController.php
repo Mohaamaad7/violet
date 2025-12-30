@@ -19,22 +19,9 @@ class CustomerPasswordResetController extends Controller
      */
     public function showResetForm(Request $request, string $token)
     {
-        // Verify that customer exists
-        $email = $request->query('email');
-        
-        if (!$email) {
-            abort(400, 'Email parameter is required');
-        }
-        
-        $customer = \App\Models\Customer::where('email', $email)->first();
-        
-        if (!$customer) {
-            abort(404, 'Customer not found with email: ' . $email);
-        }
-        
         return view('auth.customer.reset-password', [
             'token' => $token,
-            'email' => $email,
+            'email' => $request->query('email'),
         ]);
     }
 

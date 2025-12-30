@@ -26,17 +26,11 @@ class AppServiceProvider extends ServiceProvider
         \Illuminate\Auth\Notifications\ResetPassword::createUrlUsing(function ($user, string $token) {
             // Check if user is a Customer model
             if ($user instanceof \App\Models\Customer) {
-                return url(route('password.reset', [
-                    'token' => $token,
-                    'email' => $user->getEmailForPasswordReset(),
-                ], false));
+                return config('app.url') . '/reset-password/' . $token . '?email=' . urlencode($user->getEmailForPasswordReset());
             }
 
             // Default URL for other user types (admin users, etc.)
-            return url(route('password.reset', [
-                'token' => $token,
-                'email' => $user->getEmailForPasswordReset(),
-            ], false));
+            return config('app.url') . '/reset-password/' . $token . '?email=' . urlencode($user->getEmailForPasswordReset());
         });
 
         // Register observers

@@ -201,33 +201,3 @@ Route::prefix('api')->name('api.')->group(function () {
     Route::get('products/on-sale', [ProductController::class, 'onSale'])->name('products.on-sale');
     Route::get('products/{id}', [ProductController::class, 'show'])->name('products.show');
 });
-
-// Temporary test route - DELETE AFTER TESTING
-Route::get('/test-password-reset', function () {
-    $email = 'mohaamaad@gmail.com';
-    
-    // Test 1: Check if customer exists
-    $customer = \App\Models\Customer::where('email', $email)->first();
-    
-    if (!$customer) {
-        return 'ERROR: Customer not found with email: ' . $email;
-    }
-    
-    // Test 2: Try to send reset link
-    $status = \Illuminate\Support\Facades\Password::broker('customers')->sendResetLink([
-        'email' => $email
-    ]);
-    
-    return [
-        'customer_found' => true,
-        'customer_id' => $customer->id,
-        'customer_email' => $customer->email,
-        'customer_table' => $customer->getTable(),
-        'status' => $status,
-        'status_meaning' => match($status) {
-            \Illuminate\Support\Facades\Password::RESET_LINK_SENT => 'Link sent successfully',
-            \Illuminate\Support\Facades\Password::INVALID_USER => 'Invalid user (passwords.user)',
-            default => 'Unknown status'
-        }
-    ];
-});
