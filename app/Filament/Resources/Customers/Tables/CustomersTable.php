@@ -26,39 +26,45 @@ class CustomersTable
                     ->label(trans_db('admin.customers.fields.profile_photo'))
                     ->circular()
                     ->defaultImageUrl(fn($record) => 'https://ui-avatars.com/api/?name=' . urlencode($record->name) . '&color=7F9CF5&background=EBF4FF')
-                    ->size(40),
+                    ->size(40)
+                    ->toggleable(),
 
                 TextColumn::make('name')
                     ->label(trans_db('admin.customers.fields.name'))
                     ->searchable()
                     ->sortable()
-                    ->weight('bold'),
+                    ->weight('bold')
+                    ->toggleable(),
 
                 TextColumn::make('email')
                     ->label(trans_db('admin.customers.fields.email'))
                     ->searchable()
                     ->sortable()
                     ->icon('heroicon-o-envelope')
-                    ->copyable(),
+                    ->copyable()
+                    ->toggleable(),
 
                 TextColumn::make('phone')
                     ->label(trans_db('admin.customers.fields.phone'))
                     ->searchable()
                     ->icon('heroicon-o-phone')
-                    ->placeholder(trans_db('messages.not_available')),
+                    ->placeholder(trans_db('messages.not_available'))
+                    ->toggleable(),
 
                 TextColumn::make('total_orders')
                     ->label(trans_db('admin.customers.fields.total_orders'))
                     ->sortable()
                     ->badge()
                     ->color('info')
-                    ->alignCenter(),
+                    ->alignCenter()
+                    ->toggleable(),
 
                 TextColumn::make('total_spent')
                     ->label(trans_db('admin.customers.fields.total_spent'))
                     ->money('EGP')
                     ->sortable()
-                    ->alignEnd(),
+                    ->alignEnd()
+                    ->toggleable(),
 
                 TextColumn::make('last_order_at')
                     ->label(trans_db('admin.customers.fields.last_order_at'))
@@ -67,7 +73,8 @@ class CustomersTable
                         // استخدام العلاقة المحملة من eager loading
                         return $record->orders->first()?->created_at;
                     })
-                    ->placeholder(trans_db('messages.no_orders_yet')),
+                    ->placeholder(trans_db('messages.no_orders_yet'))
+                    ->toggleable(),
 
                 TextColumn::make('status')
                     ->label(trans_db('admin.customers.fields.status'))
@@ -78,13 +85,14 @@ class CustomersTable
                         'inactive' => 'warning',
                     })
                     ->formatStateUsing(fn(string $state): string => trans_db("admin.customers.status.{$state}"))
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(),
 
                 TextColumn::make('created_at')
                     ->label(trans_db('admin.customers.fields.created_at'))
                     ->dateTime('d/m/Y')
                     ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+                    ->toggleable(),
             ])
             ->filters([
                 SelectFilter::make('status')
@@ -158,6 +166,15 @@ class CustomersTable
                                 fn(Builder $query, $value): Builder => $query->where('total_spent', '<=', $value),
                             );
                     }),
+            ])
+            ->headerActions([
+                \pxlrbt\FilamentExcel\Actions\Tables\ExportAction::make()
+                    ->label('تصدير Excel')
+                    ->exports([
+                        \pxlrbt\FilamentExcel\Exports\ExcelExport::make()
+                            ->fromTable()
+                            ->withFilename('customers-' . now()->format('Y-m-d'))
+                    ]),
             ])
             ->recordActions([
                 ViewAction::make(),
