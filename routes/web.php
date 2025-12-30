@@ -201,7 +201,6 @@ Route::prefix('api')->name('api.')->group(function () {
     Route::get('products/on-sale', [ProductController::class, 'onSale'])->name('products.on-sale');
     Route::get('products/{id}', [ProductController::class, 'show'])->name('products.show');
 });
-<?php
 
 // Temporary test route - DELETE AFTER TESTING
 Route::get('/test-password-reset', function () {
