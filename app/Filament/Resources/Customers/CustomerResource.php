@@ -5,9 +5,11 @@ namespace App\Filament\Resources\Customers;
 use App\Filament\Resources\Customers\Pages\EditCustomer;
 use App\Filament\Resources\Customers\Pages\ListCustomers;
 use App\Filament\Resources\Customers\Pages\ViewCustomer;
+use App\Filament\Resources\Customers\Schemas\CustomerForm;
 use App\Models\Customer;
 use BackedEnum;
 use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 
 class CustomerResource extends Resource
@@ -41,6 +43,11 @@ class CustomerResource extends Resource
     public static function getNavigationBadge(): ?string
     {
         return (string) static::getModel()::count();
+    }
+
+    public static function form(Schema $schema): Schema
+    {
+        return CustomerForm::make($schema);
     }
 
     public static function getPages(): array
