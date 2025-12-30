@@ -10,13 +10,13 @@ use App\Models\Customer;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
-use Filament\Infolists\Components\Grid;
-use Filament\Infolists\Components\ImageEntry;
-use Filament\Infolists\Components\RepeatableEntry;
-use Filament\Infolists\Components\Section;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Infolists\Infolist;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\ImageEntry;
+use Filament\Schemas\Components\RepeatableEntry;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\TextEntry;
+use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
 
 class ViewCustomer extends ViewRecord
@@ -54,9 +54,9 @@ class ViewCustomer extends ViewRecord
         ];
     }
 
-    public function infolist(Infolist $infolist): Infolist
+    public function infolist(Schema $schema): Schema
     {
-        return $infolist
+        return $schema
             ->schema([
                 // معلومات العميل الأساسية
                 Section::make(trans_db('admin.customers.sections.customer_info'))
@@ -170,7 +170,7 @@ class ViewCustomer extends ViewRecord
                                     ]),
                             ])
                             ->contained(false)
-                            ->default(fn(Customer $record) => $record->orders()->latest()->take(5)->get()),
+                            ->state(fn(Customer $record) => $record->orders()->latest()->take(5)->get()),
                     ])
                     ->collapsible()
                     ->visible(fn(Customer $record) => $record->orders()->count() > 0),
@@ -203,7 +203,15 @@ class ViewCustomer extends ViewRecord
                                 TextEntry::make('formatted_address')
                                     ->label(trans_db('admin.shipping_addresses.fields.address'))
                                     ->icon('heroicon-o-map-pin')
-                                    ->columnSpanFull(),
+                                    ->columnSpanFull()
+                                    ->state(function($record) {
+                                        return sprintf(
+                                            '%s، %s، %s',
+                                            $record->street_address ?? '',
+                                            $record->city ?? '',
+                                            $record->governorate ?? ''
+                                        );
+                                    }),
                             ])
                             ->contained(false),
                     ])
