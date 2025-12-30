@@ -15,12 +15,14 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
             'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
+            'customer.active' => \App\Http\Middleware\EnsureCustomerIsActive::class,
         ]);
 
         // Add middlewares to web group
         $middleware->web(append: [
             \App\Http\Middleware\SetLocale::class,
             \App\Http\Middleware\LogActivityContext::class,
+            \App\Http\Middleware\EnsureCustomerIsActive::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

@@ -16,6 +16,13 @@ new #[Layout('layouts.auth')] class extends Component {
             'email' => ['required', 'string', 'email'],
         ]);
 
+        // Check if customer exists and is blocked
+        $customer = \App\Models\Customer::where('email', $this->email)->first();
+        if ($customer && $customer->status === 'blocked') {
+            $this->addError('email', __('auth.blocked'));
+            return;
+        }
+
         $status = Password::broker('customers')->sendResetLink(
             $this->only('email')
         );

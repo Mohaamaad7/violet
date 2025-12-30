@@ -47,6 +47,17 @@ class LoginForm extends Form
             ]);
         }
 
+        // Check if customer is blocked
+        $customer = Auth::guard('customer')->user();
+        if ($customer && $customer->status === 'blocked') {
+            // Logout the blocked customer
+            Auth::guard('customer')->logout();
+
+            throw ValidationException::withMessages([
+                'form.email' => trans('auth.blocked'),
+            ]);
+        }
+
         RateLimiter::clear($this->throttleKey());
     }
 
