@@ -3,9 +3,10 @@
 namespace App\Filament\Resources\Customers\Schemas;
 
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
 class CustomerForm
@@ -66,7 +67,7 @@ class CustomerForm
 
             Section::make(trans_db('admin.customers.sections.security_note'))
                 ->schema([
-                    \Filament\Forms\Components\Placeholder::make('password_note')
+                    Placeholder::make('password_note')
                         ->label('')
                         ->content(trans_db('admin.customers.messages.password_security_note'))
                         ->columnSpanFull(),
