@@ -701,12 +701,6 @@ class CheckoutPage extends Component
 
             // Online payment: redirect to payment processor
             if ($isOnlinePayment) {
-                \Log::error('CheckoutPage: Redirecting to payment.process', [
-                    'order_id' => $order->id,
-                    'method' => $this->paymentMethod,
-                    'route' => route('payment.process', ['order' => $order->id]),
-                ]);
-
                 // Use Livewire's redirect method
                 $this->redirectRoute('payment.process', [
                     'order' => $order->id,

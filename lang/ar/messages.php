@@ -611,5 +611,16 @@ return [
             'damaged' => 'تالف',
         ],
     ],
+
+    // General Messages
+    'not_available' => 'غير متوفر',
+    'not_verified' => 'غير مفعّل',
+    'no_orders_yet' => 'لا توجد طلبات بعد',
+    'view' => 'عرض',
+    'close' => 'إغلاق',
+    'yes' => 'نعم',
+    'no' => 'لا',
+    'copied' => 'تم النسخ',
+    'added_on' => 'أُضيف في',
 ];
 

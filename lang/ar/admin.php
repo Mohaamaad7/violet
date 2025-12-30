@@ -48,6 +48,8 @@ return [
         'featured_only' => 'مميز فقط',
         'min' => 'الحد الأدنى',
         'max' => 'الحد الأقصى',
+        'date_from' => 'من تاريخ',
+        'date_to' => 'إلى تاريخ',
     ],
 
     // Common Fields
@@ -159,6 +161,122 @@ return [
         'actions' => [
             'activate' => 'تفعيل المحدد',
             'deactivate' => 'تعطيل المحدد',
+        ],
+    ],
+
+    // Customers
+    'customers' => [
+        'title' => 'العملاء',
+        'singular' => 'عميل',
+        'plural' => 'العملاء',
+
+        'sections' => [
+            'customer_info' => 'معلومات العميل',
+            'basic_info' => 'المعلومات الأساسية',
+            'statistics' => 'الإحصائيات',
+            'recent_orders' => 'آخر الطلبات',
+            'addresses' => 'العناوين المحفوظة',
+            'timestamps' => 'التواريخ',
+            'security_note' => 'ملاحظة أمنية',
+        ],
+
+        'fields' => [
+            'profile_photo' => 'الصورة الشخصية',
+            'name' => 'الاسم',
+            'email' => 'البريد الإلكتروني',
+            'phone' => 'رقم الموبايل',
+            'status' => 'الحالة',
+            'locale' => 'اللغة المفضلة',
+            'total_orders' => 'عدد الطلبات',
+            'total_spent' => 'إجمالي المشتريات',
+            'last_order_at' => 'آخر طلب',
+            'created_at' => 'تاريخ التسجيل',
+            'updated_at' => 'آخر تحديث',
+            'email_verified_at' => 'تاريخ تفعيل البريد',
+        ],
+
+        'status' => [
+            'active' => 'نشط',
+            'blocked' => 'محظور',
+            'inactive' => 'غير نشط',
+        ],
+
+        'filters' => [
+            'min_orders' => 'الحد الأدنى للطلبات',
+            'max_orders' => 'الحد الأقصى للطلبات',
+            'min_spent' => 'الحد الأدنى للمشتريات',
+            'max_spent' => 'الحد الأقصى للمشتريات',
+        ],
+
+        'actions' => [
+            'activate' => 'تفعيل',
+            'block' => 'حظر',
+            'activate_selected' => 'تفعيل المحدد',
+            'block_selected' => 'حظر المحدد',
+            'send_email' => 'إرسال بريد إلكتروني',
+            'reset_password' => 'إعادة تعيين كلمة المرور',
+            'view_wishlist' => 'عرض قائمة الأمنيات',
+        ],
+
+        'email' => [
+            'subject' => 'الموضوع',
+            'message' => 'الرسالة',
+            'sent_success' => 'تم إرسال البريد بنجاح',
+            'sent_failed' => 'فشل إرسال البريد',
+            'sent_to' => 'تم إرسال البريد إلى: :email',
+        ],
+
+        'password' => [
+            'reset_heading' => 'إعادة تعيين كلمة المرور',
+            'reset_description' => 'سيتم إرسال رابط إعادة تعيين كلمة المرور إلى بريد العميل الإلكتروني.',
+            'send_reset_link' => 'إرسال رابط إعادة التعيين',
+            'sent_success' => 'تم إرسال رابط إعادة التعيين بنجاح',
+            'sent_failed' => 'فشل إرسال رابط إعادة التعيين',
+            'sent_to' => 'تم إرسال الرابط إلى: :email',
+            'error' => 'حدث خطأ',
+        ],
+
+        'wishlist' => [
+            'heading' => 'قائمة أمنيات :name',
+            'empty' => 'لا توجد منتجات في قائمة الأمنيات',
+            'total_items' => 'إجمالي المنتجات: :count',
+        ],
+
+        'messages' => [
+            'password_security_note' => 'ملاحظة: لأسباب أمنية، لا يمكن تعديل كلمة المرور من لوحة الإدارة. استخدم خيار "إعادة تعيين كلمة المرور" لإرسال رابط إعادة التعيين للعميل.',
+        ],
+    ],
+
+    // Orders
+    'orders' => [
+        'fields' => [
+            'order_number' => 'رقم الطلب',
+            'total' => 'الإجمالي',
+            'status' => 'حالة الطلب',
+            'payment_status' => 'حالة الدفع',
+            'created_at' => 'تاريخ الطلب',
+        ],
+        'payment_status' => [
+            'paid' => 'مدفوع',
+            'unpaid' => 'غير مدفوع',
+            'pending' => 'معلق',
+        ],
+    ],
+
+    // Shipping Addresses
+    'shipping_addresses' => [
+        'fields' => [
+            'full_name' => 'الاسم الكامل',
+            'phone' => 'رقم الموبايل',
+            'address' => 'العنوان',
+            'is_default' => 'العنوان الافتراضي',
+        ],
+    ],
+
+    // Products
+    'products' => [
+        'fields' => [
+            'sku' => 'كود المنتج',
         ],
     ],
 ];

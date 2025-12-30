@@ -612,5 +612,16 @@ return [
             'damaged' => 'Damaged',
         ],
     ],
+
+    // General Messages
+    'not_available' => 'Not Available',
+    'not_verified' => 'Not Verified',
+    'no_orders_yet' => 'No orders yet',
+    'view' => 'View',
+    'close' => 'Close',
+    'yes' => 'Yes',
+    'no' => 'No',
+    'copied' => 'Copied',
+    'added_on' => 'Added on',
 ];
 

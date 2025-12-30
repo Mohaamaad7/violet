@@ -49,6 +49,8 @@ return [
         'featured_only' => 'Featured Only',
         'min' => 'Min',
         'max' => 'Max',
+        'date_from' => 'Date From',
+        'date_to' => 'Date To',
     ],
 
     // Coupons
@@ -115,5 +117,88 @@ return [
         'discount_types' => ['percentage' => 'Percentage', 'fixed' => 'Fixed Amount', 'free_shipping' => 'Free Shipping'],
         'filters' => ['active_only' => 'Active Only', 'expired' => 'Expired', 'valid' => 'Currently Valid'],
         'actions' => ['activate' => 'Activate Selected', 'deactivate' => 'Deactivate Selected'],
+    ],
+
+    // Customers
+    'customers' => [
+        'title' => 'Customers',
+        'singular' => 'Customer',
+        'plural' => 'Customers',
+
+        'sections' => [
+            'customer_info' => 'Customer Information',
+            'basic_info' => 'Basic Information',
+            'statistics' => 'Statistics',
+            'recent_orders' => 'Recent Orders',
+            'addresses' => 'Saved Addresses',
+            'timestamps' => 'Timestamps',
+            'security_note' => 'Security Note',
+        ],
+
+        'fields' => [
+            'profile_photo' => 'Profile Photo',
+            'name' => 'Name',
+            'email' => 'Email',
+            'phone' => 'Phone Number',
+            'status' => 'Status',
+            'locale' => 'Preferred Language',
+            'total_orders' => 'Total Orders',
+            'total_spent' => 'Total Spent',
+            'last_order_at' => 'Last Order',
+            'created_at' => 'Registration Date',
+            'updated_at' => 'Last Updated',
+            'email_verified_at' => 'Email Verified At',
+        ],
+
+        'status' => [
+            'active' => 'Active',
+            'blocked' => 'Blocked',
+            'inactive' => 'Inactive',
+        ],
+
+        'filters' => [
+            'min_orders' => 'Min Orders',
+            'max_orders' => 'Max Orders',
+            'min_spent' => 'Min Spent',
+            'max_spent' => 'Max Spent',
+        ],
+
+        'actions' => [
+            'activate' => 'Activate',
+            'block' => 'Block',
+            'activate_selected' => 'Activate Selected',
+            'block_selected' => 'Block Selected',
+            'send_email' => 'Send Email',
+            'reset_password' => 'Reset Password',
+            'view_wishlist' => 'View Wishlist',
+        ],
+
+        'email' => [
+            'subject' => 'Subject',
+            'message' => 'Message',
+            'sent_success' => 'Email sent successfully',
+            'sent_failed' => 'Failed to send email',
+            'sent_to' => 'Email sent to: :email',
+        ],
+
+        'password' => [
+            'reset_heading' => 'Reset Password',
+            'reset_description' => 'A password reset link will be sent to the customer\'s email address.',
+            'send_reset_link' => 'Send Reset Link',
+            'sent_success' => 'Reset link sent successfully',
+            'sent_failed' => 'Failed to send reset link',
+            'sent_to' => 'Reset link sent to: :email',
+            'error' => 'An error occurred',
+        ],
+
+        'wishlist' => [
+            'heading' => ':name\'s Wishlist',
+            'empty' => 'No products in wishlist',
+            'total_items' => 'Total items: :count',
+        ],
+
+        'messages' => [
+            'password_security_note' => 'Note: For security reasons, passwords cannot be edited from the admin panel. Use the "Reset Password" option to send a reset link to the customer.',
+        ],
     ],
 ];

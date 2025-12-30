@@ -414,4 +414,53 @@ class EmailService
             'current_year' => date('Y'),
         ];
     }
+
+    /**
+     * Send custom email to a customer (from admin panel).
+     */
+    public function sendCustomEmail(
+        string $to,
+        string $subject,
+        string $content,
+        string $customerName = null
+    ): ?EmailLog {
+        try {
+            // Create a simple email log
+            $log = EmailLog::create([
+                'recipient_email' => $to,
+                'recipient_name' => $customerName,
+                'subject' => $subject,
+                'content' => $content,
+                'status' => 'pending',
+            ]);
+
+            // Send the email
+            Mail::send([], [], function ($message) use ($to, $subject, $content, $customerName) {
+                $message->to($to, $customerName)
+                    ->subject($subject)
+                    ->html($content);
+            });
+
+            // Update log status
+            $log->update(['status' => 'sent', 'sent_at' => now()]);
+
+            return $log;
+
+        } catch (\Exception $e) {
+            Log::error('Failed to send custom email', [
+                'to' => $to,
+                'subject' => $subject,
+                'error' => $e->getMessage()
+            ]);
+
+            if (isset($log)) {
+                $log->update([
+                    'status' => 'failed',
+                    'error_message' => $e->getMessage()
+                ]);
+            }
+
+            throw $e;
+        }
+    }
 }

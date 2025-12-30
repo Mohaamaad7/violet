@@ -55,35 +55,22 @@ class PaymentController extends Controller
      */
     public function process(Request $request, Order $order)
     {
-        Log::error('PaymentController::process called', [
-            'order_id' => $order->id,
-            'request_all' => $request->all(),
-            'url' => $request->fullUrl(),
-        ]);
-
         // Accept method from POST body or GET query
         $method = $request->input('payment_method') ?? $request->input('method');
 
         if (!$method) {
-            Log::error('PaymentController: No payment method provided');
             return back()->with('error', 'طريقة الدفع مطلوبة');
         }
 
         // Check method is enabled
         if (!\App\Models\PaymentSetting::isMethodEnabled($method)) {
-            Log::error('PaymentController: Method not enabled', ['method' => $method]);
             return back()->with('error', 'طريقة الدفع غير متاحة');
         }
-
-        Log::error('PaymentController: Calling PaymentService', ['method' => $method]);
 
         // Initiate payment via the active gateway
         $result = $this->paymentService->initiatePayment($order, $method);
 
-        Log::error('PaymentController: PaymentService returned', ['result' => $result]);
-
         if (!$result['success']) {
-            Log::error('PaymentController: Payment initiation failed', ['error' => $result['error']]);
             return back()->with('error', $result['error']);
         }
 

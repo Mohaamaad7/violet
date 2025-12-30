@@ -27,17 +27,7 @@ class PaymentService
      */
     public function initiatePayment(Order $order, string $paymentMethod): array
     {
-        Log::error('PaymentService::initiatePayment called', [
-            'order_id' => $order->id,
-            'method' => $paymentMethod,
-        ]);
-
         $gateway = $this->gatewayManager->getActiveGateway();
-
-        Log::error('PaymentService: Active gateway retrieved', [
-            'gateway_name' => $gateway->getName(),
-            'is_configured' => $gateway->isConfigured(),
-        ]);
 
         // Check if gateway is configured
         if (!$gateway->isConfigured()) {
@@ -50,8 +40,6 @@ class PaymentService
                 'error' => 'بوابة الدفع غير مُعدّة بشكل صحيح',
             ];
         }
-
-        Log::error('PaymentService: Delegating to gateway', ['gateway' => $gateway->getName()]);
 
         // Delegate to the active gateway
         return $gateway->initiatePayment($order, $paymentMethod);
