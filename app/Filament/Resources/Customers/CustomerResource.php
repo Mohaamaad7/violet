@@ -14,9 +14,12 @@ class CustomerResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-users';
 
-    protected static ?string $navigationGroup = 'إدارة العملاء';
-
     protected static ?int $navigationSort = 1;
+
+    public static function getNavigationGroup(): ?string
+    {
+        return trans_db('admin.nav.customers');
+    }
 
     public static function getNavigationLabel(): string
     {
