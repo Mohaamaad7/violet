@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Services\DashboardConfigurationService;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -50,11 +51,9 @@ class AdminPanelProvider extends PanelProvider
             ->pages([
                 Dashboard::class,
             ])
+            // Dynamic widget loading based on user role
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
-            ->widgets([
-                AccountWidget::class,
-
-            ])
+            ->widgets($this->getWidgetsForCurrentUser())
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
@@ -66,9 +65,42 @@ class AdminPanelProvider extends PanelProvider
                 DisableBladeIconComponents::class,
                 DispatchServingFilamentEvent::class,
                 \App\Http\Middleware\SetLocale::class,
+                \App\Http\Middleware\ApplyDashboardConfiguration::class,
             ])
             ->authMiddleware([
                 Authenticate::class,
             ]);
+    }
+
+    /**
+     * Get widgets for the current authenticated user
+     * Falls back to default widgets if user is not authenticated
+     */
+    protected function getWidgetsForCurrentUser(): array
+    {
+        // Always include AccountWidget
+        $widgets = [AccountWidget::class];
+
+        // If user is authenticated, get their configured widgets
+        if (auth()->check()) {
+            try {
+                $service = app(DashboardConfigurationService::class);
+                $user = auth()->user();
+
+                $configuredWidgets = $service->getWidgetClassesForUser($user);
+
+                // Filter to only include classes that exist
+                foreach ($configuredWidgets as $widgetClass) {
+                    if (class_exists($widgetClass) && !in_array($widgetClass, $widgets)) {
+                        $widgets[] = $widgetClass;
+                    }
+                }
+            } catch (\Throwable $e) {
+                // If service fails, log error and use default discovery
+                \Log::warning('DashboardConfigurationService failed: ' . $e->getMessage());
+            }
+        }
+
+        return $widgets;
     }
 }
