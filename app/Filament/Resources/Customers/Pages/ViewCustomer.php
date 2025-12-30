@@ -150,7 +150,7 @@ class ViewCustomer extends ViewRecord
                                         TextEntry::make('order_number')
                                             ->label(trans_db('admin.orders.fields.order_number'))
                                             ->weight(FontWeight::Bold)
-                                            ->url(fn($record) => route('filament.admin.resources.orders.orders.view', $record)),
+                                            ->url(fn($record) => route('filament.admin.resources.orders.view', $record)),
                                         
                                         TextEntry::make('total')
                                             ->label(trans_db('admin.orders.fields.total'))
