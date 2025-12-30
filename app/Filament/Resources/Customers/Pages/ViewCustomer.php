@@ -18,6 +18,7 @@ use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Enums\FontWeight;
+use Filament\Support\Enums\TextSize;
 
 class ViewCustomer extends ViewRecord
 {
@@ -73,7 +74,7 @@ class ViewCustomer extends ViewRecord
                                 TextEntry::make('name')
                                     ->label(trans_db('admin.customers.fields.name'))
                                     ->weight(FontWeight::Bold)
-                                    ->size(TextEntry\TextEntrySize::Large),
+                                    ->size(TextSize::Large),
                                 
                                 TextEntry::make('email')
                                     ->label(trans_db('admin.customers.fields.email'))
@@ -127,7 +128,7 @@ class ViewCustomer extends ViewRecord
                                     ->icon('heroicon-o-currency-dollar')
                                     ->money('EGP')
                                     ->weight(FontWeight::Bold)
-                                    ->size(TextEntry\TextEntrySize::Large),
+                                    ->size(TextSize::Large),
                                 
                                 TextEntry::make('last_order_at')
                                     ->label(trans_db('admin.customers.fields.last_order_at'))
