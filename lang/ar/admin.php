@@ -3,21 +3,33 @@
 return [
     // Navigation Groups
     'nav' => [
-        'catalog' => 'الكتالوج',                    // المنتجات والفئات
-        'sales' => 'المبيعات',                      // الطلبات والمدفوعات والكوبونات والمرتجعات
-        'inventory' => 'المخزون',                   // المخازن وحركات المخزون والجرد
-        'customers' => 'العملاء',                   // إدارة العملاء
-        'content' => 'المحتوى',                     // السلايدرز والبانرز
-        'geography' => 'الإعدادات الجغرافية',       // البلاد والمحافظات والمدن
-        'settings' => 'الإعدادات',                  // إعدادات النظام والإيميلات
-        'system' => 'النظام',                       // المستخدمين والأدوار والصلاحيات والترجمات
+        'catalog' => 'الكتالوج',
+        'sales' => 'المبيعات',
+        'inventory' => 'المخزون',
+        'customers' => 'العملاء',
+        'content' => 'المحتوى',
+        'geography' => 'الإعدادات الجغرافية',
+        'settings' => 'الإعدادات',
+        'system' => 'النظام',
     ],
+
+    // Common Fields
+    'address' => 'العنوان',
+    'phone' => 'الهاتف',
+    'notes' => 'ملاحظات',
+    'active' => 'نشط',
+    'created_by' => 'أنشأه',
+    'created_at' => 'تاريخ الإنشاء',
+    'status' => 'الحالة',
+    'error' => 'خطأ',
+    'category' => 'الفئة',
 
     // Table Headers
     'table' => [
         'id' => 'المعرف',
         'name' => 'الاسم',
         'image' => 'الصورة',
+        'photo' => 'الصورة',
         'sku' => 'رمز المنتج',
         'stock' => 'المخزون',
         'price' => 'السعر',
@@ -25,6 +37,29 @@ return [
         'status' => 'الحالة',
         'created_at' => 'تاريخ الإنشاء',
         'updated_at' => 'تاريخ التحديث',
+        'email' => 'البريد الإلكتروني',
+        'phone' => 'الهاتف',
+        'role' => 'الدور',
+        'no_role' => 'بدون دور',
+        'title' => 'العنوان',
+        'link' => 'الرابط',
+        'order' => 'الترتيب',
+        'active' => 'نشط',
+    ],
+
+    // Form Fields
+    'form' => [
+        'user_info' => 'معلومات المستخدم',
+        'profile_photo' => 'الصورة الشخصية',
+        'name' => 'الاسم',
+        'email' => 'البريد الإلكتروني',
+        'phone' => 'الهاتف',
+        'language' => 'اللغة',
+        'language_help' => 'اللغة المستخدمة في لوحة الإدارة',
+        'role_permissions' => 'الدور والصلاحيات',
+        'role' => 'الدور',
+        'password_section' => 'كلمة المرور',
+        'password' => 'كلمة المرور',
     ],
 
     // Actions
@@ -34,6 +69,7 @@ return [
         'duplicate' => 'نسخ',
         'view' => 'عرض',
         'create' => 'إنشاء',
+        'export_excel' => 'تصدير Excel',
     ],
 
     // Status Values
@@ -54,16 +90,189 @@ return [
         'date_to' => 'إلى تاريخ',
     ],
 
-    // Common Fields
-    'address' => 'العنوان',
-    'phone' => 'الهاتف',
-    'notes' => 'ملاحظات',
-    'active' => 'نشط',
-    'created_by' => 'أنشأه',
-    'created_at' => 'تاريخ الإنشاء',
-    'status' => 'الحالة',
-    'error' => 'خطأ',
-    'category' => 'الفئة',
+    // Products
+    'products' => [
+        'title' => 'المنتجات',
+        'singular' => 'منتج',
+        'plural' => 'المنتجات',
+        'fields' => [
+            'sku' => 'كود المنتج',
+        ],
+    ],
+
+    // Categories
+    'categories' => [
+        'title' => 'الفئات',
+        'singular' => 'فئة',
+        'plural' => 'الفئات',
+    ],
+
+    // Orders
+    'orders' => [
+        'title' => 'الطلبات',
+        'singular' => 'طلب',
+        'plural' => 'الطلبات',
+        'fields' => [
+            'order_number' => 'رقم الطلب',
+            'total' => 'الإجمالي',
+            'status' => 'حالة الطلب',
+            'payment_status' => 'حالة الدفع',
+            'created_at' => 'تاريخ الطلب',
+        ],
+        'payment_status' => [
+            'paid' => 'مدفوع',
+            'unpaid' => 'غير مدفوع',
+            'pending' => 'معلق',
+        ],
+    ],
+
+    // Payments
+    'payments' => [
+        'title' => 'المدفوعات',
+        'singular' => 'دفعة',
+        'plural' => 'المدفوعات',
+    ],
+
+    // Returns
+    'returns' => [
+        'title' => 'المرتجعات',
+        'singular' => 'مرتجع',
+        'plural' => 'المرتجعات',
+    ],
+
+    // Sliders
+    'sliders' => [
+        'title' => 'السلايدرز',
+        'singular' => 'سلايدر',
+        'plural' => 'السلايدرز',
+    ],
+
+    // Banners
+    'banners' => [
+        'title' => 'البانرات',
+        'singular' => 'بانر',
+        'plural' => 'البانرات',
+    ],
+
+    // Warehouses
+    'warehouses' => [
+        'title' => 'المخازن',
+        'singular' => 'مخزن',
+        'plural' => 'المخازن',
+    ],
+
+    // Stock Movements
+    'stock_movements' => [
+        'title' => 'حركات المخزون',
+        'singular' => 'حركة مخزون',
+        'plural' => 'حركات المخزون',
+    ],
+
+    // Stock Counts
+    'stock_counts' => [
+        'title' => 'جرد المخزون',
+        'singular' => 'جرد',
+        'plural' => 'جرد المخزون',
+    ],
+
+    // Low Stock Products
+    'low_stock' => [
+        'title' => 'منتجات مخزون منخفض',
+        'singular' => 'منتج مخزون منخفض',
+        'plural' => 'منتجات مخزون منخفض',
+    ],
+
+    // Out of Stock Products
+    'out_of_stock' => [
+        'title' => 'منتجات نفذت',
+        'singular' => 'منتج نفذ',
+        'plural' => 'منتجات نفذت',
+    ],
+
+    // Users
+    'users' => [
+        'title' => 'المستخدمين',
+        'singular' => 'مستخدم',
+        'plural' => 'المستخدمين',
+    ],
+
+    // Roles
+    'roles' => [
+        'title' => 'الأدوار',
+        'singular' => 'دور',
+        'plural' => 'الأدوار',
+    ],
+
+    // Permissions
+    'permissions' => [
+        'title' => 'الصلاحيات',
+        'singular' => 'صلاحية',
+        'plural' => 'الصلاحيات',
+    ],
+
+    // Translations
+    'translations' => [
+        'title' => 'الترجمات',
+        'singular' => 'ترجمة',
+        'plural' => 'الترجمات',
+    ],
+
+    // Settings
+    'settings' => [
+        'title' => 'الإعدادات',
+        'singular' => 'إعداد',
+        'plural' => 'الإعدادات',
+    ],
+
+    // Email Templates
+    'email_templates' => [
+        'title' => 'قوالب البريد',
+        'singular' => 'قالب بريد',
+        'plural' => 'قوالب البريد',
+    ],
+
+    // Email Logs
+    'email_logs' => [
+        'title' => 'سجلات البريد',
+        'singular' => 'سجل بريد',
+        'plural' => 'سجلات البريد',
+    ],
+
+    // Countries
+    'countries' => [
+        'title' => 'الدول',
+        'singular' => 'دولة',
+        'plural' => 'الدول',
+    ],
+
+    // Governorates
+    'governorates' => [
+        'title' => 'المحافظات',
+        'singular' => 'محافظة',
+        'plural' => 'المحافظات',
+    ],
+
+    // Cities
+    'cities' => [
+        'title' => 'المدن',
+        'singular' => 'مدينة',
+        'plural' => 'المدن',
+    ],
+
+    // Pages
+    'pages' => [
+        'payment_settings' => [
+            'title' => 'إعدادات الدفع',
+            'active_gateway' => 'البوابة النشطة',
+            'gateway_description' => 'اختر بوابة الدفع التي سيتم استخدامها لجميع عمليات الدفع. سيتم عرض إعدادات البوابة المختارة فقط.',
+            'enabled_gateway' => 'بوابة الدفع المفعّلة',
+            'save_success' => 'تم حفظ الإعدادات',
+        ],
+        'sales_report' => [
+            'title' => 'تقرير المبيعات',
+        ],
+    ],
+
 
     // Coupons
     'coupons' => [
@@ -248,38 +457,4 @@ return [
             'password_security_note' => 'ملاحظة: لأسباب أمنية، لا يمكن تعديل كلمة المرور من لوحة الإدارة. استخدم خيار "إعادة تعيين كلمة المرور" لإرسال رابط إعادة التعيين للعميل.',
         ],
     ],
-
-    // Orders
-    'orders' => [
-        'fields' => [
-            'order_number' => 'رقم الطلب',
-            'total' => 'الإجمالي',
-            'status' => 'حالة الطلب',
-            'payment_status' => 'حالة الدفع',
-            'created_at' => 'تاريخ الطلب',
-        ],
-        'payment_status' => [
-            'paid' => 'مدفوع',
-            'unpaid' => 'غير مدفوع',
-            'pending' => 'معلق',
-        ],
-    ],
-
-    // Shipping Addresses
-    'shipping_addresses' => [
-        'fields' => [
-            'full_name' => 'الاسم الكامل',
-            'phone' => 'رقم الموبايل',
-            'address' => 'العنوان',
-            'is_default' => 'العنوان الافتراضي',
-        ],
-    ],
-
-    // Products
-    'products' => [
-        'fields' => [
-            'sku' => 'كود المنتج',
-        ],
-    ],
 ];
-

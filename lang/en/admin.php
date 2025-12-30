@@ -3,21 +3,33 @@
 return [
     // Navigation Groups
     'nav' => [
-        'catalog' => 'Catalog',                      // Products and Categories
-        'sales' => 'Sales',                          // Orders, Payments, Coupons, Returns
-        'inventory' => 'Inventory',                  // Warehouses, Stock Movements, Stock Counts
-        'customers' => 'Customers',                  // Customer Management
-        'content' => 'Content',                      // Sliders and Banners
-        'geography' => 'Geographic Settings',        // Countries, Governorates, Cities
-        'settings' => 'Settings',                    // System Settings and Email Templates
-        'system' => 'System',                        // Users, Roles, Permissions, Translations
+        'catalog' => 'Catalog',
+        'sales' => 'Sales',
+        'inventory' => 'Inventory',
+        'customers' => 'Customers',
+        'content' => 'Content',
+        'geography' => 'Geographic Settings',
+        'settings' => 'Settings',
+        'system' => 'System',
     ],
+
+    // Common Fields
+    'address' => 'Address',
+    'phone' => 'Phone',
+    'notes' => 'Notes',
+    'active' => 'Active',
+    'created_by' => 'Created By',
+    'created_at' => 'Created At',
+    'status' => 'Status',
+    'error' => 'Error',
+    'category' => 'Category',
 
     // Table Headers
     'table' => [
         'id' => 'ID',
         'name' => 'Name',
         'image' => 'Image',
+        'photo' => 'Photo',
         'sku' => 'SKU',
         'stock' => 'Stock',
         'price' => 'Price',
@@ -25,6 +37,29 @@ return [
         'status' => 'Status',
         'created_at' => 'Created At',
         'updated_at' => 'Updated At',
+        'email' => 'Email',
+        'phone' => 'Phone',
+        'role' => 'Role',
+        'no_role' => 'No Role',
+        'title' => 'Title',
+        'link' => 'Link',
+        'order' => 'Order',
+        'active' => 'Active',
+    ],
+
+    // Form Fields
+    'form' => [
+        'user_info' => 'User Information',
+        'profile_photo' => 'Profile Photo',
+        'name' => 'Name',
+        'email' => 'Email',
+        'phone' => 'Phone',
+        'language' => 'Language',
+        'language_help' => 'The language used in the admin panel',
+        'role_permissions' => 'Role & Permissions',
+        'role' => 'Role',
+        'password_section' => 'Password',
+        'password' => 'Password',
     ],
 
     // Actions
@@ -38,7 +73,7 @@ return [
     ],
 
     // Status
-    'status' => [
+    'status_values' => [
         'active' => 'Active',
         'inactive' => 'Inactive',
         'draft' => 'Draft',
@@ -53,6 +88,186 @@ return [
         'max' => 'Max',
         'date_from' => 'Date From',
         'date_to' => 'Date To',
+    ],
+
+    // Products
+    'products' => [
+        'title' => 'Products',
+        'singular' => 'Product',
+        'plural' => 'Products',
+    ],
+
+    // Categories
+    'categories' => [
+        'title' => 'Categories',
+        'singular' => 'Category',
+        'plural' => 'Categories',
+    ],
+
+    // Orders
+    'orders' => [
+        'title' => 'Orders',
+        'singular' => 'Order',
+        'plural' => 'Orders',
+        'fields' => [
+            'order_number' => 'Order Number',
+            'total' => 'Total',
+            'status' => 'Order Status',
+            'payment_status' => 'Payment Status',
+            'created_at' => 'Order Date',
+        ],
+        'payment_status' => [
+            'paid' => 'Paid',
+            'unpaid' => 'Unpaid',
+            'pending' => 'Pending',
+        ],
+    ],
+
+    // Payments
+    'payments' => [
+        'title' => 'Payments',
+        'singular' => 'Payment',
+        'plural' => 'Payments',
+    ],
+
+    // Returns
+    'returns' => [
+        'title' => 'Returns',
+        'singular' => 'Return',
+        'plural' => 'Returns',
+    ],
+
+    // Sliders
+    'sliders' => [
+        'title' => 'Sliders',
+        'singular' => 'Slider',
+        'plural' => 'Sliders',
+    ],
+
+    // Banners
+    'banners' => [
+        'title' => 'Banners',
+        'singular' => 'Banner',
+        'plural' => 'Banners',
+    ],
+
+    // Warehouses
+    'warehouses' => [
+        'title' => 'Warehouses',
+        'singular' => 'Warehouse',
+        'plural' => 'Warehouses',
+    ],
+
+    // Stock Movements
+    'stock_movements' => [
+        'title' => 'Stock Movements',
+        'singular' => 'Stock Movement',
+        'plural' => 'Stock Movements',
+    ],
+
+    // Stock Counts
+    'stock_counts' => [
+        'title' => 'Stock Counts',
+        'singular' => 'Stock Count',
+        'plural' => 'Stock Counts',
+    ],
+
+    // Low Stock Products
+    'low_stock' => [
+        'title' => 'Low Stock Products',
+        'singular' => 'Low Stock Product',
+        'plural' => 'Low Stock Products',
+    ],
+
+    // Out of Stock Products
+    'out_of_stock' => [
+        'title' => 'Out of Stock Products',
+        'singular' => 'Out of Stock Product',
+        'plural' => 'Out of Stock Products',
+    ],
+
+    // Users
+    'users' => [
+        'title' => 'Users',
+        'singular' => 'User',
+        'plural' => 'Users',
+    ],
+
+    // Roles
+    'roles' => [
+        'title' => 'Roles',
+        'singular' => 'Role',
+        'plural' => 'Roles',
+    ],
+
+    // Permissions
+    'permissions' => [
+        'title' => 'Permissions',
+        'singular' => 'Permission',
+        'plural' => 'Permissions',
+    ],
+
+    // Translations
+    'translations' => [
+        'title' => 'Translations',
+        'singular' => 'Translation',
+        'plural' => 'Translations',
+    ],
+
+    // Settings
+    'settings' => [
+        'title' => 'Settings',
+        'singular' => 'Setting',
+        'plural' => 'Settings',
+    ],
+
+    // Email Templates
+    'email_templates' => [
+        'title' => 'Email Templates',
+        'singular' => 'Email Template',
+        'plural' => 'Email Templates',
+    ],
+
+    // Email Logs
+    'email_logs' => [
+        'title' => 'Email Logs',
+        'singular' => 'Email Log',
+        'plural' => 'Email Logs',
+    ],
+
+    // Countries
+    'countries' => [
+        'title' => 'Countries',
+        'singular' => 'Country',
+        'plural' => 'Countries',
+    ],
+
+    // Governorates
+    'governorates' => [
+        'title' => 'Governorates',
+        'singular' => 'Governorate',
+        'plural' => 'Governorates',
+    ],
+
+    // Cities
+    'cities' => [
+        'title' => 'Cities',
+        'singular' => 'City',
+        'plural' => 'Cities',
+    ],
+
+    // Pages
+    'pages' => [
+        'payment_settings' => [
+            'title' => 'Payment Settings',
+            'active_gateway' => 'Active Gateway',
+            'gateway_description' => 'Choose the payment gateway for all transactions. Only settings for selected gateway will be shown.',
+            'enabled_gateway' => 'Active Payment Gateway',
+            'save_success' => 'Settings saved successfully',
+        ],
+        'sales_report' => [
+            'title' => 'Sales Report',
+        ],
     ],
 
     // Coupons

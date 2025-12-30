@@ -25,15 +25,26 @@ class EmailTemplateResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
-    protected static ?string $modelLabel = 'قالب بريد';
-
-    protected static ?string $pluralModelLabel = 'قوالب البريد';
-
     protected static ?int $navigationSort = 10;
 
     public static function getNavigationGroup(): ?string
     {
         return __('admin.nav.settings');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('admin.email_templates.title');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('admin.email_templates.singular');
+    }
+
+    public static function getPluralLabel(): string
+    {
+        return __('admin.email_templates.plural');
     }
 
     public static function form(Schema $schema): Schema

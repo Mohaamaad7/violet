@@ -23,17 +23,26 @@ class GovernorateResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name_ar';
 
-    protected static ?string $navigationLabel = 'المحافظات';
-
-    protected static ?string $modelLabel = 'محافظة';
-
-    protected static ?string $pluralModelLabel = 'المحافظات';
-
     protected static ?int $navigationSort = 2;
 
     public static function getNavigationGroup(): ?string
     {
         return __('admin.nav.geography');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('admin.governorates.title');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('admin.governorates.singular');
+    }
+
+    public static function getPluralLabel(): string
+    {
+        return __('admin.governorates.plural');
     }
 
     public static function form(Schema $schema): Schema

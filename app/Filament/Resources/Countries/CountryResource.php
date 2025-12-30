@@ -23,17 +23,26 @@ class CountryResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name_ar';
 
-    protected static ?string $navigationLabel = 'الدول';
-
-    protected static ?string $modelLabel = 'دولة';
-
-    protected static ?string $pluralModelLabel = 'الدول';
-
     protected static ?int $navigationSort = 1;
 
     public static function getNavigationGroup(): ?string
     {
         return __('admin.nav.geography');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('admin.countries.title');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('admin.countries.singular');
+    }
+
+    public static function getPluralLabel(): string
+    {
+        return __('admin.countries.plural');
     }
 
     public static function form(Schema $schema): Schema

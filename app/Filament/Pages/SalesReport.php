@@ -25,10 +25,18 @@ class SalesReport extends Page implements HasTable
     use InteractsWithTable;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedChartBar;
-    protected static ?string $navigationLabel = 'تقرير المبيعات';
-    protected static ?string $title = 'تقرير المبيعات';
     protected static ?int $navigationSort = 2;
     protected string $view = 'filament.pages.sales-report';
+
+    public static function getNavigationLabel(): string
+    {
+        return __('admin.pages.sales_report.title');
+    }
+
+    public function getTitle(): string
+    {
+        return __('admin.pages.sales_report.title');
+    }
 
     public static function getNavigationGroup(): ?string
     {

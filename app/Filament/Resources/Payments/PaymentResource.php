@@ -36,17 +36,17 @@ class PaymentResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return 'المدفوعات';
+        return __('admin.payments.title');
     }
 
     public static function getModelLabel(): string
     {
-        return 'دفعة';
+        return __('admin.payments.singular');
     }
 
     public static function getPluralLabel(): string
     {
-        return 'المدفوعات';
+        return __('admin.payments.plural');
     }
 
     public static function getNavigationBadge(): ?string

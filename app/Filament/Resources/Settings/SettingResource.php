@@ -33,17 +33,17 @@ class SettingResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return 'الإعدادات';
+        return __('admin.settings.title');
     }
 
     public static function getModelLabel(): string
     {
-        return 'إعداد';
+        return __('admin.settings.singular');
     }
 
     public static function getPluralLabel(): string
     {
-        return 'الإعدادات';
+        return __('admin.settings.plural');
     }
 
     public static function form(Schema $schema): Schema

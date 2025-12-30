@@ -24,12 +24,20 @@ class PaymentSettings extends Page implements HasForms
 {
     use InteractsWithForms;
 
-    protected static ?string $navigationLabel = 'إعدادات الدفع';
-    protected static ?string $title = 'إعدادات الدفع';
     protected static ?int $navigationSort = 101;
     protected string $view = 'filament.pages.payment-settings';
 
     public ?array $data = [];
+
+    public static function getNavigationLabel(): string
+    {
+        return __('admin.pages.payment_settings.title');
+    }
+
+    public function getTitle(): string
+    {
+        return __('admin.pages.payment_settings.title');
+    }
 
     public static function getNavigationIcon(): string
     {
@@ -38,7 +46,7 @@ class PaymentSettings extends Page implements HasForms
 
     public static function getNavigationGroup(): ?string
     {
-        return 'النظام';
+        return __('admin.nav.system');
     }
 
     public function mount(): void

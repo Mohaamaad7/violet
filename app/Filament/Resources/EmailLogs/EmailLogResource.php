@@ -20,15 +20,26 @@ class EmailLogResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'recipient_email';
 
-    protected static ?string $modelLabel = 'سجل بريد';
-
-    protected static ?string $pluralModelLabel = 'سجلات البريد';
-
     protected static ?int $navigationSort = 11;
 
     public static function getNavigationGroup(): ?string
     {
         return __('admin.nav.settings');
+    }
+
+    public static function getNavigationLabel(): string
+    {
+        return __('admin.email_logs.title');
+    }
+
+    public static function getModelLabel(): string
+    {
+        return __('admin.email_logs.singular');
+    }
+
+    public static function getPluralLabel(): string
+    {
+        return __('admin.email_logs.plural');
     }
 
     public static function canCreate(): bool
