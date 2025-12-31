@@ -3,12 +3,15 @@
 namespace App\Filament\Widgets;
 
 use App\Enums\ReturnStatus;
+use App\Filament\Widgets\Concerns\ChecksWidgetVisibility;
 use App\Models\OrderReturn;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class PendingReturnsWidget extends StatsOverviewWidget
 {
+    use ChecksWidgetVisibility;
+
     protected static ?int $sort = 2;
 
     protected function getStats(): array

@@ -51,9 +51,8 @@ class AdminPanelProvider extends PanelProvider
             ->pages([
                 Dashboard::class,
             ])
-            // Dynamic widget loading based on user role
+            // Widgets are discovered but filtered by canView() on each widget class
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
-            ->widgets($this->getWidgetsForCurrentUser())
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,

@@ -2,12 +2,15 @@
 
 namespace App\Filament\Widgets;
 
+use App\Filament\Widgets\Concerns\ChecksWidgetVisibility;
 use App\Models\StockMovement;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Carbon;
 
 class StockMovementsChartWidget extends ChartWidget
 {
+    use ChecksWidgetVisibility;
+
     protected static ?int $sort = 4;
 
     protected int|string|array $columnSpan = 'full';
@@ -54,13 +57,13 @@ class StockMovementsChartWidget extends ChartWidget
             $datasets[] = [
                 'label' => __('inventory.' . $type),
                 'data' => $data,
-                'borderColor' => match($type) {
+                'borderColor' => match ($type) {
                     'restock' => 'rgb(34, 197, 94)',
                     'sale' => 'rgb(59, 130, 246)',
                     'return' => 'rgb(234, 179, 8)',
                     'adjustment' => 'rgb(156, 163, 175)',
                 },
-                'backgroundColor' => match($type) {
+                'backgroundColor' => match ($type) {
                     'restock' => 'rgba(34, 197, 94, 0.1)',
                     'sale' => 'rgba(59, 130, 246, 0.1)',
                     'return' => 'rgba(234, 179, 8, 0.1)',

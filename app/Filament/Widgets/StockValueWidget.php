@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Filament\Widgets\Concerns\ChecksWidgetVisibility;
 use App\Models\Product;
 use Filament\Widgets\StatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
@@ -9,6 +10,8 @@ use Illuminate\Support\Facades\DB;
 
 class StockValueWidget extends StatsOverviewWidget
 {
+    use ChecksWidgetVisibility;
+
     protected static ?int $sort = 3;
 
     protected function getStats(): array

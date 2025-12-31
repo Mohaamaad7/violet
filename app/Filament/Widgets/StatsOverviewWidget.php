@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Enums\OrderStatus;
+use App\Filament\Widgets\Concerns\ChecksWidgetVisibility;
 use App\Models\Customer;
 use App\Models\Order;
 use App\Models\Product;
@@ -11,6 +12,7 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class StatsOverviewWidget extends BaseWidget
 {
+    use ChecksWidgetVisibility;
     /**
      * Widget refresh interval in seconds (not static in base class)
      */

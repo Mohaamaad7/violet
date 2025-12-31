@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Enums\OrderStatus;
+use App\Filament\Widgets\Concerns\ChecksWidgetVisibility;
 use App\Models\Order;
 use Filament\Widgets\ChartWidget;
 use Illuminate\Support\Carbon;
@@ -15,6 +16,7 @@ use Illuminate\Support\Carbon;
  */
 class SalesChartWidget extends ChartWidget
 {
+    use ChecksWidgetVisibility;
     /**
      * Widget heading (non-static in ChartWidget)
      */

@@ -3,6 +3,7 @@
 namespace App\Filament\Widgets;
 
 use App\Enums\OrderStatus;
+use App\Filament\Widgets\Concerns\ChecksWidgetVisibility;
 use App\Models\Order;
 use Filament\Tables;
 use Filament\Actions\Action;
@@ -11,6 +12,7 @@ use Filament\Widgets\TableWidget as BaseWidget;
 
 class RecentOrdersWidget extends BaseWidget
 {
+    use ChecksWidgetVisibility;
     /**
      * Widget heading
      */
