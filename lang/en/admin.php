@@ -41,6 +41,32 @@ return [
         'label_en' => 'English Label',
     ],
 
+    // Role Permissions Page
+    'role_permissions' => [
+        'title' => 'Role Permissions',
+        'select_role' => 'Select Role',
+        'widgets' => 'Widgets',
+        'nav_groups' => 'Navigation Groups',
+        'resources' => 'Resources',
+        'enable_all' => 'Enable All',
+        'disable_all' => 'Disable All',
+        'grant_full_access' => 'Grant Full Access',
+        'resource_name' => 'Resource',
+        'view' => 'View',
+        'create' => 'Create',
+        'edit' => 'Edit',
+        'delete' => 'Delete',
+        'widget_enabled' => 'Widget enabled',
+        'widget_disabled' => 'Widget disabled',
+        'nav_group_enabled' => 'Navigation group enabled',
+        'nav_group_disabled' => 'Navigation group disabled',
+        'permission_updated' => 'Permission updated',
+        'all_widgets_enabled' => 'All widgets enabled',
+        'all_widgets_disabled' => 'All widgets disabled',
+        'all_nav_groups_enabled' => 'All navigation groups enabled',
+        'full_access_granted' => 'Full access granted',
+    ],
+
     // Common Fields
     'address' => 'Address',
     'phone' => 'Phone',

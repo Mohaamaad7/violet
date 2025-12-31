@@ -41,6 +41,32 @@ return [
         'label_en' => 'العنوان بالإنجليزية',
     ],
 
+    // Role Permissions Page
+    'role_permissions' => [
+        'title' => 'صلاحيات الأدوار',
+        'select_role' => 'اختر الدور',
+        'widgets' => 'الويدجات',
+        'nav_groups' => 'مجموعات القوائم',
+        'resources' => 'الموارد',
+        'enable_all' => 'تفعيل الكل',
+        'disable_all' => 'تعطيل الكل',
+        'grant_full_access' => 'منح كل الصلاحيات',
+        'resource_name' => 'المورد',
+        'view' => 'عرض',
+        'create' => 'إنشاء',
+        'edit' => 'تعديل',
+        'delete' => 'حذف',
+        'widget_enabled' => 'تم تفعيل الويدجت',
+        'widget_disabled' => 'تم تعطيل الويدجت',
+        'nav_group_enabled' => 'تم تفعيل مجموعة القوائم',
+        'nav_group_disabled' => 'تم تعطيل مجموعة القوائم',
+        'permission_updated' => 'تم تحديث الصلاحية',
+        'all_widgets_enabled' => 'تم تفعيل كل الويدجات',
+        'all_widgets_disabled' => 'تم تعطيل كل الويدجات',
+        'all_nav_groups_enabled' => 'تم تفعيل كل مجموعات القوائم',
+        'full_access_granted' => 'تم منح كل الصلاحيات',
+    ],
+
     // Common Fields
     'address' => 'العنوان',
     'phone' => 'الهاتف',
