@@ -152,11 +152,11 @@ class LowStockProductResource extends Resource
                     ])
                     ->action(function (Product $record, array $data): void {
                         app(StockMovementService::class)->addStock(
-                            $record,
+                            $record->id,
                             $data['quantity'],
                             $data['type'],
-                            $data['notes'] ?? null,
-                            auth()->id()
+                            null, // reference
+                            $data['notes'] ?? null
                         );
 
                         Notification::make()
