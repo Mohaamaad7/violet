@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Permissions;
 
+use App\Filament\Resources\Concerns\ChecksResourceAccess;
 use App\Filament\Resources\Permissions\Pages\ListPermissions;
 use App\Filament\Resources\Permissions\Schemas\PermissionForm;
 use App\Filament\Resources\Permissions\Tables\PermissionsTable;
@@ -14,29 +15,31 @@ use Filament\Tables\Table;
 
 class PermissionResource extends Resource
 {
+    use ChecksResourceAccess;
+
     protected static ?string $model = Permission::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedLockClosed;
 
     protected static ?string $recordTitleAttribute = 'name';
-    
+
     public static function getNavigationGroup(): ?string
     {
         return __('admin.nav.system');
     }
-    
+
     protected static ?int $navigationSort = 1;
-    
+
     public static function getNavigationLabel(): string
     {
         return __('admin.permissions.title');
     }
-    
+
     public static function getPluralLabel(): string
     {
         return __('admin.permissions.plural');
     }
-    
+
     public static function getModelLabel(): string
     {
         return __('admin.permissions.singular');
@@ -65,7 +68,7 @@ class PermissionResource extends Resource
             'index' => ListPermissions::route('/'),
         ];
     }
-    
+
     public static function canCreate(): bool
     {
         return false;

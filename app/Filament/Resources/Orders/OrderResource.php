@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Orders;
 
+use App\Filament\Resources\Concerns\ChecksResourceAccess;
 use App\Filament\Resources\Orders\Pages\ListOrders;
 use App\Filament\Resources\Orders\Pages\ViewOrder;
 use App\Filament\Resources\Orders\Schemas\OrderForm;
@@ -16,6 +17,8 @@ use UnitEnum;
 
 class OrderResource extends Resource
 {
+    use ChecksResourceAccess;
+
     protected static ?string $model = Order::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
@@ -29,22 +32,22 @@ class OrderResource extends Resource
     protected static ?string $pluralModelLabel = null;
 
     protected static UnitEnum|string|null $navigationGroup = null;
-    
+
     public static function getNavigationGroup(): ?string
     {
         return __('admin.nav.sales');
     }
-    
+
     public static function getNavigationLabel(): string
     {
         return __('admin.orders.title');
     }
-    
+
     public static function getModelLabel(): string
     {
         return __('admin.orders.singular');
     }
-    
+
     public static function getPluralLabel(): string
     {
         return __('admin.orders.plural');

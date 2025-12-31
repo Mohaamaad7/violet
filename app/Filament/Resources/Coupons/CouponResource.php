@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Coupons;
 
+use App\Filament\Resources\Concerns\ChecksResourceAccess;
 use App\Filament\Resources\Coupons\Pages\CreateCoupon;
 use App\Filament\Resources\Coupons\Pages\EditCoupon;
 use App\Filament\Resources\Coupons\Pages\ListCoupons;
@@ -18,6 +19,8 @@ use UnitEnum;
 
 class CouponResource extends Resource
 {
+    use ChecksResourceAccess;
+
     protected static ?string $model = DiscountCode::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTicket;

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Governorates;
 
+use App\Filament\Resources\Concerns\ChecksResourceAccess;
 use App\Filament\Resources\Governorates\Pages\CreateGovernorate;
 use App\Filament\Resources\Governorates\Pages\EditGovernorate;
 use App\Filament\Resources\Governorates\Pages\ListGovernorates;
@@ -17,6 +18,8 @@ use UnitEnum;
 
 class GovernorateResource extends Resource
 {
+    use ChecksResourceAccess;
+
     protected static ?string $model = Governorate::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;

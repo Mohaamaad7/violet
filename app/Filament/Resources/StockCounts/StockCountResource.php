@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\StockCounts;
 
+use App\Filament\Resources\Concerns\ChecksResourceAccess;
 use App\Filament\Resources\StockCounts\Pages\CreateStockCount;
 use App\Filament\Resources\StockCounts\Pages\ListStockCounts;
 use App\Filament\Resources\StockCounts\Pages\ViewStockCount;
@@ -16,6 +17,8 @@ use Filament\Tables\Table;
 
 class StockCountResource extends Resource
 {
+    use ChecksResourceAccess;
+
     protected static ?string $model = StockCount::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClipboardDocumentCheck;

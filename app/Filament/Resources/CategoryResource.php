@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\CategoryResource\Pages;
+use App\Filament\Resources\Concerns\ChecksResourceAccess;
 use App\Models\Category;
 use Filament\Actions;
 use Filament\Forms;
@@ -19,6 +20,8 @@ use Filament\Tables\Columns\SpatieMediaLibraryImageColumn;
 
 class CategoryResource extends Resource
 {
+    use ChecksResourceAccess;
+
     protected static ?string $model = Category::class;
 
     public static function getNavigationIcon(): ?string

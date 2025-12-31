@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Products;
 
+use App\Filament\Resources\Concerns\ChecksResourceAccess;
 use App\Filament\Resources\Products\Pages\CreateProduct;
 use App\Filament\Resources\Products\Pages\EditProduct;
 use App\Filament\Resources\Products\Pages\ListProducts;
@@ -21,6 +22,8 @@ use UnitEnum;
 
 class ProductResource extends Resource
 {
+    use ChecksResourceAccess;
+
     protected static ?string $model = Product::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
@@ -32,22 +35,22 @@ class ProductResource extends Resource
     protected static ?int $navigationSort = 2;
 
     protected static ?string $navigationLabel = null;
-    
+
     public static function getNavigationGroup(): ?string
     {
         return __('admin.nav.catalog');
     }
-    
+
     public static function getNavigationLabel(): string
     {
         return __('admin.products.title');
     }
-    
+
     public static function getModelLabel(): string
     {
         return __('admin.products.singular');
     }
-    
+
     public static function getPluralLabel(): string
     {
         return __('admin.products.plural');

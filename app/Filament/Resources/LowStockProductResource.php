@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Filament\Resources\Concerns\ChecksResourceAccess;
 use App\Filament\Resources\LowStockProductResource\Pages;
 use App\Models\Product;
 use App\Services\StockMovementService;
@@ -19,6 +20,8 @@ use Illuminate\Database\Eloquent\Builder;
 
 class LowStockProductResource extends Resource
 {
+    use ChecksResourceAccess;
+
     protected static ?string $model = Product::class;
 
     public static function getNavigationIcon(): ?string

@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\OrderReturns;
 
+use App\Filament\Resources\Concerns\ChecksResourceAccess;
 use App\Filament\Resources\OrderReturns\Pages\ListOrderReturns;
 use App\Filament\Resources\OrderReturns\Pages\ViewOrderReturn;
 use App\Filament\Resources\OrderReturns\Schemas\OrderReturnInfolist;
@@ -15,6 +16,8 @@ use Filament\Tables\Table;
 
 class OrderReturnResource extends Resource
 {
+    use ChecksResourceAccess;
+
     protected static ?string $model = OrderReturn::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedArrowUturnLeft;

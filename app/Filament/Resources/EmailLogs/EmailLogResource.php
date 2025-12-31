@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\EmailLogs;
 
+use App\Filament\Resources\Concerns\ChecksResourceAccess;
 use App\Filament\Resources\EmailLogs\Pages\ListEmailLogs;
 use App\Filament\Resources\EmailLogs\Tables\EmailLogsTable;
 use App\Models\EmailLog;
@@ -14,6 +15,8 @@ use UnitEnum;
 
 class EmailLogResource extends Resource
 {
+    use ChecksResourceAccess;
+
     protected static ?string $model = EmailLog::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedInboxStack;

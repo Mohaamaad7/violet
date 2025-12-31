@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Sliders;
 
+use App\Filament\Resources\Concerns\ChecksResourceAccess;
 use App\Filament\Resources\Sliders\Pages\CreateSlider;
 use App\Filament\Resources\Sliders\Pages\EditSlider;
 use App\Filament\Resources\Sliders\Pages\ListSliders;
@@ -17,40 +18,42 @@ use UnitEnum;
 
 class SliderResource extends Resource
 {
+    use ChecksResourceAccess;
+
     protected static ?string $model = Slider::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;
 
     protected static ?string $recordTitleAttribute = 'title';
-    
+
     protected static ?string $navigationLabel = null;
-    
+
     protected static ?string $modelLabel = null;
-    
+
     protected static ?string $pluralModelLabel = null;
-    
+
     protected static UnitEnum|string|null $navigationGroup = null;
-    
+
     public static function getNavigationGroup(): ?string
     {
         return __('admin.nav.content');
     }
-    
+
     public static function getNavigationLabel(): string
     {
         return __('admin.sliders.title');
     }
-    
+
     public static function getModelLabel(): string
     {
         return __('admin.sliders.singular');
     }
-    
+
     public static function getPluralLabel(): string
     {
         return __('admin.sliders.plural');
     }
-    
+
     protected static ?int $navigationSort = 1;
 
     public static function form(Schema $schema): Schema

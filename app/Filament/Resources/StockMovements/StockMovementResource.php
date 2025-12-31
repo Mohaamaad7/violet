@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\StockMovements;
 
+use App\Filament\Resources\Concerns\ChecksResourceAccess;
 use App\Filament\Resources\StockMovements\Pages\CreateStockMovement;
 use App\Filament\Resources\StockMovements\Pages\EditStockMovement;
 use App\Filament\Resources\StockMovements\Pages\ListStockMovements;
@@ -18,6 +19,8 @@ use Filament\Tables\Table;
 
 class StockMovementResource extends Resource
 {
+    use ChecksResourceAccess;
+
     protected static ?string $model = StockMovement::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedRectangleStack;

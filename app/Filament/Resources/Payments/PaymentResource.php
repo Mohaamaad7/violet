@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Payments;
 
+use App\Filament\Resources\Concerns\ChecksResourceAccess;
 use App\Filament\Resources\Payments\Pages\ListPayments;
 use App\Filament\Resources\Payments\Pages\ViewPayment;
 use App\Models\Payment;
@@ -21,6 +22,8 @@ use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
 
 class PaymentResource extends Resource
 {
+    use ChecksResourceAccess;
+
     protected static ?string $model = Payment::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCreditCard;
