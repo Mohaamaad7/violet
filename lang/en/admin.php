@@ -65,6 +65,13 @@ return [
         'all_widgets_disabled' => 'All widgets disabled',
         'all_nav_groups_enabled' => 'All navigation groups enabled',
         'full_access_granted' => 'Full access granted',
+        // Zero-Config specific
+        'no_widgets_found' => 'No widgets found in the codebase',
+        'no_resources_found' => 'No resources found in the codebase',
+        'zero_config_info' => 'Zero-Config Mode Active',
+        'default_visible_info' => 'All widgets and resources are visible by default',
+        'override_info' => 'Items marked with "Override" have custom settings for this role',
+        'auto_discover_info' => 'New widgets and resources are automatically discovered from code',
     ],
 
     // Common Fields

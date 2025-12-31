@@ -2,53 +2,44 @@
 
 namespace App\Console\Commands;
 
-use App\Services\DashboardConfigurationService;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Cache;
 
 /**
- * Discover and register widgets, resources, and navigation groups
+ * Dashboard Discover Command - DEPRECATED
+ * 
+ * This command is no longer needed with the Zero-Config approach.
+ * Widgets and resources are now discovered automatically at runtime.
+ * 
+ * Kept for backward compatibility - now just clears cache.
  */
 class DashboardDiscover extends Command
 {
     protected $signature = 'dashboard:discover 
-                            {--widgets : Discover widgets only}
-                            {--resources : Discover resources only}
-                            {--nav-groups : Discover navigation groups only}';
+                            {--widgets : (deprecated) No effect}
+                            {--resources : (deprecated) No effect}
+                            {--nav-groups : (deprecated) No effect}';
 
-    protected $description = 'Auto-discover and register widgets, resources, and navigation groups';
+    protected $description = '(Deprecated) Clear dashboard cache to refresh auto-discovery';
 
-    public function handle(DashboardConfigurationService $service): int
+    public function handle(): int
     {
-        $discoverAll = !$this->option('widgets') && !$this->option('resources') && !$this->option('nav-groups');
-
-        $this->info('🔍 Starting discovery...');
+        $this->info('🔄 Zero-Config Mode Active');
         $this->newLine();
 
-        // Discover Navigation Groups first (other things depend on them)
-        if ($discoverAll || $this->option('nav-groups')) {
-            $this->info('📁 Discovering navigation groups...');
-            $count = $service->discoverNavigationGroups();
-            $this->info("   ✅ Registered {$count} new navigation groups");
-            $this->newLine();
-        }
+        $this->info('📝 In Zero-Config mode, widgets and resources are discovered automatically.');
+        $this->info('   No manual registration is needed!');
+        $this->newLine();
 
-        // Discover Widgets
-        if ($discoverAll || $this->option('widgets')) {
-            $this->info('🧩 Discovering widgets...');
-            $count = $service->discoverWidgets();
-            $this->info("   ✅ Registered {$count} new widgets");
-            $this->newLine();
-        }
+        // Just clear the cache to force re-discovery
+        Cache::forget('all_widget_classes');
+        Cache::forget('all_resource_classes');
+        Cache::flush();
 
-        // Discover Resources
-        if ($discoverAll || $this->option('resources')) {
-            $this->info('📦 Discovering resources...');
-            $count = $service->discoverResources();
-            $this->info("   ✅ Registered {$count} new resources");
-            $this->newLine();
-        }
+        $this->info('✅ Cache cleared. New widgets/resources will be discovered on next page load.');
+        $this->newLine();
 
-        $this->info('✨ Discovery complete!');
+        $this->warn('💡 This command is deprecated. New widgets/resources appear automatically.');
 
         return Command::SUCCESS;
     }

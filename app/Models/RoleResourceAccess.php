@@ -6,9 +6,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * Role Resource Access Model
+ * Role Resource Access Model - Zero-Config Approach
  * 
- * Defines which resources each role can access and with what permissions.
+ * Stores ONLY restricted resources (overrides).
+ * If a resource is NOT in this table, it has FULL ACCESS by default.
+ * 
+ * Use resource_class directly instead of resource_configuration_id.
  */
 class RoleResourceAccess extends Model
 {
@@ -16,7 +19,8 @@ class RoleResourceAccess extends Model
 
     protected $fillable = [
         'role_id',
-        'resource_configuration_id',
+        'resource_class', // The full class name, e.g., App\Filament\Resources\Products\ProductResource
+        'resource_configuration_id', // Legacy - kept for backward compatibility
         'can_view',
         'can_create',
         'can_edit',
@@ -36,17 +40,12 @@ class RoleResourceAccess extends Model
 
     // ==================== Relationships ====================
 
-    /**
-     * The role
-     */
     public function role(): BelongsTo
     {
         return $this->belongsTo(Role::class);
     }
 
-    /**
-     * The resource configuration
-     */
+    // Legacy relationship - kept for backward compatibility
     public function resourceConfiguration(): BelongsTo
     {
         return $this->belongsTo(ResourceConfiguration::class);
@@ -55,31 +54,43 @@ class RoleResourceAccess extends Model
     // ==================== Scopes ====================
 
     /**
-     * Get visible resources for a role
+     * Get restricted resources for a role
      */
-    public function scopeVisibleForRole($query, int $roleId)
+    public function scopeRestrictedForRole($query, int $roleId)
     {
         return $query->where('role_id', $roleId)
-            ->where('is_visible_in_navigation', true)
-            ->orderBy('navigation_sort');
+            ->where(function ($q) {
+                $q->where('can_view', false)
+                    ->orWhere('can_create', false)
+                    ->orWhere('can_edit', false)
+                    ->orWhere('can_delete', false);
+            });
+    }
+
+    // ==================== Static Helpers ====================
+
+    /**
+     * Check if a resource has restrictions for a role
+     */
+    public static function getRestriction(int $roleId, string $resourceClass): ?self
+    {
+        return self::where('role_id', $roleId)
+            ->where('resource_class', $resourceClass)
+            ->first();
     }
 
     /**
-     * Get resources with view permission for a role
+     * Check if role can perform action on resource
+     * Returns TRUE if no restriction found (default: full access)
      */
-    public function scopeViewableForRole($query, int $roleId)
+    public static function canPerform(int $roleId, string $resourceClass, string $permission): bool
     {
-        return $query->where('role_id', $roleId)
-            ->where('can_view', true);
-    }
+        $restriction = self::getRestriction($roleId, $resourceClass);
 
-    // ==================== Helpers ====================
+        if (!$restriction) {
+            return true; // No restriction = full access
+        }
 
-    /**
-     * Check if role has any permission on the resource
-     */
-    public function hasAnyPermission(): bool
-    {
-        return $this->can_view || $this->can_create || $this->can_edit || $this->can_delete;
+        return (bool) $restriction->{$permission};
     }
 }

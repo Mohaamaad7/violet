@@ -2,28 +2,27 @@
 
 namespace App\Filament\Pages;
 
-use App\Models\NavigationGroupConfiguration;
-use App\Models\ResourceConfiguration;
 use App\Models\Role;
-use App\Models\RoleNavigationGroup;
 use App\Models\RoleResourceAccess;
 use App\Models\RoleWidgetDefault;
-use App\Models\WidgetConfiguration;
 use App\Services\DashboardConfigurationService;
 use BackedEnum;
-use Filament\Actions\Action;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Concerns\InteractsWithForms;
-use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\Cache;
 
-class RolePermissions extends Page implements HasForms
+/**
+ * Role Permissions Page - Zero-Config Approach
+ * 
+ * This page allows admins to manage widget/resource visibility per role.
+ * Widgets and resources are discovered from CODE at runtime (no DB registration needed).
+ * Database only stores EXCEPTIONS (hidden items), not visible items.
+ * 
+ * Default: Everything is VISIBLE. Only store what's hidden.
+ */
+class RolePermissions extends Page
 {
-    use InteractsWithForms;
-
     protected static string|\BackedEnum|null $navigationIcon = Heroicon::OutlinedShieldCheck;
 
     protected string $view = 'filament.pages.role-permissions';
@@ -33,14 +32,18 @@ class RolePermissions extends Page implements HasForms
     // Form state
     public ?int $selectedRoleId = null;
 
-    // Widget permissions
-    public array $widgetPermissions = [];
+    // Widget permissions (discovered from code)
+    public array $widgets = [];
 
-    // Resource permissions
-    public array $resourcePermissions = [];
+    // Resource permissions (discovered from code)
+    public array $resources = [];
 
-    // Navigation group permissions
-    public array $navGroupPermissions = [];
+    protected DashboardConfigurationService $service;
+
+    public function boot(): void
+    {
+        $this->service = app(DashboardConfigurationService::class);
+    }
 
     public static function getNavigationGroup(): ?string
     {
@@ -59,6 +62,8 @@ class RolePermissions extends Page implements HasForms
 
     public function mount(): void
     {
+        $this->service = app(DashboardConfigurationService::class);
+
         // Default to first role
         $firstRole = Role::first();
         if ($firstRole) {
@@ -72,85 +77,49 @@ class RolePermissions extends Page implements HasForms
         $this->loadPermissions();
     }
 
+    /**
+     * Load permissions using runtime discovery
+     * No database registration needed - discovers from code!
+     */
     protected function loadPermissions(): void
     {
         if (!$this->selectedRoleId) {
             return;
         }
 
-        // Load widget permissions
-        $this->widgetPermissions = [];
-        $widgets = WidgetConfiguration::all();
-        foreach ($widgets as $widget) {
-            $roleDefault = RoleWidgetDefault::where('role_id', $this->selectedRoleId)
-                ->where('widget_configuration_id', $widget->id)
-                ->first();
+        $this->service = app(DashboardConfigurationService::class);
 
-            $this->widgetPermissions[$widget->id] = [
-                'name' => $widget->widget_name,
-                'group' => $widget->widget_group,
-                'is_visible' => $roleDefault?->is_visible ?? true,
-            ];
-        }
+        // Discover widgets from CODE and get their status for this role
+        $this->widgets = $this->service->getWidgetsWithStatusForRole($this->selectedRoleId);
 
-        // Load resource permissions
-        $this->resourcePermissions = [];
-        $resources = ResourceConfiguration::all();
-        foreach ($resources as $resource) {
-            $roleAccess = RoleResourceAccess::where('role_id', $this->selectedRoleId)
-                ->where('resource_configuration_id', $resource->id)
-                ->first();
-
-            $this->resourcePermissions[$resource->id] = [
-                'name' => $resource->resource_name,
-                'navigation_group' => $resource->navigation_group,
-                'can_view' => $roleAccess?->can_view ?? true,
-                'can_create' => $roleAccess?->can_create ?? false,
-                'can_edit' => $roleAccess?->can_edit ?? false,
-                'can_delete' => $roleAccess?->can_delete ?? false,
-                'is_visible_in_navigation' => $roleAccess?->is_visible_in_navigation ?? true,
-            ];
-        }
-
-        // Load navigation group permissions
-        $this->navGroupPermissions = [];
-        $navGroups = NavigationGroupConfiguration::all();
-        foreach ($navGroups as $navGroup) {
-            $roleNavGroup = RoleNavigationGroup::where('role_id', $this->selectedRoleId)
-                ->where('navigation_group_id', $navGroup->id)
-                ->first();
-
-            $this->navGroupPermissions[$navGroup->id] = [
-                'key' => $navGroup->group_key,
-                'label_ar' => $navGroup->group_label_ar,
-                'label_en' => $navGroup->group_label_en,
-                'is_visible' => $roleNavGroup?->is_visible ?? true,
-            ];
-        }
+        // Discover resources from CODE and get their status for this role
+        $this->resources = $this->service->getResourcesWithStatusForRole($this->selectedRoleId);
     }
 
-    public function toggleWidget(int $widgetId): void
+    /**
+     * Toggle a widget's visibility for the selected role
+     * Uses widget_class directly (no configuration ID needed)
+     */
+    public function toggleWidget(string $widgetClass): void
     {
-        if (!$this->selectedRoleId)
+        if (!$this->selectedRoleId) {
             return;
+        }
 
-        $current = $this->widgetPermissions[$widgetId]['is_visible'] ?? true;
-        $newValue = !$current;
+        // Find current status
+        $currentlyVisible = true;
+        foreach ($this->widgets as &$widget) {
+            if ($widget['class'] === $widgetClass) {
+                $currentlyVisible = $widget['is_visible'];
+                $widget['is_visible'] = !$currentlyVisible;
+                break;
+            }
+        }
 
-        RoleWidgetDefault::updateOrCreate(
-            [
-                'role_id' => $this->selectedRoleId,
-                'widget_configuration_id' => $widgetId,
-            ],
-            [
-                'is_visible' => $newValue,
-                'order_position' => WidgetConfiguration::find($widgetId)?->default_order ?? 0,
-                'column_span' => WidgetConfiguration::find($widgetId)?->default_column_span ?? 1,
-            ]
-        );
+        $newValue = !$currentlyVisible;
 
-        $this->widgetPermissions[$widgetId]['is_visible'] = $newValue;
-        $this->clearCache();
+        // Update database
+        $this->service->setWidgetVisibility($this->selectedRoleId, $widgetClass, $newValue);
 
         Notification::make()
             ->title($newValue ? __('admin.role_permissions.widget_enabled') : __('admin.role_permissions.widget_disabled'))
@@ -158,74 +127,46 @@ class RolePermissions extends Page implements HasForms
             ->send();
     }
 
-    public function toggleNavGroup(int $navGroupId): void
+    /**
+     * Toggle a resource permission for the selected role
+     */
+    public function toggleResourcePermission(string $resourceClass, string $permission): void
     {
-        if (!$this->selectedRoleId)
+        if (!$this->selectedRoleId) {
             return;
-
-        $current = $this->navGroupPermissions[$navGroupId]['is_visible'] ?? true;
-        $newValue = !$current;
-
-        RoleNavigationGroup::updateOrCreate(
-            [
-                'role_id' => $this->selectedRoleId,
-                'navigation_group_id' => $navGroupId,
-            ],
-            [
-                'is_visible' => $newValue,
-                'order_position' => NavigationGroupConfiguration::find($navGroupId)?->default_order ?? 0,
-            ]
-        );
-
-        $this->navGroupPermissions[$navGroupId]['is_visible'] = $newValue;
-        $this->clearCache();
-
-        Notification::make()
-            ->title($newValue ? __('admin.role_permissions.nav_group_enabled') : __('admin.role_permissions.nav_group_disabled'))
-            ->success()
-            ->send();
-    }
-
-    public function updateResourcePermission(int $resourceId, string $permission): void
-    {
-        if (!$this->selectedRoleId)
-            return;
-
-        $current = $this->resourcePermissions[$resourceId][$permission] ?? false;
-        $newValue = !$current;
-
-        $updateData = [$permission => $newValue];
-
-        // If enabling view, also enable navigation visibility
-        if ($permission === 'can_view' && $newValue) {
-            $updateData['is_visible_in_navigation'] = true;
-            $this->resourcePermissions[$resourceId]['is_visible_in_navigation'] = true;
         }
 
-        // If disabling view, also disable everything else
-        if ($permission === 'can_view' && !$newValue) {
-            $updateData['can_create'] = false;
-            $updateData['can_edit'] = false;
-            $updateData['can_delete'] = false;
-            $updateData['is_visible_in_navigation'] = false;
-            $this->resourcePermissions[$resourceId]['can_create'] = false;
-            $this->resourcePermissions[$resourceId]['can_edit'] = false;
-            $this->resourcePermissions[$resourceId]['can_delete'] = false;
-            $this->resourcePermissions[$resourceId]['is_visible_in_navigation'] = false;
+        // Find current status and toggle
+        $newPermissions = [];
+        foreach ($this->resources as &$resource) {
+            if ($resource['class'] === $resourceClass) {
+                $currentValue = $resource[$permission];
+                $resource[$permission] = !$currentValue;
+
+                // Build permissions array
+                $newPermissions = [
+                    'can_view' => $resource['can_view'],
+                    'can_create' => $resource['can_create'],
+                    'can_edit' => $resource['can_edit'],
+                    'can_delete' => $resource['can_delete'],
+                ];
+
+                // If disabling view, disable everything
+                if ($permission === 'can_view' && $resource[$permission] === false) {
+                    $resource['can_create'] = false;
+                    $resource['can_edit'] = false;
+                    $resource['can_delete'] = false;
+                    $newPermissions['can_create'] = false;
+                    $newPermissions['can_edit'] = false;
+                    $newPermissions['can_delete'] = false;
+                }
+
+                break;
+            }
         }
 
-        RoleResourceAccess::updateOrCreate(
-            [
-                'role_id' => $this->selectedRoleId,
-                'resource_configuration_id' => $resourceId,
-            ],
-            array_merge([
-                'navigation_sort' => ResourceConfiguration::find($resourceId)?->default_navigation_sort ?? 0,
-            ], $updateData)
-        );
-
-        $this->resourcePermissions[$resourceId][$permission] = $newValue;
-        $this->clearCache();
+        // Update database
+        $this->service->setResourceAccess($this->selectedRoleId, $resourceClass, $newPermissions);
 
         Notification::make()
             ->title(__('admin.role_permissions.permission_updated'))
@@ -233,108 +174,100 @@ class RolePermissions extends Page implements HasForms
             ->send();
     }
 
+    /**
+     * Enable all widgets for the selected role
+     * Simply delete all "hide" overrides - back to default (visible)
+     */
     public function enableAllWidgets(): void
     {
-        if (!$this->selectedRoleId)
+        if (!$this->selectedRoleId) {
             return;
-
-        foreach ($this->widgetPermissions as $widgetId => $data) {
-            RoleWidgetDefault::updateOrCreate(
-                [
-                    'role_id' => $this->selectedRoleId,
-                    'widget_configuration_id' => $widgetId,
-                ],
-                ['is_visible' => true]
-            );
-            $this->widgetPermissions[$widgetId]['is_visible'] = true;
         }
 
-        $this->clearCache();
-        Notification::make()->title(__('admin.role_permissions.all_widgets_enabled'))->success()->send();
+        // Delete all hide overrides for this role
+        RoleWidgetDefault::where('role_id', $this->selectedRoleId)->delete();
+
+        // Update UI state
+        foreach ($this->widgets as &$widget) {
+            $widget['is_visible'] = true;
+            $widget['has_override'] = false;
+        }
+
+        Cache::flush();
+
+        Notification::make()
+            ->title(__('admin.role_permissions.all_widgets_enabled'))
+            ->success()
+            ->send();
     }
 
+    /**
+     * Disable all widgets for the selected role
+     */
     public function disableAllWidgets(): void
     {
-        if (!$this->selectedRoleId)
+        if (!$this->selectedRoleId) {
             return;
-
-        foreach ($this->widgetPermissions as $widgetId => $data) {
-            RoleWidgetDefault::updateOrCreate(
-                [
-                    'role_id' => $this->selectedRoleId,
-                    'widget_configuration_id' => $widgetId,
-                ],
-                ['is_visible' => false]
-            );
-            $this->widgetPermissions[$widgetId]['is_visible'] = false;
         }
 
-        $this->clearCache();
-        Notification::make()->title(__('admin.role_permissions.all_widgets_disabled'))->success()->send();
-    }
-
-    public function enableAllNavGroups(): void
-    {
-        if (!$this->selectedRoleId)
-            return;
-
-        foreach ($this->navGroupPermissions as $navGroupId => $data) {
-            RoleNavigationGroup::updateOrCreate(
-                [
-                    'role_id' => $this->selectedRoleId,
-                    'navigation_group_id' => $navGroupId,
-                ],
-                ['is_visible' => true]
-            );
-            $this->navGroupPermissions[$navGroupId]['is_visible'] = true;
+        foreach ($this->widgets as &$widget) {
+            $this->service->setWidgetVisibility($this->selectedRoleId, $widget['class'], false);
+            $widget['is_visible'] = false;
+            $widget['has_override'] = true;
         }
 
-        $this->clearCache();
-        Notification::make()->title(__('admin.role_permissions.all_nav_groups_enabled'))->success()->send();
+        Notification::make()
+            ->title(__('admin.role_permissions.all_widgets_disabled'))
+            ->success()
+            ->send();
     }
 
+    /**
+     * Grant full resource access for the selected role
+     * Simply delete all restriction overrides - back to default (full access)
+     */
     public function grantFullResourceAccess(): void
     {
-        if (!$this->selectedRoleId)
+        if (!$this->selectedRoleId) {
             return;
-
-        foreach ($this->resourcePermissions as $resourceId => $data) {
-            RoleResourceAccess::updateOrCreate(
-                [
-                    'role_id' => $this->selectedRoleId,
-                    'resource_configuration_id' => $resourceId,
-                ],
-                [
-                    'can_view' => true,
-                    'can_create' => true,
-                    'can_edit' => true,
-                    'can_delete' => true,
-                    'is_visible_in_navigation' => true,
-                ]
-            );
-            $this->resourcePermissions[$resourceId]['can_view'] = true;
-            $this->resourcePermissions[$resourceId]['can_create'] = true;
-            $this->resourcePermissions[$resourceId]['can_edit'] = true;
-            $this->resourcePermissions[$resourceId]['can_delete'] = true;
-            $this->resourcePermissions[$resourceId]['is_visible_in_navigation'] = true;
         }
 
-        $this->clearCache();
-        Notification::make()->title(__('admin.role_permissions.full_access_granted'))->success()->send();
-    }
+        // Delete all restriction overrides for this role
+        RoleResourceAccess::where('role_id', $this->selectedRoleId)->delete();
 
-    protected function clearCache(): void
-    {
+        // Update UI state
+        foreach ($this->resources as &$resource) {
+            $resource['can_view'] = true;
+            $resource['can_create'] = true;
+            $resource['can_edit'] = true;
+            $resource['can_delete'] = true;
+            $resource['has_override'] = false;
+        }
+
         Cache::flush();
+
+        Notification::make()
+            ->title(__('admin.role_permissions.full_access_granted'))
+            ->success()
+            ->send();
     }
 
+    /**
+     * Get all roles for the select dropdown
+     */
     public function getRoles(): array
     {
         return Role::pluck('name', 'id')->toArray();
     }
 
+    /**
+     * Get the selected role name for display
+     */
     public function getSelectedRoleName(): string
     {
+        if (!$this->selectedRoleId) {
+            return '';
+        }
         return Role::find($this->selectedRoleId)?->name ?? '';
     }
 }

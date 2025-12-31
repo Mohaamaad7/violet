@@ -65,6 +65,13 @@ return [
         'all_widgets_disabled' => 'تم تعطيل كل الويدجات',
         'all_nav_groups_enabled' => 'تم تفعيل كل مجموعات القوائم',
         'full_access_granted' => 'تم منح كل الصلاحيات',
+        // Zero-Config specific
+        'no_widgets_found' => 'لا توجد ويدجات في الكود',
+        'no_resources_found' => 'لا توجد موارد في الكود',
+        'zero_config_info' => 'وضع الإعداد التلقائي مفعّل',
+        'default_visible_info' => 'كل الويدجات والموارد مرئية تلقائياً',
+        'override_info' => 'العناصر المميزة بـ "Override" لها إعدادات مخصصة لهذا الدور',
+        'auto_discover_info' => 'الويدجات والموارد الجديدة تُكتشف تلقائياً من الكود',
     ],
 
     // Common Fields

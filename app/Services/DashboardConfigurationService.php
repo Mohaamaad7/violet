@@ -2,491 +2,419 @@
 
 namespace App\Services;
 
-use App\Models\NavigationGroupConfiguration;
-use App\Models\ResourceConfiguration;
-use App\Models\RoleNavigationGroup;
 use App\Models\RoleResourceAccess;
 use App\Models\RoleWidgetDefault;
 use App\Models\User;
-use App\Models\UserWidgetPreference;
-use App\Models\WidgetConfiguration;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Str;
+use ReflectionClass;
 
 /**
- * Dashboard Configuration Service
+ * Dashboard Configuration Service - Zero-Config Approach
  * 
- * Provides dynamic widget, resource, and navigation group management
- * based on user preferences and role defaults.
+ * This service provides runtime discovery of widgets and resources.
+ * Everything is visible by default unless explicitly hidden in the database.
+ * 
+ * Philosophy:
+ * - No artisan commands needed
+ * - No base classes required
+ * - Database stores EXCEPTIONS only (what's hidden), not what's visible
+ * - Plug & Play: Create widget/resource → it appears automatically
  */
 class DashboardConfigurationService
 {
     /**
-     * Cache duration in seconds (1 hour)
+     * Get visible widgets for the current user
+     * Returns array of widget class names that should be shown
      */
-    protected int $cacheDuration = 3600;
-
-    // ==================== Widget Methods ====================
-
-    /**
-     * Get widgets for a specific user
-     * Priority: User Preferences > Role Defaults > System Defaults
-     *
-     * @param User $user
-     * @return array Array of widget class names
-     */
-    public function getWidgetsForUser(User $user): array
+    public function getVisibleWidgetsForCurrentUser(): array
     {
-        $cacheKey = "user_widgets_{$user->id}";
+        $user = auth()->user();
 
-        return Cache::remember($cacheKey, $this->cacheDuration, function () use ($user) {
-            // 1. Check user-specific preferences first
-            $userPreferences = UserWidgetPreference::where('user_id', $user->id)
-                ->where('is_visible', true)
-                ->with('widgetConfiguration')
-                ->orderBy('order_position')
-                ->get();
+        if (!$user) {
+            return $this->getDefaultWidgets();
+        }
 
-            if ($userPreferences->isNotEmpty()) {
-                return $userPreferences
-                    ->filter(fn($pref) => $pref->widgetConfiguration?->is_active)
-                    ->map(fn($pref) => [
-                        'class' => $pref->widgetConfiguration->widget_class,
-                        'column_span' => $pref->column_span,
-                        'order' => $pref->order_position,
-                    ])
-                    ->values()
-                    ->toArray();
-            }
+        $cacheKey = "visible_widgets_user_{$user->id}";
 
-            // 2. Fall back to role defaults
-            $roleIds = $user->roles->pluck('id')->toArray();
+        return Cache::remember($cacheKey, 300, function () use ($user) {
+            $allWidgets = $this->discoverAllWidgets();
+            $visibleWidgets = [];
 
-            if (!empty($roleIds)) {
-                $roleDefaults = RoleWidgetDefault::whereIn('role_id', $roleIds)
-                    ->where('is_visible', true)
-                    ->with('widgetConfiguration')
-                    ->orderBy('order_position')
-                    ->get();
-
-                if ($roleDefaults->isNotEmpty()) {
-                    return $roleDefaults
-                        ->filter(fn($def) => $def->widgetConfiguration?->is_active)
-                        ->unique('widget_configuration_id')
-                        ->map(fn($def) => [
-                            'class' => $def->widgetConfiguration->widget_class,
-                            'column_span' => $def->column_span,
-                            'order' => $def->order_position,
-                        ])
-                        ->values()
-                        ->toArray();
+            foreach ($allWidgets as $widgetClass) {
+                if ($this->isWidgetVisibleForUser($widgetClass, $user)) {
+                    $visibleWidgets[] = $widgetClass;
                 }
             }
 
-            // 3. Fall back to system defaults (all active widgets)
-            return WidgetConfiguration::active()
-                ->orderBy('default_order')
-                ->get()
-                ->map(fn($widget) => [
-                    'class' => $widget->widget_class,
-                    'column_span' => $widget->default_column_span,
-                    'order' => $widget->default_order,
-                ])
-                ->toArray();
+            return $visibleWidgets;
         });
     }
 
     /**
-     * Get widget classes only for Filament panel
+     * Check if a widget is visible for a specific user
+     * DEFAULT: VISIBLE (true) unless explicitly hidden
      */
-    public function getWidgetClassesForUser(User $user): array
+    public function isWidgetVisibleForUser(string $widgetClass, User $user): bool
     {
-        $widgets = $this->getWidgetsForUser($user);
-        return array_column($widgets, 'class');
-    }
+        // Super-admin sees everything
+        if ($user->hasRole('super-admin')) {
+            return true;
+        }
 
-    // ==================== Resource Methods ====================
+        $roleIds = $user->roles->pluck('id')->toArray();
 
-    /**
-     * Get accessible resources for a user
-     *
-     * @param User $user
-     * @return array Array of resource configurations with permissions
-     */
-    public function getResourcesForUser(User $user): array
-    {
-        $cacheKey = "user_resources_{$user->id}";
+        if (empty($roleIds)) {
+            return true; // No role? Show everything
+        }
 
-        return Cache::remember($cacheKey, $this->cacheDuration, function () use ($user) {
-            $roleIds = $user->roles->pluck('id')->toArray();
+        // Check if there's an explicit "hide" record in the database
+        $hiddenRecord = RoleWidgetDefault::where('widget_class', $widgetClass)
+            ->whereIn('role_id', $roleIds)
+            ->where('is_visible', false)
+            ->first();
 
-            if (empty($roleIds)) {
-                return [];
-            }
-
-            // Get all resource access for user's roles
-            $resourceAccess = RoleResourceAccess::whereIn('role_id', $roleIds)
-                ->where('can_view', true)
-                ->with('resourceConfiguration')
-                ->get();
-
-            // Merge permissions from all roles (most permissive wins)
-            $mergedAccess = [];
-
-            foreach ($resourceAccess as $access) {
-                $resourceClass = $access->resourceConfiguration?->resource_class;
-
-                if (!$resourceClass || !$access->resourceConfiguration->is_active) {
-                    continue;
-                }
-
-                if (!isset($mergedAccess[$resourceClass])) {
-                    $mergedAccess[$resourceClass] = [
-                        'class' => $resourceClass,
-                        'name' => $access->resourceConfiguration->resource_name,
-                        'navigation_group' => $access->resourceConfiguration->navigation_group,
-                        'can_view' => false,
-                        'can_create' => false,
-                        'can_edit' => false,
-                        'can_delete' => false,
-                        'is_visible_in_navigation' => false,
-                        'navigation_sort' => $access->navigation_sort,
-                    ];
-                }
-
-                // Merge permissions (most permissive)
-                $mergedAccess[$resourceClass]['can_view'] = $mergedAccess[$resourceClass]['can_view'] || $access->can_view;
-                $mergedAccess[$resourceClass]['can_create'] = $mergedAccess[$resourceClass]['can_create'] || $access->can_create;
-                $mergedAccess[$resourceClass]['can_edit'] = $mergedAccess[$resourceClass]['can_edit'] || $access->can_edit;
-                $mergedAccess[$resourceClass]['can_delete'] = $mergedAccess[$resourceClass]['can_delete'] || $access->can_delete;
-                $mergedAccess[$resourceClass]['is_visible_in_navigation'] = $mergedAccess[$resourceClass]['is_visible_in_navigation'] || $access->is_visible_in_navigation;
-            }
-
-            return array_values($mergedAccess);
-        });
+        // If found a record that says "hide" → hide it
+        // Otherwise → show it (Default: Visible)
+        return $hiddenRecord === null;
     }
 
     /**
-     * Get resource classes visible in navigation for a user
+     * Check if a resource is accessible for current user
+     * DEFAULT: FULL ACCESS unless explicitly restricted
      */
-    public function getVisibleResourceClassesForUser(User $user): array
+    public function canAccessResource(string $resourceClass, string $permission = 'can_view'): bool
     {
-        $resources = $this->getResourcesForUser($user);
+        $user = auth()->user();
 
-        return collect($resources)
-            ->filter(fn($r) => $r['is_visible_in_navigation'])
-            ->pluck('class')
-            ->toArray();
-    }
-
-    /**
-     * Check if user can perform action on a resource
-     */
-    public function canUserAccessResource(User $user, string $resourceClass, string $action = 'view'): bool
-    {
-        $resources = $this->getResourcesForUser($user);
-
-        $resource = collect($resources)->firstWhere('class', $resourceClass);
-
-        if (!$resource) {
+        if (!$user) {
             return false;
         }
 
-        return match ($action) {
-            'view' => $resource['can_view'],
-            'create' => $resource['can_create'],
-            'edit' => $resource['can_edit'],
-            'delete' => $resource['can_delete'],
-            default => false,
-        };
+        // Super-admin has full access
+        if ($user->hasRole('super-admin')) {
+            return true;
+        }
+
+        $roleIds = $user->roles->pluck('id')->toArray();
+
+        if (empty($roleIds)) {
+            return true; // No role? Allow by default
+        }
+
+        // Check if there's an explicit "deny" record
+        $denyRecord = RoleResourceAccess::where('resource_class', $resourceClass)
+            ->whereIn('role_id', $roleIds)
+            ->where($permission, false)
+            ->first();
+
+        // If found a record that says "deny" → deny
+        // Otherwise → allow (Default: Full Access)
+        return $denyRecord === null;
     }
 
-    // ==================== Navigation Group Methods ====================
+    /**
+     * Should resource be shown in navigation?
+     * DEFAULT: VISIBLE unless explicitly hidden
+     */
+    public function shouldShowResourceInNavigation(string $resourceClass): bool
+    {
+        return $this->canAccessResource($resourceClass, 'can_view');
+    }
 
     /**
-     * Get navigation groups for a user
-     *
-     * @param User $user
-     * @return array Array of navigation groups with labels
+     * Discover all widget classes from the codebase
+     * This is the runtime discovery - no database needed
      */
-    public function getNavigationGroupsForUser(User $user): array
+    public function discoverAllWidgets(): array
     {
-        $cacheKey = "user_nav_groups_{$user->id}";
+        $cacheKey = 'all_widget_classes';
 
-        return Cache::remember($cacheKey, $this->cacheDuration, function () use ($user) {
-            $roleIds = $user->roles->pluck('id')->toArray();
+        return Cache::remember($cacheKey, 3600, function () {
+            $widgets = [];
+            $widgetPath = app_path('Filament/Widgets');
 
-            if (empty($roleIds)) {
-                // Return all active groups for users without roles
-                return NavigationGroupConfiguration::active()
-                    ->ordered()
-                    ->get()
-                    ->map(fn($group) => [
-                        'key' => $group->group_key,
-                        'label' => $group->getLabel(),
-                        'icon' => $group->icon,
-                        'order' => $group->default_order,
-                    ])
-                    ->toArray();
+            if (!File::isDirectory($widgetPath)) {
+                return $widgets;
             }
 
-            // Get role-specific navigation groups
-            $roleNavGroups = RoleNavigationGroup::whereIn('role_id', $roleIds)
-                ->where('is_visible', true)
-                ->with('navigationGroup')
-                ->orderBy('order_position')
-                ->get();
+            $files = File::allFiles($widgetPath);
 
-            if ($roleNavGroups->isNotEmpty()) {
-                return $roleNavGroups
-                    ->filter(fn($rng) => $rng->navigationGroup?->is_active)
-                    ->unique('navigation_group_id')
-                    ->map(fn($rng) => [
-                        'key' => $rng->navigationGroup->group_key,
-                        'label' => $rng->navigationGroup->getLabel(),
-                        'icon' => $rng->navigationGroup->icon,
-                        'order' => $rng->order_position,
-                    ])
-                    ->sortBy('order')
-                    ->values()
-                    ->toArray();
+            foreach ($files as $file) {
+                $className = $this->getClassNameFromFile($file->getPathname());
+
+                if ($className && $this->isValidWidgetClass($className)) {
+                    $widgets[] = $className;
+                }
             }
 
-            // Fall back to all active groups
-            return NavigationGroupConfiguration::active()
-                ->ordered()
-                ->get()
-                ->map(fn($group) => [
-                    'key' => $group->group_key,
-                    'label' => $group->getLabel(),
-                    'icon' => $group->icon,
-                    'order' => $group->default_order,
-                ])
-                ->toArray();
+            return $widgets;
         });
     }
 
-    // ==================== Discovery Methods ====================
+    /**
+     * Discover all resource classes from the codebase
+     */
+    public function discoverAllResources(): array
+    {
+        $cacheKey = 'all_resource_classes';
+
+        return Cache::remember($cacheKey, 3600, function () {
+            $resources = [];
+            $resourcePath = app_path('Filament/Resources');
+
+            if (!File::isDirectory($resourcePath)) {
+                return $resources;
+            }
+
+            $files = File::allFiles($resourcePath);
+
+            foreach ($files as $file) {
+                // Only include main resource files (not pages, schemas, etc.)
+                if (Str::endsWith($file->getFilename(), 'Resource.php')) {
+                    $className = $this->getClassNameFromFile($file->getPathname());
+
+                    if ($className && $this->isValidResourceClass($className)) {
+                        $resources[] = $className;
+                    }
+                }
+            }
+
+            return $resources;
+        });
+    }
 
     /**
-     * Auto-discover and register widgets from the Filament/Widgets directory
-     *
-     * @return int Number of widgets registered
+     * Get all widgets with their visibility status for a role
+     * Used by the Role Permissions UI
      */
-    public function discoverWidgets(): int
+    public function getWidgetsWithStatusForRole(int $roleId): array
     {
-        $widgetsPath = app_path('Filament/Widgets');
-        $registered = 0;
+        $allWidgets = $this->discoverAllWidgets();
+        $result = [];
 
-        if (!File::isDirectory($widgetsPath)) {
-            return 0;
+        foreach ($allWidgets as $widgetClass) {
+            // Check if there's an override in the database
+            $override = RoleWidgetDefault::where('widget_class', $widgetClass)
+                ->where('role_id', $roleId)
+                ->first();
+
+            $result[] = [
+                'class' => $widgetClass,
+                'name' => $this->getWidgetDisplayName($widgetClass),
+                'group' => $this->getWidgetGroup($widgetClass),
+                'is_visible' => $override ? $override->is_visible : true, // Default: visible
+                'has_override' => $override !== null,
+            ];
         }
 
-        $files = File::allFiles($widgetsPath);
+        return $result;
+    }
 
-        foreach ($files as $file) {
-            $className = $this->getClassNameFromFile($file->getPathname(), 'App\\Filament\\Widgets');
+    /**
+     * Get all resources with their access status for a role
+     * Used by the Role Permissions UI
+     */
+    public function getResourcesWithStatusForRole(int $roleId): array
+    {
+        $allResources = $this->discoverAllResources();
+        $result = [];
 
-            if (!$className || !class_exists($className)) {
+        foreach ($allResources as $resourceClass) {
+            // Skip DashboardConfig resources (system only)
+            if (Str::contains($resourceClass, 'DashboardConfig')) {
                 continue;
             }
 
-            // Skip if already registered
-            if (WidgetConfiguration::where('widget_class', $className)->exists()) {
-                continue;
-            }
+            $override = RoleResourceAccess::where('resource_class', $resourceClass)
+                ->where('role_id', $roleId)
+                ->first();
 
-            // Determine widget name from class name
-            $widgetName = $this->getHumanReadableName($className);
-            $widgetGroup = $this->guessWidgetGroup($className);
+            $result[] = [
+                'class' => $resourceClass,
+                'name' => $this->getResourceDisplayName($resourceClass),
+                'group' => $this->getResourceGroup($resourceClass),
+                'can_view' => $override ? $override->can_view : true,
+                'can_create' => $override ? $override->can_create : true,
+                'can_edit' => $override ? $override->can_edit : true,
+                'can_delete' => $override ? $override->can_delete : true,
+                'has_override' => $override !== null,
+            ];
+        }
 
-            WidgetConfiguration::create([
-                'widget_class' => $className,
-                'widget_name' => $widgetName,
-                'widget_group' => $widgetGroup,
-                'is_active' => true,
-                'default_order' => $registered * 10,
-                'default_column_span' => 1,
-            ]);
+        return $result;
+    }
 
-            $registered++;
+    /**
+     * Set widget visibility for a role
+     * Creates/updates/deletes override record as needed
+     */
+    public function setWidgetVisibility(int $roleId, string $widgetClass, bool $isVisible): void
+    {
+        if ($isVisible) {
+            // Default is visible, so delete any override
+            RoleWidgetDefault::where('role_id', $roleId)
+                ->where('widget_class', $widgetClass)
+                ->delete();
+        } else {
+            // Need to hide it - create override record
+            RoleWidgetDefault::updateOrCreate(
+                ['role_id' => $roleId, 'widget_class' => $widgetClass],
+                ['is_visible' => false]
+            );
         }
 
         // Clear cache
-        $this->clearAllCaches();
-
-        return $registered;
+        Cache::forget("visible_widgets_user_*");
+        Cache::flush(); // Simple approach - clear all for now
     }
 
     /**
-     * Auto-discover and register resources from the Filament/Resources directory
-     *
-     * @return int Number of resources registered
+     * Set resource access for a role
      */
-    public function discoverResources(): int
+    public function setResourceAccess(int $roleId, string $resourceClass, array $permissions): void
     {
-        $resourcesPath = app_path('Filament/Resources');
-        $registered = 0;
+        // Check if all permissions are true (default state)
+        $isDefault = ($permissions['can_view'] ?? true) &&
+            ($permissions['can_create'] ?? true) &&
+            ($permissions['can_edit'] ?? true) &&
+            ($permissions['can_delete'] ?? true);
 
-        if (!File::isDirectory($resourcesPath)) {
-            return 0;
+        if ($isDefault) {
+            // All permissions are default, delete the override
+            RoleResourceAccess::where('role_id', $roleId)
+                ->where('resource_class', $resourceClass)
+                ->delete();
+        } else {
+            // Need custom permissions - create override
+            RoleResourceAccess::updateOrCreate(
+                ['role_id' => $roleId, 'resource_class' => $resourceClass],
+                $permissions
+            );
         }
 
-        // Get all *Resource.php files
-        $files = File::allFiles($resourcesPath);
-        $resourceFiles = collect($files)->filter(fn($f) => str_ends_with($f->getFilename(), 'Resource.php'));
-
-        foreach ($resourceFiles as $file) {
-            $className = $this->getClassNameFromFile($file->getPathname(), 'App\\Filament\\Resources');
-
-            if (!$className || !class_exists($className)) {
-                continue;
-            }
-
-            // Skip if already registered
-            if (ResourceConfiguration::where('resource_class', $className)->exists()) {
-                continue;
-            }
-
-            // Get resource info using reflection
-            $resourceName = $this->getHumanReadableName($className, 'Resource');
-            $navigationGroup = $this->getResourceNavigationGroup($className);
-
-            ResourceConfiguration::create([
-                'resource_class' => $className,
-                'resource_name' => $resourceName,
-                'navigation_group' => $navigationGroup,
-                'is_active' => true,
-                'default_navigation_sort' => $registered * 10,
-            ]);
-
-            $registered++;
-        }
-
-        // Clear cache
-        $this->clearAllCaches();
-
-        return $registered;
-    }
-
-    /**
-     * Discover and register navigation groups from translation files
-     *
-     * @return int Number of groups registered
-     */
-    public function discoverNavigationGroups(): int
-    {
-        $registered = 0;
-
-        // Get navigation groups from translation
-        $arGroups = __('admin.nav', [], 'ar');
-        $enGroups = __('admin.nav', [], 'en');
-
-        if (!is_array($arGroups) || !is_array($enGroups)) {
-            return 0;
-        }
-
-        foreach ($arGroups as $key => $arLabel) {
-            // Skip if already registered
-            if (NavigationGroupConfiguration::where('group_key', $key)->exists()) {
-                continue;
-            }
-
-            $enLabel = $enGroups[$key] ?? ucfirst($key);
-
-            NavigationGroupConfiguration::create([
-                'group_key' => $key,
-                'group_label_ar' => $arLabel,
-                'group_label_en' => $enLabel,
-                'is_active' => true,
-                'default_order' => $registered * 10,
-            ]);
-
-            $registered++;
-        }
-
-        // Clear cache
-        $this->clearAllCaches();
-
-        return $registered;
-    }
-
-    // ==================== Cache Methods ====================
-
-    /**
-     * Clear cache for a specific user
-     */
-    public function clearUserCache(User $user): void
-    {
-        Cache::forget("user_widgets_{$user->id}");
-        Cache::forget("user_resources_{$user->id}");
-        Cache::forget("user_nav_groups_{$user->id}");
-    }
-
-    /**
-     * Clear all dashboard configuration caches
-     */
-    public function clearAllCaches(): void
-    {
-        // This is a simplified version - in production you'd want to track cache keys
         Cache::flush();
     }
-
-    // ==================== Helper Methods ====================
 
     /**
      * Get class name from file path
      */
-    protected function getClassNameFromFile(string $filePath, string $baseNamespace): ?string
+    protected function getClassNameFromFile(string $filePath): ?string
     {
         $content = File::get($filePath);
 
         // Extract namespace
-        if (preg_match('/namespace\s+([^;]+);/', $content, $matches)) {
-            $namespace = $matches[1];
+        if (preg_match('/namespace\s+([^;]+);/', $content, $namespaceMatch)) {
+            $namespace = $namespaceMatch[1];
         } else {
             return null;
         }
 
         // Extract class name
-        if (preg_match('/class\s+(\w+)/', $content, $matches)) {
-            $className = $matches[1];
-        } else {
-            return null;
+        if (preg_match('/class\s+(\w+)/', $content, $classMatch)) {
+            $className = $classMatch[1];
+            return $namespace . '\\' . $className;
         }
 
-        return $namespace . '\\' . $className;
+        return null;
     }
 
     /**
-     * Get human-readable name from class name
+     * Check if class is a valid Filament widget
      */
-    protected function getHumanReadableName(string $className, string $suffix = 'Widget'): string
+    protected function isValidWidgetClass(string $className): bool
     {
-        $shortName = class_basename($className);
-        $name = str_replace($suffix, '', $shortName);
+        if (!class_exists($className)) {
+            return false;
+        }
 
-        // Convert CamelCase to Title Case
-        return preg_replace('/(?<!^)([A-Z])/', ' $1', $name);
+        try {
+            $reflection = new ReflectionClass($className);
+
+            // Must not be abstract
+            if ($reflection->isAbstract()) {
+                return false;
+            }
+
+            // Must be a Filament widget
+            if (!$reflection->isSubclassOf(\Filament\Widgets\Widget::class)) {
+                return false;
+            }
+
+            // Check if it's discoverable (not hidden)
+            if ($reflection->hasProperty('isDiscovered')) {
+                $prop = $reflection->getProperty('isDiscovered');
+                $prop->setAccessible(true);
+                if ($prop->getValue() === false) {
+                    return false;
+                }
+            }
+
+            return true;
+        } catch (\Exception $e) {
+            return false;
+        }
     }
 
     /**
-     * Guess widget group from class name
+     * Check if class is a valid Filament resource
      */
-    protected function guessWidgetGroup(string $className): string
+    protected function isValidResourceClass(string $className): bool
     {
-        $shortName = strtolower(class_basename($className));
-
-        if (str_contains($shortName, 'sales') || str_contains($shortName, 'order') || str_contains($shortName, 'revenue')) {
-            return 'sales';
+        if (!class_exists($className)) {
+            return false;
         }
 
-        if (str_contains($shortName, 'stock') || str_contains($shortName, 'inventory') || str_contains($shortName, 'warehouse')) {
+        try {
+            $reflection = new ReflectionClass($className);
+
+            if ($reflection->isAbstract()) {
+                return false;
+            }
+
+            return $reflection->isSubclassOf(\Filament\Resources\Resource::class);
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Get display name for a widget
+     */
+    protected function getWidgetDisplayName(string $widgetClass): string
+    {
+        $shortName = class_basename($widgetClass);
+
+        // Remove "Widget" suffix and convert to readable format
+        $name = Str::replaceLast('Widget', '', $shortName);
+        return Str::headline($name);
+    }
+
+    /**
+     * Get display name for a resource
+     */
+    protected function getResourceDisplayName(string $resourceClass): string
+    {
+        $shortName = class_basename($resourceClass);
+        $name = Str::replaceLast('Resource', '', $shortName);
+        return Str::headline($name);
+    }
+
+    /**
+     * Get widget group (for categorization in UI)
+     */
+    protected function getWidgetGroup(string $widgetClass): string
+    {
+        $shortName = class_basename($widgetClass);
+
+        if (Str::contains($shortName, ['Stock', 'Inventory', 'Product'])) {
             return 'inventory';
         }
-
-        if (str_contains($shortName, 'customer') || str_contains($shortName, 'user')) {
+        if (Str::contains($shortName, ['Order', 'Sales', 'Revenue'])) {
+            return 'sales';
+        }
+        if (Str::contains($shortName, ['Customer'])) {
             return 'customers';
         }
 
@@ -494,30 +422,40 @@ class DashboardConfigurationService
     }
 
     /**
-     * Get resource navigation group using class method if available
+     * Get resource group
      */
-    protected function getResourceNavigationGroup(string $className): ?string
+    protected function getResourceGroup(string $resourceClass): string
     {
-        if (!class_exists($className)) {
-            return null;
+        if (
+            Str::contains($resourceClass, '\\Products\\') ||
+            Str::contains($resourceClass, 'Category')
+        ) {
+            return 'catalog';
+        }
+        if (
+            Str::contains($resourceClass, '\\Orders\\') ||
+            Str::contains($resourceClass, 'Payment') ||
+            Str::contains($resourceClass, 'Coupon')
+        ) {
+            return 'sales';
+        }
+        if (
+            Str::contains($resourceClass, 'Stock') ||
+            Str::contains($resourceClass, 'Warehouse')
+        ) {
+            return 'inventory';
         }
 
-        try {
-            if (method_exists($className, 'getNavigationGroup')) {
-                // Set locale to en to get the key
-                $originalLocale = app()->getLocale();
-                app()->setLocale('en');
+        return 'system';
+    }
 
-                $group = $className::getNavigationGroup();
-
-                app()->setLocale($originalLocale);
-
-                return $group;
-            }
-        } catch (\Throwable $e) {
-            // Ignore errors
-        }
-
-        return null;
+    /**
+     * Get default widgets (for non-authenticated users)
+     */
+    protected function getDefaultWidgets(): array
+    {
+        return [
+            \Filament\Widgets\AccountWidget::class,
+        ];
     }
 }

@@ -51,7 +51,9 @@ class AdminPanelProvider extends PanelProvider
             ->pages([
                 Dashboard::class,
             ])
-            // Widgets are discovered but filtered by canView() on each widget class
+            // Zero-Config Widget Discovery
+            // Widgets are discovered from code and filtered by DashboardConfigurationService
+            // Default: ALL widgets visible unless explicitly hidden in database
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
             ->middleware([
                 EncryptCookies::class,
@@ -69,37 +71,5 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ]);
-    }
-
-    /**
-     * Get widgets for the current authenticated user
-     * Falls back to default widgets if user is not authenticated
-     */
-    protected function getWidgetsForCurrentUser(): array
-    {
-        // Always include AccountWidget
-        $widgets = [AccountWidget::class];
-
-        // If user is authenticated, get their configured widgets
-        if (auth()->check()) {
-            try {
-                $service = app(DashboardConfigurationService::class);
-                $user = auth()->user();
-
-                $configuredWidgets = $service->getWidgetClassesForUser($user);
-
-                // Filter to only include classes that exist
-                foreach ($configuredWidgets as $widgetClass) {
-                    if (class_exists($widgetClass) && !in_array($widgetClass, $widgets)) {
-                        $widgets[] = $widgetClass;
-                    }
-                }
-            } catch (\Throwable $e) {
-                // If service fails, log error and use default discovery
-                \Log::warning('DashboardConfigurationService failed: ' . $e->getMessage());
-            }
-        }
-
-        return $widgets;
     }
 }
