@@ -26,7 +26,7 @@ class RolePermissions extends Page implements HasForms
 
     protected static string|\BackedEnum|null $navigationIcon = Heroicon::OutlinedShieldCheck;
 
-    protected static string $view = 'filament.pages.role-permissions';
+    protected string $view = 'filament.pages.role-permissions';
 
     protected static ?int $navigationSort = 103;
 
