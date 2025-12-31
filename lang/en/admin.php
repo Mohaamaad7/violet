@@ -472,4 +472,77 @@ return [
             'password_security_note' => 'Note: For security reasons, passwords cannot be edited from the admin panel. Use the "Reset Password" option to send a reset link to the customer.',
         ],
     ],
+
+    // Widgets
+    'widgets' => [
+        // Stats (legacy - kept for compatibility)
+        'stats' => [
+            'heading' => 'Statistics Overview',
+            'today_revenue' => 'Today\'s Revenue',
+            'new_orders_today' => 'New Orders Today',
+            'total_customers' => 'Total Customers',
+            'products_in_stock' => 'Products in Stock',
+            'vs_yesterday' => 'vs yesterday',
+            'no_change' => 'No change',
+            'new_customers_this_week' => 'new this week',
+            'low_stock_products' => 'low stock products',
+            'all_in_stock' => 'All in stock',
+        ],
+
+        // Today Revenue Widget
+        'today_revenue' => [
+            'heading' => 'Today\'s Revenue',
+            'title' => 'Today\'s Revenue',
+        ],
+
+        // New Orders Today Widget
+        'new_orders_today' => [
+            'heading' => 'New Orders Today',
+            'title' => 'New Orders Today',
+        ],
+
+        // Total Customers Widget
+        'total_customers' => [
+            'heading' => 'Total Customers',
+            'title' => 'Total Customers',
+            'new_this_week' => 'new this week',
+        ],
+
+        // Products In Stock Widget
+        'products_in_stock' => [
+            'heading' => 'Products in Stock',
+            'title' => 'Products in Stock',
+            'low_stock' => 'low stock products',
+            'all_in_stock' => 'All in stock',
+        ],
+
+        // Recent Orders Widget
+        'recent_orders' => [
+            'heading' => 'Recent Orders',
+            'order_number' => 'Order Number',
+            'customer' => 'Customer',
+            'status' => 'Status',
+            'total' => 'Total',
+            'copied' => 'Copied!',
+            'view_all' => 'View All Orders',
+        ],
+
+        // Sales Chart Widget
+        'sales' => [
+            'heading' => 'Sales Chart',
+            'dataset_label' => 'Revenue (EGP)',
+            'filters' => [
+                '7days' => 'Last 7 Days',
+                '30days' => 'Last 30 Days',
+            ],
+            'desc_7days' => 'Revenue trend for the last 7 days',
+            'desc_30days' => 'Revenue trend for the last 30 days',
+        ],
+    ],
+
+    // Currency
+    'currency' => [
+        'egp_short' => 'EGP',
+        'egp_full' => 'Egyptian Pound',
+    ],
 ];

@@ -13,6 +13,15 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 class StatsOverviewWidget extends BaseWidget
 {
     use ChecksWidgetVisibility;
+
+    /**
+     * @deprecated This widget has been split into 4 separate widgets:
+     * - TodayRevenueWidget
+     * - NewOrdersTodayWidget
+     * - TotalCustomersWidget
+     * - ProductsInStockWidget
+     */
+    protected static bool $isDiscovered = false;
     /**
      * Widget refresh interval in seconds (not static in base class)
      */
