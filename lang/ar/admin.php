@@ -95,6 +95,9 @@ return [
         'auto_discover_info' => 'الويدجات والموارد والصفحات الجديدة تُكتشف تلقائياً من الكود',
     ],
 
+    // Access Control
+    'access_denied' => 'غير مصرح - ليس لديك صلاحية للوصول لهذه الصفحة',
+
     // Common Fields
     'address' => 'العنوان',
     'phone' => 'الهاتف',

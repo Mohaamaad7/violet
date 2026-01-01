@@ -95,6 +95,9 @@ return [
         'auto_discover_info' => 'New widgets, resources, and pages are automatically discovered from code',
     ],
 
+    // Access Control
+    'access_denied' => 'Access Denied - You do not have permission to access this page',
+
     // Common Fields
     'address' => 'Address',
     'phone' => 'Phone',

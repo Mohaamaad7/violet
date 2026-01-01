@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Http\Middleware\EnforcePageAccess;
 use App\Services\DashboardConfigurationService;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
@@ -20,6 +21,18 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 
+/**
+ * Admin Panel Provider - Zero-Config Permissions
+ * 
+ * This panel automatically filters:
+ * - Widgets: Via DashboardConfigurationService in widget classes
+ * - Resources: Via DashboardConfigurationService in resource classes  
+ * - Pages: Via DashboardConfigurationService in page classes + middleware
+ * 
+ * The system uses a "defensive" approach:
+ * - Even if developer forgets traits, the middleware protects access
+ * - Components are auto-discovered and appear in Role Permissions
+ */
 class AdminPanelProvider extends PanelProvider
 {
     public function panel(Panel $panel): Panel
@@ -31,30 +44,29 @@ class AdminPanelProvider extends PanelProvider
             ->login()
             // Brand identity
             ->brandName('Violet')
-            // Place brand logo inside the sidebar header (Filament v4)
             ->brandLogo(asset('images/logo.png'))
             ->brandLogoHeight('3.5rem')
-            // Brand color palette switched to Violet (Filament Support Colors\Color)
             ->colors([
                 'primary' => Color::Violet,
             ])
-            // Premium font (Google Fonts Cairo – professional Arabic/English)
             ->font('Cairo', 'https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap')
-            // Custom Vite theme CSS (luxury Violet admin overrides)
             ->viteTheme('resources/css/filament/admin/theme.css')
-            // Enable global search in topbar (HasGlobalSearch trait)
             ->globalSearch()
-            // Improve UX: collapsible sidebar on desktop for spacious content area
             ->sidebarCollapsibleOnDesktop()
+
+            // Auto-discover Resources
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\Filament\Resources')
+
+            // Auto-discover Pages
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\Filament\Pages')
             ->pages([
                 Dashboard::class,
             ])
-            // Zero-Config Widget Discovery
-            // Widgets are discovered from code and filtered by DashboardConfigurationService
-            // Default: ALL widgets visible unless explicitly hidden in database
+
+            // Auto-discover Widgets
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\Filament\Widgets')
+
+            // Middleware stack
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
@@ -70,6 +82,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
+                EnforcePageAccess::class, // Protects direct URL access to denied pages
             ]);
     }
 }
