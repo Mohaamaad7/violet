@@ -545,6 +545,50 @@ return [
             'desc_7days' => 'Revenue trend for the last 7 days',
             'desc_30days' => 'Revenue trend for the last 30 days',
         ],
+
+        // Out of Stock Widget
+        'out_of_stock' => [
+            'heading' => 'Out of Stock',
+            'title' => 'Out of Stock',
+            'of_total' => 'of total products',
+        ],
+
+        // Approved Returns Widget
+        'approved_returns' => [
+            'heading' => 'Approved Returns',
+            'title' => 'Approved Returns',
+            'today' => 'approved today',
+        ],
+
+        // Monthly Returns Widget
+        'monthly_returns' => [
+            'heading' => 'Monthly Returns',
+            'title' => 'Returns This Month',
+            'vs_last_month' => 'vs last month',
+        ],
+
+        // Current Orders Widget
+        'current_orders' => [
+            'heading' => 'Current Orders',
+            'title' => 'Orders in Progress',
+            'pending' => 'pending',
+            'processing' => 'processing',
+            'shipped' => 'shipped',
+        ],
+
+        // Potential Profit Widget
+        'potential_profit' => [
+            'heading' => 'Potential Profit',
+            'title' => 'Potential Profit',
+            'margin' => 'profit margin',
+        ],
+
+        // Total Stock Units Widget
+        'total_stock_units' => [
+            'heading' => 'Total Stock Units',
+            'title' => 'Total Units in Stock',
+            'avg_per_product' => 'avg per product',
+        ],
     ],
 
     // Currency
