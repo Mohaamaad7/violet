@@ -179,56 +179,58 @@
                     {{-- Hierarchical Dropdown Menu (WordPress Style) --}}
                     <div
                         class="absolute {{ app()->getLocale() === 'ar' ? 'right-0' : 'left-0' }} top-full mt-2 w-64 bg-white shadow-xl rounded-lg py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-auto">
-                        <ul class="divide-y divide-gray-100">
+                        <ul>
                             @foreach(\App\Models\Category::with('children')->whereNull('parent_id')->where('is_active', true)->orderBy('order')->get() as $parentCategory)
-                                <li class="relative category-item">
-                                    <a href="{{ route('category.show', $parentCategory->slug) }}"
-                                        class="flex items-center justify-between px-4 py-3 text-gray-700 hover:bg-violet-50 hover:text-violet-600 transition-colors">
-                                        <span class="flex items-center gap-2 font-medium">
-                                            @if($parentCategory->icon)
-                                                @if(Str::startsWith($parentCategory->icon, 'heroicon'))
-                                                    @svg($parentCategory->icon, 'w-4 h-4')
+                                <li class="category-item border-b border-gray-100 last:border-0">
+                                    <div class="relative">
+                                        <a href="{{ route('category.show', $parentCategory->slug) }}"
+                                            class="flex items-center justify-between px-4 py-3 text-gray-700 hover:bg-violet-50 hover:text-violet-600 transition-colors">
+                                            <span class="flex items-center gap-2 font-medium">
+                                                @if($parentCategory->icon)
+                                                    @if(Str::startsWith($parentCategory->icon, 'heroicon'))
+                                                        @svg($parentCategory->icon, 'w-4 h-4')
+                                                    @else
+                                                        <i class="{{ $parentCategory->icon }} text-sm"></i>
+                                                    @endif
                                                 @else
-                                                    <i class="{{ $parentCategory->icon }} text-sm"></i>
+                                                    @svg('heroicon-o-tag', 'w-4 h-4')
                                                 @endif
-                                            @else
-                                                @svg('heroicon-o-tag', 'w-4 h-4')
+                                                {{ $parentCategory->name }}
+                                            </span>
+                                            @if($parentCategory->children->count() > 0)
+                                                <svg class="w-4 h-4 {{ app()->getLocale() === 'ar' ? 'rotate-180' : '' }}"
+                                                    fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                        d="M9 5l7 7-7 7" />
+                                                </svg>
                                             @endif
-                                            {{ $parentCategory->name }}
-                                        </span>
-                                        @if($parentCategory->children->count() > 0)
-                                            <svg class="w-4 h-4 {{ app()->getLocale() === 'ar' ? 'rotate-180' : '' }}"
-                                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M9 5l7 7-7 7" />
-                                            </svg>
-                                        @endif
-                                    </a>
+                                        </a>
 
-                                    {{-- Submenu for children categories --}}
-                                    @if($parentCategory->children->count() > 0)
-                                        <div
-                                            class="submenu-panel absolute {{ app()->getLocale() === 'ar' ? 'right-full mr-1' : 'left-full ml-1' }} top-0 w-56 bg-white shadow-xl rounded-lg py-2 opacity-0 invisible transition-all duration-200 z-50">
-                                            <ul class="divide-y divide-gray-100">
-                                                @foreach($parentCategory->children as $childCategory)
-                                                    <li>
-                                                        <a href="{{ route('category.show', $childCategory->slug) }}"
-                                                            class="block px-4 py-2.5 text-sm text-gray-600 hover:bg-violet-50 hover:text-violet-600 transition-colors">
-                                                            <span class="flex items-center gap-2">
-                                                                <svg class="w-3 h-3" fill="currentColor"
-                                                                    viewBox="0 0 20 20">
-                                                                    <path fill-rule="evenodd"
-                                                                        d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                                                                        clip-rule="evenodd" />
-                                                                </svg>
-                                                                {{ $childCategory->name }}
-                                                            </span>
-                                                        </a>
-                                                    </li>
-                                                @endforeach
-                                            </ul>
-                                        </div>
-                                    @endif
+                                        {{-- Submenu for children categories (Flyout) --}}
+                                        @if($parentCategory->children->count() > 0)
+                                            <div
+                                                class="submenu-panel absolute {{ app()->getLocale() === 'ar' ? 'right-full mr-1' : 'left-full ml-1' }} top-0 w-56 bg-white shadow-2xl rounded-lg py-2 opacity-0 invisible transition-all duration-200 border border-gray-200">
+                                                <ul>
+                                                    @foreach($parentCategory->children as $childCategory)
+                                                        <li class="border-b border-gray-100 last:border-0">
+                                                            <a href="{{ route('category.show', $childCategory->slug) }}"
+                                                                class="block px-4 py-2.5 text-sm text-gray-600 hover:bg-violet-50 hover:text-violet-600 transition-colors">
+                                                                <span class="flex items-center gap-2">
+                                                                    <svg class="w-3 h-3" fill="currentColor"
+                                                                        viewBox="0 0 20 20">
+                                                                        <path fill-rule="evenodd"
+                                                                            d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                                                                            clip-rule="evenodd" />
+                                                                    </svg>
+                                                                    {{ $childCategory->name }}
+                                                                </span>
+                                                            </a>
+                                                        </li>
+                                                    @endforeach
+                                                </ul>
+                                            </div>
+                                        @endif
+                                    </div>
                                 </li>
                             @endforeach
                         </ul>
@@ -418,8 +420,8 @@
 </script>
 
 <style>
-    /* Category submenu hover effects */
-    .category-item:hover > .submenu-panel {
+    /* Category submenu hover effects - Flyout Menu */
+    .category-item:hover > div > .submenu-panel {
         opacity: 1 !important;
         visibility: visible !important;
     }
@@ -428,5 +430,15 @@
     .submenu-panel:hover {
         opacity: 1 !important;
         visibility: visible !important;
+    }
+    
+    /* Ensure submenu appears on top */
+    .submenu-panel {
+        z-index: 60;
+    }
+    
+    /* Prevent accordion behavior - submenu should not push content down */
+    .category-item div {
+        position: relative;
     }
 </style>
