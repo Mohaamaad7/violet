@@ -139,6 +139,7 @@ return [
         'already_used' => 'You have already used this code',
         'min_order_not_met' => 'Minimum order amount is :amount',
         'not_applicable' => 'This code does not apply to items in your cart',
+        'influencer_suspended' => 'This discount code is currently unavailable',
     ],
 
     // Coupon Success

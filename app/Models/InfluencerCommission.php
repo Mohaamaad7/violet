@@ -14,18 +14,19 @@ class InfluencerCommission extends Model
         'influencer_id',
         'order_id',
         'discount_code_id',
-        'order_total',
-        'commission_amount',
+        'order_amount',
         'commission_rate',
+        'commission_amount',
         'status',
+        'paid_at',
         'payout_id',
     ];
 
     protected $casts = [
-        'order_total' => 'decimal:2',
-        'commission_amount' => 'decimal:2',
+        'order_amount' => 'decimal:2',
         'commission_rate' => 'decimal:2',
-        'payout_id' => 'integer',
+        'commission_amount' => 'decimal:2',
+        'paid_at' => 'datetime',
     ];
 
     public function influencer(): BelongsTo

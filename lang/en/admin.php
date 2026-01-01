@@ -7,6 +7,7 @@ return [
         'sales' => 'Sales',
         'inventory' => 'Inventory',
         'customers' => 'Customers',
+        'influencers' => 'Influencers',
         'content' => 'Content',
         'geography' => 'Geographic Settings',
         'settings' => 'Settings',
@@ -612,6 +613,190 @@ return [
             'heading' => 'Total Stock Units',
             'title' => 'Total Units in Stock',
             'avg_per_product' => 'avg per product',
+        ],
+    ],
+
+    // Influencers
+    'influencers' => [
+        'title' => 'Influencers',
+        'singular' => 'Influencer',
+        'plural' => 'Influencers',
+
+        'sections' => [
+            'basic_info' => 'Basic Information',
+            'social_accounts' => 'Social Media Accounts',
+            'statistics' => 'Statistics',
+            'commission' => 'Commissions',
+            'discount_codes' => 'Discount Codes',
+        ],
+
+        'fields' => [
+            'user' => 'User',
+            'name' => 'Name',
+            'instagram' => 'Instagram',
+            'facebook' => 'Facebook',
+            'tiktok' => 'TikTok',
+            'youtube' => 'YouTube',
+            'twitter' => 'Twitter',
+            'url' => 'URL',
+            'followers' => 'Followers',
+            'content_type' => 'Content Type',
+            'commission_rate' => 'Commission Rate',
+            'total_sales' => 'Total Sales',
+            'total_earned' => 'Total Earned',
+            'total_paid' => 'Total Paid',
+            'balance' => 'Current Balance',
+            'status' => 'Status',
+        ],
+
+        'status' => [
+            'active' => 'Active',
+            'inactive' => 'Inactive',
+            'suspended' => 'Suspended',
+        ],
+
+        'content_types' => [
+            'fashion' => 'Fashion',
+            'beauty' => 'Beauty',
+            'lifestyle' => 'Lifestyle',
+            'food' => 'Food',
+            'travel' => 'Travel',
+            'tech' => 'Technology',
+            'fitness' => 'Fitness',
+            'other' => 'Other',
+        ],
+    ],
+
+    // Influencer Applications
+    'applications' => [
+        'title' => 'Applications',
+        'singular' => 'Application',
+        'plural' => 'Applications',
+
+        'sections' => [
+            'applicant_info' => 'Applicant Information',
+            'social_accounts' => 'Social Accounts',
+            'followers_info' => 'Followers Information',
+            'review' => 'Review',
+        ],
+
+        'fields' => [
+            'full_name' => 'Full Name',
+            'email' => 'Email',
+            'phone' => 'Phone',
+            'portfolio' => 'Portfolio',
+            'status' => 'Status',
+            'rejection_reason' => 'Rejection Reason',
+            'reviewed_by' => 'Reviewed By',
+            'reviewed_at' => 'Reviewed At',
+            'commission_rate' => 'Commission Rate',
+            'total_followers' => 'Total Followers',
+        ],
+
+        'status' => [
+            'pending' => 'Pending Review',
+            'approved' => 'Approved',
+            'rejected' => 'Rejected',
+        ],
+
+        'actions' => [
+            'approve' => 'Approve Application',
+            'reject' => 'Reject Application',
+            'set_commission' => 'Set Commission Rate',
+            'view_details' => 'View Details',
+        ],
+
+        'modals' => [
+            'approve_heading' => 'Approve Application',
+            'approve_description' => 'An influencer account and discount code will be created for the applicant.',
+            'reject_heading' => 'Reject Application',
+            'reject_description' => 'Please provide a reason for rejection.',
+        ],
+
+        'notifications' => [
+            'approved' => 'Application approved and influencer account created successfully',
+            'rejected' => 'Application rejected',
+        ],
+    ],
+
+    // Commission Payouts
+    'payouts' => [
+        'title' => 'Payouts',
+        'singular' => 'Payout',
+        'plural' => 'Payouts',
+
+        'sections' => [
+            'payout_info' => 'Payout Information',
+            'bank_info' => 'Bank Information',
+            'approval' => 'Approval',
+        ],
+
+        'fields' => [
+            'influencer' => 'Influencer',
+            'amount' => 'Amount',
+            'method' => 'Payment Method',
+            'bank_details' => 'Bank Details',
+            'bank_name' => 'Bank Name',
+            'account_number' => 'Account Number',
+            'account_name' => 'Account Name',
+            'iban' => 'IBAN',
+            'status' => 'Status',
+            'rejection_reason' => 'Rejection Reason',
+            'transaction_ref' => 'Transaction Reference',
+            'approved_by' => 'Approved By',
+            'approved_at' => 'Approved At',
+            'paid_by' => 'Paid By',
+            'paid_at' => 'Paid At',
+            'notes' => 'Notes',
+        ],
+
+        'methods' => [
+            'bank_transfer' => 'Bank Transfer',
+            'cash' => 'Cash',
+            'wallet' => 'E-Wallet',
+        ],
+
+        'status' => [
+            'pending' => 'Pending',
+            'approved' => 'Approved',
+            'rejected' => 'Rejected',
+            'paid' => 'Paid',
+        ],
+
+        'actions' => [
+            'approve' => 'Approve',
+            'reject' => 'Reject',
+            'mark_paid' => 'Mark as Paid',
+        ],
+
+        'notifications' => [
+            'approved' => 'Payout request approved',
+            'rejected' => 'Payout request rejected',
+            'paid' => 'Payment recorded successfully',
+        ],
+    ],
+
+    // Commission Records
+    'commissions' => [
+        'title' => 'Commission Records',
+        'singular' => 'Commission',
+        'plural' => 'Commissions',
+
+        'fields' => [
+            'order' => 'Order',
+            'order_amount' => 'Order Amount',
+            'commission_rate' => 'Commission Rate',
+            'commission_amount' => 'Commission Amount',
+            'discount_code' => 'Discount Code',
+            'status' => 'Status',
+            'paid_at' => 'Paid At',
+        ],
+
+        'status' => [
+            'pending' => 'Pending',
+            'due' => 'Due',
+            'paid' => 'Paid',
+            'cancelled' => 'Cancelled',
         ],
     ],
 

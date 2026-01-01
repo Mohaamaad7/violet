@@ -30,7 +30,7 @@ class InfluencerService
         if (isset($filters['search'])) {
             $query->whereHas('user', function ($q) use ($filters) {
                 $q->where('name', 'like', "%{$filters['search']}%")
-                  ->orWhere('email', 'like', "%{$filters['search']}%");
+                    ->orWhere('email', 'like', "%{$filters['search']}%");
             });
         }
 
@@ -83,18 +83,31 @@ class InfluencerService
                 'reviewed_at' => now(),
             ]);
 
-            // Update user type to influencer
-            $application->user->update(['type' => 'influencer']);
-
-            // Create influencer record
+            // Create influencer record with social media data from application
             $influencer = Influencer::create([
                 'user_id' => $application->user_id,
                 'commission_rate' => $commissionRate,
                 'status' => 'active',
-                'social_platform' => $application->social_platform,
-                'social_handle' => $application->social_handle,
-                'followers_count' => $application->followers_count,
+                'instagram_url' => $application->instagram_url,
+                'facebook_url' => $application->facebook_url,
+                'tiktok_url' => $application->tiktok_url,
+                'youtube_url' => $application->youtube_url,
+                'twitter_url' => $application->twitter_url,
+                'instagram_followers' => $application->instagram_followers,
+                'facebook_followers' => $application->facebook_followers,
+                'tiktok_followers' => $application->tiktok_followers,
+                'youtube_followers' => $application->youtube_followers,
+                'twitter_followers' => $application->twitter_followers,
                 'content_type' => $application->content_type,
+            ]);
+
+            // Create default discount code for influencer
+            $this->createDiscountCode($influencer->id, [
+                'discount_type' => 'percentage',
+                'discount_value' => 10,
+                'is_active' => true,
+                'commission_type' => 'percentage',
+                'commission_value' => $commissionRate,
             ]);
 
             return $influencer;
@@ -142,7 +155,7 @@ class InfluencerService
     {
         $base = strtoupper(Str::slug($name, ''));
         $base = substr($base, 0, 6);
-        
+
         do {
             $code = $base . strtoupper(Str::random(4));
         } while (DiscountCode::where('code', $code)->exists());
@@ -176,15 +189,15 @@ class InfluencerService
     public function calculateCommission(int $influencerId, float $orderTotal, ?int $discountCodeId = null): float
     {
         $influencer = $this->findInfluencer($influencerId);
-        
+
         // Get discount code to check for custom commission
         if ($discountCodeId) {
             $discountCode = DiscountCode::find($discountCodeId);
-            
+
             if ($discountCode && $discountCode->commission_type === 'fixed') {
                 return $discountCode->commission_value;
             }
-            
+
             if ($discountCode && $discountCode->commission_type === 'percentage') {
                 return ($orderTotal * $discountCode->commission_value) / 100;
             }
@@ -247,28 +260,10 @@ class InfluencerService
             $payout = CommissionPayout::create([
                 'influencer_id' => $influencerId,
                 'amount' => $amount,
-                'payment_method' => $data['payment_method'],
-                'payment_details' => $data['payment_details'] ?? null,
+                'method' => $data['method'] ?? 'bank_transfer',
+                'bank_details' => $data['bank_details'] ?? null,
                 'status' => 'pending',
                 'notes' => $data['notes'] ?? null,
-            ]);
-
-            // Mark commissions as paid
-            $pendingCommissions = InfluencerCommission::where('influencer_id', $influencerId)
-                ->where('status', 'pending')
-                ->get();
-
-            foreach ($pendingCommissions as $commission) {
-                $commission->update([
-                    'status' => 'paid',
-                    'payout_id' => $payout->id,
-                ]);
-            }
-
-            // Update influencer balance
-            $influencer->update([
-                'total_paid' => $influencer->total_paid + $amount,
-                'pending_balance' => 0,
             ]);
 
             return $payout;
@@ -276,19 +271,78 @@ class InfluencerService
     }
 
     /**
-     * Complete payout
+     * Approve payout request
      */
-    public function completePayout(int $payoutId, ?int $processedBy = null): CommissionPayout
+    public function approvePayout(int $payoutId, ?int $approvedBy = null): CommissionPayout
     {
         $payout = CommissionPayout::findOrFail($payoutId);
 
         $payout->update([
-            'status' => 'completed',
-            'processed_by' => $processedBy,
-            'processed_at' => now(),
+            'status' => 'approved',
+            'approved_by' => $approvedBy,
+            'approved_at' => now(),
         ]);
 
         return $payout->fresh();
+    }
+
+    /**
+     * Reject payout request
+     */
+    public function rejectPayout(int $payoutId, string $reason, ?int $rejectedBy = null): CommissionPayout
+    {
+        $payout = CommissionPayout::findOrFail($payoutId);
+
+        $payout->update([
+            'status' => 'rejected',
+            'rejection_reason' => $reason,
+            'approved_by' => $rejectedBy,
+            'approved_at' => now(),
+        ]);
+
+        return $payout->fresh();
+    }
+
+    /**
+     * Process/complete payout (mark as paid)
+     */
+    public function processPayout(int $payoutId, string $transactionReference, ?int $paidBy = null): CommissionPayout
+    {
+        return DB::transaction(function () use ($payoutId, $transactionReference, $paidBy) {
+            $payout = CommissionPayout::findOrFail($payoutId);
+            $influencer = $payout->influencer;
+
+            // Update payout status
+            $payout->update([
+                'status' => 'paid',
+                'transaction_reference' => $transactionReference,
+                'paid_by' => $paidBy,
+                'paid_at' => now(),
+            ]);
+
+            // Mark pending commissions as paid and link to payout
+            InfluencerCommission::where('influencer_id', $payout->influencer_id)
+                ->where('status', 'pending')
+                ->update([
+                    'status' => 'paid',
+                    'payout_id' => $payout->id,
+                    'paid_at' => now(),
+                ]);
+
+            // Update influencer balance
+            $influencer->decrement('balance', $payout->amount);
+            $influencer->increment('total_commission_paid', $payout->amount);
+
+            return $payout->fresh();
+        });
+    }
+
+    /**
+     * Complete payout (legacy method - calls processPayout)
+     */
+    public function completePayout(int $payoutId, ?int $processedBy = null): CommissionPayout
+    {
+        return $this->processPayout($payoutId, 'MANUAL-' . now()->format('YmdHis'), $processedBy);
     }
 
     /**

@@ -139,6 +139,7 @@ return [
         'already_used' => 'لقد استخدمت هذا الكود من قبل',
         'min_order_not_met' => 'الحد الأدنى للطلب يجب أن يكون :amount',
         'not_applicable' => 'الكوبون لا ينطبق على منتجات السلة',
+        'influencer_suspended' => 'هذا الكود غير متاح حالياً',
     ],
 
     // Coupon Success

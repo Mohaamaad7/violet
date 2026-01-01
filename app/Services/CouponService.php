@@ -39,6 +39,26 @@ class CouponService
             ];
         }
 
+        // Edge Case: Check if influencer coupon belongs to a suspended influencer
+        if ($coupon->influencer_id) {
+            $influencer = $coupon->influencer;
+            if (!$influencer || $influencer->status === 'suspended') {
+                return [
+                    'valid' => false,
+                    'error' => __('messages.coupon_errors.influencer_suspended'),
+                    'coupon' => null,
+                ];
+            }
+            // Also check if influencer is inactive
+            if ($influencer->status !== 'active') {
+                return [
+                    'valid' => false,
+                    'error' => __('messages.coupon_errors.invalid'),
+                    'coupon' => null,
+                ];
+            }
+        }
+
         // Check start date
         if ($coupon->starts_at && $coupon->starts_at->isFuture()) {
             return [

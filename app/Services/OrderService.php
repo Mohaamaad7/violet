@@ -3,6 +3,9 @@
 namespace App\Services;
 
 use App\Enums\OrderStatus;
+use App\Models\DiscountCode;
+use App\Models\Influencer;
+use App\Models\InfluencerCommission;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\OrderStatusHistory;
@@ -220,6 +223,7 @@ class OrderService
     public function updatePaymentStatus(int $id, string $paymentStatus, ?string $transactionId = null): Order
     {
         $order = $this->findOrder($id);
+        $previousPaymentStatus = $order->payment_status;
 
         $updateData = ['payment_status' => $paymentStatus];
 
@@ -231,6 +235,12 @@ class OrderService
         }
 
         $order->update($updateData);
+
+        // Record influencer commission when payment is confirmed
+        if ($paymentStatus === 'paid' && $previousPaymentStatus !== 'paid') {
+            $this->recordInfluencerCommission($order->fresh());
+        }
+
         return $order->fresh();
     }
 
@@ -272,9 +282,108 @@ class OrderService
             'cancellation_reason' => $reason,
         ]);
 
+        // Reverse influencer commission if exists
+        $this->reverseInfluencerCommission($order);
+
         // NOTE: Stock restoration is now handled explicitly in updateStatus()
         // using restockRejectedOrder() method, which checks stock_deducted_at
         // and creates proper stock movement records
+    }
+
+    /**
+     * Record influencer commission when order is paid
+     * Only records if the order used an influencer's discount code
+     * and the influencer is active
+     */
+    protected function recordInfluencerCommission(Order $order): void
+    {
+        // Check if order has a discount code
+        if (!$order->discount_code_id) {
+            return;
+        }
+
+        $discountCode = DiscountCode::find($order->discount_code_id);
+
+        // Check if discount code belongs to an influencer
+        if (!$discountCode || !$discountCode->influencer_id) {
+            return;
+        }
+
+        $influencer = Influencer::find($discountCode->influencer_id);
+
+        // Edge Case: Suspended influencer doesn't get commission
+        if (!$influencer || $influencer->status !== 'active') {
+            \Log::info("Influencer commission skipped for Order #{$order->order_number}: Influencer is not active");
+            return;
+        }
+
+        // Edge Case: Disabled discount code doesn't record commission
+        if (!$discountCode->is_active) {
+            \Log::info("Influencer commission skipped for Order #{$order->order_number}: Discount code is not active");
+            return;
+        }
+
+        // Check if commission already recorded for this order
+        $existingCommission = InfluencerCommission::where('order_id', $order->id)->first();
+        if ($existingCommission) {
+            \Log::info("Influencer commission already exists for Order #{$order->order_number}");
+            return;
+        }
+
+        // Calculate commission
+        $commissionRate = $discountCode->commission_value ?? $influencer->commission_rate;
+        $commissionAmount = $order->total * ($commissionRate / 100);
+
+        // Record commission using InfluencerService
+        try {
+            app(InfluencerService::class)->recordCommission([
+                'influencer_id' => $influencer->id,
+                'order_id' => $order->id,
+                'discount_code_id' => $discountCode->id,
+                'order_amount' => $order->total,
+                'commission_rate' => $commissionRate,
+                'commission_amount' => $commissionAmount,
+                'status' => 'pending',
+            ]);
+
+            // Update influencer statistics
+            $influencer->increment('total_sales', $order->total);
+            $influencer->increment('total_commission_earned', $commissionAmount);
+            $influencer->increment('balance', $commissionAmount);
+
+            \Log::info("Influencer commission recorded for Order #{$order->order_number}: {$commissionAmount} EGP");
+        } catch (\Exception $e) {
+            \Log::error("Failed to record influencer commission for Order #{$order->order_number}: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Reverse influencer commission when order is cancelled or refunded
+     */
+    protected function reverseInfluencerCommission(Order $order): void
+    {
+        // Find pending commission for this order
+        $commission = InfluencerCommission::where('order_id', $order->id)
+            ->where('status', 'pending')
+            ->first();
+
+        if (!$commission) {
+            return;
+        }
+
+        $influencer = $commission->influencer;
+
+        // Update commission status to cancelled
+        $commission->update(['status' => 'cancelled']);
+
+        // Reverse influencer statistics
+        if ($influencer) {
+            $influencer->decrement('total_sales', $commission->order_amount);
+            $influencer->decrement('total_commission_earned', $commission->commission_amount);
+            $influencer->decrement('balance', $commission->commission_amount);
+
+            \Log::info("Influencer commission reversed for Order #{$order->order_number}: {$commission->commission_amount} EGP");
+        }
     }
 
     /**

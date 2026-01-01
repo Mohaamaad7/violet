@@ -7,6 +7,7 @@ return [
         'sales' => 'المبيعات',
         'inventory' => 'المخزون',
         'customers' => 'العملاء',
+        'influencers' => 'المؤثرين',
         'content' => 'المحتوى',
         'geography' => 'الإعدادات الجغرافية',
         'settings' => 'الإعدادات',
@@ -651,6 +652,190 @@ return [
             'heading' => 'إجمالي وحدات المخزون',
             'title' => 'إجمالي الوحدات في المخزون',
             'avg_per_product' => 'متوسط لكل منتج',
+        ],
+    ],
+
+    // المؤثرين
+    'influencers' => [
+        'title' => 'المؤثرين',
+        'singular' => 'مؤثر',
+        'plural' => 'المؤثرين',
+
+        'sections' => [
+            'basic_info' => 'المعلومات الأساسية',
+            'social_accounts' => 'حسابات التواصل الاجتماعي',
+            'statistics' => 'الإحصائيات',
+            'commission' => 'العمولات',
+            'discount_codes' => 'أكواد الخصم',
+        ],
+
+        'fields' => [
+            'user' => 'المستخدم',
+            'name' => 'الاسم',
+            'instagram' => 'انستجرام',
+            'facebook' => 'فيسبوك',
+            'tiktok' => 'تيك توك',
+            'youtube' => 'يوتيوب',
+            'twitter' => 'تويتر',
+            'url' => 'الرابط',
+            'followers' => 'المتابعين',
+            'content_type' => 'نوع المحتوى',
+            'commission_rate' => 'نسبة العمولة',
+            'total_sales' => 'إجمالي المبيعات',
+            'total_earned' => 'إجمالي الأرباح',
+            'total_paid' => 'إجمالي المدفوع',
+            'balance' => 'الرصيد الحالي',
+            'status' => 'الحالة',
+        ],
+
+        'status' => [
+            'active' => 'نشط',
+            'inactive' => 'غير نشط',
+            'suspended' => 'موقوف',
+        ],
+
+        'content_types' => [
+            'fashion' => 'أزياء',
+            'beauty' => 'جمال',
+            'lifestyle' => 'نمط الحياة',
+            'food' => 'طعام',
+            'travel' => 'سفر',
+            'tech' => 'تكنولوجيا',
+            'fitness' => 'لياقة بدنية',
+            'other' => 'أخرى',
+        ],
+    ],
+
+    // طلبات تقديم المؤثرين
+    'applications' => [
+        'title' => 'طلبات التقديم',
+        'singular' => 'طلب تقديم',
+        'plural' => 'طلبات التقديم',
+
+        'sections' => [
+            'applicant_info' => 'معلومات المتقدم',
+            'social_accounts' => 'حسابات التواصل',
+            'followers_info' => 'معلومات المتابعين',
+            'review' => 'المراجعة',
+        ],
+
+        'fields' => [
+            'full_name' => 'الاسم الكامل',
+            'email' => 'البريد الإلكتروني',
+            'phone' => 'الهاتف',
+            'portfolio' => 'البورتفوليو',
+            'status' => 'الحالة',
+            'rejection_reason' => 'سبب الرفض',
+            'reviewed_by' => 'راجعه',
+            'reviewed_at' => 'تاريخ المراجعة',
+            'commission_rate' => 'نسبة العمولة',
+            'total_followers' => 'إجمالي المتابعين',
+        ],
+
+        'status' => [
+            'pending' => 'قيد المراجعة',
+            'approved' => 'مقبول',
+            'rejected' => 'مرفوض',
+        ],
+
+        'actions' => [
+            'approve' => 'قبول الطلب',
+            'reject' => 'رفض الطلب',
+            'set_commission' => 'تحديد نسبة العمولة',
+            'view_details' => 'عرض التفاصيل',
+        ],
+
+        'modals' => [
+            'approve_heading' => 'قبول طلب التقديم',
+            'approve_description' => 'سيتم إنشاء حساب مؤثر وكود خصم للمتقدم.',
+            'reject_heading' => 'رفض طلب التقديم',
+            'reject_description' => 'يرجى توضيح سبب الرفض.',
+        ],
+
+        'notifications' => [
+            'approved' => 'تم قبول الطلب بنجاح وإنشاء حساب المؤثر',
+            'rejected' => 'تم رفض الطلب',
+        ],
+    ],
+
+    // عمليات صرف العمولات
+    'payouts' => [
+        'title' => 'عمليات الصرف',
+        'singular' => 'عملية صرف',
+        'plural' => 'عمليات الصرف',
+
+        'sections' => [
+            'payout_info' => 'معلومات الصرف',
+            'bank_info' => 'معلومات البنك',
+            'approval' => 'الموافقة',
+        ],
+
+        'fields' => [
+            'influencer' => 'المؤثر',
+            'amount' => 'المبلغ',
+            'method' => 'طريقة الدفع',
+            'bank_details' => 'تفاصيل البنك',
+            'bank_name' => 'اسم البنك',
+            'account_number' => 'رقم الحساب',
+            'account_name' => 'اسم صاحب الحساب',
+            'iban' => 'IBAN',
+            'status' => 'الحالة',
+            'rejection_reason' => 'سبب الرفض',
+            'transaction_ref' => 'رقم المرجع',
+            'approved_by' => 'وافق عليه',
+            'approved_at' => 'تاريخ الموافقة',
+            'paid_by' => 'دفعه',
+            'paid_at' => 'تاريخ الدفع',
+            'notes' => 'ملاحظات',
+        ],
+
+        'methods' => [
+            'bank_transfer' => 'تحويل بنكي',
+            'cash' => 'نقدي',
+            'wallet' => 'محفظة إلكترونية',
+        ],
+
+        'status' => [
+            'pending' => 'معلق',
+            'approved' => 'موافق عليه',
+            'rejected' => 'مرفوض',
+            'paid' => 'تم الدفع',
+        ],
+
+        'actions' => [
+            'approve' => 'الموافقة',
+            'reject' => 'الرفض',
+            'mark_paid' => 'تسجيل الدفع',
+        ],
+
+        'notifications' => [
+            'approved' => 'تمت الموافقة على طلب الصرف',
+            'rejected' => 'تم رفض طلب الصرف',
+            'paid' => 'تم تسجيل الدفع بنجاح',
+        ],
+    ],
+
+    // سجل العمولات
+    'commissions' => [
+        'title' => 'سجل العمولات',
+        'singular' => 'عمولة',
+        'plural' => 'العمولات',
+
+        'fields' => [
+            'order' => 'الطلب',
+            'order_amount' => 'قيمة الطلب',
+            'commission_rate' => 'نسبة العمولة',
+            'commission_amount' => 'مبلغ العمولة',
+            'discount_code' => 'كود الخصم',
+            'status' => 'الحالة',
+            'paid_at' => 'تاريخ الدفع',
+        ],
+
+        'status' => [
+            'pending' => 'معلق',
+            'due' => 'مستحق',
+            'paid' => 'مدفوع',
+            'cancelled' => 'ملغى',
         ],
     ],
 

@@ -14,19 +14,23 @@ class CommissionPayout extends Model
     protected $fillable = [
         'influencer_id',
         'amount',
-        'payment_method',
-        'payment_details',
+        'method',
+        'bank_details',
         'status',
-        'processed_by',
-        'processed_at',
+        'rejection_reason',
+        'approved_by',
+        'approved_at',
+        'paid_by',
+        'paid_at',
+        'transaction_reference',
         'notes',
     ];
 
     protected $casts = [
         'amount' => 'decimal:2',
-        'payment_details' => 'array',
-        'processed_at' => 'datetime',
-        'processed_by' => 'integer',
+        'bank_details' => 'array',
+        'approved_at' => 'datetime',
+        'paid_at' => 'datetime',
     ];
 
     public function influencer(): BelongsTo
@@ -39,9 +43,14 @@ class CommissionPayout extends Model
         return $this->hasMany(InfluencerCommission::class, 'payout_id');
     }
 
-    public function processor(): BelongsTo
+    public function approver(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'processed_by');
+        return $this->belongsTo(User::class, 'approved_by');
+    }
+
+    public function payer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'paid_by');
     }
 
     public function scopePending($query)
@@ -49,8 +58,13 @@ class CommissionPayout extends Model
         return $query->where('status', 'pending');
     }
 
-    public function scopeCompleted($query)
+    public function scopeApproved($query)
     {
-        return $query->where('status', 'completed');
+        return $query->where('status', 'approved');
+    }
+
+    public function scopePaid($query)
+    {
+        return $query->where('status', 'paid');
     }
 }
