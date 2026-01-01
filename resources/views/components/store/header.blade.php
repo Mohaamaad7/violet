@@ -178,10 +178,10 @@
                     </button>
                     {{-- Hierarchical Dropdown Menu (WordPress Style) --}}
                     <div
-                        class="absolute {{ app()->getLocale() === 'ar' ? 'right-0' : 'left-0' }} top-full mt-2 w-64 bg-white shadow-xl rounded-lg py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                        class="absolute {{ app()->getLocale() === 'ar' ? 'right-0' : 'left-0' }} top-full mt-2 w-64 bg-white shadow-xl rounded-lg py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 pointer-events-auto">
                         <ul class="divide-y divide-gray-100">
                             @foreach(\App\Models\Category::with('children')->whereNull('parent_id')->where('is_active', true)->orderBy('order')->get() as $parentCategory)
-                                <li class="relative group/submenu">
+                                <li class="relative category-item">
                                     <a href="{{ route('category.show', $parentCategory->slug) }}"
                                         class="flex items-center justify-between px-4 py-3 text-gray-700 hover:bg-violet-50 hover:text-violet-600 transition-colors">
                                         <span class="flex items-center gap-2 font-medium">
@@ -208,7 +208,7 @@
                                     {{-- Submenu for children categories --}}
                                     @if($parentCategory->children->count() > 0)
                                         <div
-                                            class="absolute {{ app()->getLocale() === 'ar' ? 'right-full mr-1' : 'left-full ml-1' }} top-0 w-56 bg-white shadow-xl rounded-lg py-2 opacity-0 invisible group-hover/submenu:opacity-100 group-hover/submenu:visible transition-all duration-200">
+                                            class="submenu-panel absolute {{ app()->getLocale() === 'ar' ? 'right-full mr-1' : 'left-full ml-1' }} top-0 w-56 bg-white shadow-xl rounded-lg py-2 opacity-0 invisible transition-all duration-200 z-50">
                                             <ul class="divide-y divide-gray-100">
                                                 @foreach($parentCategory->children as $childCategory)
                                                     <li>
@@ -416,3 +416,17 @@
         }
     }
 </script>
+
+<style>
+    /* Category submenu hover effects */
+    .category-item:hover > .submenu-panel {
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+    
+    /* Keep submenu visible when hovering over it */
+    .submenu-panel:hover {
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+</style>
