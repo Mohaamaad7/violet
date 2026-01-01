@@ -205,11 +205,11 @@
 
                                 {{-- Submenu (Flyout to the side) --}}
                                 @if($parentCategory->children->count() > 0)
-                                    <ul class="dropdown-submenu absolute {{ app()->getLocale() === 'ar' ? 'right-full mr-1' : 'left-full ml-1' }} top-0 w-56 bg-white shadow-2xl rounded-lg py-2 border border-gray-200">
+                                    <ul class="dropdown-submenu absolute {{ app()->getLocale() === 'ar' ? 'right-full mr-2' : 'left-full ml-2' }} top-0 min-w-[280px] bg-white shadow-2xl rounded-lg py-3 border border-gray-200">
                                         @foreach($parentCategory->children as $childCategory)
-                                            <li class="border-b border-gray-100 last:border-0">
+                                            <li>
                                                 <a href="{{ route('category.show', $childCategory->slug) }}"
-                                                    class="block px-4 py-2.5 text-sm text-gray-600 hover:bg-violet-50 hover:text-violet-600 transition-colors">
+                                                    class="block px-5 py-3 text-sm text-gray-700 hover:bg-violet-50 hover:text-violet-600 transition-colors font-medium">
                                                     <span class="flex items-center gap-2">
                                                         <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
                                                             <path fill-rule="evenodd"
@@ -431,24 +431,27 @@
         visibility: hidden;
         opacity: 0;
         z-index: 70;
-        transition: opacity 0.2s ease, visibility 0.2s ease;
+        transition: opacity 0.15s ease, visibility 0.15s ease;
         pointer-events: none;
         /* Ensure it doesn't affect layout */
         top: 0 !important;
+        white-space: nowrap;
     }
     
-    /* RTL positioning */
+    /* RTL positioning - with gap */
     [dir="rtl"] .dropdown-submenu,
     html[lang="ar"] .dropdown-submenu {
         right: 100% !important;
         left: auto !important;
+        margin-right: 0.5rem !important;
     }
     
-    /* LTR positioning */
+    /* LTR positioning - with gap */
     [dir="ltr"] .dropdown-submenu,
     html[lang="en"] .dropdown-submenu {
         left: 100% !important;
         right: auto !important;
+        margin-left: 0.5rem !important;
     }
     
     /* Show submenu on hover - CRITICAL: must use direct child selector */
@@ -462,5 +465,25 @@
     .dropdown-submenu:hover {
         visibility: visible;
         opacity: 1;
+    }
+    
+    /* Bridge area to prevent submenu closing when moving mouse */
+    .dropdown-menu > li::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 0.5rem;
+        z-index: 69;
+    }
+    [dir="rtl"] .dropdown-menu > li::after,
+    html[lang="ar"] .dropdown-menu > li::after {
+        right: 100%;
+        margin-right: -0.5rem;
+    }
+    [dir="ltr"] .dropdown-menu > li::after,
+    html[lang="en"] .dropdown-menu > li::after {
+        left: 100%;
+        margin-left: -0.5rem;
     }
 </style>
