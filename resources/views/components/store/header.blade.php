@@ -98,8 +98,13 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
-                    <span
-                        class="hidden md:block text-sm font-medium text-gray-700 group-hover:text-violet-600 transition">{{ trans_db('store.header.account') }}</span>
+                    <span class="hidden md:block text-sm font-medium text-gray-700 group-hover:text-violet-600 transition">
+                        @auth('customer')
+                            {{ auth('customer')->user()->name }}
+                        @else
+                            {{ trans_db('store.header.account') }}
+                        @endauth
+                    </span>
                 </a>
 
                 {{-- Wishlist (Livewire Component) --}}
