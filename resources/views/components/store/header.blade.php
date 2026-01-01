@@ -412,38 +412,55 @@
 </script>
 
 <style>
-    /* Pure CSS Flyout Menu (Standard Pattern) */
+    /* Pure CSS Flyout Menu - Standard W3C Pattern */
     
-    /* Main dropdown - hidden by default */
+    /* Main dropdown */
     .dropdown-menu {
-        overflow: visible;
+        overflow: visible !important;
     }
     
-    /* Parent li must be relative for absolute child positioning */
+    /* Parent li MUST be relative */
     .dropdown-menu > li {
         position: relative;
+        overflow: visible !important;
     }
     
-    /* Hide all submenus by default */
+    /* Hide submenu by default - use visibility/opacity only for smooth transitions */
     .dropdown-submenu {
+        position: absolute !important;
         visibility: hidden;
         opacity: 0;
-        position: absolute;
-        display: none;
         z-index: 70;
-        margin-top: 0;
+        transition: opacity 0.2s ease, visibility 0.2s ease;
+        pointer-events: none;
+        /* Ensure it doesn't affect layout */
+        top: 0 !important;
     }
     
-    /* Show submenu on parent hover - CSS ONLY */
-    .dropdown-menu > li:hover > .dropdown-submenu,
+    /* RTL positioning */
+    [dir="rtl"] .dropdown-submenu,
+    html[lang="ar"] .dropdown-submenu {
+        right: 100% !important;
+        left: auto !important;
+    }
+    
+    /* LTR positioning */
+    [dir="ltr"] .dropdown-submenu,
+    html[lang="en"] .dropdown-submenu {
+        left: 100% !important;
+        right: auto !important;
+    }
+    
+    /* Show submenu on hover - CRITICAL: must use direct child selector */
+    .dropdown-menu > li:hover > .dropdown-submenu {
+        visibility: visible;
+        opacity: 1;
+        pointer-events: auto;
+    }
+    
+    /* Keep submenu visible when hovering over it */
     .dropdown-submenu:hover {
         visibility: visible;
         opacity: 1;
-        display: block;
-    }
-    
-    /* Smooth transition */
-    .dropdown-submenu {
-        transition: opacity 0.2s ease, visibility 0.2s ease;
     }
 </style>
