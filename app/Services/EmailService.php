@@ -236,7 +236,7 @@ class EmailService
             'shipping_city' => $order->shippingAddress?->city ?? $order->guest_city,
             'shipping_governorate' => $order->shippingAddress?->governorate ?? $order->guest_governorate,
             'shipping_phone' => $order->shippingAddress?->phone ?? $order->guest_phone,
-            'track_url' => config('app.url') . '/track/' . $order->order_number,
+            'track_url' => config('app.url') . '/track-order',
         ];
     }
 

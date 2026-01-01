@@ -165,7 +165,7 @@ class EmailTemplateService
             'action_url' => config('app.url') . '/orders/12345',
             'reset_url' => config('app.url') . '/reset-password/token123',
             'verify_url' => config('app.url') . '/verify-email/token123',
-            'track_url' => config('app.url') . '/track/VIO-2024-001234',
+            'track_url' => config('app.url') . '/track-order',
             
             // Auth
             'verification_code' => '123456',
