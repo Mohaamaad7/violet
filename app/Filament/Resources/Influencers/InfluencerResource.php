@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Influencers;
 
 use App\Filament\Resources\Concerns\ChecksResourceAccess;
+use App\Filament\Resources\Influencers\Pages\CreateInfluencer;
 use App\Filament\Resources\Influencers\Pages\EditInfluencer;
 use App\Filament\Resources\Influencers\Pages\ListInfluencers;
 use App\Filament\Resources\Influencers\Pages\ViewInfluencer;
@@ -64,8 +65,10 @@ class InfluencerResource extends Resource
     {
         return [
             'index' => ListInfluencers::route('/'),
+            'create' => CreateInfluencer::route('/create'),
             'view' => ViewInfluencer::route('/{record}'),
             'edit' => EditInfluencer::route('/{record}/edit'),
         ];
     }
 }
+

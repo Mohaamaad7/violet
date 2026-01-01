@@ -7,16 +7,18 @@
 3. [الـ Models](#الـ-models)
 4. [الـ Services](#الـ-services)
 5. [Filament Resources](#filament-resources)
-6. [تدفق العمليات](#تدفق-العمليات)
-7. [الإشعارات](#الإشعارات)
-8. [الترجمات](#الترجمات)
+6. [نموذج تقديم المؤثرين (Frontend)](#نموذج-تقديم-المؤثرين-frontend)
+7. [تدفق العمليات](#تدفق-العمليات)
+8. [الإشعارات](#الإشعارات)
+9. [الترجمات](#الترجمات)
 
 ---
 
 ## نظرة عامة
 
 نظام المؤثرين يتيح:
-- تقديم طلبات انضمام كمؤثر
+- **تقديم طلبات انضمام كمؤثر من الـ Frontend** (`/influencer/apply`)
+- **إضافة مؤثر مباشرة من الأدمن** (`/admin/influencers/influencers/create`)
 - إدارة طلبات التقديم (قبول/رفض)
 - إنشاء أكواد خصم للمؤثرين
 - تتبع العمولات من المبيعات
@@ -50,13 +52,16 @@ app/
 │   ├── OrderService.php           ← تسجيل العمولات
 │   └── CouponService.php          ← التحقق من الأكواد
 │
+├── Livewire/
+│   └── InfluencerApplicationForm.php  ← نموذج التقديم (Frontend)
+│
 ├── Filament/Resources/Influencers/
 │   ├── InfluencerApplicationResource.php
 │   ├── InfluencerResource.php
 │   ├── CommissionPayoutResource.php
 │   ├── Schemas/
 │   │   ├── ApplicationForm.php
-│   │   ├── InfluencerForm.php
+│   │   ├── InfluencerForm.php     ← يدعم الإنشاء والتعديل
 │   │   └── PayoutForm.php
 │   ├── Tables/
 │   │   ├── ApplicationsTable.php
@@ -65,6 +70,7 @@ app/
 │   └── Pages/
 │       ├── ListApplications.php
 │       ├── ViewApplication.php
+│       ├── CreateInfluencer.php   ← إنشاء مؤثر مباشرة
 │       ├── ListInfluencers.php
 │       ├── ViewInfluencer.php
 │       ├── EditInfluencer.php
@@ -77,6 +83,9 @@ app/
     ├── ApplicationRejectedNotification.php
     ├── CommissionEarnedNotification.php
     └── PayoutProcessedNotification.php
+
+resources/views/livewire/
+└── influencer-application-form.blade.php  ← واجهة نموذج التقديم
 ```
 
 ---
@@ -322,6 +331,12 @@ if ($coupon->influencer_id) {
 - **تفعيل**: يغير status إلى active
 - **تعليق**: يغير status إلى suspended
 
+**إضافة مؤثر جديد (`/admin/influencers/influencers/create`):**
+- اختيار User من dropdown (بحث searchable)
+- تحديد نسبة العمولة (default: 10%)
+- اختيار الحالة (default: active)
+- إضافة روابط السوشيال ميديا
+
 ### CommissionPayoutResource
 
 **المسار:** `/admin/influencers/commission-payouts`
@@ -340,6 +355,84 @@ if ($coupon->influencer_id) {
 - **تم الدفع**: يفتح modal لرقم المرجع
 
 ---
+
+## نموذج تقديم المؤثرين (Frontend)
+
+### الوصف
+
+نموذج Livewire يتيح لأي شخص التقديم كمؤثر من الـ Frontend.
+
+**المسار:** `/influencer/apply`
+
+**الملفات:**
+- `app/Livewire/InfluencerApplicationForm.php`
+- `resources/views/livewire/influencer-application-form.blade.php`
+
+### الميزات
+
+1. **التعبئة المسبقة**: إذا كان العميل مسجل دخول، يتم تعبئة بياناته تلقائياً
+2. **التحقق من الطلبات السابقة**: يمنع تقديم طلب جديد إذا كان هناك طلب pending أو approved
+3. **التحقق من السوشيال ميديا**: يجب إدخال رابط حساب واحد على الأقل
+4. **أنواع المحتوى**: اختيار نوع المحتوى (أزياء، جمال، لايف ستايل، إلخ)
+
+### الحقول
+
+| الحقل | النوع | مطلوب |
+|-------|------|-------|
+| الاسم الكامل | text | ✅ |
+| البريد الإلكتروني | email | ✅ |
+| الهاتف | tel | ✅ |
+| Instagram URL | url | ❌ (واحد على الأقل) |
+| Instagram Followers | number | ❌ |
+| Facebook URL | url | ❌ |
+| Facebook Followers | number | ❌ |
+| TikTok URL | url | ❌ |
+| TikTok Followers | number | ❌ |
+| YouTube URL | url | ❌ |
+| YouTube Subscribers | number | ❌ |
+| Twitter URL | url | ❌ |
+| Twitter Followers | number | ❌ |
+| نوع المحتوى | select | ❌ |
+| نبذة | textarea | ❌ |
+
+### التصميم
+
+- تقسيم الفورم إلى 3 أقسام بصرية
+- كل منصة سوشيال ميديا بلون مختلف (Instagram: وردي، Facebook: أزرق، إلخ)
+- رسائل نجاح وخطأ واضحة
+- Loading state أثناء الإرسال
+
+### الكود
+
+```php
+// InfluencerApplicationForm.php
+public function submit()
+{
+    $this->validate();
+    
+    // التحقق من وجود طلب سابق
+    $existing = InfluencerApplication::where('email', $this->email)
+        ->whereIn('status', ['pending', 'approved'])
+        ->first();
+    
+    if ($existing) {
+        $this->alreadyApplied = true;
+        return;
+    }
+    
+    // التحقق من وجود حساب سوشيال واحد على الأقل
+    if (!$this->instagram_url && !$this->facebook_url && ...) {
+        $this->addError('instagram_url', __('messages.influencer.at_least_one_social'));
+        return;
+    }
+    
+    // إنشاء الطلب
+    InfluencerApplication::create([...]);
+    
+    $this->submitted = true;
+}
+```
+
 
 ## تدفق العمليات
 

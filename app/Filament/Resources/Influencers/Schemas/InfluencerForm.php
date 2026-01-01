@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Influencers\Schemas;
 
 use App\Models\Influencer;
+use App\Models\User;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -16,9 +17,20 @@ class InfluencerForm
         return $schema->schema([
             Section::make(trans_db('admin.influencers.sections.basic_info'))
                 ->schema([
+                    // For Create: Select user
+                    Select::make('user_id')
+                        ->label(trans_db('admin.influencers.fields.user'))
+                        ->relationship('user', 'name')
+                        ->searchable()
+                        ->preload()
+                        ->required()
+                        ->visible(fn(?Influencer $record) => $record === null),
+
+                    // For Edit/View: Show user name as placeholder
                     Placeholder::make('user_name')
                         ->label(trans_db('admin.influencers.fields.user'))
-                        ->content(fn(?Influencer $record) => $record?->user?->name ?? '-'),
+                        ->content(fn(?Influencer $record) => $record?->user?->name ?? '-')
+                        ->visible(fn(?Influencer $record) => $record !== null),
 
                     Select::make('status')
                         ->label(trans_db('admin.influencers.fields.status'))
@@ -27,6 +39,7 @@ class InfluencerForm
                             'inactive' => trans_db('admin.influencers.status.inactive'),
                             'suspended' => trans_db('admin.influencers.status.suspended'),
                         ])
+                        ->default('active')
                         ->required()
                         ->native(false),
 
@@ -35,6 +48,7 @@ class InfluencerForm
                         ->numeric()
                         ->minValue(0)
                         ->maxValue(100)
+                        ->default(10)
                         ->suffix('%')
                         ->required(),
                 ])
@@ -102,3 +116,4 @@ class InfluencerForm
         ]);
     }
 }
+

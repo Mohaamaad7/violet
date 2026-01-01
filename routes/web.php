@@ -43,6 +43,9 @@ Route::view('/about', 'pages.about')->name('about');
 // Contact Us Page (Static Page with Livewire Form)
 Route::view('/contact', 'pages.contact')->name('contact');
 
+// Influencer Application Page
+Route::get('/influencer/apply', App\Livewire\InfluencerApplicationForm::class)->name('influencer.apply');
+
 // Customer Account Area (Task 4.2 - Phase 4)
 // Uses customer guard for authentication
 Route::middleware(['auth:customer'])->prefix('account')->name('account.')->group(function () {
