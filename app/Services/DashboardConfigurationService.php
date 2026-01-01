@@ -11,22 +11,46 @@ use Illuminate\Support\Str;
 use ReflectionClass;
 
 /**
- * Dashboard Configuration Service - Zero-Config Approach
+ * Dashboard Configuration Service - Zero-Config with Smart Grouping
  * 
- * This service provides runtime discovery of widgets and resources.
- * Everything is visible by default unless explicitly hidden in the database.
- * 
- * Philosophy:
- * - No artisan commands needed
- * - No base classes required
- * - Database stores EXCEPTIONS only (what's hidden), not what's visible
- * - Plug & Play: Create widget/resource → it appears automatically
+ * Features:
+ * - Runtime discovery of widgets and resources
+ * - Smart group guessing from class names
+ * - Optional override via $dashboardGroup property
+ * - Localized display names
+ * - Everything visible by default
  */
 class DashboardConfigurationService
 {
     /**
+     * Navigation group mapping for smart guessing
+     */
+    protected array $groupKeywords = [
+        'sales' => ['sales', 'order', 'revenue', 'payment', 'return', 'coupon'],
+        'inventory' => ['stock', 'warehouse', 'inventory', 'product', 'batch', 'movement'],
+        'customers' => ['customer', 'user', 'client'],
+        'catalog' => ['category', 'product', 'brand'],
+        'content' => ['banner', 'slider', 'email', 'template'],
+        'geography' => ['city', 'country', 'governorate'],
+        'system' => ['role', 'permission', 'setting', 'config', 'user'],
+    ];
+
+    /**
+     * Group display order
+     */
+    protected array $groupOrder = [
+        'sales' => 1,
+        'inventory' => 2,
+        'catalog' => 3,
+        'customers' => 4,
+        'content' => 5,
+        'geography' => 6,
+        'system' => 7,
+        'general' => 99,
+    ];
+
+    /**
      * Get visible widgets for the current user
-     * Returns array of widget class names that should be shown
      */
     public function getVisibleWidgetsForCurrentUser(): array
     {
@@ -54,11 +78,9 @@ class DashboardConfigurationService
 
     /**
      * Check if a widget is visible for a specific user
-     * DEFAULT: VISIBLE (true) unless explicitly hidden
      */
     public function isWidgetVisibleForUser(string $widgetClass, User $user): bool
     {
-        // Super-admin sees everything
         if ($user->hasRole('super-admin')) {
             return true;
         }
@@ -66,23 +88,19 @@ class DashboardConfigurationService
         $roleIds = $user->roles->pluck('id')->toArray();
 
         if (empty($roleIds)) {
-            return true; // No role? Show everything
+            return true;
         }
 
-        // Check if there's an explicit "hide" record in the database
         $hiddenRecord = RoleWidgetDefault::where('widget_class', $widgetClass)
             ->whereIn('role_id', $roleIds)
             ->where('is_visible', false)
             ->first();
 
-        // If found a record that says "hide" → hide it
-        // Otherwise → show it (Default: Visible)
         return $hiddenRecord === null;
     }
 
     /**
      * Check if a resource is accessible for current user
-     * DEFAULT: FULL ACCESS unless explicitly restricted
      */
     public function canAccessResource(string $resourceClass, string $permission = 'can_view'): bool
     {
@@ -92,7 +110,6 @@ class DashboardConfigurationService
             return false;
         }
 
-        // Super-admin has full access
         if ($user->hasRole('super-admin')) {
             return true;
         }
@@ -100,23 +117,19 @@ class DashboardConfigurationService
         $roleIds = $user->roles->pluck('id')->toArray();
 
         if (empty($roleIds)) {
-            return true; // No role? Allow by default
+            return true;
         }
 
-        // Check if there's an explicit "deny" record
         $denyRecord = RoleResourceAccess::where('resource_class', $resourceClass)
             ->whereIn('role_id', $roleIds)
             ->where($permission, false)
             ->first();
 
-        // If found a record that says "deny" → deny
-        // Otherwise → allow (Default: Full Access)
         return $denyRecord === null;
     }
 
     /**
      * Should resource be shown in navigation?
-     * DEFAULT: VISIBLE unless explicitly hidden
      */
     public function shouldShowResourceInNavigation(string $resourceClass): bool
     {
@@ -125,7 +138,6 @@ class DashboardConfigurationService
 
     /**
      * Discover all widget classes from the codebase
-     * This is the runtime discovery - no database needed
      */
     public function discoverAllWidgets(): array
     {
@@ -171,7 +183,6 @@ class DashboardConfigurationService
             $files = File::allFiles($resourcePath);
 
             foreach ($files as $file) {
-                // Only include main resource files (not pages, schemas, etc.)
                 if (Str::endsWith($file->getFilename(), 'Resource.php')) {
                     $className = $this->getClassNameFromFile($file->getPathname());
 
@@ -186,8 +197,7 @@ class DashboardConfigurationService
     }
 
     /**
-     * Get all widgets with their visibility status for a role
-     * Used by the Role Permissions UI
+     * Get all widgets with their visibility status for a role, grouped by category
      */
     public function getWidgetsWithStatusForRole(int $roleId): array
     {
@@ -195,26 +205,36 @@ class DashboardConfigurationService
         $result = [];
 
         foreach ($allWidgets as $widgetClass) {
-            // Check if there's an override in the database
             $override = RoleWidgetDefault::where('widget_class', $widgetClass)
                 ->where('role_id', $roleId)
                 ->first();
 
+            $group = $this->getWidgetGroup($widgetClass);
+
             $result[] = [
                 'class' => $widgetClass,
                 'name' => $this->getWidgetDisplayName($widgetClass),
-                'group' => $this->getWidgetGroup($widgetClass),
-                'is_visible' => $override ? $override->is_visible : true, // Default: visible
+                'group' => $group,
+                'group_label' => $this->getGroupLabel($group),
+                'group_order' => $this->groupOrder[$group] ?? 99,
+                'is_visible' => $override ? $override->is_visible : true,
                 'has_override' => $override !== null,
             ];
         }
+
+        // Sort by group order, then by name
+        usort($result, function ($a, $b) {
+            if ($a['group_order'] !== $b['group_order']) {
+                return $a['group_order'] <=> $b['group_order'];
+            }
+            return strcmp($a['name'], $b['name']);
+        });
 
         return $result;
     }
 
     /**
-     * Get all resources with their access status for a role
-     * Used by the Role Permissions UI
+     * Get all resources with their access status for a role, grouped by category
      */
     public function getResourcesWithStatusForRole(int $roleId): array
     {
@@ -231,10 +251,14 @@ class DashboardConfigurationService
                 ->where('role_id', $roleId)
                 ->first();
 
+            $group = $this->getResourceGroup($resourceClass);
+
             $result[] = [
                 'class' => $resourceClass,
                 'name' => $this->getResourceDisplayName($resourceClass),
-                'group' => $this->getResourceGroup($resourceClass),
+                'group' => $group,
+                'group_label' => $this->getGroupLabel($group),
+                'group_order' => $this->groupOrder[$group] ?? 99,
                 'can_view' => $override ? $override->can_view : true,
                 'can_create' => $override ? $override->can_create : true,
                 'can_edit' => $override ? $override->can_edit : true,
@@ -243,31 +267,103 @@ class DashboardConfigurationService
             ];
         }
 
+        // Sort by group order, then by name
+        usort($result, function ($a, $b) {
+            if ($a['group_order'] !== $b['group_order']) {
+                return $a['group_order'] <=> $b['group_order'];
+            }
+            return strcmp($a['name'], $b['name']);
+        });
+
         return $result;
     }
 
     /**
+     * Get widgets grouped by category for UI
+     */
+    public function getWidgetsGroupedForRole(int $roleId): array
+    {
+        $widgets = $this->getWidgetsWithStatusForRole($roleId);
+        $grouped = [];
+
+        foreach ($widgets as $widget) {
+            $group = $widget['group'];
+            if (!isset($grouped[$group])) {
+                $grouped[$group] = [
+                    'key' => $group,
+                    'label' => $widget['group_label'],
+                    'order' => $widget['group_order'],
+                    'items' => [],
+                ];
+            }
+            $grouped[$group]['items'][] = $widget;
+        }
+
+        // Sort groups by order
+        uasort($grouped, fn($a, $b) => $a['order'] <=> $b['order']);
+
+        return $grouped;
+    }
+
+    /**
+     * Get resources grouped by category for UI
+     */
+    public function getResourcesGroupedForRole(int $roleId): array
+    {
+        $resources = $this->getResourcesWithStatusForRole($roleId);
+        $grouped = [];
+
+        foreach ($resources as $resource) {
+            $group = $resource['group'];
+            if (!isset($grouped[$group])) {
+                $grouped[$group] = [
+                    'key' => $group,
+                    'label' => $resource['group_label'],
+                    'order' => $resource['group_order'],
+                    'items' => [],
+                ];
+            }
+            $grouped[$group]['items'][] = $resource;
+        }
+
+        uasort($grouped, fn($a, $b) => $a['order'] <=> $b['order']);
+
+        return $grouped;
+    }
+
+    /**
+     * Get all available groups
+     */
+    public function getAvailableGroups(): array
+    {
+        $groups = [];
+        foreach ($this->groupOrder as $key => $order) {
+            $groups[$key] = [
+                'key' => $key,
+                'label' => $this->getGroupLabel($key),
+                'order' => $order,
+            ];
+        }
+        return $groups;
+    }
+
+    /**
      * Set widget visibility for a role
-     * Creates/updates/deletes override record as needed
      */
     public function setWidgetVisibility(int $roleId, string $widgetClass, bool $isVisible): void
     {
         if ($isVisible) {
-            // Default is visible, so delete any override
             RoleWidgetDefault::where('role_id', $roleId)
                 ->where('widget_class', $widgetClass)
                 ->delete();
         } else {
-            // Need to hide it - create override record
             RoleWidgetDefault::updateOrCreate(
                 ['role_id' => $roleId, 'widget_class' => $widgetClass],
                 ['is_visible' => false]
             );
         }
 
-        // Clear cache
-        Cache::forget("visible_widgets_user_*");
-        Cache::flush(); // Simple approach - clear all for now
+        Cache::flush();
     }
 
     /**
@@ -275,19 +371,16 @@ class DashboardConfigurationService
      */
     public function setResourceAccess(int $roleId, string $resourceClass, array $permissions): void
     {
-        // Check if all permissions are true (default state)
         $isDefault = ($permissions['can_view'] ?? true) &&
             ($permissions['can_create'] ?? true) &&
             ($permissions['can_edit'] ?? true) &&
             ($permissions['can_delete'] ?? true);
 
         if ($isDefault) {
-            // All permissions are default, delete the override
             RoleResourceAccess::where('role_id', $roleId)
                 ->where('resource_class', $resourceClass)
                 ->delete();
         } else {
-            // Need custom permissions - create override
             RoleResourceAccess::updateOrCreate(
                 ['role_id' => $roleId, 'resource_class' => $resourceClass],
                 $permissions
@@ -298,20 +391,53 @@ class DashboardConfigurationService
     }
 
     /**
+     * Bulk set all widgets in a group for a role
+     */
+    public function setGroupWidgetsVisibility(int $roleId, string $group, bool $isVisible): void
+    {
+        $widgets = $this->getWidgetsWithStatusForRole($roleId);
+
+        foreach ($widgets as $widget) {
+            if ($widget['group'] === $group) {
+                $this->setWidgetVisibility($roleId, $widget['class'], $isVisible);
+            }
+        }
+    }
+
+    /**
+     * Bulk set all resources in a group for a role
+     */
+    public function setGroupResourcesAccess(int $roleId, string $group, bool $fullAccess): void
+    {
+        $resources = $this->getResourcesWithStatusForRole($roleId);
+
+        $permissions = [
+            'can_view' => $fullAccess,
+            'can_create' => $fullAccess,
+            'can_edit' => $fullAccess,
+            'can_delete' => $fullAccess,
+        ];
+
+        foreach ($resources as $resource) {
+            if ($resource['group'] === $group) {
+                $this->setResourceAccess($roleId, $resource['class'], $permissions);
+            }
+        }
+    }
+
+    /**
      * Get class name from file path
      */
     protected function getClassNameFromFile(string $filePath): ?string
     {
         $content = File::get($filePath);
 
-        // Extract namespace
         if (preg_match('/namespace\s+([^;]+);/', $content, $namespaceMatch)) {
             $namespace = $namespaceMatch[1];
         } else {
             return null;
         }
 
-        // Extract class name
         if (preg_match('/class\s+(\w+)/', $content, $classMatch)) {
             $className = $classMatch[1];
             return $namespace . '\\' . $className;
@@ -332,21 +458,22 @@ class DashboardConfigurationService
         try {
             $reflection = new ReflectionClass($className);
 
-            // Must not be abstract
             if ($reflection->isAbstract()) {
                 return false;
             }
 
-            // Must be a Filament widget
             if (!$reflection->isSubclassOf(\Filament\Widgets\Widget::class)) {
                 return false;
             }
 
-            // Check if it's discoverable (not hidden)
+            // Check if it's discoverable
             if ($reflection->hasProperty('isDiscovered')) {
                 $prop = $reflection->getProperty('isDiscovered');
                 $prop->setAccessible(true);
-                if ($prop->getValue() === false) {
+
+                // Get static property value
+                $defaultProperties = $reflection->getDefaultProperties();
+                if (isset($defaultProperties['isDiscovered']) && $defaultProperties['isDiscovered'] === false) {
                     return false;
                 }
             }
@@ -380,77 +507,172 @@ class DashboardConfigurationService
     }
 
     /**
-     * Get display name for a widget
-     */
-    protected function getWidgetDisplayName(string $widgetClass): string
-    {
-        $shortName = class_basename($widgetClass);
-
-        // Remove "Widget" suffix and convert to readable format
-        $name = Str::replaceLast('Widget', '', $shortName);
-        return Str::headline($name);
-    }
-
-    /**
-     * Get display name for a resource
-     */
-    protected function getResourceDisplayName(string $resourceClass): string
-    {
-        $shortName = class_basename($resourceClass);
-        $name = Str::replaceLast('Resource', '', $shortName);
-        return Str::headline($name);
-    }
-
-    /**
-     * Get widget group (for categorization in UI)
+     * Get widget group using Hybrid approach:
+     * 1. Check for explicit $dashboardGroup property
+     * 2. Smart guess from class name
      */
     protected function getWidgetGroup(string $widgetClass): string
     {
-        $shortName = class_basename($widgetClass);
+        try {
+            $reflection = new ReflectionClass($widgetClass);
 
-        if (Str::contains($shortName, ['Stock', 'Inventory', 'Product'])) {
-            return 'inventory';
-        }
-        if (Str::contains($shortName, ['Order', 'Sales', 'Revenue'])) {
-            return 'sales';
-        }
-        if (Str::contains($shortName, ['Customer'])) {
-            return 'customers';
-        }
+            // 1. Check for explicit property
+            $defaultProperties = $reflection->getDefaultProperties();
+            if (isset($defaultProperties['dashboardGroup'])) {
+                return $defaultProperties['dashboardGroup'];
+            }
 
-        return 'general';
+            // 2. Smart guess from class name
+            $shortName = strtolower(class_basename($widgetClass));
+
+            foreach ($this->groupKeywords as $group => $keywords) {
+                foreach ($keywords as $keyword) {
+                    if (Str::contains($shortName, $keyword)) {
+                        return $group;
+                    }
+                }
+            }
+
+            return 'general';
+        } catch (\Exception $e) {
+            return 'general';
+        }
     }
 
     /**
-     * Get resource group
+     * Get resource group from its Navigation Group
      */
     protected function getResourceGroup(string $resourceClass): string
     {
-        if (
-            Str::contains($resourceClass, '\\Products\\') ||
-            Str::contains($resourceClass, 'Category')
-        ) {
-            return 'catalog';
-        }
-        if (
-            Str::contains($resourceClass, '\\Orders\\') ||
-            Str::contains($resourceClass, 'Payment') ||
-            Str::contains($resourceClass, 'Coupon')
-        ) {
-            return 'sales';
-        }
-        if (
-            Str::contains($resourceClass, 'Stock') ||
-            Str::contains($resourceClass, 'Warehouse')
-        ) {
-            return 'inventory';
-        }
+        try {
+            if (method_exists($resourceClass, 'getNavigationGroup')) {
+                $navGroup = $resourceClass::getNavigationGroup();
 
-        return 'system';
+                if ($navGroup) {
+                    // Map navigation group to our groups
+                    $navGroupLower = strtolower($navGroup);
+
+                    // Check against translation keys
+                    $mappings = [
+                        'المبيعات' => 'sales',
+                        'sales' => 'sales',
+                        'المخزون' => 'inventory',
+                        'inventory' => 'inventory',
+                        'الكتالوج' => 'catalog',
+                        'catalog' => 'catalog',
+                        'العملاء' => 'customers',
+                        'customers' => 'customers',
+                        'المحتوى' => 'content',
+                        'content' => 'content',
+                        'الإعدادات الجغرافية' => 'geography',
+                        'geographic' => 'geography',
+                        'النظام' => 'system',
+                        'system' => 'system',
+                        'الإعدادات' => 'system',
+                        'settings' => 'system',
+                    ];
+
+                    foreach ($mappings as $key => $group) {
+                        if (Str::contains($navGroupLower, strtolower($key))) {
+                            return $group;
+                        }
+                    }
+                }
+            }
+
+            // Fallback: guess from class name
+            $shortName = strtolower(class_basename($resourceClass));
+
+            foreach ($this->groupKeywords as $group => $keywords) {
+                foreach ($keywords as $keyword) {
+                    if (Str::contains($shortName, $keyword)) {
+                        return $group;
+                    }
+                }
+            }
+
+            return 'system';
+        } catch (\Exception $e) {
+            return 'system';
+        }
     }
 
     /**
-     * Get default widgets (for non-authenticated users)
+     * Get localized display name for a widget
+     */
+    protected function getWidgetDisplayName(string $widgetClass): string
+    {
+        try {
+            // 1. Check if widget has getHeading() method
+            if (method_exists($widgetClass, 'getHeading')) {
+                $instance = app($widgetClass);
+                $heading = $instance->getHeading();
+                if ($heading) {
+                    return $heading;
+                }
+            }
+
+            // 2. Fallback: Convert class name to readable format
+            $shortName = class_basename($widgetClass);
+            $name = Str::replaceLast('Widget', '', $shortName);
+            return Str::headline($name);
+        } catch (\Exception $e) {
+            $shortName = class_basename($widgetClass);
+            return Str::replaceLast('Widget', '', $shortName);
+        }
+    }
+
+    /**
+     * Get localized display name for a resource
+     */
+    protected function getResourceDisplayName(string $resourceClass): string
+    {
+        try {
+            // 1. Check for getModelLabel() or getNavigationLabel()
+            if (method_exists($resourceClass, 'getNavigationLabel')) {
+                $label = $resourceClass::getNavigationLabel();
+                if ($label) {
+                    return $label;
+                }
+            }
+
+            if (method_exists($resourceClass, 'getPluralModelLabel')) {
+                $label = $resourceClass::getPluralModelLabel();
+                if ($label) {
+                    return $label;
+                }
+            }
+
+            // 2. Fallback
+            $shortName = class_basename($resourceClass);
+            $name = Str::replaceLast('Resource', '', $shortName);
+            return Str::headline($name);
+        } catch (\Exception $e) {
+            $shortName = class_basename($resourceClass);
+            return Str::replaceLast('Resource', '', $shortName);
+        }
+    }
+
+    /**
+     * Get localized group label
+     */
+    protected function getGroupLabel(string $group): string
+    {
+        // Use admin.nav translations
+        $key = "admin.nav.{$group}";
+        $translated = __($key);
+
+        // If translation exists, return it
+        if ($translated !== $key) {
+            return $translated;
+        }
+
+        // Fallback to headline
+        return Str::headline($group);
+    }
+
+    /**
+     * Get default widgets
      */
     protected function getDefaultWidgets(): array
     {
