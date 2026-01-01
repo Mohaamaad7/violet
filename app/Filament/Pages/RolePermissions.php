@@ -3,6 +3,7 @@
 namespace App\Filament\Pages;
 
 use App\Models\Role;
+use App\Models\RolePageAccess;
 use App\Models\RoleResourceAccess;
 use App\Models\RoleWidgetDefault;
 use App\Services\DashboardConfigurationService;
@@ -36,6 +37,7 @@ class RolePermissions extends Page
     // Data
     public array $widgetsGrouped = [];
     public array $resourcesGrouped = [];
+    public array $pagesGrouped = [];
     public array $availableGroups = [];
 
     protected DashboardConfigurationService $service;
@@ -101,6 +103,9 @@ class RolePermissions extends Page
 
         // Get resources grouped by category
         $this->resourcesGrouped = $this->service->getResourcesGroupedForRole($this->selectedRoleId);
+
+        // Get pages grouped by category
+        $this->pagesGrouped = $this->service->getPagesGroupedForRole($this->selectedRoleId);
     }
 
     /**
@@ -291,6 +296,92 @@ class RolePermissions extends Page
     }
 
     /**
+     * Toggle a page's access
+     */
+    public function togglePage(string $pageClass): void
+    {
+        if (!$this->selectedRoleId) {
+            return;
+        }
+
+        // Find current status
+        $currentlyAccessible = true;
+        foreach ($this->pagesGrouped as $group => &$groupData) {
+            foreach ($groupData['items'] as &$page) {
+                if ($page['class'] === $pageClass) {
+                    $currentlyAccessible = $page['can_access'];
+                    $page['can_access'] = !$currentlyAccessible;
+                    $page['has_override'] = !$currentlyAccessible ? false : true;
+                    break 2;
+                }
+            }
+        }
+
+        $newValue = !$currentlyAccessible;
+        $this->service->setPageAccess($this->selectedRoleId, $pageClass, $newValue);
+
+        Notification::make()
+            ->title($newValue ? __('admin.role_permissions.page_enabled') : __('admin.role_permissions.page_disabled'))
+            ->success()
+            ->send();
+    }
+
+    /**
+     * Enable all pages in a specific group
+     */
+    public function enableGroupPages(string $group): void
+    {
+        if (!$this->selectedRoleId) {
+            return;
+        }
+
+        $this->service->setGroupPagesAccess($this->selectedRoleId, $group, true);
+        $this->loadPermissions();
+
+        Notification::make()
+            ->title(__('admin.role_permissions.group_pages_enabled'))
+            ->success()
+            ->send();
+    }
+
+    /**
+     * Disable all pages in a specific group
+     */
+    public function disableGroupPages(string $group): void
+    {
+        if (!$this->selectedRoleId) {
+            return;
+        }
+
+        $this->service->setGroupPagesAccess($this->selectedRoleId, $group, false);
+        $this->loadPermissions();
+
+        Notification::make()
+            ->title(__('admin.role_permissions.group_pages_disabled'))
+            ->success()
+            ->send();
+    }
+
+    /**
+     * Enable all pages (all groups)
+     */
+    public function enableAllPages(): void
+    {
+        if (!$this->selectedRoleId) {
+            return;
+        }
+
+        RolePageAccess::where('role_id', $this->selectedRoleId)->delete();
+        $this->loadPermissions();
+        Cache::flush();
+
+        Notification::make()
+            ->title(__('admin.role_permissions.all_pages_enabled'))
+            ->success()
+            ->send();
+    }
+
+    /**
      * Get all roles for the select dropdown
      */
     public function getRoles(): array
@@ -334,6 +425,18 @@ class RolePermissions extends Page
     }
 
     /**
+     * Get filtered pages based on selected group
+     */
+    public function getFilteredPages(): array
+    {
+        if ($this->selectedGroup === 'all') {
+            return $this->pagesGrouped;
+        }
+
+        return array_filter($this->pagesGrouped, fn($group) => $group['key'] === $this->selectedGroup);
+    }
+
+    /**
      * Get total counts for display
      */
     public function getTotalWidgetsCount(): int
@@ -349,6 +452,15 @@ class RolePermissions extends Page
     {
         $total = 0;
         foreach ($this->resourcesGrouped as $group) {
+            $total += count($group['items']);
+        }
+        return $total;
+    }
+
+    public function getTotalPagesCount(): int
+    {
+        $total = 0;
+        foreach ($this->pagesGrouped as $group) {
             $total += count($group['items']);
         }
         return $total;

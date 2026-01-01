@@ -280,6 +280,93 @@
             @endif
         </x-filament::section>
 
+        {{-- Pages Section - Grouped --}}
+        <x-filament::section collapsible>
+            <x-slot name="heading">
+                <div class="flex items-center gap-2">
+                    <x-heroicon-o-document-text class="w-5 h-5" />
+                    {{ __('admin.role_permissions.pages') }}
+                    <x-filament::badge size="sm" color="gray">
+                        {{ $this->getTotalPagesCount() }}
+                    </x-filament::badge>
+                </div>
+            </x-slot>
+
+            <x-slot name="headerEnd">
+                <x-filament::button size="xs" color="success" wire:click="enableAllPages">
+                    {{ __('admin.role_permissions.enable_all') }}
+                </x-filament::button>
+            </x-slot>
+
+            @php $filteredPages = $this->getFilteredPages(); @endphp
+
+            @if(count($filteredPages) > 0)
+                <div class="space-y-6">
+                    @foreach($filteredPages as $groupKey => $group)
+                        <div class="border border-gray-200 dark:border-gray-700 rounded-xl p-4">
+                            {{-- Group Header --}}
+                            <div
+                                class="flex items-center justify-between mb-4 pb-3 border-b border-gray-100 dark:border-gray-800">
+                                <div class="flex items-center gap-2">
+                                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                                        {{ $group['label'] }}
+                                    </h3>
+                                    <x-filament::badge size="sm" color="info">
+                                        {{ count($group['items']) }}
+                                    </x-filament::badge>
+                                </div>
+                                <div class="flex gap-2">
+                                    <x-filament::button size="xs" color="success"
+                                        wire:click="enableGroupPages('{{ $groupKey }}')">
+                                        {{ __('admin.role_permissions.enable_group') }}
+                                    </x-filament::button>
+                                    <x-filament::button size="xs" color="danger"
+                                        wire:click="disableGroupPages('{{ $groupKey }}')">
+                                        {{ __('admin.role_permissions.disable_group') }}
+                                    </x-filament::button>
+                                </div>
+                            </div>
+
+                            {{-- Group Items (Cards) --}}
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                                @foreach($group['items'] as $page)
+                                    <div
+                                        class="flex items-center justify-between p-3 rounded-lg border {{ $page['can_access'] ? 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20' : 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-900/20' }} transition-all duration-200">
+                                        <div class="flex-1 min-w-0">
+                                            <div class="font-medium text-gray-900 dark:text-white truncate"
+                                                title="{{ $page['name'] }}">
+                                                {{ $page['name'] }}
+                                            </div>
+                                            @if($page['has_override'])
+                                                <x-filament::badge size="sm" color="warning">
+                                                    Override
+                                                </x-filament::badge>
+                                            @endif
+                                        </div>
+                                        <div class="ms-2 flex-shrink-0">
+                                            <button type="button" wire:click="togglePage('{{ addslashes($page['class']) }}')"
+                                                class="p-2 rounded-full transition-colors {{ $page['can_access'] ? 'text-green-600 hover:bg-green-100 dark:hover:bg-green-800' : 'text-red-600 hover:bg-red-100 dark:hover:bg-red-800' }}">
+                                                @if($page['can_access'])
+                                                    <x-heroicon-s-check-circle class="w-6 h-6" />
+                                                @else
+                                                    <x-heroicon-s-x-circle class="w-6 h-6" />
+                                                @endif
+                                            </button>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @else
+                <div class="text-center py-8 text-gray-500">
+                    <x-heroicon-o-document-text class="w-12 h-12 mx-auto mb-2 opacity-50" />
+                    <p>{{ __('admin.role_permissions.no_pages_in_group') }}</p>
+                </div>
+            @endif
+        </x-filament::section>
+
         {{-- Info Box --}}
         <x-filament::section>
             <div class="text-sm text-gray-500 dark:text-gray-400 space-y-2">

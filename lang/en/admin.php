@@ -76,15 +76,23 @@ return [
         'group_widgets_disabled' => 'Group widgets disabled',
         'group_access_granted' => 'Group access granted',
         'group_access_revoked' => 'Group access revoked',
+        // Pages
+        'pages' => 'Pages',
+        'page_enabled' => 'Page enabled',
+        'page_disabled' => 'Page disabled',
+        'group_pages_enabled' => 'Group pages enabled',
+        'group_pages_disabled' => 'Group pages disabled',
+        'all_pages_enabled' => 'All pages enabled',
+        'no_pages_in_group' => 'No pages in this group',
         // Zero-Config specific
         'no_widgets_found' => 'No widgets found in the codebase',
         'no_resources_found' => 'No resources found in the codebase',
         'no_widgets_in_group' => 'No widgets in this group',
         'no_resources_in_group' => 'No resources in this group',
         'zero_config_info' => 'Zero-Config Mode Active',
-        'default_visible_info' => 'All widgets and resources are visible by default',
+        'default_visible_info' => 'All widgets, resources, and pages are visible by default',
         'override_info' => 'Items marked with "Override" have custom settings for this role',
-        'auto_discover_info' => 'New widgets and resources are automatically discovered from code',
+        'auto_discover_info' => 'New widgets, resources, and pages are automatically discovered from code',
     ],
 
     // Common Fields

@@ -76,15 +76,23 @@ return [
         'group_widgets_disabled' => 'تم تعطيل ويدجات المجموعة',
         'group_access_granted' => 'تم منح صلاحيات المجموعة',
         'group_access_revoked' => 'تم سحب صلاحيات المجموعة',
+        // Pages
+        'pages' => 'الصفحات',
+        'page_enabled' => 'تم تفعيل الصفحة',
+        'page_disabled' => 'تم تعطيل الصفحة',
+        'group_pages_enabled' => 'تم تفعيل صفحات المجموعة',
+        'group_pages_disabled' => 'تم تعطيل صفحات المجموعة',
+        'all_pages_enabled' => 'تم تفعيل كل الصفحات',
+        'no_pages_in_group' => 'لا توجد صفحات في هذه المجموعة',
         // Zero-Config specific
         'no_widgets_found' => 'لا توجد ويدجات في الكود',
         'no_resources_found' => 'لا توجد موارد في الكود',
         'no_widgets_in_group' => 'لا توجد ويدجات في هذه المجموعة',
         'no_resources_in_group' => 'لا توجد موارد في هذه المجموعة',
         'zero_config_info' => 'وضع الإعداد التلقائي مفعّل',
-        'default_visible_info' => 'كل الويدجات والموارد مرئية تلقائياً',
+        'default_visible_info' => 'كل الويدجات والموارد والصفحات مرئية تلقائياً',
         'override_info' => 'العناصر المميزة بـ "Override" لها إعدادات مخصصة لهذا الدور',
-        'auto_discover_info' => 'الويدجات والموارد الجديدة تُكتشف تلقائياً من الكود',
+        'auto_discover_info' => 'الويدجات والموارد والصفحات الجديدة تُكتشف تلقائياً من الكود',
     ],
 
     // Common Fields

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\RolePageAccess;
 use App\Models\RoleResourceAccess;
 use App\Models\RoleWidgetDefault;
 use App\Models\User;
@@ -329,6 +330,262 @@ class DashboardConfigurationService
         uasort($grouped, fn($a, $b) => $a['order'] <=> $b['order']);
 
         return $grouped;
+    }
+
+    /**
+     * Discover all page classes from the codebase
+     */
+    public function discoverAllPages(): array
+    {
+        $cacheKey = 'all_page_classes';
+
+        return Cache::remember($cacheKey, 3600, function () {
+            $pages = [];
+            $pagePath = app_path('Filament/Pages');
+
+            if (!File::isDirectory($pagePath)) {
+                return $pages;
+            }
+
+            $files = File::allFiles($pagePath);
+
+            foreach ($files as $file) {
+                if (Str::endsWith($file->getFilename(), '.php')) {
+                    $className = $this->getClassNameFromFile($file->getPathname());
+
+                    if ($className && $this->isValidPageClass($className)) {
+                        $pages[] = $className;
+                    }
+                }
+            }
+
+            return $pages;
+        });
+    }
+
+    /**
+     * Check if class is a valid Filament page
+     */
+    protected function isValidPageClass(string $className): bool
+    {
+        if (!class_exists($className)) {
+            return false;
+        }
+
+        try {
+            $reflection = new ReflectionClass($className);
+
+            if ($reflection->isAbstract()) {
+                return false;
+            }
+
+            // Must be a subclass of Filament Page
+            return $reflection->isSubclassOf(\Filament\Pages\Page::class);
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
+    /**
+     * Check if a page is accessible for current user
+     */
+    public function canAccessPage(string $pageClass): bool
+    {
+        $user = auth()->user();
+
+        if (!$user) {
+            return false;
+        }
+
+        if ($user->hasRole('super-admin')) {
+            return true;
+        }
+
+        $roleIds = $user->roles->pluck('id')->toArray();
+
+        if (empty($roleIds)) {
+            return true;
+        }
+
+        $denyRecord = RolePageAccess::where('page_class', $pageClass)
+            ->whereIn('role_id', $roleIds)
+            ->where('can_access', false)
+            ->first();
+
+        return $denyRecord === null;
+    }
+
+    /**
+     * Get all pages with their access status for a role, grouped by category
+     */
+    public function getPagesWithStatusForRole(int $roleId): array
+    {
+        $allPages = $this->discoverAllPages();
+        $result = [];
+
+        foreach ($allPages as $pageClass) {
+            $override = RolePageAccess::where('page_class', $pageClass)
+                ->where('role_id', $roleId)
+                ->first();
+
+            $group = $this->getPageGroup($pageClass);
+
+            $result[] = [
+                'class' => $pageClass,
+                'name' => $this->getPageDisplayName($pageClass),
+                'group' => $group,
+                'group_label' => $this->getGroupLabel($group),
+                'group_order' => $this->groupOrder[$group] ?? 99,
+                'can_access' => $override ? $override->can_access : true,
+                'has_override' => $override !== null,
+            ];
+        }
+
+        // Sort by group order, then by name
+        usort($result, function ($a, $b) {
+            if ($a['group_order'] !== $b['group_order']) {
+                return $a['group_order'] <=> $b['group_order'];
+            }
+            return strcmp($a['name'], $b['name']);
+        });
+
+        return $result;
+    }
+
+    /**
+     * Get pages grouped by category for UI
+     */
+    public function getPagesGroupedForRole(int $roleId): array
+    {
+        $pages = $this->getPagesWithStatusForRole($roleId);
+        $grouped = [];
+
+        foreach ($pages as $page) {
+            $group = $page['group'];
+            if (!isset($grouped[$group])) {
+                $grouped[$group] = [
+                    'key' => $group,
+                    'label' => $page['group_label'],
+                    'order' => $page['group_order'],
+                    'items' => [],
+                ];
+            }
+            $grouped[$group]['items'][] = $page;
+        }
+
+        uasort($grouped, fn($a, $b) => $a['order'] <=> $b['order']);
+
+        return $grouped;
+    }
+
+    /**
+     * Set page access for a role
+     */
+    public function setPageAccess(int $roleId, string $pageClass, bool $canAccess): void
+    {
+        if ($canAccess) {
+            RolePageAccess::where('role_id', $roleId)
+                ->where('page_class', $pageClass)
+                ->delete();
+        } else {
+            RolePageAccess::updateOrCreate(
+                ['role_id' => $roleId, 'page_class' => $pageClass],
+                ['can_access' => false]
+            );
+        }
+
+        Cache::flush();
+    }
+
+    /**
+     * Bulk set all pages in a group for a role
+     */
+    public function setGroupPagesAccess(int $roleId, string $group, bool $canAccess): void
+    {
+        $pages = $this->getPagesWithStatusForRole($roleId);
+
+        foreach ($pages as $page) {
+            if ($page['group'] === $group) {
+                $this->setPageAccess($roleId, $page['class'], $canAccess);
+            }
+        }
+    }
+
+    /**
+     * Get page group using Navigation Group or smart guessing
+     */
+    protected function getPageGroup(string $pageClass): string
+    {
+        try {
+            if (method_exists($pageClass, 'getNavigationGroup')) {
+                $navGroup = $pageClass::getNavigationGroup();
+
+                if ($navGroup) {
+                    $navGroupLower = strtolower($navGroup);
+
+                    $mappings = [
+                        'المبيعات' => 'sales',
+                        'sales' => 'sales',
+                        'المخزون' => 'inventory',
+                        'inventory' => 'inventory',
+                        'النظام' => 'system',
+                        'system' => 'system',
+                        'الإعدادات' => 'system',
+                        'settings' => 'system',
+                    ];
+
+                    foreach ($mappings as $key => $group) {
+                        if (Str::contains($navGroupLower, strtolower($key))) {
+                            return $group;
+                        }
+                    }
+                }
+            }
+
+            // Fallback: guess from class name
+            $shortName = strtolower(class_basename($pageClass));
+
+            foreach ($this->groupKeywords as $group => $keywords) {
+                foreach ($keywords as $keyword) {
+                    if (Str::contains($shortName, $keyword)) {
+                        return $group;
+                    }
+                }
+            }
+
+            return 'system';
+        } catch (\Exception $e) {
+            return 'system';
+        }
+    }
+
+    /**
+     * Get localized display name for a page
+     */
+    protected function getPageDisplayName(string $pageClass): string
+    {
+        try {
+            if (method_exists($pageClass, 'getNavigationLabel')) {
+                $label = $pageClass::getNavigationLabel();
+                if ($label) {
+                    return $label;
+                }
+            }
+
+            if (method_exists($pageClass, 'getTitle')) {
+                $instance = app($pageClass);
+                $title = $instance->getTitle();
+                if ($title) {
+                    return $title;
+                }
+            }
+
+            // Fallback
+            $shortName = class_basename($pageClass);
+            return Str::headline($shortName);
+        } catch (\Exception $e) {
+            return class_basename($pageClass);
+        }
     }
 
     /**
