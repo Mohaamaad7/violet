@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Pages\Concerns\ChecksPageAccess;
 use App\Models\Role;
 use App\Models\RolePageAccess;
 use App\Models\RoleResourceAccess;
@@ -24,6 +25,8 @@ use Illuminate\Support\Facades\Cache;
  */
 class RolePermissions extends Page
 {
+    use ChecksPageAccess;
+
     protected static string|\BackedEnum|null $navigationIcon = Heroicon::OutlinedShieldCheck;
 
     protected string $view = 'filament.pages.role-permissions';

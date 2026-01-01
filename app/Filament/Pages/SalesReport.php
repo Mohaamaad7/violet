@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Pages\Concerns\ChecksPageAccess;
 use App\Filament\Widgets\SalesReportStatsWidget;
 use App\Models\Order;
 use BackedEnum;
@@ -23,6 +24,7 @@ use pxlrbt\FilamentExcel\Exports\ExcelExport;
 class SalesReport extends Page implements HasTable
 {
     use InteractsWithTable;
+    use ChecksPageAccess;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedChartBar;
     protected static ?int $navigationSort = 2;

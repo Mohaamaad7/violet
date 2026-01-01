@@ -2,6 +2,7 @@
 
 namespace App\Filament\Pages;
 
+use App\Filament\Pages\Concerns\ChecksPageAccess;
 use App\Models\PaymentSetting;
 use App\Services\PaymentGatewayManager;
 use Filament\Forms\Components\Select;
@@ -23,6 +24,7 @@ use Filament\Schemas\Schema;
 class PaymentSettings extends Page implements HasForms
 {
     use InteractsWithForms;
+    use ChecksPageAccess;
 
     protected static ?int $navigationSort = 101;
     protected string $view = 'filament.pages.payment-settings';
