@@ -178,48 +178,38 @@
                     </button>
                     {{-- Hierarchical Dropdown Menu (WordPress Style) --}}
                     <div
-                        class="absolute {{ app()->getLocale() === 'ar' ? 'right-0' : 'left-0' }} top-full mt-2 w-64 bg-white shadow-xl rounded-lg py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                        class="category-dropdown absolute {{ app()->getLocale() === 'ar' ? 'right-0' : 'left-0' }} top-full mt-2 w-64 bg-white shadow-xl rounded-lg py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                         <ul>
                             @foreach(\App\Models\Category::with('children')->whereNull('parent_id')->where('is_active', true)->orderBy('order')->get() as $parentCategory)
-                                <li class="category-menu-item relative border-b border-gray-100 last:border-0">
-                                    <a href="{{ route('category.show', $parentCategory->slug) }}"
-                                        class="flex items-center justify-between px-4 py-3 text-gray-700 hover:bg-violet-50 hover:text-violet-600 transition-colors">
-                                        <span class="flex items-center gap-2 font-medium">
-                                            @if($parentCategory->icon)
-                                                @if(Str::startsWith($parentCategory->icon, 'heroicon'))
-                                                    @svg($parentCategory->icon, 'w-4 h-4')
-                                                @else
-                                                    <i class="{{ $parentCategory->icon }} text-sm"></i>
-                                                @endif
-                                            @else
-                                                @svg('heroicon-o-tag', 'w-4 h-4')
-                                            @endif
-                                            {{ $parentCategory->name }}
-                                        </span>
-                                        @if($parentCategory->children->count() > 0)
-                                            <svg class="w-4 h-4 {{ app()->getLocale() === 'ar' ? 'rotate-180' : '' }}"
-                                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M9 5l7 7-7 7" />
-                                            </svg>
-                                        @endif
-                                    </a>
-
-                                    {{-- Submenu for children categories (Flyout Panel) --}}
+                                <li class="category-menu-item border-b border-gray-100 last:border-0" data-category-menu-item>
                                     @if($parentCategory->children->count() > 0)
-                                        <div
-                                            class="category-submenu absolute {{ app()->getLocale() === 'ar' ? 'right-full mr-1' : 'left-full ml-1' }} top-0 w-56 bg-white shadow-2xl rounded-lg py-2 opacity-0 invisible transition-all duration-200 border border-gray-200 z-[60]">
+                                        <button type="button" class="category-parent-toggle w-full flex items-center justify-between px-4 py-3 text-gray-700 hover:bg-violet-50 hover:text-violet-600 transition-colors" aria-haspopup="menu" aria-expanded="false">
+                                            <span class="flex items-center gap-2 font-medium">
+                                                @if($parentCategory->icon)
+                                                    @if(Str::startsWith($parentCategory->icon, 'heroicon'))
+                                                        @svg($parentCategory->icon, 'w-4 h-4')
+                                                    @else
+                                                        <i class="{{ $parentCategory->icon }} text-sm"></i>
+                                                    @endif
+                                                @else
+                                                    @svg('heroicon-o-tag', 'w-4 h-4')
+                                                @endif
+                                                {{ $parentCategory->name }}
+                                            </span>
+                                            <svg class="w-4 h-4 {{ app()->getLocale() === 'ar' ? 'rotate-180' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                            </svg>
+                                        </button>
+
+                                        {{-- Submenu for children categories (Flyout Panel) --}}
+                                        <div class="category-submenu {{ app()->getLocale() === 'ar' ? 'right-full mr-1' : 'left-full ml-1' }} top-0 w-56 bg-white shadow-2xl rounded-lg py-2 border border-gray-200" role="menu" aria-label="{{ $parentCategory->name }}">
                                             <ul>
                                                 @foreach($parentCategory->children as $childCategory)
                                                     <li class="border-b border-gray-100 last:border-0">
-                                                        <a href="{{ route('category.show', $childCategory->slug) }}"
-                                                            class="block px-4 py-2.5 text-sm text-gray-600 hover:bg-violet-50 hover:text-violet-600 transition-colors">
+                                                        <a href="{{ route('category.show', $childCategory->slug) }}" class="block px-4 py-2.5 text-sm text-gray-600 hover:bg-violet-50 hover:text-violet-600 transition-colors">
                                                             <span class="flex items-center gap-2">
-                                                                <svg class="w-3 h-3" fill="currentColor"
-                                                                    viewBox="0 0 20 20">
-                                                                    <path fill-rule="evenodd"
-                                                                        d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                                                                        clip-rule="evenodd" />
+                                                                <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                                                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
                                                                 </svg>
                                                                 {{ $childCategory->name }}
                                                             </span>
@@ -228,6 +218,21 @@
                                                 @endforeach
                                             </ul>
                                         </div>
+                                    @else
+                                        <a href="{{ route('category.show', $parentCategory->slug) }}" class="w-full flex items-center justify-between px-4 py-3 text-gray-700 hover:bg-violet-50 hover:text-violet-600 transition-colors">
+                                            <span class="flex items-center gap-2 font-medium">
+                                                @if($parentCategory->icon)
+                                                    @if(Str::startsWith($parentCategory->icon, 'heroicon'))
+                                                        @svg($parentCategory->icon, 'w-4 h-4')
+                                                    @else
+                                                        <i class="{{ $parentCategory->icon }} text-sm"></i>
+                                                    @endif
+                                                @else
+                                                    @svg('heroicon-o-tag', 'w-4 h-4')
+                                                @endif
+                                                {{ $parentCategory->name }}
+                                            </span>
+                                        </a>
                                     @endif
                                 </li>
                             @endforeach
@@ -415,28 +420,69 @@
             icon.classList.toggle('rotate-180');
         }
     }
+
+    /**
+     * Desktop flyout: click toggles the side submenu without navigating.
+     * Hover still works via CSS.
+     */
+    document.addEventListener('DOMContentLoaded', function () {
+        const toggles = document.querySelectorAll('.category-parent-toggle');
+        const items = document.querySelectorAll('[data-category-menu-item]');
+
+        function closeAll(exceptItem) {
+            items.forEach((item) => {
+                if (exceptItem && item === exceptItem) return;
+                item.classList.remove('is-open');
+                const btn = item.querySelector('.category-parent-toggle');
+                if (btn) btn.setAttribute('aria-expanded', 'false');
+            });
+        }
+
+        toggles.forEach((btn) => {
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                const item = btn.closest('[data-category-menu-item]');
+                if (!item) return;
+
+                const willOpen = !item.classList.contains('is-open');
+                closeAll(item);
+                item.classList.toggle('is-open', willOpen);
+                btn.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+            });
+        });
+
+        document.addEventListener('click', function () {
+            closeAll();
+        });
+    });
 </script>
 
 <style>
-    /* Flyout Submenu - Opens to the side on hover */
-    .category-menu-item:hover > .category-submenu {
-        opacity: 1 !important;
-        visibility: visible !important;
+    /* Desktop flyout submenu: absolute overlay, never affects layout. */
+    .category-dropdown {
+        overflow: visible;
     }
-    
-    /* Keep submenu visible when hovering over submenu itself */
-    .category-submenu:hover {
-        opacity: 1 !important;
-        visibility: visible !important;
-    }
-    
-    /* Ensure proper positioning and prevent layout shift */
+
     .category-menu-item {
         position: relative;
         overflow: visible;
     }
-    
+
     .category-submenu {
-        pointer-events: auto;
+        position: absolute;
+        display: none;
+        z-index: 60;
+    }
+
+    /* Hover opens (WordPress-like). */
+    .category-menu-item:hover > .category-submenu {
+        display: block;
+    }
+
+    /* Click-open state for desktop. */
+    .category-menu-item.is-open > .category-submenu {
+        display: block;
     }
 </style>
