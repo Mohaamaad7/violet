@@ -242,8 +242,8 @@ class DashboardConfigurationService
         $result = [];
 
         foreach ($allResources as $resourceClass) {
-            // Skip DashboardConfig resources (system only)
-            if (Str::contains($resourceClass, 'DashboardConfig')) {
+            // Skip BaseResource (it's abstract-like)
+            if (Str::endsWith($resourceClass, 'BaseResource')) {
                 continue;
             }
 
