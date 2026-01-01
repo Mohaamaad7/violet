@@ -176,60 +176,70 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                         </svg>
                     </button>
-                    {{-- Dynamic Mega Menu with ALL Categories --}}
+                    {{-- Hierarchical Dropdown Menu (WordPress Style) --}}
                     <div
-                        class="absolute {{ app()->getLocale() === 'ar' ? 'right-0' : 'left-0' }} top-full mt-2 w-screen max-w-6xl bg-white shadow-xl rounded-lg p-6 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
-                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+                        class="absolute {{ app()->getLocale() === 'ar' ? 'right-0' : 'left-0' }} top-full mt-2 w-64 bg-white shadow-xl rounded-lg py-2 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
+                        <ul class="divide-y divide-gray-100">
                             @foreach(\App\Models\Category::with('children')->whereNull('parent_id')->where('is_active', true)->orderBy('order')->get() as $parentCategory)
-                                <div>
-                                    <h4 class="font-bold text-gray-900 mb-3 flex items-center gap-2">
-                                        @if($parentCategory->icon)
-                                            @if(Str::startsWith($parentCategory->icon, 'heroicon'))
-                                                @svg($parentCategory->icon, 'w-5 h-5 text-violet-600')
+                                <li class="relative group/submenu">
+                                    <a href="{{ route('category.show', $parentCategory->slug) }}"
+                                        class="flex items-center justify-between px-4 py-3 text-gray-700 hover:bg-violet-50 hover:text-violet-600 transition-colors">
+                                        <span class="flex items-center gap-2 font-medium">
+                                            @if($parentCategory->icon)
+                                                @if(Str::startsWith($parentCategory->icon, 'heroicon'))
+                                                    @svg($parentCategory->icon, 'w-4 h-4')
+                                                @else
+                                                    <i class="{{ $parentCategory->icon }} text-sm"></i>
+                                                @endif
                                             @else
-                                                <i class="{{ $parentCategory->icon }} text-violet-600"></i>
+                                                @svg('heroicon-o-tag', 'w-4 h-4')
                                             @endif
-                                        @else
-                                            @svg('heroicon-o-tag', 'w-5 h-5 text-violet-600')
+                                            {{ $parentCategory->name }}
+                                        </span>
+                                        @if($parentCategory->children->count() > 0)
+                                            <svg class="w-4 h-4 {{ app()->getLocale() === 'ar' ? 'rotate-180' : '' }}"
+                                                fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M9 5l7 7-7 7" />
+                                            </svg>
                                         @endif
-                                        {{ $parentCategory->name }}
-                                    </h4>
+                                    </a>
+
+                                    {{-- Submenu for children categories --}}
                                     @if($parentCategory->children->count() > 0)
-                                        <ul class="space-y-2 text-sm text-gray-600">
-                                            @foreach($parentCategory->children->take(5) as $childCategory)
-                                                <li>
-                                                    <a href="{{ route('category.show', $childCategory->slug) }}"
-                                                        class="hover:text-violet-600 transition flex items-center gap-1">
-                                                        <i class="fas fa-chevron-right text-[8px]"></i>
-                                                        {{ $childCategory->name }}
-                                                    </a>
-                                                </li>
-                                            @endforeach
-                                            @if($parentCategory->children->count() > 5)
-                                                <li>
-                                                    <a href="{{ route('category.show', $parentCategory->slug) }}"
-                                                        class="text-violet-600 hover:text-violet-700 font-semibold text-xs">
-                                                        {{ trans_db('store.header.view_all') }}
-                                                        ({{ $parentCategory->children->count() }})
-                                                    </a>
-                                                </li>
-                                            @endif
-                                        </ul>
-                                    @else
-                                        <a href="{{ route('category.show', $parentCategory->slug) }}"
-                                            class="text-sm text-violet-600 hover:text-violet-700">
-                                            {{ trans_db('store.header.view_products') }}
-                                        </a>
+                                        <div
+                                            class="absolute {{ app()->getLocale() === 'ar' ? 'right-full mr-1' : 'left-full ml-1' }} top-0 w-56 bg-white shadow-xl rounded-lg py-2 opacity-0 invisible group-hover/submenu:opacity-100 group-hover/submenu:visible transition-all duration-200">
+                                            <ul class="divide-y divide-gray-100">
+                                                @foreach($parentCategory->children as $childCategory)
+                                                    <li>
+                                                        <a href="{{ route('category.show', $childCategory->slug) }}"
+                                                            class="block px-4 py-2.5 text-sm text-gray-600 hover:bg-violet-50 hover:text-violet-600 transition-colors">
+                                                            <span class="flex items-center gap-2">
+                                                                <svg class="w-3 h-3" fill="currentColor"
+                                                                    viewBox="0 0 20 20">
+                                                                    <path fill-rule="evenodd"
+                                                                        d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                                                                        clip-rule="evenodd" />
+                                                                </svg>
+                                                                {{ $childCategory->name }}
+                                                            </span>
+                                                        </a>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        </div>
                                     @endif
-                                </div>
+                                </li>
                             @endforeach
-                        </div>
-                        <div class="mt-6 pt-4 border-t border-gray-200">
+                        </ul>
+                        <div class="mt-2 pt-2 px-4 border-t border-gray-200">
                             <a href="/products"
-                                class="text-violet-600 hover:text-violet-700 font-semibold flex items-center gap-2">
-                                <i class="fas fa-th"></i>
+                                class="block py-2 text-violet-600 hover:text-violet-700 font-semibold text-sm flex items-center gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                                </svg>
                                 {{ trans_db('store.header.view_all_products') }}
-                                <i class="fas fa-arrow-right text-xs"></i>
                             </a>
                         </div>
                     </div>
@@ -257,7 +267,7 @@
     {{-- Mobile Navigation Menu --}}
     <div id="mobile-menu" class="hidden lg:hidden border-t border-gray-200 bg-white">
         <nav class="container mx-auto px-4 py-4">
-            <ul class="space-y-3">
+            <ul class="space-y-1">
                 <li>
                     <a href="/" class="block py-2 text-gray-700 hover:text-violet-600 font-medium transition">
                         🏠 {{ trans_db('store.header.home') }}
@@ -268,11 +278,59 @@
                         {{ trans_db('store.header.products') }}
                     </a>
                 </li>
+                
+                {{-- Categories with nested structure --}}
                 <li>
-                    <a href="/categories" class="block py-2 text-gray-700 hover:text-violet-600 font-medium transition">
-                        {{ trans_db('store.header.categories') }}
-                    </a>
+                    <button onclick="toggleMobileCategories()" 
+                        class="w-full flex items-center justify-between py-2 text-gray-700 hover:text-violet-600 font-medium transition">
+                        <span>{{ trans_db('store.header.categories') }}</span>
+                        <svg id="mobile-categories-icon" class="w-4 h-4 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </button>
+                    <div id="mobile-categories-list" class="hidden {{ app()->getLocale() === 'ar' ? 'pr-4' : 'pl-4' }} mt-1 space-y-1">
+                        @foreach(\App\Models\Category::with('children')->whereNull('parent_id')->where('is_active', true)->orderBy('order')->get() as $parentCategory)
+                            <div class="border-{{ app()->getLocale() === 'ar' ? 'r' : 'l' }}-2 border-gray-200 {{ app()->getLocale() === 'ar' ? 'pr-3' : 'pl-3' }}">
+                                <div class="flex items-center justify-between py-2">
+                                    <a href="{{ route('category.show', $parentCategory->slug) }}" 
+                                        class="flex-1 text-sm text-gray-600 hover:text-violet-600 font-medium flex items-center gap-2">
+                                        @if($parentCategory->icon)
+                                            @if(Str::startsWith($parentCategory->icon, 'heroicon'))
+                                                @svg($parentCategory->icon, 'w-4 h-4')
+                                            @else
+                                                <i class="{{ $parentCategory->icon }} text-xs"></i>
+                                            @endif
+                                        @endif
+                                        {{ $parentCategory->name }}
+                                    </a>
+                                    @if($parentCategory->children->count() > 0)
+                                        <button onclick="toggleSubcategory({{ $parentCategory->id }})" 
+                                            class="p-1 text-gray-400 hover:text-violet-600">
+                                            <svg id="subcategory-icon-{{ $parentCategory->id }}" class="w-3 h-3 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </button>
+                                    @endif
+                                </div>
+                                
+                                @if($parentCategory->children->count() > 0)
+                                    <div id="subcategory-{{ $parentCategory->id }}" class="hidden {{ app()->getLocale() === 'ar' ? 'pr-3' : 'pl-3' }} space-y-1 pb-2">
+                                        @foreach($parentCategory->children as $childCategory)
+                                            <a href="{{ route('category.show', $childCategory->slug) }}" 
+                                                class="block py-1.5 text-xs text-gray-500 hover:text-violet-600 flex items-center gap-2">
+                                                <svg class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                                                </svg>
+                                                {{ $childCategory->name }}
+                                            </a>
+                                        @endforeach
+                                    </div>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
                 </li>
+                
                 <li>
                     <a href="/offers" class="block py-2 text-red-600 hover:text-red-700 font-bold transition">
                         🔥 {{ trans_db('store.header.offers') }}
@@ -329,6 +387,32 @@
         const searchBar = document.getElementById('mobile-search-bar');
         if (searchBar) {
             searchBar.classList.toggle('hidden');
+        }
+    }
+
+    /**
+     * Toggle Mobile Categories List
+     */
+    function toggleMobileCategories() {
+        const list = document.getElementById('mobile-categories-list');
+        const icon = document.getElementById('mobile-categories-icon');
+        
+        if (list && icon) {
+            list.classList.toggle('hidden');
+            icon.classList.toggle('rotate-180');
+        }
+    }
+
+    /**
+     * Toggle Subcategory List
+     */
+    function toggleSubcategory(categoryId) {
+        const subcategoryList = document.getElementById(`subcategory-${categoryId}`);
+        const icon = document.getElementById(`subcategory-icon-${categoryId}`);
+        
+        if (subcategoryList && icon) {
+            subcategoryList.classList.toggle('hidden');
+            icon.classList.toggle('rotate-180');
         }
     }
 </script>
