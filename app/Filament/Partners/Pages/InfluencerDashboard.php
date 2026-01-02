@@ -14,7 +14,14 @@ class InfluencerDashboard extends Page
 {
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedHome;
     protected static ?int $navigationSort = 1;
-    protected static string $view = 'filament.partners.pages.influencer-dashboard';
+
+    /**
+     * Get the view for this page
+     */
+    public static function getView(): string
+    {
+        return 'filament.partners.pages.influencer-dashboard';
+    }
 
     /**
      * Page title
