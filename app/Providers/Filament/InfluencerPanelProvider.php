@@ -35,7 +35,6 @@ class InfluencerPanelProvider extends PanelProvider
 
             // Brand Identity - Different from Admin
             ->brandName('Flower Violet Partners')
-            ->brandLogo(asset('images/partners-logo.png'))
             ->brandLogoHeight('3.5rem')
             ->colors([
                 'primary' => Color::Purple,
