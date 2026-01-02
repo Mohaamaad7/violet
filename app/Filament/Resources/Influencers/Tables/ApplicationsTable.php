@@ -4,7 +4,6 @@ namespace App\Filament\Resources\Influencers\Tables;
 
 use App\Models\InfluencerApplication;
 use App\Services\InfluencerService;
-use Filament\Forms\Components\Actions\Action as FormAction;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -120,15 +119,7 @@ class ApplicationsTable
                             ->maxLength(20)
                             ->alphaDash()
                             ->default(fn(InfluencerApplication $record) => self::generateCouponCode($record->full_name))
-                            ->suffixAction(
-                                FormAction::make('generate_code')
-                                    ->icon('heroicon-o-arrow-path')
-                                    ->tooltip(trans_db('admin.influencers.fields.generate_code'))
-                                    ->action(function ($get, $set, InfluencerApplication $record) {
-                                        $code = self::generateCouponCode($record->full_name);
-                                        $set('coupon_code', $code);
-                                    })
-                            ),
+                            ->helperText(trans_db('admin.influencers.fields.coupon_code_help')),
 
                         // نوع الخصم للعملاء
                         Radio::make('discount_type')

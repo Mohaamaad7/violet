@@ -8,7 +8,6 @@ use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
-use Filament\Schemas\Components\Actions\Action;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Str;
@@ -156,25 +155,14 @@ class InfluencerForm
                         ->suffix(fn($get) => $get('commission_type') === 'percentage' ? '%' : trans_db('admin.currency.egp_short'))
                         ->required(),
 
-                    // --- كود الخصم ---
+                    // --- كود الخصم (بدون زر Generate لتجنب الأخطاء) ---
                     TextInput::make('coupon_code')
                         ->label(trans_db('admin.influencers.fields.coupon_code'))
                         ->required()
                         ->maxLength(20)
                         ->unique('discount_codes', 'code')
                         ->alphaDash()
-                        ->suffixAction(
-                            Action::make('generate_code')
-                                ->icon('heroicon-o-arrow-path')
-                                ->tooltip(trans_db('admin.influencers.fields.generate_code'))
-                                ->action(function ($get, $set) {
-                                    $name = $get('name') ?? $get('handle') ?? 'CODE';
-                                    $firstName = strtoupper(Str::before($name, ' '));
-                                    $firstName = preg_replace('/[^A-Z0-9]/', '', $firstName);
-                                    $code = $firstName . date('Y');
-                                    $set('coupon_code', $code);
-                                })
-                        )
+                        ->helperText(trans_db('admin.influencers.fields.coupon_code_help'))
                         ->visible(fn(?Influencer $record) => $record === null),
 
                     Radio::make('discount_type')
