@@ -10,6 +10,8 @@ class Influencer extends Model
 {
     protected $fillable = [
         'user_id',
+        'primary_platform',
+        'handle',
         'instagram_url',
         'facebook_url',
         'tiktok_url',

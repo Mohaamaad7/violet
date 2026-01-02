@@ -46,13 +46,25 @@ class User extends Authenticatable implements FilamentUser
     }
 
     /**
-     * Determine if the user can access the Filament admin panel.
+     * Determine if the user can access a Filament panel.
+     * 
+     * - Admin Panel: Staff roles (super-admin, admin, manager, etc.)
+     * - Partners Panel: Influencers with active status
      */
     public function canAccessPanel(Panel $panel): bool
     {
-        // All users in this table can access admin panel
-        // (type column was removed - all records are now staff/admins)
-        return $this->hasRole(['super-admin', 'admin', 'manager', 'sales', 'accountant', 'content-manager', 'delivery']);
+        // Admin Panel: Staff/Employees only
+        if ($panel->getId() === 'admin') {
+            return $this->hasRole(['super-admin', 'admin', 'manager', 'sales', 'accountant', 'content-manager', 'delivery']);
+        }
+
+        // Partners Panel: Active Influencers only
+        if ($panel->getId() === 'partners') {
+            return $this->hasRole('influencer')
+                && $this->influencer?->status === 'active';
+        }
+
+        return false;
     }
 
     // Relations

@@ -3,33 +3,57 @@
 namespace App\Filament\Resources\Influencers\Schemas;
 
 use App\Models\Influencer;
-use App\Models\User;
 use Filament\Forms\Components\Placeholder;
+use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Actions\Action;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Str;
 
 class InfluencerForm
 {
     public static function configure(Schema $schema): Schema
     {
         return $schema->schema([
-            Section::make(trans_db('admin.influencers.sections.basic_info'))
+            // ========================================
+            // القسم 1: بيانات الدخول والهوية
+            // ========================================
+            Section::make(trans_db('admin.influencers.sections.credentials'))
+                ->description(trans_db('admin.influencers.sections.credentials_desc'))
+                ->icon('heroicon-o-user')
                 ->schema([
-                    // For Create: Select user
-                    Select::make('user_id')
-                        ->label(trans_db('admin.influencers.fields.user'))
-                        ->relationship('user', 'name')
-                        ->searchable()
-                        ->preload()
+                    TextInput::make('name')
+                        ->label(trans_db('admin.influencers.fields.name'))
+                        ->required()
+                        ->maxLength(255)
+                        ->visible(fn(?Influencer $record) => $record === null),
+
+                    TextInput::make('email')
+                        ->label(trans_db('admin.influencers.fields.email'))
+                        ->email()
+                        ->required()
+                        ->unique('users', 'email')
+                        ->visible(fn(?Influencer $record) => $record === null),
+
+                    TextInput::make('phone')
+                        ->label(trans_db('admin.influencers.fields.phone'))
+                        ->tel()
                         ->required()
                         ->visible(fn(?Influencer $record) => $record === null),
 
-                    // For Edit/View: Show user name as placeholder
-                    Placeholder::make('user_name')
+                    Toggle::make('send_invitation')
+                        ->label(trans_db('admin.influencers.fields.send_invitation'))
+                        ->helperText(trans_db('admin.influencers.fields.send_invitation_help'))
+                        ->default(true)
+                        ->visible(fn(?Influencer $record) => $record === null),
+
+                    // عرض بيانات المستخدم عند التعديل
+                    Placeholder::make('user_info')
                         ->label(trans_db('admin.influencers.fields.user'))
-                        ->content(fn(?Influencer $record) => $record?->user?->name ?? '-')
+                        ->content(fn(?Influencer $record) => $record?->user?->name . ' (' . $record?->user?->email . ')')
                         ->visible(fn(?Influencer $record) => $record !== null),
 
                     Select::make('status')
@@ -42,49 +66,146 @@ class InfluencerForm
                         ->default('active')
                         ->required()
                         ->native(false),
-
-                    TextInput::make('commission_rate')
-                        ->label(trans_db('admin.influencers.fields.commission_rate'))
-                        ->numeric()
-                        ->minValue(0)
-                        ->maxValue(100)
-                        ->default(10)
-                        ->suffix('%')
-                        ->required(),
                 ])
-                ->columns(3),
+                ->columns(2),
 
-            Section::make(trans_db('admin.influencers.sections.social_accounts'))
+            // ========================================
+            // القسم 2: ملف المؤثر (السوشيال ميديا)
+            // ========================================
+            Section::make(trans_db('admin.influencers.sections.profile'))
+                ->description(trans_db('admin.influencers.sections.profile_desc'))
+                ->icon('heroicon-o-share')
                 ->schema([
+                    Select::make('primary_platform')
+                        ->label(trans_db('admin.influencers.fields.primary_platform'))
+                        ->options([
+                            'instagram' => 'Instagram',
+                            'facebook' => 'Facebook',
+                            'tiktok' => 'TikTok',
+                            'youtube' => 'YouTube',
+                            'twitter' => 'Twitter/X',
+                        ])
+                        ->required()
+                        ->native(false)
+                        ->live(),
+
+                    TextInput::make('handle')
+                        ->label(trans_db('admin.influencers.fields.handle'))
+                        ->prefix('@')
+                        ->placeholder('username')
+                        ->required(),
+
                     TextInput::make('instagram_url')
                         ->label(trans_db('admin.influencers.fields.instagram'))
                         ->url()
-                        ->suffixIcon('heroicon-o-link'),
+                        ->prefixIcon('heroicon-o-link')
+                        ->placeholder('https://instagram.com/username'),
 
                     TextInput::make('facebook_url')
                         ->label(trans_db('admin.influencers.fields.facebook'))
                         ->url()
-                        ->suffixIcon('heroicon-o-link'),
+                        ->prefixIcon('heroicon-o-link')
+                        ->placeholder('https://facebook.com/page'),
 
                     TextInput::make('tiktok_url')
                         ->label(trans_db('admin.influencers.fields.tiktok'))
                         ->url()
-                        ->suffixIcon('heroicon-o-link'),
+                        ->prefixIcon('heroicon-o-link')
+                        ->placeholder('https://tiktok.com/@username'),
 
                     TextInput::make('youtube_url')
                         ->label(trans_db('admin.influencers.fields.youtube'))
                         ->url()
-                        ->suffixIcon('heroicon-o-link'),
+                        ->prefixIcon('heroicon-o-link')
+                        ->placeholder('https://youtube.com/c/channel'),
 
                     TextInput::make('twitter_url')
                         ->label(trans_db('admin.influencers.fields.twitter'))
                         ->url()
-                        ->suffixIcon('heroicon-o-link'),
+                        ->prefixIcon('heroicon-o-link')
+                        ->placeholder('https://twitter.com/username'),
                 ])
                 ->columns(3)
                 ->collapsible(),
 
+            // ========================================
+            // القسم 3: الاتفاق المالي والكود
+            // ========================================
+            Section::make(trans_db('admin.influencers.sections.financial'))
+                ->description(trans_db('admin.influencers.sections.financial_desc'))
+                ->icon('heroicon-o-banknotes')
+                ->schema([
+                    // --- عمولة المؤثر ---
+                    Radio::make('commission_type')
+                        ->label(trans_db('admin.influencers.fields.commission_type'))
+                        ->options([
+                            'percentage' => trans_db('admin.influencers.commission_types.percentage'),
+                            'fixed' => trans_db('admin.influencers.commission_types.fixed'),
+                        ])
+                        ->default('percentage')
+                        ->inline()
+                        ->required()
+                        ->live(),
+
+                    TextInput::make('commission_rate')
+                        ->label(trans_db('admin.influencers.fields.commission_value'))
+                        ->numeric()
+                        ->minValue(0)
+                        ->maxValue(fn($get) => $get('commission_type') === 'percentage' ? 100 : 99999)
+                        ->default(10)
+                        ->suffix(fn($get) => $get('commission_type') === 'percentage' ? '%' : trans_db('admin.currency.egp_short'))
+                        ->required(),
+
+                    // --- كود الخصم ---
+                    TextInput::make('coupon_code')
+                        ->label(trans_db('admin.influencers.fields.coupon_code'))
+                        ->required()
+                        ->maxLength(20)
+                        ->unique('discount_codes', 'code')
+                        ->alphaDash()
+                        ->suffixAction(
+                            Action::make('generate_code')
+                                ->icon('heroicon-o-arrow-path')
+                                ->tooltip(trans_db('admin.influencers.fields.generate_code'))
+                                ->action(function ($get, $set) {
+                                    $name = $get('name') ?? $get('handle') ?? 'CODE';
+                                    $firstName = strtoupper(Str::before($name, ' '));
+                                    $firstName = preg_replace('/[^A-Z0-9]/', '', $firstName);
+                                    $code = $firstName . date('Y');
+                                    $set('coupon_code', $code);
+                                })
+                        )
+                        ->visible(fn(?Influencer $record) => $record === null),
+
+                    Radio::make('discount_type')
+                        ->label(trans_db('admin.influencers.fields.discount_type'))
+                        ->options([
+                            'percentage' => trans_db('admin.influencers.discount_types.percentage'),
+                            'fixed' => trans_db('admin.influencers.discount_types.fixed'),
+                        ])
+                        ->default('percentage')
+                        ->inline()
+                        ->required()
+                        ->live()
+                        ->visible(fn(?Influencer $record) => $record === null),
+
+                    TextInput::make('discount_value')
+                        ->label(trans_db('admin.influencers.fields.discount_value'))
+                        ->numeric()
+                        ->minValue(0)
+                        ->maxValue(fn($get) => $get('discount_type') === 'percentage' ? 100 : 99999)
+                        ->default(15)
+                        ->suffix(fn($get) => $get('discount_type') === 'percentage' ? '%' : trans_db('admin.currency.egp_short'))
+                        ->required()
+                        ->visible(fn(?Influencer $record) => $record === null),
+                ])
+                ->columns(2),
+
+            // ========================================
+            // القسم 4: الإحصائيات (للعرض فقط)
+            // ========================================
             Section::make(trans_db('admin.influencers.sections.statistics'))
+                ->icon('heroicon-o-chart-bar')
                 ->schema([
                     Placeholder::make('total_sales_display')
                         ->label(trans_db('admin.influencers.fields.total_sales'))
@@ -116,4 +237,3 @@ class InfluencerForm
         ]);
     }
 }
-

@@ -4,15 +4,19 @@ namespace App\Filament\Resources\Influencers\Tables;
 
 use App\Models\InfluencerApplication;
 use App\Services\InfluencerService;
-use Filament\Actions\Action;
-use Filament\Actions\ViewAction;
+use Filament\Forms\Components\Actions\Action as FormAction;
+use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Notifications\Notification;
+use Filament\Tables\Actions\Action;
+use Filament\Tables\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
 
 class ApplicationsTable
@@ -87,7 +91,9 @@ class ApplicationsTable
             ->actions([
                 ViewAction::make(),
 
-                // Approve Action
+                // ========================================
+                // Approve Action (Enhanced with Coupon)
+                // ========================================
                 Action::make('approve')
                     ->label(trans_db('admin.applications.actions.approve'))
                     ->icon('heroicon-o-check-circle')
@@ -97,6 +103,7 @@ class ApplicationsTable
                     ->modalHeading(trans_db('admin.applications.modals.approve_heading'))
                     ->modalDescription(trans_db('admin.applications.modals.approve_description'))
                     ->form([
+                        // نسبة عمولة المؤثر
                         TextInput::make('commission_rate')
                             ->label(trans_db('admin.applications.fields.commission_rate'))
                             ->numeric()
@@ -105,19 +112,67 @@ class ApplicationsTable
                             ->default(10)
                             ->suffix('%')
                             ->required(),
+
+                        // كود الخصم
+                        TextInput::make('coupon_code')
+                            ->label(trans_db('admin.influencers.fields.coupon_code'))
+                            ->required()
+                            ->maxLength(20)
+                            ->alphaDash()
+                            ->default(fn(InfluencerApplication $record) => self::generateCouponCode($record->full_name))
+                            ->suffixAction(
+                                FormAction::make('generate_code')
+                                    ->icon('heroicon-o-arrow-path')
+                                    ->tooltip(trans_db('admin.influencers.fields.generate_code'))
+                                    ->action(function ($get, $set, InfluencerApplication $record) {
+                                        $code = self::generateCouponCode($record->full_name);
+                                        $set('coupon_code', $code);
+                                    })
+                            ),
+
+                        // نوع الخصم للعملاء
+                        Radio::make('discount_type')
+                            ->label(trans_db('admin.influencers.fields.discount_type'))
+                            ->options([
+                                'percentage' => trans_db('admin.influencers.discount_types.percentage'),
+                                'fixed' => trans_db('admin.influencers.discount_types.fixed'),
+                            ])
+                            ->default('percentage')
+                            ->inline()
+                            ->required(),
+
+                        // قيمة الخصم
+                        TextInput::make('discount_value')
+                            ->label(trans_db('admin.influencers.fields.discount_value'))
+                            ->numeric()
+                            ->minValue(0)
+                            ->default(15)
+                            ->suffix(fn($get) => $get('discount_type') === 'percentage' ? '%' : trans_db('admin.currency.egp_short'))
+                            ->required(),
+
+                        // إرسال إيميل ترحيب
+                        Toggle::make('send_welcome_email')
+                            ->label(trans_db('admin.applications.fields.send_welcome_email'))
+                            ->helperText(trans_db('admin.applications.fields.send_welcome_email_help'))
+                            ->default(true),
                     ])
                     ->action(function (InfluencerApplication $record, array $data): void {
                         try {
                             DB::transaction(function () use ($record, $data) {
-                                app(InfluencerService::class)->approveApplication(
-                                    $record->id,
-                                    (float) $data['commission_rate'],
-                                    auth()->id()
+                                app(InfluencerService::class)->approveApplicationWithCoupon(
+                                    applicationId: $record->id,
+                                    commissionRate: (float) $data['commission_rate'],
+                                    couponCode: $data['coupon_code'],
+                                    discountType: $data['discount_type'],
+                                    discountValue: (float) $data['discount_value'],
+                                    sendWelcomeEmail: $data['send_welcome_email'] ?? true,
+                                    reviewedBy: auth()->id()
                                 );
                             });
 
                             Notification::make()
                                 ->title(trans_db('admin.applications.notifications.approved'))
+                                ->body(trans_db('admin.influencers.fields.coupon_code') . ': ' . $data['coupon_code'])
                                 ->success()
                                 ->send();
                         } catch (\Exception $e) {
@@ -129,7 +184,9 @@ class ApplicationsTable
                         }
                     }),
 
+                // ========================================
                 // Reject Action
+                // ========================================
                 Action::make('reject')
                     ->label(trans_db('admin.applications.actions.reject'))
                     ->icon('heroicon-o-x-circle')
@@ -166,5 +223,16 @@ class ApplicationsTable
                     }),
             ])
             ->defaultSort('created_at', 'desc');
+    }
+
+    /**
+     * Generate coupon code from name
+     */
+    private static function generateCouponCode(string $name): string
+    {
+        $firstName = strtoupper(Str::before($name, ' '));
+        $firstName = preg_replace('/[^A-Z0-9]/', '', $firstName);
+        $firstName = substr($firstName, 0, 8); // Max 8 chars from name
+        return $firstName . date('Y');
     }
 }

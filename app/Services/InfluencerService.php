@@ -115,6 +115,163 @@ class InfluencerService
     }
 
     /**
+     * Approve influencer application with custom coupon settings
+     * 
+     * @param int $applicationId
+     * @param float $commissionRate
+     * @param string $couponCode
+     * @param string $discountType
+     * @param float $discountValue
+     * @param bool $sendWelcomeEmail
+     * @param int|null $reviewedBy
+     * @return Influencer
+     */
+    public function approveApplicationWithCoupon(
+        int $applicationId,
+        float $commissionRate,
+        string $couponCode,
+        string $discountType,
+        float $discountValue,
+        bool $sendWelcomeEmail = true,
+        ?int $reviewedBy = null
+    ): Influencer {
+        return DB::transaction(function () use ($applicationId, $commissionRate, $couponCode, $discountType, $discountValue, $sendWelcomeEmail, $reviewedBy) {
+            $application = InfluencerApplication::findOrFail($applicationId);
+
+            // Update application status
+            $application->update([
+                'status' => 'approved',
+                'reviewed_by' => $reviewedBy,
+                'reviewed_at' => now(),
+            ]);
+
+            // Get or create user
+            $user = $application->user;
+            $generatedPassword = null;
+
+            if (!$user) {
+                // Create new user if application was from guest
+                $generatedPassword = \Illuminate\Support\Str::random(12);
+                $user = \App\Models\User::create([
+                    'name' => $application->full_name,
+                    'email' => $application->email,
+                    'phone' => $application->phone,
+                    'password' => \Illuminate\Support\Facades\Hash::make($generatedPassword),
+                    'email_verified_at' => now(),
+                ]);
+
+                // Link user to application
+                $application->update(['user_id' => $user->id]);
+            }
+
+            // Assign influencer role
+            if (method_exists($user, 'assignRole') && !$user->hasRole('influencer')) {
+                $user->assignRole('influencer');
+            }
+
+            // Determine primary platform from application data
+            $primaryPlatform = $this->determinePrimaryPlatform($application);
+
+            // Create influencer record
+            $influencer = Influencer::create([
+                'user_id' => $user->id,
+                'primary_platform' => $primaryPlatform,
+                'handle' => $application->instagram_url ? $this->extractHandle($application->instagram_url) : null,
+                'commission_rate' => $commissionRate,
+                'status' => 'active',
+                'instagram_url' => $application->instagram_url,
+                'facebook_url' => $application->facebook_url,
+                'tiktok_url' => $application->tiktok_url,
+                'youtube_url' => $application->youtube_url,
+                'twitter_url' => $application->twitter_url,
+                'instagram_followers' => $application->instagram_followers,
+                'facebook_followers' => $application->facebook_followers,
+                'tiktok_followers' => $application->tiktok_followers,
+                'youtube_followers' => $application->youtube_followers,
+                'twitter_followers' => $application->twitter_followers,
+                'content_type' => $application->content_type,
+                'total_sales' => 0,
+                'total_commission_earned' => 0,
+                'total_commission_paid' => 0,
+                'balance' => 0,
+            ]);
+
+            // Create discount code with custom settings
+            DiscountCode::create([
+                'influencer_id' => $influencer->id,
+                'code' => strtoupper($couponCode),
+                'discount_type' => $discountType,
+                'discount_value' => $discountValue,
+                'commission_type' => 'percentage',
+                'commission_value' => $commissionRate,
+                'is_active' => true,
+            ]);
+
+            // Send welcome email
+            if ($sendWelcomeEmail && $generatedPassword) {
+                try {
+                    $user->notify(new \App\Notifications\InfluencerInvitationNotification(
+                        $generatedPassword,
+                        $couponCode
+                    ));
+                } catch (\Exception $e) {
+                    \Log::error('Failed to send influencer welcome email: ' . $e->getMessage());
+                }
+            } elseif ($sendWelcomeEmail) {
+                // Send approval notification without password (existing user)
+                try {
+                    $user->notify(new \App\Notifications\ApplicationApprovedNotification(
+                        $influencer,
+                        $couponCode
+                    ));
+                } catch (\Exception $e) {
+                    \Log::error('Failed to send approval notification: ' . $e->getMessage());
+                }
+            }
+
+            return $influencer;
+        });
+    }
+
+    /**
+     * Determine primary platform from application data
+     */
+    protected function determinePrimaryPlatform(InfluencerApplication $application): ?string
+    {
+        $platforms = [
+            'instagram' => $application->instagram_followers ?? 0,
+            'facebook' => $application->facebook_followers ?? 0,
+            'tiktok' => $application->tiktok_followers ?? 0,
+            'youtube' => $application->youtube_followers ?? 0,
+            'twitter' => $application->twitter_followers ?? 0,
+        ];
+
+        arsort($platforms);
+        $topPlatform = key($platforms);
+
+        return $platforms[$topPlatform] > 0 ? $topPlatform : null;
+    }
+
+    /**
+     * Extract handle from social media URL
+     */
+    protected function extractHandle(?string $url): ?string
+    {
+        if (!$url)
+            return null;
+
+        $parts = parse_url($url, PHP_URL_PATH);
+        if (!$parts)
+            return null;
+
+        $segments = array_filter(explode('/', $parts));
+        $handle = end($segments);
+
+        return $handle ?: null;
+    }
+
+
+    /**
      * Reject influencer application
      */
     public function rejectApplication(int $applicationId, string $reason, ?int $reviewedBy = null): InfluencerApplication
@@ -324,10 +481,10 @@ class InfluencerService
             InfluencerCommission::where('influencer_id', $payout->influencer_id)
                 ->where('status', 'pending')
                 ->update([
-                    'status' => 'paid',
-                    'payout_id' => $payout->id,
-                    'paid_at' => now(),
-                ]);
+                        'status' => 'paid',
+                        'payout_id' => $payout->id,
+                        'paid_at' => now(),
+                    ]);
 
             // Update influencer balance
             $influencer->decrement('balance', $payout->amount);
