@@ -3,7 +3,6 @@
 namespace App\Providers\Filament;
 
 use App\Filament\Partners\Pages\InfluencerDashboard;
-use App\Filament\Partners\Pages\Login as PartnersLogin;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -31,7 +30,7 @@ class InfluencerPanelProvider extends PanelProvider
         return $panel
             ->id('partners')
             ->path('partners')
-            ->login(PartnersLogin::class)
+            ->login()
             ->authGuard('web')
 
             // Brand Identity - Different from Admin
