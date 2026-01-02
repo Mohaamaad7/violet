@@ -66,7 +66,8 @@ class InfluencerForm
                         ->required()
                         ->native(false),
                 ])
-                ->columns(2),
+                ->columns(1)
+                ->columnSpanFull(),
 
             // ========================================
             // القسم 2: ملف المؤثر (السوشيال ميديا)
@@ -124,7 +125,8 @@ class InfluencerForm
                         ->prefixIcon('heroicon-o-link')
                         ->placeholder('https://twitter.com/username'),
                 ])
-                ->columns(3)
+                ->columns(2)
+                ->columnSpanFull()
                 ->collapsible(),
 
             // ========================================
@@ -187,7 +189,8 @@ class InfluencerForm
                         ->required()
                         ->visible(fn(?Influencer $record) => $record === null),
                 ])
-                ->columns(2),
+                ->columns(2)
+                ->columnSpanFull(),
 
             // ========================================
             // القسم 4: الإحصائيات (للعرض فقط)
@@ -220,6 +223,7 @@ class InfluencerForm
                         ->content(fn(?Influencer $record) => $record?->commissions()->count() ?? 0),
                 ])
                 ->columns(3)
+                ->columnSpanFull()
                 ->collapsible()
                 ->visible(fn(?Influencer $record) => $record !== null),
         ]);

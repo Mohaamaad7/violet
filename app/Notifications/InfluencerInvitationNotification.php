@@ -3,11 +3,15 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Illuminate\Support\Facades\Log;
 
-class InfluencerInvitationNotification extends Notification implements ShouldQueue
+/**
+ * Sends invitation email to new influencers with login credentials and coupon code
+ * NOTE: This notification is synchronous (not queued) to ensure immediate delivery
+ */
+class InfluencerInvitationNotification extends Notification
 {
     use Queueable;
 

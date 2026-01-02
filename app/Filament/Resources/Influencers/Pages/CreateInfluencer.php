@@ -104,9 +104,20 @@ class CreateInfluencer extends CreateRecord
                         $this->generatedPassword,
                         $this->couponCode
                     ));
+
+                    \Log::info('Influencer invitation email sent', [
+                        'user_id' => $user->id,
+                        'email' => $user->email,
+                        'coupon' => $this->couponCode,
+                    ]);
                 } catch (\Exception $e) {
                     // Log error but don't fail the creation
-                    \Log::error('Failed to send influencer invitation: ' . $e->getMessage());
+                    \Log::error('Failed to send influencer invitation', [
+                        'user_id' => $user->id,
+                        'email' => $user->email,
+                        'error' => $e->getMessage(),
+                        'trace' => $e->getTraceAsString(),
+                    ]);
                 }
             }
 
