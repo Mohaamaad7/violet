@@ -5,12 +5,14 @@ namespace App\Filament\Partners\Pages;
 use App\Models\DiscountCode;
 use App\Models\Influencer;
 use App\Models\InfluencerCommission;
+use BackedEnum;
 use Filament\Pages\Page;
+use Filament\Support\Icons\Heroicon;
 use Illuminate\Contracts\Support\Htmlable;
 
 class InfluencerDashboard extends Page
 {
-    protected static ?string $navigationIcon = 'heroicon-o-home';
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedHome;
     protected static ?int $navigationSort = 1;
     protected static string $view = 'filament.partners.pages.influencer-dashboard';
 
