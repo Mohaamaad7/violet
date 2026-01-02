@@ -80,4 +80,16 @@ class UserResource extends Resource
                 SoftDeletingScope::class,
             ]);
     }
+
+    /**
+     * Filter out influencers from the Users resource
+     * Influencers are managed in the Influencers resource
+     */
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->whereDoesntHave('roles', function (Builder $query) {
+                $query->where('name', 'influencer');
+            });
+    }
 }
