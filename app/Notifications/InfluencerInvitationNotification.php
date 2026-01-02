@@ -32,7 +32,7 @@ class InfluencerInvitationNotification extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['mail', 'database'];
+        return ['mail']; // Only email, database channel requires notifications table
     }
 
     /**
