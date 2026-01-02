@@ -18,7 +18,7 @@ class InfluencerDashboard extends Page
     /**
      * Get the view for this page
      */
-    public static function getView(): string
+    public function getView(): string
     {
         return 'filament.partners.pages.influencer-dashboard';
     }
