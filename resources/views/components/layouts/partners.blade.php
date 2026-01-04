@@ -166,7 +166,41 @@
 
                     <div class="fi-topbar-end">
                         @if (filament()->auth()->check())
-                            <x-filament-panels::user-menu />
+                            <x-filament::dropdown
+                                placement="bottom-end"
+                                teleport
+                            >
+                                <x-slot name="trigger">
+                                    <button
+                                        type="button"
+                                        class="fi-btn fi-btn-color-gray fi-btn-icon-btn fi-btn-size-md relative shrink-0 rounded-lg shadow-sm outline-hidden transition-colors duration-75 hover:bg-gray-50 dark:hover:bg-white/5"
+                                    >
+                                        <x-filament::avatar
+                                            :src="filament()->getUserAvatarUrl(filament()->auth()->user())"
+                                            :alt="filament()->getUserName(filament()->auth()->user())"
+                                            size="md"
+                                            class="fi-user-avatar"
+                                        />
+                                    </button>
+                                </x-slot>
+
+                                <x-filament::dropdown.list>
+                                    <x-filament::dropdown.list.item
+                                        :href="route('filament.partners.pages.profile-page')"
+                                        tag="a"
+                                    >
+                                        {{ __('messages.partners.nav.profile') }}
+                                    </x-filament::dropdown.list.item>
+
+                                    <x-filament::dropdown.list.item
+                                        tag="form"
+                                        :action="route('filament.partners.auth.logout')"
+                                        method="post"
+                                    >
+                                        {{ __('messages.partners.nav.logout') }}
+                                    </x-filament::dropdown.list.item>
+                                </x-filament::dropdown.list>
+                            </x-filament::dropdown>
                         @endif
                     </div>
                 </nav>
