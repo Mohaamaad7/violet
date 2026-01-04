@@ -1,6 +1,5 @@
-<x-layouts.partners :heading="__('messages.partners.nav.discount_codes')">
-    <div class="max-w-6xl mx-auto">
-        <x-filament::section>
+<div class="max-w-6xl mx-auto">
+    <x-filament::section>
             <x-slot name="heading">
                 {{ __('messages.partners.nav.discount_codes') }}
             </x-slot>
@@ -16,6 +15,5 @@
                     ستتمكن قريباً من عرض إحصائيات تفصيلية لكل كود خصم
                 </p>
             </div>
-        </x-filament::section>
-    </div>
-</x-layouts.partners>
+    </x-filament::section>
+</div>

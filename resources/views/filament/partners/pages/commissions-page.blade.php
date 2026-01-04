@@ -1,6 +1,5 @@
-<x-layouts.partners :heading="__('messages.partners.nav.commissions')">
-    <div class="max-w-6xl mx-auto">
-        <x-filament::section>
+<div class="max-w-6xl mx-auto">
+    <x-filament::section>
             <x-slot name="heading">
                 {{ __('messages.partners.nav.commissions') }}
             </x-slot>
@@ -16,6 +15,5 @@
                     ستتمكن قريباً من عرض جميع عمولاتك مع فلاتر متقدمة
                 </p>
             </div>
-        </x-filament::section>
-    </div>
-</x-layouts.partners>
+    </x-filament::section>
+</div>

@@ -1,13 +1,12 @@
-<x-layouts.partners :heading="__('messages.partners.nav.profile')">
-    <div class="max-w-7xl mx-auto space-y-6">
-        
-        <!-- Header Section -->
-        <div class="flex items-center justify-between">
-            <div>
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('messages.partners.nav.profile') }}</h2>
-                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">إدارة معلوماتك الشخصية وحساباتك على وسائل التواصل الاجتماعي</p>
-            </div>
+<div class="max-w-7xl mx-auto space-y-6">
+    
+    <!-- Header Section -->
+    <div class="flex items-center justify-between">
+        <div>
+            <h2 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('messages.partners.nav.profile') }}</h2>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">إدارة معلوماتك الشخصية وحساباتك على وسائل التواصل الاجتماعي</p>
         </div>
+    </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             
@@ -210,4 +209,4 @@
             </div>
         </div>
     </div>
-</x-layouts.partners>
+</div>
