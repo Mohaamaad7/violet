@@ -14,13 +14,30 @@
             </button>
         </div>
         <div x-show="showDebug" x-cloak class="mt-3 space-y-3 text-sm text-yellow-700 dark:text-yellow-300">
-            <p>✓ Livewire: <span x-text="typeof Livewire !== 'undefined' ? 'محمل' : 'غير محمل'"></span></p>
-            <p>✓ Alpine.js: <span x-text="typeof Alpine !== 'undefined' ? 'محمل' : 'غير محمل'"></span></p>
-            <div class="pt-2 border-t border-yellow-300 dark:border-yellow-700">
+            <p>✓ Livewire: <span x-text="typeof Livewire !== 'undefined' ? 'محمل ✅' : 'غير محمل ❌'"></span></p>
+            <p>✓ Alpine.js: <span x-text="typeof Alpine !== 'undefined' ? 'محمل ✅' : 'غير محمل ❌'"></span></p>
+            <p>✓ Filament: <span x-text="typeof FilamentNotification !== 'undefined' ? 'محمل ✅' : 'غير محمل ❌'"></span></p>
+            
+            <div class="pt-2 border-t border-yellow-300 dark:border-yellow-700 space-y-2">
+                <!-- Test 1: Direct Alpine notification -->
+                <button type="button" 
+                        @click="alert('Alpine.js works! ✅')"
+                        class="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-sm transition-colors">
+                    🧪 اختبار 1: Alpine.js
+                </button>
+                
+                <!-- Test 2: Livewire wire:click -->
                 <button type="button" 
                         wire:click="testNotification"
-                        class="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 active:bg-yellow-800 text-white font-medium rounded-lg shadow-sm transition-colors duration-200">
-                    🔔 اختبار الإشعارات
+                        class="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg shadow-sm transition-colors">
+                    🧪 اختبار 2: Livewire (wire:click)
+                </button>
+                
+                <!-- Test 3: Alpine calling Livewire -->
+                <button type="button" 
+                        @click="$wire.testNotification()"
+                        class="w-full px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white font-medium rounded-lg shadow-sm transition-colors">
+                    🧪 اختبار 3: Alpine → Livewire
                 </button>
             </div>
         </div>
