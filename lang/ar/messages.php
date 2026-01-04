@@ -774,8 +774,5 @@ return [
         ],
     ],
 
-    // Currency
-    'currency' => [
-        'egp' => 'ج.م',
-    ],
+
 ];
