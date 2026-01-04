@@ -144,14 +144,6 @@
                 </div>
                 
                 <div class="flex items-center gap-4">
-                    <!-- Notifications -->
-                    <button class="relative p-2 text-gray-500 dark:text-gray-400 hover:bg-primary-50 dark:hover:bg-gray-800 hover:text-primary-600 dark:hover:text-primary-400 rounded-full transition-colors">
-                        <i class="ph ph-bell text-2xl"></i>
-                        @if(auth()->user()->unreadNotifications->count() > 0)
-                        <span class="absolute top-2 {{ app()->getLocale() === 'ar' ? 'right-2' : 'left-2' }} w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-white dark:border-gray-900"></span>
-                        @endif
-                    </button>
-                    
                     <!-- User Info -->
                     <div class="flex items-center gap-3 border-{{ app()->getLocale() === 'ar' ? 'l' : 'r' }} border-gray-200 dark:border-gray-700 p{{ app()->getLocale() === 'ar' ? 'r' : 'l' }}-4 m{{ app()->getLocale() === 'ar' ? 'r' : 'l' }}-2">
                         <div class="{{ app()->getLocale() === 'ar' ? 'text-right' : 'text-left' }} hidden md:block">
