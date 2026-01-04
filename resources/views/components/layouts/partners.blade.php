@@ -168,26 +168,44 @@
                         @if (filament()->auth()->check())
                             <x-filament::dropdown
                                 placement="bottom-end"
+                                width="xs"
                                 teleport
                             >
                                 <x-slot name="trigger">
                                     <button
                                         type="button"
-                                        class="fi-btn fi-btn-color-gray fi-btn-icon-btn fi-btn-size-md relative shrink-0 rounded-lg shadow-sm outline-hidden transition-colors duration-75 hover:bg-gray-50 dark:hover:bg-white/5"
+                                        class="shrink-0"
+                                        aria-label="User menu"
                                     >
                                         <x-filament::avatar
                                             :src="filament()->getUserAvatarUrl(filament()->auth()->user())"
                                             :alt="filament()->getUserName(filament()->auth()->user())"
                                             size="md"
-                                            class="fi-user-avatar"
                                         />
                                     </button>
                                 </x-slot>
 
+                                {{-- User Info Header --}}
+                                <x-filament::dropdown.header
+                                    color="gray"
+                                    class="!p-4"
+                                >
+                                    <div class="flex flex-col">
+                                        <span class="text-sm font-semibold text-gray-900 dark:text-white">
+                                            {{ filament()->getUserName(filament()->auth()->user()) }}
+                                        </span>
+                                        <span class="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                            {{ filament()->auth()->user()->email }}
+                                        </span>
+                                    </div>
+                                </x-filament::dropdown.header>
+
+                                {{-- Menu Items --}}
                                 <x-filament::dropdown.list>
                                     <x-filament::dropdown.list.item
                                         :href="route('filament.partners.pages.profile-page')"
                                         tag="a"
+                                        icon="heroicon-o-user"
                                     >
                                         {{ __('messages.partners.nav.profile') }}
                                     </x-filament::dropdown.list.item>
@@ -196,6 +214,8 @@
                                         tag="form"
                                         :action="route('filament.partners.auth.logout')"
                                         method="post"
+                                        icon="heroicon-o-arrow-right-on-rectangle"
+                                        color="danger"
                                     >
                                         {{ __('messages.partners.nav.logout') }}
                                     </x-filament::dropdown.list.item>
