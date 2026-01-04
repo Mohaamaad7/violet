@@ -62,6 +62,9 @@ class InfluencerPanelProvider extends PanelProvider
             // Disable sidebar (single page app)
             ->sidebarCollapsibleOnDesktop(false)
 
+            // Disable default topbar (we have custom layout)
+            ->topbar(false)
+
             // Middleware
             ->middleware([
                 EncryptCookies::class,
