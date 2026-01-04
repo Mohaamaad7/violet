@@ -48,21 +48,7 @@
     
     <div class="flex h-screen" x-data="{ sidebarOpen: false }">
         
-        <!-- Sidebar (القائمة الجانبية) -->
-        <aside id="sidebar" 
-               class="fixed inset-y-0 {{ app()->getLocale() === 'ar' ? 'right-0' : 'left-0' }} z-50 w-64 bg-white dark:bg-gray-900 border-{{ app()->getLocale() === 'ar' ? 'l' : 'r' }} border-gray-200 dark:border-gray-700 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-auto"
-               :class="sidebarOpen ? 'translate-x-0' : '{{ app()->getLocale() === 'ar' ? 'translate-x-full' : '-translate-x-full' }}'">
-            
-            <!-- Logo -->
-            <div class="flex items-center justify-center h-20 border-b border-gray-100 dark:border-gray-800 px-4">
-                <div class="flex items-center gap-2 text-primary-700 dark:text-primary-400 font-bold text-xl">
-                    <i class="ph ph-hexagon-fill text-3xl"></i>
-                    <span>Flower Violet</span>
-                </div>
-            </div>
-            
-
-        </aside>
+        @include('components.layouts.partners.sidebar')
         
         <!-- Overlay for mobile -->
         <div x-show="sidebarOpen" 
@@ -79,96 +65,7 @@
         <!-- Main Content -->
         <div class="flex flex-col flex-1 overflow-hidden min-w-0">
             
-            <!-- Topbar (نفس تصميم Admin) -->
-            <div class="fi-topbar-ctn">
-                <nav class="fi-topbar">
-                    <!-- Mobile Menu Buttons -->
-                    <x-filament::icon-button
-                        color="gray"
-                        icon="heroicon-o-bars-3"
-                        icon-size="lg"
-                        label="فتح القائمة"
-                        x-cloak
-                        x-on:click="sidebarOpen = true"
-                        x-show="! sidebarOpen"
-                        class="fi-topbar-open-sidebar-btn lg:hidden"
-                    />
-
-                    <x-filament::icon-button
-                        color="gray"
-                        icon="heroicon-o-x-mark"
-                        icon-size="lg"
-                        label="إغلاق القائمة"
-                        x-cloak
-                        x-on:click="sidebarOpen = false"
-                        x-show="sidebarOpen"
-                        class="fi-topbar-close-sidebar-btn lg:hidden"
-                    />
-
-                    <!-- Topbar Start (Heading) -->
-                    <div class="fi-topbar-start">
-                        <h1 class="text-xl font-bold text-gray-900 dark:text-white">
-                            {{ $heading ?? __('messages.partners.dashboard.title') }}
-                        </h1>
-                    </div>
-
-                    <!-- Topbar End (User Menu) -->
-                    <div class="fi-topbar-end">
-                        <x-filament::dropdown
-                            :placement="app()->getLocale() === 'ar' ? 'bottom-start' : 'bottom-end'"
-                            width="xs"
-                            teleport
-                        >
-                            <x-slot name="trigger">
-                                <button
-                                    type="button"
-                                    class="shrink-0"
-                                    aria-label="قائمة المستخدم"
-                                >
-                                    <x-filament::avatar
-                                        :src="filament()->getUserAvatarUrl(auth()->user())"
-                                        :alt="filament()->getUserName(auth()->user())"
-                                        size="md"
-                                    />
-                                </button>
-                            </x-slot>
-
-                            {{-- User Info Header --}}
-                            <x-filament::dropdown.header class="!p-4">
-                                <div class="flex flex-col">
-                                    <span class="text-sm font-semibold text-gray-900 dark:text-white">
-                                        {{ filament()->getUserName(auth()->user()) }}
-                                    </span>
-                                    <span class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                        {{ auth()->user()->email }}
-                                    </span>
-                                </div>
-                            </x-filament::dropdown.header>
-
-                            {{-- Menu Items --}}
-                            <x-filament::dropdown.list>
-                                <x-filament::dropdown.list.item
-                                    :href="route('filament.partners.pages.profile-page')"
-                                    tag="a"
-                                    icon="heroicon-o-user"
-                                >
-                                    {{ __('messages.partners.nav.profile') }}
-                                </x-filament::dropdown.list.item>
-
-                                <x-filament::dropdown.list.item
-                                    tag="form"
-                                    :action="route('filament.partners.auth.logout')"
-                                    method="post"
-                                    icon="heroicon-o-arrow-right-on-rectangle"
-                                    color="danger"
-                                >
-                                    {{ __('messages.partners.nav.logout') }}
-                                </x-filament::dropdown.list.item>
-                            </x-filament::dropdown.list>
-                        </x-filament::dropdown>
-                    </div>
-                </nav>
-            </div>
+            @include('components.layouts.partners.topbar')
             
             <!-- Page Content (scrollable) -->
             <main class="flex-1 overflow-y-auto p-6 lg:p-10 bg-gray-50 dark:bg-gray-950">
