@@ -129,63 +129,48 @@
         <!-- Main Content -->
         <div class="flex flex-col flex-1 overflow-hidden min-w-0">
             
-            <!-- Header -->
-            <header class="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 h-20 flex items-center justify-between px-6 lg:px-10 shrink-0">
-                <div class="flex items-center gap-4">
-                    <!-- Mobile Menu Button -->
-                    <button @click="sidebarOpen = !sidebarOpen" 
-                            class="p-2 text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 rounded-lg lg:hidden hover:bg-gray-200 dark:hover:bg-gray-700">
-                        <i class="ph ph-list text-2xl"></i>
-                    </button>
-                    
-                    <h1 class="text-xl font-bold text-gray-800 dark:text-gray-200 hidden sm:block">
-                        {{ $heading ?? __('messages.partners.dashboard.title') }}
-                    </h1>
-                </div>
-                
-                <!-- User Dropdown Menu (FIXED: Proper Absolute Positioning) -->
-                <div class="relative" x-data="{ open: false }" @click.outside="open = false">
-                    <!-- Avatar Button (Trigger) -->
-                    <button @click="open = !open" 
-                            type="button"
-                            class="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 flex items-center justify-center font-bold text-lg border-2 border-primary-200 dark:border-primary-800 hover:border-primary-300 dark:hover:border-primary-700 shadow-sm transition-all cursor-pointer">
-                        {{ mb_substr(auth()->user()->name, 0, 2) }}
-                    </button>
-                    
-                    <!-- Dropdown Menu (Absolute Overlay - MUST NOT take layout space) -->
-                    <div x-show="open" 
-                         x-transition:enter="transition ease-out duration-200"
-                         x-transition:enter-start="opacity-0 scale-95"
-                         x-transition:enter-end="opacity-100 scale-100"
-                         x-transition:leave="transition ease-in duration-75"
-                         x-transition:leave-start="opacity-100 scale-100"
-                         x-transition:leave-end="opacity-0 scale-95"
-                         class="absolute top-full {{ app()->getLocale() === 'ar' ? 'right-0' : 'left-0' }} mt-2 w-56 rounded-xl shadow-lg z-50"
-                         style="display: none;">
-                        <div class="rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
-                            <div class="p-4 border-b border-gray-100 dark:border-gray-700">
-                                <p class="font-semibold text-gray-800 dark:text-gray-200">{{ auth()->user()->name }}</p>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ auth()->user()->email }}</p>
-                            </div>
-                            <div class="p-2">
-                                <a href="{{ route('filament.partners.pages.profile-page') }}" 
-                                   class="flex items-center gap-2 px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
-                                    <i class="ph ph-user"></i>
-                                    {{ __('messages.partners.nav.profile') }}
-                                </a>
-                                <form method="POST" action="{{ route('filament.partners.auth.logout') }}">
-                                    @csrf
-                                    <button type="submit" 
-                                            class="w-full flex items-center gap-2 px-3 py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
-                                        <i class="ph ph-sign-out"></i>
-                                        {{ __('messages.partners.nav.logout') }}
-                                    </button>
-                                </form>
-                            </div>
-                        </div>
+            <!-- Topbar (نفس تصميم الأدمن بالحرف) -->
+            <div class="fi-topbar-ctn">
+                <nav class="fi-topbar">
+                    @if (true) {{-- hasNavigation --}}
+                        <x-filament::icon-button
+                            color="gray"
+                            icon="heroicon-o-bars-3"
+                            icon-size="lg"
+                            label="Open sidebar"
+                            x-cloak
+                            x-data="{}"
+                            x-on:click="sidebarOpen = true"
+                            x-show="! sidebarOpen"
+                            class="fi-topbar-open-sidebar-btn lg:hidden"
+                        />
+
+                        <x-filament::icon-button
+                            color="gray"
+                            icon="heroicon-o-x-mark"
+                            icon-size="lg"
+                            label="Close sidebar"
+                            x-cloak
+                            x-data="{}"
+                            x-on:click="sidebarOpen = false"
+                            x-show="sidebarOpen"
+                            class="fi-topbar-close-sidebar-btn lg:hidden"
+                        />
+                    @endif
+
+                    <div class="fi-topbar-start">
+                        <h1 class="text-xl font-bold text-gray-800 dark:text-gray-200 hidden sm:block">
+                            {{ $heading ?? __('messages.partners.dashboard.title') }}
+                        </h1>
                     </div>
-                </div>
-            </header>
+
+                    <div class="fi-topbar-end">
+                        @if (filament()->auth()->check())
+                            <x-filament-panels::user-menu />
+                        @endif
+                    </div>
+                </nav>
+            </div>
             
             <!-- Page Content (scrollable) -->
             <main class="flex-1 overflow-y-auto p-6 lg:p-10 bg-gray-50 dark:bg-gray-950">
