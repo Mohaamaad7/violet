@@ -13,14 +13,16 @@
                 <span x-text="showDebug ? 'إخفاء' : 'عرض'"></span>
             </button>
         </div>
-        <div x-show="showDebug" x-cloak class="mt-3 space-y-2 text-sm text-yellow-700 dark:text-yellow-300">
+        <div x-show="showDebug" x-cloak class="mt-3 space-y-3 text-sm text-yellow-700 dark:text-yellow-300">
             <p>✓ Livewire: <span x-text="typeof Livewire !== 'undefined' ? 'محمل' : 'غير محمل'"></span></p>
             <p>✓ Alpine.js: <span x-text="typeof Alpine !== 'undefined' ? 'محمل' : 'غير محمل'"></span></p>
-            <button type="button" 
-                    onclick="new FilamentNotification().title('اختبار').body('الإشعارات تعمل!').success().send()"
-                    class="mt-2 px-3 py-1 bg-yellow-600 hover:bg-yellow-700 text-white rounded text-xs">
-                اختبار الإشعارات
-            </button>
+            <div class="pt-2 border-t border-yellow-300 dark:border-yellow-700">
+                <button type="button" 
+                        onclick="new FilamentNotification().title('اختبار').body('الإشعارات تعمل!').success().send()"
+                        class="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 active:bg-yellow-800 text-white font-medium rounded-lg shadow-sm transition-colors duration-200">
+                    🔔 اختبار الإشعارات
+                </button>
+            </div>
         </div>
     </div>
     
