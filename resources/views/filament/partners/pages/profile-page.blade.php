@@ -1,4 +1,4 @@
-<div>
+<x-layouts.partners :heading="__('messages.partners.nav.profile')">
     <div class="max-w-7xl mx-auto space-y-6">
         
         <!-- Header Section -->
@@ -210,4 +210,4 @@
             </div>
         </div>
     </div>
-</div>
+</x-layouts.partners>

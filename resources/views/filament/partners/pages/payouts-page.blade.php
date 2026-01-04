@@ -1,4 +1,4 @@
-<div>
+<x-layouts.partners :heading="__('messages.partners.nav.payouts')">
     <div class="max-w-6xl mx-auto">
         <x-filament::section>
             <x-slot name="heading">
@@ -18,4 +18,4 @@
             </div>
         </x-filament::section>
     </div>
-</div>
+</x-layouts.partners>
