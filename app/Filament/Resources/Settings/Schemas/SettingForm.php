@@ -48,6 +48,7 @@ class SettingForm
                                 'social' => 'وسائل التواصل',
                                 'analytics' => 'التحليلات',
                                 'security' => 'الأمان',
+                                'tracking' => 'تتبع الأحداث',
                             ])
                             ->required()
                             ->native(false)

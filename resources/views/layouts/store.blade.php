@@ -97,6 +97,9 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 
+    {{-- Facebook Pixel --}}
+    <x-analytics.facebook-pixel :pixelId="setting('facebook_pixel_id')" />
+
     {{-- Additional Head Content --}}
     @stack('styles')
 </head>

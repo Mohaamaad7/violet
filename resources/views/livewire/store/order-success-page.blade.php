@@ -228,3 +228,19 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+{{-- Facebook Pixel Purchase Event --}}
+<script>
+    // Track Purchase Event
+    if (typeof fbq !== 'undefined') {
+        fbq('track', 'Purchase', {
+            value: {{ $order->total }},
+            currency: 'EGP',
+            content_ids: @json($order->items->pluck('product_id')->toArray()),
+            content_type: 'product',
+            num_items: {{ $order->items->sum('quantity') }}
+        });
+    }
+</script>
+@endpush
