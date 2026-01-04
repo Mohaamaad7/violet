@@ -244,13 +244,28 @@ class CheckoutPage extends Component
 
         if ($cart && $cart->items->count() > 0) {
             $this->cartItems = $cart->items->map(function ($item) {
+                // Safely get product name - handle if it's an array or object
+                $productName = 'Unknown Product';
+                if ($item->product && $item->product->name) {
+                    $productName = is_array($item->product->name) 
+                        ? ($item->product->name[app()->getLocale()] ?? $item->product->name['en'] ?? 'Unknown Product')
+                        : (string) $item->product->name;
+                }
+
+                // Safely get image URL
+                $imageUrl = '';
+                if ($item->product) {
+                    $mediaUrl = $item->product->getFirstMediaUrl('products');
+                    $imageUrl = is_string($mediaUrl) ? $mediaUrl : '';
+                }
+
                 return [
                     'id' => $item->id,
                     'product_id' => $item->product_id,
-                    'name' => $item->product->name ?? 'Unknown Product',
+                    'name' => $productName,
                     'price' => $item->product->sale_price ?? $item->product->price ?? 0,
                     'quantity' => $item->quantity,
-                    'image' => $item->product ? $item->product->getFirstMediaUrl('products') : '',
+                    'image' => $imageUrl,
                     'subtotal' => $item->quantity * ($item->product->sale_price ?? $item->product->price ?? 0),
                 ];
             })->toArray();
