@@ -185,20 +185,7 @@
                                     </button>
                                 </x-slot>
 
-                                {{-- User Info Header --}}
-                                <x-filament::dropdown.header
-                                    color="gray"
-                                    class="!p-4"
-                                >
-                                    <div class="flex flex-col">
-                                        <span class="text-sm font-semibold text-gray-900 dark:text-white">
-                                            {{ filament()->getUserName(filament()->auth()->user()) }}
-                                        </span>
-                                        <span class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                            {{ filament()->auth()->user()->email }}
-                                        </span>
-                                    </div>
-                                </x-filament::dropdown.header>
+
 
                                 {{-- Menu Items --}}
                                 <x-filament::dropdown.list>
