@@ -1,4 +1,28 @@
-<div class="max-w-7xl mx-auto space-y-6">
+<div class="max-w-7xl mx-auto space-y-6" x-data="{ showDebug: false }">
+    
+    <!-- Debug Panel (for testing) -->
+    <div class="bg-yellow-100 dark:bg-yellow-900 border border-yellow-400 dark:border-yellow-600 rounded-lg p-4 mb-4">
+        <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <svg class="w-5 h-5 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                </svg>
+                <span class="text-sm font-medium text-yellow-800 dark:text-yellow-200">وضع الاختبار - للتحقق من عمل الإشعارات</span>
+            </div>
+            <button @click="showDebug = !showDebug" class="text-yellow-600 hover:text-yellow-800">
+                <span x-text="showDebug ? 'إخفاء' : 'عرض'"></span>
+            </button>
+        </div>
+        <div x-show="showDebug" x-cloak class="mt-3 space-y-2 text-sm text-yellow-700 dark:text-yellow-300">
+            <p>✓ Livewire: <span x-text="typeof Livewire !== 'undefined' ? 'محمل' : 'غير محمل'"></span></p>
+            <p>✓ Alpine.js: <span x-text="typeof Alpine !== 'undefined' ? 'محمل' : 'غير محمل'"></span></p>
+            <button type="button" 
+                    onclick="new FilamentNotification().title('اختبار').body('الإشعارات تعمل!').success().send()"
+                    class="mt-2 px-3 py-1 bg-yellow-600 hover:bg-yellow-700 text-white rounded text-xs">
+                اختبار الإشعارات
+            </button>
+        </div>
+    </div>
     
     <!-- Header Section -->
     <div class="flex items-center justify-between">

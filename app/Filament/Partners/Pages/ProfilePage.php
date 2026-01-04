@@ -91,10 +91,10 @@ class ProfilePage extends Page
             ->title('تم التحديث بنجاح')
             ->body('تم تحديث كلمة المرور بنجاح. سيتم تسجيل خروجك الآن...')
             ->success()
-            ->seconds(3)
+            ->duration(3000)
             ->send();
 
-        // Logout user and redirect to login after 3 seconds
+        // Dispatch browser event for logout
         $this->dispatch('password-changed');
     }
 

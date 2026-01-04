@@ -117,5 +117,8 @@
             // No initialization needed for web version
         });
     </script>
+    
+    <!-- Additional Scripts Stack -->
+    @stack('scripts')
 </body>
 </html>
