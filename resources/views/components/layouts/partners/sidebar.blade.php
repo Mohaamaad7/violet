@@ -1,6 +1,6 @@
 {{-- Partners Sidebar - Enhanced Navigation --}}
 <aside id="sidebar" 
-       class="fixed inset-y-0 {{ app()->getLocale() === 'ar' ? 'right-0' : 'left-0' }} z-50 w-64 bg-white dark:bg-gray-900 border-{{ app()->getLocale() === 'ar' ? 'l' : 'r' }} border-gray-200 dark:border-gray-700 shadow-lg lg:block lg:sticky lg:top-0 lg:shadow-none"
+       class="fixed inset-y-0 {{ app()->getLocale() === 'ar' ? 'right-0' : 'left-0' }} z-50 w-64 h-screen bg-white dark:bg-gray-900 border-{{ app()->getLocale() === 'ar' ? 'l' : 'r' }} border-gray-200 dark:border-gray-700 shadow-lg lg:shadow-none overflow-y-auto"
        :class="sidebarOpen ? 'block' : 'hidden lg:block'">
     
     {{-- Logo Section --}}
