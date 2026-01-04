@@ -1,5 +1,6 @@
-<x-layouts.partners :heading="__('messages.partners.dashboard.overview')">
-    <div class="space-y-8">
+<div>
+    <x-layouts.partners :heading="__('messages.partners.dashboard.overview')">
+        <div class="space-y-8">
         
         @php
             $stats = $this->getStats();
@@ -216,3 +217,4 @@
         </div>
     </div>
 </x-layouts.partners>
+</div>
