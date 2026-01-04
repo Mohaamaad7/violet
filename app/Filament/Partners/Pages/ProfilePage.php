@@ -89,9 +89,13 @@ class ProfilePage extends Page
         // Show success notification
         Notification::make()
             ->title('تم التحديث بنجاح')
-            ->body('تم تحديث كلمة المرور بنجاح')
+            ->body('تم تحديث كلمة المرور بنجاح. سيتم تسجيل خروجك الآن...')
             ->success()
+            ->seconds(3)
             ->send();
+
+        // Logout user and redirect to login after 3 seconds
+        $this->dispatch('password-changed');
     }
 
     /**

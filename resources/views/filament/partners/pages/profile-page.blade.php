@@ -299,3 +299,28 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+    // Listen for password change event and logout/redirect
+    document.addEventListener('livewire:initialized', () => {
+        Livewire.on('password-changed', () => {
+            // Wait 3 seconds then logout (using form POST)
+            setTimeout(() => {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = '{{ route('filament.partners.auth.logout') }}';
+                
+                const csrfToken = document.createElement('input');
+                csrfToken.type = 'hidden';
+                csrfToken.name = '_token';
+                csrfToken.value = '{{ csrf_token() }}';
+                
+                form.appendChild(csrfToken);
+                document.body.appendChild(form);
+                form.submit();
+            }, 3000);
+        });
+    });
+</script>
+@endpush

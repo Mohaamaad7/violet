@@ -19,6 +19,9 @@
     @filamentStyles
     @vite('resources/css/app.css')
     
+    <!-- Livewire Styles -->
+    @livewireStyles
+    
     <style>
         body {
             font-family: 'Cairo', ui-sans-serif, system-ui, sans-serif;
@@ -96,6 +99,16 @@
     <!-- Filament Scripts -->
     @filamentScripts
     @vite('resources/js/app.js')
+    
+    <!-- Livewire Scripts -->
+    @livewireScripts
+    
+    <!-- Filament Notifications (Required for notifications to display) -->
+    <script>
+        window.addEventListener('DOMContentLoaded', () => {
+            // Filament notifications will work automatically
+        });
+    </script>
     
     <!-- Initialize Phosphor Icons -->
     <script>
