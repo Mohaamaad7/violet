@@ -160,7 +160,7 @@
                          x-transition:leave="transition ease-in duration-75"
                          x-transition:leave-start="opacity-100 scale-100"
                          x-transition:leave-end="opacity-0 scale-95"
-                         class="absolute top-full {{ app()->getLocale() === 'ar' ? 'left-0' : 'right-0' }} mt-2 w-56 rounded-xl shadow-lg z-50"
+                         class="absolute top-full {{ app()->getLocale() === 'ar' ? 'right-0' : 'left-0' }} mt-2 w-56 rounded-xl shadow-lg z-50"
                          style="display: none;">
                         <div class="rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                             <div class="p-4 border-b border-gray-100 dark:border-gray-700">
