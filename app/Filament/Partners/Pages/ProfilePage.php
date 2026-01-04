@@ -13,6 +13,11 @@ class ProfilePage extends Page
         return 'filament.partners.pages.profile-page';
     }
 
+    public function getLayout(): string
+    {
+        return 'components.layouts.partners';
+    }
+
     public function getTitle(): string
     {
         return __('messages.partners.nav.profile');

@@ -13,6 +13,11 @@ class CommissionsPage extends Page
         return 'filament.partners.pages.commissions-page';
     }
 
+    public function getLayout(): string
+    {
+        return 'components.layouts.partners';
+    }
+
     public function getTitle(): string
     {
         return __('messages.partners.nav.commissions');

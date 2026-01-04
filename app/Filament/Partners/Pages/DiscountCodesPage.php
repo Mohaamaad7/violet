@@ -13,6 +13,11 @@ class DiscountCodesPage extends Page
         return 'filament.partners.pages.discount-codes-page';
     }
 
+    public function getLayout(): string
+    {
+        return 'components.layouts.partners';
+    }
+
     public function getTitle(): string
     {
         return __('messages.partners.nav.discount_codes');

@@ -13,6 +13,11 @@ class PayoutsPage extends Page
         return 'filament.partners.pages.payouts-page';
     }
 
+    public function getLayout(): string
+    {
+        return 'components.layouts.partners';
+    }
+
     public function getTitle(): string
     {
         return __('messages.partners.nav.payouts');

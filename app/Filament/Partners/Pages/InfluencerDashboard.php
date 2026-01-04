@@ -24,6 +24,14 @@ class InfluencerDashboard extends Page
     }
 
     /**
+     * Get custom layout
+     */
+    public function getLayout(): string
+    {
+        return 'components.layouts.partners';
+    }
+
+    /**
      * Page title
      */
     public function getTitle(): string|Htmlable
