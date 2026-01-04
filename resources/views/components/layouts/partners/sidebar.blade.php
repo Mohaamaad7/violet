@@ -97,20 +97,4 @@
         </form>
     </nav>
     
-    {{-- Footer Info --}}
-    <div class="px-4 py-4 border-t border-gray-200 dark:border-gray-700">
-        <div class="flex items-center gap-3 px-3 py-2 bg-violet-50 dark:bg-violet-900/20 rounded-lg">
-            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">
-                {{ mb_substr(auth()->user()->name, 0, 2) }}
-            </div>
-            <div class="flex-1 min-w-0">
-                <p class="text-sm font-medium text-gray-900 dark:text-white truncate">
-                    {{ auth()->user()->name }}
-                </p>
-                <p class="text-xs text-gray-500 dark:text-gray-400">
-                    {{ __('Influencer') }}
-                </p>
-            </div>
-        </div>
-    </div>
 </aside>

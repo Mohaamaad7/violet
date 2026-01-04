@@ -24,6 +24,11 @@
             font-family: 'Cairo', ui-sans-serif, system-ui, sans-serif;
         }
         
+        /* Hide elements with x-cloak until Alpine is ready */
+        [x-cloak] {
+            display: none !important;
+        }
+        
         /* Hide scrollbar for sidebar */
         .no-scrollbar::-webkit-scrollbar {
             display: none;
@@ -44,34 +49,35 @@
         }
     </style>
 </head>
-<body class="h-full overflow-hidden text-gray-800 dark:text-gray-200">
+<body class="h-full bg-gray-50 dark:bg-gray-950 text-gray-800 dark:text-gray-200" x-data="{ sidebarOpen: false }">
     
-    <div class="flex h-screen" x-data="{ sidebarOpen: false }">
+    {{-- Sidebar --}}
+    @include('components.layouts.partners.sidebar')
+    
+    {{-- Mobile Overlay - Click outside to close --}}
+    <div x-show="sidebarOpen" 
+         x-cloak
+         @click="sidebarOpen = false"
+         x-transition:enter="transition-opacity ease-linear duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition-opacity ease-linear duration-300"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-40 lg:hidden">
+    </div>
+    
+    {{-- Main Content Area - Positioned after sidebar on desktop --}}
+    <div class="lg:{{ app()->getLocale() === 'ar' ? 'mr' : 'ml' }}-64">
         
-        @include('components.layouts.partners.sidebar')
+        {{-- Top Header --}}
+        @include('components.layouts.partners.topbar')
         
-        <!-- Overlay for mobile -->
-        <div x-show="sidebarOpen" 
-             x-transition:enter="transition-opacity ease-linear duration-300"
-             x-transition:enter-start="opacity-0"
-             x-transition:enter-end="opacity-100"
-             x-transition:leave="transition-opacity ease-linear duration-300"
-             x-transition:leave-start="opacity-100"
-             x-transition:leave-end="opacity-0"
-             @click="sidebarOpen = false" 
-             class="fixed inset-0 bg-gray-900 bg-opacity-50 z-40 lg:hidden backdrop-blur-sm"
-             style="display: none;"></div>
+        {{-- Page Content (scrollable) --}}
+        <main class="min-h-screen p-6 lg:p-8">
+            {{ $slot }}
+        </main>
         
-        <!-- Main Content -->
-        <div class="flex flex-col flex-1 overflow-hidden min-w-0">
-            
-            @include('components.layouts.partners.topbar')
-            
-            <!-- Page Content (scrollable) -->
-            <main class="flex-1 overflow-y-auto p-6 lg:p-10 bg-gray-50 dark:bg-gray-950">
-                {{ $slot }}
-            </main>
-        </div>
     </div>
     
     <!-- Filament Scripts -->
