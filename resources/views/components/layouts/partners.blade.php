@@ -146,15 +146,10 @@
                 <div class="flex items-center gap-4">
                     <!-- User Dropdown Menu (Click-to-Open, Overlay) -->
                     <div class="relative" x-data="{ open: false }">
+                        <!-- Just Avatar (Clickable) -->
                         <button @click="open = !open" 
-                                class="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
-                            <div class="{{ app()->getLocale() === 'ar' ? 'text-right' : 'text-left' }} hidden md:block">
-                                <p class="text-sm font-bold text-gray-800 dark:text-gray-200">{{ auth()->user()->name }}</p>
-                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.partners.dashboard.influencer_role') }}</p>
-                            </div>
-                            <div class="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 flex items-center justify-center font-bold text-lg border-2 border-white dark:border-gray-800 shadow-sm">
-                                {{ mb_substr(auth()->user()->name, 0, 2) }}
-                            </div>
+                                class="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 flex items-center justify-center font-bold text-lg border-2 border-primary-200 dark:border-primary-800 hover:border-primary-300 dark:hover:border-primary-700 shadow-sm transition-all cursor-pointer">
+                            {{ mb_substr(auth()->user()->name, 0, 2) }}
                         </button>
                         
                         <!-- Dropdown Menu (Overlay, NOT layout shifter) -->
