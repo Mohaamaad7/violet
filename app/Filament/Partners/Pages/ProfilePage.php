@@ -42,6 +42,19 @@ class ProfilePage extends Page
     }
 
     /**
+     * Test notification system
+     */
+    public function testNotification(): void
+    {
+        Notification::make()
+            ->title('🎉 اختبار ناجح!')
+            ->body('الإشعارات تعمل بشكل صحيح. يمكنك الآن تغيير كلمة المرور.')
+            ->success()
+            ->duration(5000)
+            ->send();
+    }
+
+    /**
      * Update password
      */
     public function updatePassword(): void

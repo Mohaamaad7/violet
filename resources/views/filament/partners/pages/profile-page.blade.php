@@ -18,7 +18,7 @@
             <p>✓ Alpine.js: <span x-text="typeof Alpine !== 'undefined' ? 'محمل' : 'غير محمل'"></span></p>
             <div class="pt-2 border-t border-yellow-300 dark:border-yellow-700">
                 <button type="button" 
-                        onclick="new FilamentNotification().title('اختبار').body('الإشعارات تعمل!').success().send()"
+                        wire:click="testNotification"
                         class="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 active:bg-yellow-800 text-white font-medium rounded-lg shadow-sm transition-colors duration-200">
                     🔔 اختبار الإشعارات
                 </button>
