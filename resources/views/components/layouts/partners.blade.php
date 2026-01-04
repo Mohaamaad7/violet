@@ -115,7 +115,7 @@
                     <!-- Topbar End (User Menu) -->
                     <div class="fi-topbar-end">
                         <x-filament::dropdown
-                            placement="bottom-end"
+                            :placement="app()->getLocale() === 'ar' ? 'bottom-start' : 'bottom-end'"
                             width="xs"
                             teleport
                         >
