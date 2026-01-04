@@ -143,26 +143,26 @@
                     </h1>
                 </div>
                 
-                <div class="flex items-center gap-4">
-                    <!-- User Dropdown Menu (Click-to-Open, Overlay) -->
-                    <div class="relative" x-data="{ open: false }">
-                        <!-- Just Avatar (Clickable) -->
-                        <button @click="open = !open" 
-                                class="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 flex items-center justify-center font-bold text-lg border-2 border-primary-200 dark:border-primary-800 hover:border-primary-300 dark:hover:border-primary-700 shadow-sm transition-all cursor-pointer">
-                            {{ mb_substr(auth()->user()->name, 0, 2) }}
-                        </button>
-                        
-                        <!-- Dropdown Menu (Overlay, NOT layout shifter) -->
-                        <div x-show="open" 
-                             @click.away="open = false"
-                             x-transition:enter="transition ease-out duration-200"
-                             x-transition:enter-start="opacity-0 scale-95"
-                             x-transition:enter-end="opacity-100 scale-100"
-                             x-transition:leave="transition ease-in duration-150"
-                             x-transition:leave-start="opacity-100 scale-100"
-                             x-transition:leave-end="opacity-0 scale-95"
-                             class="absolute {{ app()->getLocale() === 'ar' ? 'left-0' : 'right-0' }} mt-2 w-56 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 z-50"
-                             style="display: none;">
+                <!-- User Dropdown Menu (FIXED: Proper Absolute Positioning) -->
+                <div class="relative" x-data="{ open: false }" @click.outside="open = false">
+                    <!-- Avatar Button (Trigger) -->
+                    <button @click="open = !open" 
+                            type="button"
+                            class="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 flex items-center justify-center font-bold text-lg border-2 border-primary-200 dark:border-primary-800 hover:border-primary-300 dark:hover:border-primary-700 shadow-sm transition-all cursor-pointer">
+                        {{ mb_substr(auth()->user()->name, 0, 2) }}
+                    </button>
+                    
+                    <!-- Dropdown Menu (Absolute Overlay - MUST NOT take layout space) -->
+                    <div x-show="open" 
+                         x-transition:enter="transition ease-out duration-200"
+                         x-transition:enter-start="opacity-0 scale-95"
+                         x-transition:enter-end="opacity-100 scale-100"
+                         x-transition:leave="transition ease-in duration-75"
+                         x-transition:leave-start="opacity-100 scale-100"
+                         x-transition:leave-end="opacity-0 scale-95"
+                         class="absolute top-full {{ app()->getLocale() === 'ar' ? 'left-0' : 'right-0' }} mt-2 w-56 rounded-xl shadow-lg z-50"
+                         style="display: none;">
+                        <div class="rounded-xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700">
                             <div class="p-4 border-b border-gray-100 dark:border-gray-700">
                                 <p class="font-semibold text-gray-800 dark:text-gray-200">{{ auth()->user()->name }}</p>
                                 <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ auth()->user()->email }}</p>
