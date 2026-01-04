@@ -47,6 +47,19 @@
             --primary-700: #6d28d9;
             --primary-900: #4c1d95;
         }
+        
+        /* Partners Content Area - Fixed margin for sidebar */
+        @media (min-width: 1024px) {
+            html[dir="rtl"] .partners-content-area {
+                margin-right: 256px !important;
+                margin-left: 0 !important;
+            }
+            
+            html[dir="ltr"] .partners-content-area {
+                margin-left: 256px !important;
+                margin-right: 0 !important;
+            }
+        }
     </style>
 </head>
 <body class="h-full bg-gray-50 dark:bg-gray-950 text-gray-800 dark:text-gray-200" x-data="{ sidebarOpen: false }">
@@ -68,7 +81,7 @@
     </div>
     
     {{-- Main Content Area - Positioned after sidebar on desktop --}}
-    <div class="lg:{{ app()->getLocale() === 'ar' ? 'mr' : 'ml' }}-64">
+    <div class="transition-all duration-300 ease-in-out relative z-10 partners-content-area">
         
         {{-- Top Header --}}
         @include('components.layouts.partners.topbar')
