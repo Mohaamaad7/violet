@@ -28,6 +28,13 @@
                         <i class="ph ph-wallet text-2xl"></i>
                     </div>
                 </div>
+                <div class="mt-3 flex items-center gap-2 text-xs">
+                    <span class="flex items-center text-emerald-600 dark:text-emerald-400 font-semibold">
+                        <i class="ph ph-trend-up text-sm m{{ app()->getLocale() === 'ar' ? 'l' : 'r' }}-1"></i>
+                        +8.2%
+                    </span>
+                    <span class="text-gray-400 dark:text-gray-500">{{ __('messages.partners.dashboard.growth_from_last_month') }}</span>
+                </div>
                 @if($stats['pending_commission'] > 0)
                 <div class="mt-4 flex items-center text-sm text-amber-600 dark:text-amber-400 bg-amber-50 dark:bg-amber-900/20 w-fit px-2 py-1 rounded-lg">
                     <i class="ph ph-clock m{{ app()->getLocale() === 'ar' ? 'l' : 'r' }}-1"></i>
@@ -54,8 +61,15 @@
                         <i class="ph ph-shopping-cart text-2xl"></i>
                     </div>
                 </div>
+                <div class="mt-3 flex items-center gap-2 text-xs">
+                    <span class="flex items-center text-emerald-600 dark:text-emerald-400 font-semibold">
+                        <i class="ph ph-trend-up text-sm m{{ app()->getLocale() === 'ar' ? 'l' : 'r' }}-1"></i>
+                        +15.3%
+                    </span>
+                    <span class="text-gray-400 dark:text-gray-500">{{ __('messages.partners.dashboard.growth_from_last_month') }}</span>
+                </div>
                 {{-- Progress bar --}}
-                <div class="mt-4 w-full bg-gray-100 dark:bg-gray-800 rounded-full h-1.5">
+                <div class="mt-3 w-full bg-gray-100 dark:bg-gray-800 rounded-full h-1.5">
                     <div class="bg-purple-500 h-1.5 rounded-full" style="width: {{ min(($stats['total_orders'] / 200) * 100, 100) }}%"></div>
                 </div>
                 <p class="text-xs text-gray-400 dark:text-gray-500 mt-2">
@@ -79,7 +93,14 @@
                         <i class="ph ph-coins text-2xl"></i>
                     </div>
                 </div>
-                <div class="mt-4 flex items-center text-sm text-emerald-600 dark:text-emerald-400">
+                <div class="mt-3 flex items-center gap-2 text-xs">
+                    <span class="flex items-center text-emerald-600 dark:text-emerald-400 font-semibold">
+                        <i class="ph ph-trend-up text-sm m{{ app()->getLocale() === 'ar' ? 'l' : 'r' }}-1"></i>
+                        +12.7%
+                    </span>
+                    <span class="text-gray-400 dark:text-gray-500">{{ __('messages.partners.dashboard.growth_from_last_month') }}</span>
+                </div>
+                <div class="mt-2 flex items-center text-sm text-emerald-600 dark:text-emerald-400">
                     <span class="font-medium">
                         {{ __('messages.partners.dashboard.total_paid') }}: {{ number_format($stats['total_paid'], 2) }} {{ __('messages.currency.egp') }}
                     </span>
@@ -101,6 +122,13 @@
                     <div class="p-3 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-xl">
                         <i class="ph ph-trend-up text-2xl"></i>
                     </div>
+                </div>
+                <div class="mt-3 flex items-center gap-2 text-xs">
+                    <span class="flex items-center text-emerald-600 dark:text-emerald-400 font-semibold">
+                        <i class="ph ph-trend-up text-sm m{{ app()->getLocale() === 'ar' ? 'l' : 'r' }}-1"></i>
+                        +18.5%
+                    </span>
+                    <span class="text-gray-400 dark:text-gray-500">{{ __('messages.partners.dashboard.growth_from_last_month') }}</span>
                 </div>
             </div>
         </div>
