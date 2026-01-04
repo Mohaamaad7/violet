@@ -418,10 +418,19 @@ class CheckoutPage extends Component
             $gatewayMethods = $this->paymentService->getEnabledMethods();
 
             foreach ($gatewayMethods as $key => $method) {
+                // Safely extract name and description (may be arrays)
+                $name = is_array($method['name'] ?? null) 
+                    ? ($method['name'][app()->getLocale()] ?? $method['name']['ar'] ?? $method['name']['en'] ?? $key)
+                    : ($method['name'] ?? $key);
+                
+                $description = is_array($method['description'] ?? null)
+                    ? ($method['description'][app()->getLocale()] ?? $method['description']['ar'] ?? $method['description']['en'] ?? '')
+                    : ($method['description'] ?? '');
+
                 $methods[] = [
                     'key' => $key,
-                    'name' => $method['name'],
-                    'description' => $method['description'] ?? '',
+                    'name' => (string) $name,
+                    'description' => (string) $description,
                     'icon' => $this->getMethodIcon($key),
                 ];
             }
