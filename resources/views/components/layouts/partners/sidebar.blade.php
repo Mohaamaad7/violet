@@ -1,7 +1,7 @@
 {{-- Partners Sidebar - Enhanced Navigation --}}
 <aside id="sidebar" 
        class="fixed inset-y-0 {{ app()->getLocale() === 'ar' ? 'right-0' : 'left-0' }} z-50 w-64 bg-white dark:bg-gray-900 border-{{ app()->getLocale() === 'ar' ? 'l' : 'r' }} border-gray-200 dark:border-gray-700 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-auto shadow-lg lg:shadow-none"
-       :class="sidebarOpen ? 'translate-x-0' : '{{ app()->getLocale() === 'ar' ? 'translate-x-full' : '-translate-x-full' }}'">
+       :class="sidebarOpen ? 'translate-x-0' : 'max-lg:{{ app()->getLocale() === 'ar' ? 'translate-x-full' : '-translate-x-full' }}'">
     
     {{-- Logo Section --}}
     <div class="flex items-center justify-between h-20 border-b border-gray-100 dark:border-gray-800 px-6">
