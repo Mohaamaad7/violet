@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 class ProfilePage extends Page
 {
     protected static ?int $navigationSort = 2;
+    protected static string $view = 'filament.partners.pages.profile-page';
 
     // Password change properties
     public string $currentPassword = '';
