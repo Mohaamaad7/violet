@@ -2,7 +2,11 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Partners\Pages\CommissionsPage;
+use App\Filament\Partners\Pages\DiscountCodesPage;
 use App\Filament\Partners\Pages\InfluencerDashboard;
+use App\Filament\Partners\Pages\PayoutsPage;
+use App\Filament\Partners\Pages\ProfilePage;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\AuthenticateSession;
 use Filament\Http\Middleware\DisableBladeIconComponents;
@@ -46,6 +50,10 @@ class InfluencerPanelProvider extends PanelProvider
             // Simple navigation - only dashboard
             ->pages([
                 InfluencerDashboard::class,
+                ProfilePage::class,
+                CommissionsPage::class,
+                DiscountCodesPage::class,
+                PayoutsPage::class,
             ])
 
             // Widgets are defined in the dashboard page
