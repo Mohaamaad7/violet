@@ -144,14 +144,49 @@
                 </div>
                 
                 <div class="flex items-center gap-4">
-                    <!-- User Info -->
-                    <div class="flex items-center gap-3 border-{{ app()->getLocale() === 'ar' ? 'l' : 'r' }} border-gray-200 dark:border-gray-700 p{{ app()->getLocale() === 'ar' ? 'r' : 'l' }}-4 m{{ app()->getLocale() === 'ar' ? 'r' : 'l' }}-2">
-                        <div class="{{ app()->getLocale() === 'ar' ? 'text-right' : 'text-left' }} hidden md:block">
-                            <p class="text-sm font-bold text-gray-800 dark:text-gray-200">{{ auth()->user()->name }}</p>
-                            <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.partners.dashboard.influencer_role') }}</p>
-                        </div>
-                        <div class="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 flex items-center justify-center font-bold text-lg border-2 border-white dark:border-gray-800 shadow-sm">
-                            {{ mb_substr(auth()->user()->name, 0, 2) }}
+                    <!-- User Dropdown Menu (Click-to-Open, Overlay) -->
+                    <div class="relative" x-data="{ open: false }">
+                        <button @click="open = !open" 
+                                class="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                            <div class="{{ app()->getLocale() === 'ar' ? 'text-right' : 'text-left' }} hidden md:block">
+                                <p class="text-sm font-bold text-gray-800 dark:text-gray-200">{{ auth()->user()->name }}</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ __('messages.partners.dashboard.influencer_role') }}</p>
+                            </div>
+                            <div class="w-10 h-10 rounded-full bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 flex items-center justify-center font-bold text-lg border-2 border-white dark:border-gray-800 shadow-sm">
+                                {{ mb_substr(auth()->user()->name, 0, 2) }}
+                            </div>
+                        </button>
+                        
+                        <!-- Dropdown Menu (Overlay, NOT layout shifter) -->
+                        <div x-show="open" 
+                             @click.away="open = false"
+                             x-transition:enter="transition ease-out duration-200"
+                             x-transition:enter-start="opacity-0 scale-95"
+                             x-transition:enter-end="opacity-100 scale-100"
+                             x-transition:leave="transition ease-in duration-150"
+                             x-transition:leave-start="opacity-100 scale-100"
+                             x-transition:leave-end="opacity-0 scale-95"
+                             class="absolute {{ app()->getLocale() === 'ar' ? 'left-0' : 'right-0' }} mt-2 w-56 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-200 dark:border-gray-700 z-50"
+                             style="display: none;">
+                            <div class="p-4 border-b border-gray-100 dark:border-gray-700">
+                                <p class="font-semibold text-gray-800 dark:text-gray-200">{{ auth()->user()->name }}</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ auth()->user()->email }}</p>
+                            </div>
+                            <div class="p-2">
+                                <a href="{{ route('filament.partners.pages.profile-page') }}" 
+                                   class="flex items-center gap-2 px-3 py-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                                    <i class="ph ph-user"></i>
+                                    {{ __('messages.partners.nav.profile') }}
+                                </a>
+                                <form method="POST" action="{{ route('filament.partners.auth.logout') }}">
+                                    @csrf
+                                    <button type="submit" 
+                                            class="w-full flex items-center gap-2 px-3 py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors">
+                                        <i class="ph ph-sign-out"></i>
+                                        {{ __('messages.partners.nav.logout') }}
+                                    </button>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 </div>

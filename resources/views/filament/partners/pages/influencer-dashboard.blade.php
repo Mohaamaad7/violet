@@ -143,41 +143,49 @@
             </div>
             
             <div class="p-6">
-                @forelse($discountCodes as $code)
-                    <div class="flex items-center justify-between p-4 bg-gradient-to-r from-primary-50 to-purple-50 dark:from-primary-900/20 dark:to-purple-900/20 rounded-xl mb-3 border border-primary-100 dark:border-primary-900/30">
-                        <div>
-                            <span class="text-2xl font-bold text-primary-600 dark:text-primary-400 tracking-wider">{{ $code->code }}</span>
-                            <p class="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                                <span class="font-semibold">
-                                    {{ $code->discount_type === 'percentage' ? $code->discount_value . '%' : number_format($code->discount_value, 2) . ' ' . __('messages.currency.egp') }}
+                <!-- Compact 3-Column Grid for Discount Codes -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    @forelse($discountCodes as $code)
+                        <div class="bg-gradient-to-br from-primary-50 to-purple-50 dark:from-primary-900/20 dark:to-purple-900/20 rounded-xl p-4 border border-primary-100 dark:border-primary-900/30 hover:shadow-md transition-shadow">
+                            <div class="flex items-start justify-between mb-3">
+                                <div>
+                                    <span class="text-lg font-bold text-primary-600 dark:text-primary-400 tracking-wider block">{{ $code->code }}</span>
+                                    <span class="text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                        {{ $code->discount_type === 'percentage' ? $code->discount_value . '%' : number_format($code->discount_value, 2) . ' ' . __('messages.currency.egp') }}
+                                    </span>
+                                </div>
+                                <span class="px-2 py-1 text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-full">
+                                    Active
                                 </span>
-                                {{ __('messages.partners.dashboard.discount_for_followers') }}
-                            </p>
+                            </div>
                             @if($code->used_count > 0)
-                            <div class="flex items-center gap-4 mt-2 text-xs text-gray-500 dark:text-gray-400">
-                                <span><i class="ph ph-users m{{ app()->getLocale() === 'ar' ? 'l' : 'r' }}-1"></i> {{ $code->used_count }} مرة</span>
+                            <div class="text-xs text-gray-500 dark:text-gray-400 mb-3">
+                                <i class="ph ph-users"></i> {{ $code->used_count }} {{ __('messages.partners.dashboard.uses') ?? 'uses' }}
                             </div>
                             @endif
+                            <button
+                                x-on:click="navigator.clipboard.writeText('{{ $code->code }}'); 
+                                            new FilamentNotification()
+                                                .title('{{ __('messages.partners.dashboard.code_copied') }}')
+                                                .success()
+                                                .send()"
+                                class="w-full px-3 py-2 bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 text-white text-sm rounded-lg transition-colors flex items-center justify-center gap-2 font-medium">
+                                <i class="ph ph-copy"></i>
+                                {{ __('messages.partners.dashboard.copy') }}
+                            </button>
                         </div>
-                        <button
-                            x-on:click="navigator.clipboard.writeText('{{ $code->code }}'); 
-                                        new FilamentNotification()
-                                            .title('{{ __('messages.partners.dashboard.code_copied') }}')
-                                            .success()
-                                            .send()"
-                            class="px-4 py-2 bg-primary-600 hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600 text-white rounded-lg transition-colors flex items-center gap-2 font-medium">
-                            <i class="ph ph-copy text-lg"></i>
-                            {{ __('messages.partners.dashboard.copy') }}
-                        </button>
-                    </div>
-                @empty
-                    <div class="text-center py-8">
-                        <i class="ph ph-ticket text-6xl text-gray-300 dark:text-gray-700 mb-4"></i>
-                        <p class="text-gray-500 dark:text-gray-400">
-                            {{ __('messages.partners.dashboard.no_codes') }}
-                        </p>
-                    </div>
-                @endforelse
+                        @empty
+                    @endforelse
+                </div>
+                
+                @if($discountCodes->isEmpty())
+                <div class="text-center py-8">
+                    <i class="ph ph-ticket text-6xl text-gray-300 dark:text-gray-700 mb-4"></i>
+                    <p class="text-gray-500 dark:text-gray-400">
+                        {{ __('messages.partners.dashboard.no_codes') }}
+                    </p>
+                </div>
+                @endif
             </div>
         </div>
         
