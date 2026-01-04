@@ -192,6 +192,51 @@ Route::match(['get', 'post'], '/test-paymob-full', function () {
 
 require __DIR__ . '/auth.php';
 
+// Partners Panel - Password Update API
+Route::post('/partners/profile/update-password', function() {
+    $user = Auth::user();
+    
+    if (!$user) {
+        return response()->json(['success' => false, 'message' => 'غير مصرح'], 401);
+    }
+    
+    $data = request()->all();
+    
+    // Validate current password
+    if (!Hash::check($data['current_password'] ?? '', $user->password)) {
+        return response()->json([
+            'success' => false,
+            'message' => 'كلمة المرور الحالية غير صحيحة'
+        ]);
+    }
+    
+    // Validate new password
+    if (strlen($data['new_password'] ?? '') < 8) {
+        return response()->json([
+            'success' => false,
+            'message' => 'يجب أن تكون كلمة المرور 8 أحرف على الأقل'
+        ]);
+    }
+    
+    // Validate confirmation
+    if (($data['new_password'] ?? '') !== ($data['new_password_confirmation'] ?? '')) {
+        return response()->json([
+            'success' => false,
+            'message' => 'كلمة المرور الجديدة وتأكيدها غير متطابقين'
+        ]);
+    }
+    
+    // Update password
+    $user->update([
+        'password' => Hash::make($data['new_password'])
+    ]);
+    
+    return response()->json([
+        'success' => true,
+        'message' => 'تم تحديث كلمة المرور بنجاح. سيتم تسجيل خروجك الآن...'
+    ]);
+})->middleware('auth')->name('partners.profile.update-password');
+
 // Public API Routes
 Route::prefix('api')->name('api.')->group(function () {
     // Categories

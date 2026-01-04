@@ -160,9 +160,69 @@
                         تغيير كلمة المرور
                     </h3>
                     
-                    <form method="POST" action="{{ route('filament.partners.pages.profile-page') }}" class="space-y-4">
-                        @csrf
-                        <input type="hidden" name="action" value="update_password">
+                    <form x-data="{
+                        currentPassword: '',
+                        newPassword: '',
+                        newPasswordConfirmation: '',
+                        loading: false,
+                        submitForm() {
+                            if (!this.currentPassword || !this.newPassword || !this.newPasswordConfirmation) {
+                                alert('يرجى ملء جميع الحقول');
+                                return;
+                            }
+                            if (this.newPassword.length < 8) {
+                                alert('كلمة المرور يجب أن تكون 8 أحرف على الأقل');
+                                return;
+                            }
+                            if (this.newPassword !== this.newPasswordConfirmation) {
+                                alert('كلمة المرور الجديدة وتأكيدها غير متطابقين');
+                                return;
+                            }
+                            this.loading = true;
+                            
+                            fetch('{{ route('partners.profile.update-password') }}', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                    'Accept': 'application/json'
+                                },
+                                body: JSON.stringify({
+                                    action: 'update_password',
+                                    current_password: this.currentPassword,
+                                    new_password: this.newPassword,
+                                    new_password_confirmation: this.newPasswordConfirmation
+                                })
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                this.loading = false;
+                                if (data.success) {
+                                    alert('✅ ' + data.message);
+                                    // Logout after 3 seconds
+                                    setTimeout(() => {
+                                        const form = document.createElement('form');
+                                        form.method = 'POST';
+                                        form.action = '{{ route('filament.partners.auth.logout') }}';
+                                        const csrfToken = document.createElement('input');
+                                        csrfToken.type = 'hidden';
+                                        csrfToken.name = '_token';
+                                        csrfToken.value = '{{ csrf_token() }}';
+                                        form.appendChild(csrfToken);
+                                        document.body.appendChild(form);
+                                        form.submit();
+                                    }, 3000);
+                                } else {
+                                    alert('❌ ' + data.message);
+                                }
+                            })
+                            .catch(error => {
+                                this.loading = false;
+                                console.error('Error:', error);
+                                alert('حدث خطأ أثناء تحديث كلمة المرور');
+                            });
+                        }
+                    }" @submit.prevent="submitForm" class="space-y-4">
                         
                         <div class="grid grid-cols-1 gap-4">
                             <!-- Current Password -->
@@ -172,7 +232,7 @@
                                 </label>
                                 <div class="relative">
                                     <input type="password" 
-                                           name="current_password"
+                                           x-model="currentPassword"
                                            required
                                            placeholder="أدخل كلمة المرور الحالية"
                                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-violet-500 focus:ring-2 focus:ring-violet-500 focus:ring-opacity-20 transition">
@@ -191,7 +251,7 @@
                                 </label>
                                 <div class="relative">
                                     <input type="password" 
-                                           name="new_password"
+                                           x-model="newPassword"
                                            required
                                            minlength="8"
                                            placeholder="أدخل كلمة المرور الجديدة (8 أحرف على الأقل)"
@@ -211,7 +271,7 @@
                                 </label>
                                 <div class="relative">
                                     <input type="password" 
-                                           name="new_password_confirmation"
+                                           x-model="newPasswordConfirmation"
                                            required
                                            placeholder="أعد إدخال كلمة المرور الجديدة"
                                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-violet-500 focus:ring-2 focus:ring-violet-500 focus:ring-opacity-20 transition">
