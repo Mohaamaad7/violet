@@ -160,7 +160,10 @@
                         تغيير كلمة المرور
                     </h3>
                     
-                    <form class="space-y-4" wire:submit.prevent="updatePassword">
+                    <form method="POST" action="{{ route('filament.partners.pages.profile-page') }}" class="space-y-4">
+                        @csrf
+                        <input type="hidden" name="action" value="update_password">
+                        
                         <div class="grid grid-cols-1 gap-4">
                             <!-- Current Password -->
                             <div>
@@ -169,7 +172,8 @@
                                 </label>
                                 <div class="relative">
                                     <input type="password" 
-                                           wire:model="currentPassword"
+                                           name="current_password"
+                                           required
                                            placeholder="أدخل كلمة المرور الحالية"
                                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-violet-500 focus:ring-2 focus:ring-violet-500 focus:ring-opacity-20 transition">
                                     <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -187,7 +191,9 @@
                                 </label>
                                 <div class="relative">
                                     <input type="password" 
-                                           wire:model="newPassword"
+                                           name="new_password"
+                                           required
+                                           minlength="8"
                                            placeholder="أدخل كلمة المرور الجديدة (8 أحرف على الأقل)"
                                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-violet-500 focus:ring-2 focus:ring-violet-500 focus:ring-opacity-20 transition">
                                     <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -205,7 +211,8 @@
                                 </label>
                                 <div class="relative">
                                     <input type="password" 
-                                           wire:model="newPasswordConfirmation"
+                                           name="new_password_confirmation"
+                                           required
                                            placeholder="أعد إدخال كلمة المرور الجديدة"
                                            class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-violet-500 focus:ring-2 focus:ring-violet-500 focus:ring-opacity-20 transition">
                                     <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">

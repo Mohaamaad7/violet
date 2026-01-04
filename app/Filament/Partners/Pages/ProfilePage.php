@@ -6,6 +6,7 @@ use Filament\Pages\Page;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\Request;
 
 class ProfilePage extends Page
 {
@@ -15,6 +16,14 @@ class ProfilePage extends Page
     public string $currentPassword = '';
     public string $newPassword = '';
     public string $newPasswordConfirmation = '';
+    
+    public function mount(Request $request): void
+    {
+        // Handle POST request for password change
+        if ($request->isMethod('POST') && $request->input('action') === 'update_password') {
+            $this->handlePasswordUpdate($request);
+        }
+    }
 
     public function getView(): string
     {
@@ -133,5 +142,63 @@ class ProfilePage extends Page
             ->body('هذه الميزة قيد التطوير حالياً')
             ->warning()
             ->send();
+    }
+    
+    /**
+     * Handle password update from POST request
+     */
+    protected function handlePasswordUpdate(Request $request): void
+    {
+        $user = Auth::user();
+        
+        $currentPassword = $request->input('current_password');
+        $newPassword = $request->input('new_password');
+        $newPasswordConfirmation = $request->input('new_password_confirmation');
+
+        // Validate current password
+        if (!Hash::check($currentPassword, $user->password)) {
+            Notification::make()
+                ->title('خطأ في كلمة المرور')
+                ->body('كلمة المرور الحالية غير صحيحة')
+                ->danger()
+                ->send();
+            return;
+        }
+
+        // Validate new password length
+        if (strlen($newPassword) < 8) {
+            Notification::make()
+                ->title('كلمة مرور ضعيفة')
+                ->body('يجب أن تكون كلمة المرور 8 أحرف على الأقل')
+                ->danger()
+                ->send();
+            return;
+        }
+
+        // Validate password confirmation
+        if ($newPassword !== $newPasswordConfirmation) {
+            Notification::make()
+                ->title('خطأ في التأكيد')
+                ->body('كلمة المرور الجديدة وتأكيدها غير متطابقين')
+                ->danger()
+                ->send();
+            return;
+        }
+
+        // Update password
+        $user->update([
+            'password' => Hash::make($newPassword)
+        ]);
+
+        // Show success notification
+        Notification::make()
+            ->title('تم التحديث بنجاح')
+            ->body('تم تحديث كلمة المرور بنجاح. سيتم تسجيل خروجك الآن...')
+            ->success()
+            ->duration(3000)
+            ->send();
+
+        // Logout and redirect after 3 seconds
+        $this->dispatch('password-changed');
     }
 }
