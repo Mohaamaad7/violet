@@ -115,6 +115,95 @@
                     </form>
                 </div>
 
+                <!-- Change Password Section -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-6">
+                        تغيير كلمة المرور
+                    </h3>
+                    
+                    <form class="space-y-4" wire:submit.prevent="updatePassword">
+                        <div class="grid grid-cols-1 gap-4">
+                            <!-- Current Password -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    كلمة المرور الحالية
+                                </label>
+                                <div class="relative">
+                                    <input type="password" 
+                                           wire:model="currentPassword"
+                                           placeholder="أدخل كلمة المرور الحالية"
+                                           class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-violet-500 focus:ring-2 focus:ring-violet-500 focus:ring-opacity-20 transition">
+                                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- New Password -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    كلمة المرور الجديدة
+                                </label>
+                                <div class="relative">
+                                    <input type="password" 
+                                           wire:model="newPassword"
+                                           placeholder="أدخل كلمة المرور الجديدة (8 أحرف على الأقل)"
+                                           class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-violet-500 focus:ring-2 focus:ring-violet-500 focus:ring-opacity-20 transition">
+                                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Confirm New Password -->
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                    تأكيد كلمة المرور الجديدة
+                                </label>
+                                <div class="relative">
+                                    <input type="password" 
+                                           wire:model="newPasswordConfirmation"
+                                           placeholder="أعد إدخال كلمة المرور الجديدة"
+                                           class="w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:border-violet-500 focus:ring-2 focus:ring-violet-500 focus:ring-opacity-20 transition">
+                                    <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Password Requirements -->
+                        <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                            <div class="flex gap-3">
+                                <svg class="w-5 h-5 text-blue-600 dark:text-blue-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                                <div class="flex-1">
+                                    <h4 class="text-sm font-semibold text-blue-900 dark:text-blue-200 mb-1">متطلبات كلمة المرور</h4>
+                                    <ul class="text-sm text-blue-800 dark:text-blue-300 space-y-1">
+                                        <li>• يجب أن تكون 8 أحرف على الأقل</li>
+                                        <li>• يُفضل استخدام مزيج من الأحرف والأرقام والرموز</li>
+                                        <li>• تجنب استخدام معلومات شخصية واضحة</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex justify-end pt-4 border-t border-gray-200 dark:border-gray-700">
+                            <button type="submit" 
+                                    class="px-6 py-2.5 bg-violet-600 hover:bg-violet-700 text-white font-medium rounded-lg transition shadow-lg shadow-violet-500/20">
+                                تحديث كلمة المرور
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
                 <!-- Social Media Accounts -->
                 @if($influencer)
                 <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
