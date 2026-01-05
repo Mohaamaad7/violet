@@ -227,7 +227,7 @@ class ProductsTable
                     ->label('تصدير Excel')
                     ->exports([
                         \pxlrbt\FilamentExcel\Exports\ExcelExport::make()
-                            ->fromTable()
+                            ->fromModel()
                             ->withFilename('products-' . now()->format('Y-m-d'))
                     ]),
             ])
