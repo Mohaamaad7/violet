@@ -174,6 +174,9 @@ return [
         'max' => 'الحد الأقصى',
         'date_from' => 'من تاريخ',
         'date_to' => 'إلى تاريخ',
+        'all' => 'الكل',
+        'active' => 'نشط',
+        'inactive' => 'غير نشط',
     ],
 
     // Products
@@ -844,4 +847,51 @@ return [
         'egp_short' => 'ج.م',
         'egp_full' => 'جنيه مصري',
     ],
+
+    // مقالات المساعدة
+    'help_entries' => [
+        'title' => 'مقالات المساعدة',
+        'singular' => 'مقالة مساعدة',
+        'plural' => 'مقالات المساعدة',
+
+        'form' => [
+            'content_section' => 'محتوى المقالة',
+            'settings_section' => 'الإعدادات',
+            'question' => 'السؤال',
+            'answer' => 'الإجابة',
+            'category' => 'الفئة',
+            'slug' => 'الرابط المختصر',
+            'slug_help' => 'يتم توليده تلقائياً من السؤال',
+            'sort_order' => 'الترتيب',
+            'is_active' => 'نشط',
+            'is_active_help' => 'إظهار هذه المقالة في مركز المساعدة',
+        ],
+
+        'table' => [
+            'question' => 'السؤال',
+            'category' => 'الفئة',
+            'sort_order' => 'الترتيب',
+            'is_active' => 'نشط',
+            'updated_at' => 'آخر تحديث',
+        ],
+    ],
+
+    // مركز المساعدة
+    'help_center' => [
+        'title' => 'مركز المساعدة',
+        'subtitle' => 'دليل استخدام النظام',
+        'search_placeholder' => 'ابحث عن سؤال...',
+        'no_results' => 'لا توجد نتائج للبحث',
+        'no_entries' => 'لا توجد مقالات مساعدة حالياً',
+        'questions_count' => 'سؤال|أسئلة',
+        'categories' => [
+            'orders' => 'الطلبات',
+            'products' => 'المنتجات',
+            'marketing' => 'التسويق',
+            'inventory' => 'المخزون',
+            'sales' => 'المبيعات',
+            'system' => 'النظام',
+        ],
+    ],
 ];
+
