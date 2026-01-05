@@ -92,11 +92,12 @@
                 @endif
             </div>
 
-            {{-- Stock Indicator - Minimal --}}
+            {{-- Stock Indicator --}}
             @if($product->stock > 0)
                 <span class="w-2 h-2 bg-green-500 rounded-full" title="{{ __('store.product_details.in_stock') }}"></span>
             @else
-                <span class="w-2 h-2 bg-red-400 rounded-full" title="{{ __('store.product.out_of_stock') }}"></span>
+                <span
+                    class="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded">{{ __('store.out_of_stock') }}</span>
             @endif
         </div>
 
