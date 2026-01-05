@@ -167,6 +167,7 @@ class FrontendTranslationsSeeder extends Seeder
             ['key' => 'store.cart.add_more_for_free_shipping', 'en' => 'Add :amount more for free shipping', 'ar' => 'أضف :amount للحصول على شحن مجاني', 'group' => 'store'],
             ['key' => 'store.cart.close', 'en' => 'Close', 'ar' => 'إغلاق', 'group' => 'store'],
             ['key' => 'store.cart.view_full_cart', 'en' => 'View Full Cart', 'ar' => 'عرض السلة الكاملة', 'group' => 'store'],
+            ['key' => 'out_of_stock', 'en' => 'out of stock', 'ar' => 'غير متوفر', 'group' => 'store'],
 
             // Currency
             ['key' => 'store.currency.sar', 'en' => 'SAR', 'ar' => 'ر.س', 'group' => 'store'],
