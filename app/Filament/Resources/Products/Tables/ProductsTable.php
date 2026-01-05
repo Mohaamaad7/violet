@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Products\Tables;
 
+use App\Exports\ProductTemplateExport;
 use App\Models\Product;
 use Filament\Actions\BulkAction;
 use Filament\Actions\BulkActionGroup;
@@ -20,6 +21,7 @@ use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Maatwebsite\Excel\Facades\Excel;
 
 class ProductsTable
 {
@@ -295,6 +297,19 @@ class ProductsTable
                         })
                         ->deselectRecordsAfterCompletion()
                         ->successNotificationTitle(__('admin.message.unfeatured')),
+
+                    // Export Selected as Template
+                    BulkAction::make('export_template')
+                        ->label(__('admin.import.export_selected_template'))
+                        ->icon('heroicon-o-document-arrow-down')
+                        ->color('info')
+                        ->action(function (Collection $records) {
+                            return Excel::download(
+                                new ProductTemplateExport($records),
+                                'products-template-' . now()->format('Y-m-d-His') . '.xlsx'
+                            );
+                        })
+                        ->deselectRecordsAfterCompletion(),
 
                     DeleteBulkAction::make()
                         ->visible(fn() => auth()->user()->can('delete products')),
