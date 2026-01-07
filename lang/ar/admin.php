@@ -156,6 +156,12 @@ return [
         'view' => 'عرض',
         'create' => 'إنشاء',
         'export_excel' => 'تصدير Excel',
+        // Bulk Actions
+        'publish_selected' => 'نشر المحدد',
+        'unpublish_selected' => 'إلغاء نشر المحدد',
+        'mark_featured' => 'تمييز كـ مميز',
+        'remove_featured' => 'إزالة التمييز',
+        'delete_selected' => 'حذف المحدد',
     ],
 
     // Status Values
