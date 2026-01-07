@@ -177,31 +177,31 @@ class Product extends Model implements HasMedia
             ->useDisk('public')
             ->registerMediaConversions(function () {
                 // Small thumbnail for quick loading (wishlist, mini cart)
-                // keepOriginalImageFormat() preserves PNG transparency
+                // fit(Contain) places entire image inside canvas with white padding
                 $this
                     ->addMediaConversion('thumbnail')
-                    ->width(150)
-                    ->height(150)
+                    ->fit(\Spatie\Image\Enums\Fit::Contain, 150, 150)
                     ->sharpen(10)
                     ->keepOriginalImageFormat()
                     ->background('#ffffff');
 
-                // Card-sized image for product listings (optimized for cards)
+                // Card-sized image for product listings
+                // Uses Contain to show entire product without cropping
                 $this
                     ->addMediaConversion('card')
-                    ->width(400)
-                    ->height(400)
+                    ->fit(\Spatie\Image\Enums\Fit::Contain, 400, 400)
                     ->sharpen(10)
                     ->quality(90)
                     ->keepOriginalImageFormat()
                     ->background('#ffffff');
 
-                // Preview for product detail page
+                // High-quality preview for product detail page zoom
+                // Larger size for zoom quality, original is also preserved for max zoom
                 $this
                     ->addMediaConversion('preview')
-                    ->width(800)
-                    ->height(800)
+                    ->fit(\Spatie\Image\Enums\Fit::Contain, 1200, 1200)
                     ->sharpen(10)
+                    ->quality(95)
                     ->keepOriginalImageFormat()
                     ->background('#ffffff');
             });
