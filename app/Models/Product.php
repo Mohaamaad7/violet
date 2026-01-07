@@ -177,11 +177,14 @@ class Product extends Model implements HasMedia
             ->useDisk('public')
             ->registerMediaConversions(function () {
                 // Small thumbnail for quick loading (wishlist, mini cart)
+                // keepOriginalImageFormat() preserves PNG transparency
                 $this
                     ->addMediaConversion('thumbnail')
                     ->width(150)
                     ->height(150)
-                    ->sharpen(10);
+                    ->sharpen(10)
+                    ->keepOriginalImageFormat()
+                    ->background('#ffffff');
 
                 // Card-sized image for product listings (optimized for cards)
                 $this
@@ -189,14 +192,18 @@ class Product extends Model implements HasMedia
                     ->width(400)
                     ->height(400)
                     ->sharpen(10)
-                    ->quality(90);
+                    ->quality(90)
+                    ->keepOriginalImageFormat()
+                    ->background('#ffffff');
 
                 // Preview for product detail page
                 $this
                     ->addMediaConversion('preview')
                     ->width(800)
                     ->height(800)
-                    ->sharpen(10);
+                    ->sharpen(10)
+                    ->keepOriginalImageFormat()
+                    ->background('#ffffff');
             });
     }
 }

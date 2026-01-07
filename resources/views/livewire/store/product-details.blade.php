@@ -24,7 +24,7 @@
                             <img 
                                 src="{{ $media->hasGeneratedConversion('thumbnail') ? $media->getUrl('thumbnail') : $media->getUrl() }}" 
                                 alt="Thumbnail {{ $loop->iteration }}"
-                                class="w-full h-full object-cover"
+                                class="w-full h-full object-contain bg-white"
                             >
                         </button>
                     @endforeach
