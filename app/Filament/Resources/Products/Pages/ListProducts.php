@@ -175,23 +175,36 @@ class ListProducts extends ListRecords
             }
 
             if ($importResult['success']) {
-                $message = $mode === 'create'
-                    ? __('admin.import.created_success', ['count' => $importResult['processed']])
-                    : __('admin.import.updated_success', ['count' => $importResult['processed']]);
+                // Build detailed summary
+                $summaryLines = [];
+                if ($mode === 'create') {
+                    $summaryLines[] = '✅ تم إضافة ' . $importResult['processed'] . ' منتج جديد';
+                } else {
+                    $summaryLines[] = '✅ تم تحديث ' . $importResult['processed'] . ' منتج';
+                }
+
+                if ($importResult['errors'] > 0) {
+                    $summaryLines[] = '⚠️ ' . $importResult['errors'] . ' خطأ';
+                }
 
                 Notification::make()
-                    ->title(__('admin.import.success'))
-                    ->body($message)
+                    ->title($mode === 'create' ? 'تمت الإضافة بنجاح' : 'تم التحديث بنجاح')
+                    ->body(implode("\n", $summaryLines))
                     ->success()
+                    ->persistent()
                     ->send();
             } else {
+                // Build error summary
+                $errorDetails = [];
+                foreach (array_slice($importResult['errorDetails'], 0, 3) as $err) {
+                    $errorDetails[] = '• السطر ' . $err['row'] . ': ' . $err['message'];
+                }
+
                 Notification::make()
-                    ->title(__('admin.import.partial_success'))
-                    ->body(__('admin.import.some_errors', [
-                        'processed' => $importResult['processed'],
-                        'errors' => $importResult['errors']
-                    ]))
+                    ->title('تم جزئياً - ' . $importResult['processed'] . ' نجح، ' . $importResult['errors'] . ' فشل')
+                    ->body(implode("\n", $errorDetails))
                     ->warning()
+                    ->persistent()
                     ->send();
             }
 
