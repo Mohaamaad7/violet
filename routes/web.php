@@ -89,6 +89,19 @@ Route::prefix('admin/products')->middleware(['auth'])->name('admin.products.')->
     Route::post('images/{image}/set-primary', [App\Http\Controllers\Admin\ProductImageController::class, 'setPrimary'])->name('images.set-primary');
     Route::delete('images/{image}', [App\Http\Controllers\Admin\ProductImageController::class, 'destroy'])->name('images.destroy');
     Route::post('{product}/images/update-order', [App\Http\Controllers\Admin\ProductImageController::class, 'updateOrder'])->name('images.update-order');
+
+    // Download Excel Template
+    Route::get('download-template', function () {
+        $mode = request()->get('mode', 'update');
+        $filename = $mode === 'create'
+            ? 'products-new-template-' . now()->format('Y-m-d') . '.xlsx'
+            : 'products-update-template-' . now()->format('Y-m-d') . '.xlsx';
+
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\ProductTemplateExport($mode),
+            $filename
+        );
+    })->name('download-template');
 });
 
 // Stock Count Reports (Admin)
@@ -193,15 +206,15 @@ Route::match(['get', 'post'], '/test-paymob-full', function () {
 require __DIR__ . '/auth.php';
 
 // Partners Panel - Password Update API
-Route::post('/partners/profile/update-password', function() {
+Route::post('/partners/profile/update-password', function () {
     $user = Auth::user();
-    
+
     if (!$user) {
         return response()->json(['success' => false, 'message' => 'غير مصرح'], 401);
     }
-    
+
     $data = request()->all();
-    
+
     // Validate current password
     if (!Hash::check($data['current_password'] ?? '', $user->password)) {
         return response()->json([
@@ -209,7 +222,7 @@ Route::post('/partners/profile/update-password', function() {
             'message' => 'كلمة المرور الحالية غير صحيحة'
         ]);
     }
-    
+
     // Validate new password
     if (strlen($data['new_password'] ?? '') < 8) {
         return response()->json([
@@ -217,7 +230,7 @@ Route::post('/partners/profile/update-password', function() {
             'message' => 'يجب أن تكون كلمة المرور 8 أحرف على الأقل'
         ]);
     }
-    
+
     // Validate confirmation
     if (($data['new_password'] ?? '') !== ($data['new_password_confirmation'] ?? '')) {
         return response()->json([
@@ -225,12 +238,12 @@ Route::post('/partners/profile/update-password', function() {
             'message' => 'كلمة المرور الجديدة وتأكيدها غير متطابقين'
         ]);
     }
-    
+
     // Update password
     $user->update([
         'password' => Hash::make($data['new_password'])
     ]);
-    
+
     return response()->json([
         'success' => true,
         'message' => 'تم تحديث كلمة المرور بنجاح. سيتم تسجيل خروجك الآن...'

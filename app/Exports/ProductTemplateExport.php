@@ -2,6 +2,7 @@
 
 namespace App\Exports;
 
+use App\Models\Product;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
@@ -11,42 +12,41 @@ use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Cell\DataValidation;
 use Illuminate\Support\Collection;
 
 class ProductTemplateExport implements FromCollection, WithHeadings, WithStyles, ShouldAutoSize, WithColumnFormatting
 {
     protected Collection $products;
-    protected bool $emptyTemplate;
+    protected string $mode; // 'create' or 'update'
 
     /**
-     * @param Collection|null $products Products to export, null for empty template
+     * @param string $mode 'create' for new products, 'update' for existing
+     * @param Collection|null $products Products to export (for update mode)
      */
-    public function __construct(?Collection $products = null)
+    public function __construct(string $mode = 'update', ?Collection $products = null)
     {
-        $this->products = $products ?? collect();
-        $this->emptyTemplate = $products === null || $products->isEmpty();
+        $this->mode = $mode;
+
+        if ($mode === 'update') {
+            // For update mode, use provided products or get all
+            $this->products = $products ?? Product::all();
+        } else {
+            // For create mode, empty collection
+            $this->products = collect();
+        }
     }
 
     public function collection()
     {
-        if ($this->emptyTemplate) {
-            // Return empty row with example data for reference
+        if ($this->mode === 'create') {
+            // Empty template with example row
             return collect([
-                [
-                    'id' => '(مثال: 1)',
-                    'sku' => '(مثال: SKU-001)',
-                    'name' => '(مثال: اسم المنتج)',
-                    'category_name' => '(للمعلومات فقط)',
-                    'price' => '100.00',
-                    'sale_price' => '80.00',
-                    'cost_price' => '50.00',
-                    'stock' => '100',
-                    'low_stock_threshold' => '10',
-                    'status' => 'active',
-                ]
+                $this->getExampleRow(),
             ]);
         }
 
+        // Update mode - export products
         return $this->products->map(function ($product) {
             return [
                 'id' => $product->id,
@@ -56,25 +56,57 @@ class ProductTemplateExport implements FromCollection, WithHeadings, WithStyles,
                 'price' => $product->price,
                 'sale_price' => $product->sale_price,
                 'cost_price' => $product->cost_price,
-                'stock' => $product->stock,
-                'low_stock_threshold' => $product->low_stock_threshold,
                 'status' => $product->status,
             ];
         });
     }
 
+    protected function getExampleRow(): array
+    {
+        if ($this->mode === 'create') {
+            return [
+                'name' => '(مثال: اسم المنتج)',
+                'sku' => '(اختياري: SKU-001)',
+                'category_id' => '(مثال: 1)',
+                'price' => '100.00',
+                'sale_price' => '80.00',
+                'cost_price' => '50.00',
+                'stock' => '100',
+                'low_stock_threshold' => '10',
+                'status' => 'active',
+                'description' => '(اختياري: وصف المنتج)',
+            ];
+        }
+
+        return [];
+    }
+
     public function headings(): array
     {
+        if ($this->mode === 'create') {
+            return [
+                'الاسم (مطلوب)',
+                'الكود SKU',
+                'معرف التصنيف',
+                'السعر (مطلوب)',
+                'سعر التخفيض',
+                'سعر التكلفة',
+                'المخزون (مطلوب)',
+                'حد المخزون المنخفض',
+                'الحالة (مطلوب)',
+                'الوصف',
+            ];
+        }
+
+        // Update mode headings
         return [
             'المعرف (ID) - لا تعدّل',
-            'الكود (SKU) - لا تعدّل',
+            'الكود (SKU) - للمعلومات',
             'الاسم',
-            'التصنيف (للمعلومات)',
+            'التصنيف - للمعلومات',
             'السعر',
             'سعر التخفيض',
             'سعر التكلفة',
-            'المخزون',
-            'حد المخزون المنخفض',
             'الحالة (active/inactive/draft)',
         ];
     }
@@ -84,8 +116,10 @@ class ProductTemplateExport implements FromCollection, WithHeadings, WithStyles,
         // RTL support
         $sheet->setRightToLeft(true);
 
+        $columnCount = $this->mode === 'create' ? 'J' : 'H';
+
         // Header row styling
-        $sheet->getStyle('A1:J1')->applyFromArray([
+        $sheet->getStyle("A1:{$columnCount}1")->applyFromArray([
             'font' => [
                 'bold' => true,
                 'color' => ['rgb' => 'FFFFFF'],
@@ -93,7 +127,7 @@ class ProductTemplateExport implements FromCollection, WithHeadings, WithStyles,
             ],
             'fill' => [
                 'fillType' => Fill::FILL_SOLID,
-                'startColor' => ['rgb' => '667eea'],
+                'startColor' => ['rgb' => $this->mode === 'create' ? '10b981' : '667eea'],
             ],
             'alignment' => [
                 'horizontal' => Alignment::HORIZONTAL_CENTER,
@@ -107,47 +141,84 @@ class ProductTemplateExport implements FromCollection, WithHeadings, WithStyles,
             ],
         ]);
 
-        // Read-only columns (ID, SKU, Category) - light gray background
-        $lastRow = $this->products->count() + 1;
-        if ($lastRow > 1) {
-            $sheet->getStyle("A2:B{$lastRow}")->applyFromArray([
-                'fill' => [
-                    'fillType' => Fill::FILL_SOLID,
-                    'startColor' => ['rgb' => 'f3f4f6'],
-                ],
-            ]);
-            $sheet->getStyle("D2:D{$lastRow}")->applyFromArray([
-                'fill' => [
-                    'fillType' => Fill::FILL_SOLID,
-                    'startColor' => ['rgb' => 'f3f4f6'],
-                ],
-            ]);
+        // For update mode, mark read-only columns
+        if ($this->mode === 'update') {
+            $lastRow = $this->products->count() + 1;
+            if ($lastRow > 1) {
+                // ID and SKU columns - gray (read-only)
+                $sheet->getStyle("A2:B{$lastRow}")->applyFromArray([
+                    'fill' => [
+                        'fillType' => Fill::FILL_SOLID,
+                        'startColor' => ['rgb' => 'e5e7eb'],
+                    ],
+                ]);
+                // Category column - gray (info only)
+                $sheet->getStyle("D2:D{$lastRow}")->applyFromArray([
+                    'fill' => [
+                        'fillType' => Fill::FILL_SOLID,
+                        'startColor' => ['rgb' => 'e5e7eb'],
+                    ],
+                ]);
+            }
+
+            // Status dropdown for update mode (column H)
+            $this->addStatusValidation($sheet, 'H');
+        } else {
+            // Status dropdown for create mode (column I)
+            $this->addStatusValidation($sheet, 'I');
         }
 
         // Set row height for header
         $sheet->getRowDimension(1)->setRowHeight(25);
 
-        // Add data validation for status column
-        $validation = $sheet->getCell('J2')->getDataValidation();
-        $validation->setType(\PhpOffice\PhpSpreadsheet\Cell\DataValidation::TYPE_LIST);
-        $validation->setErrorStyle(\PhpOffice\PhpSpreadsheet\Cell\DataValidation::STYLE_INFORMATION);
+        return [];
+    }
+
+    protected function addStatusValidation(Worksheet $sheet, string $column): void
+    {
+        $validation = $sheet->getCell("{$column}2")->getDataValidation();
+        $validation->setType(DataValidation::TYPE_LIST);
+        $validation->setErrorStyle(DataValidation::STYLE_INFORMATION);
         $validation->setAllowBlank(false);
         $validation->setShowInputMessage(true);
         $validation->setShowErrorMessage(true);
         $validation->setShowDropDown(true);
         $validation->setFormula1('"active,inactive,draft"');
-
-        return [];
     }
 
     public function columnFormats(): array
     {
+        if ($this->mode === 'create') {
+            return [
+                'D' => '#,##0.00', // Price
+                'E' => '#,##0.00', // Sale Price
+                'F' => '#,##0.00', // Cost Price
+                'G' => '#,##0',    // Stock
+                'H' => '#,##0',    // Low Stock Threshold
+            ];
+        }
+
+        // Update mode
         return [
             'E' => '#,##0.00', // Price
             'F' => '#,##0.00', // Sale Price
             'G' => '#,##0.00', // Cost Price
-            'H' => '#,##0',    // Stock
-            'I' => '#,##0',    // Low Stock Threshold
         ];
+    }
+
+    /**
+     * Get the export mode
+     */
+    public function getMode(): string
+    {
+        return $this->mode;
+    }
+
+    /**
+     * Get count of products being exported
+     */
+    public function getCount(): int
+    {
+        return $this->products->count();
     }
 }

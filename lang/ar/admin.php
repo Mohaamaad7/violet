@@ -896,22 +896,47 @@ return [
 
     // استيراد/تصدير Excel
     'import' => [
+        // العناوين
+        'wizard_title' => 'استيراد/تصدير المنتجات',
         'title' => 'استيراد من Excel',
-        'export_template' => 'تصدير كقالب',
-        'export_selected_template' => 'تصدير المحدد كقالب',
-        'download_empty_template' => 'تحميل قالب فارغ',
-        'upload_file' => 'اختر ملف Excel',
-        'upload_help' => 'ارفع ملف Excel يحتوي على المنتجات للتحديث. يجب أن يحتوي الملف على عمود المعرف (ID) أو الكود (SKU).',
-        'importing' => 'جاري الاستيراد...',
-        'success' => 'تم الاستيراد بنجاح',
-        'success_count' => 'تم تحديث :count منتج',
-        'no_updates' => 'لم يتم تحديث أي منتجات',
-        'error' => 'حدث خطأ أثناء الاستيراد',
-        'validation_errors' => 'أخطاء في البيانات',
-        'row_error' => 'السطر :row: :message',
-        'file_required' => 'يرجى اختيار ملف Excel',
-        'products_exported' => 'تم تصدير :count منتج',
-        'empty_selection' => 'يرجى اختيار منتج واحد على الأقل',
+
+        // أزرار التحميل
+        'download_create_template' => 'قالب إضافة منتجات جديدة',
+        'download_update_template' => 'قالب تحديث كل المنتجات',
+        'export_selected_template' => 'تصدير المحدد للتحديث',
+        'download_template' => 'تحميل القالب',
+
+        // أزرار الاستيراد
+        'import_new' => 'استيراد منتجات جديدة',
+        'import_update' => 'استيراد تحديثات',
+
+        // الملف
+        'upload_file' => 'ملف Excel',
+        'upload_create_help' => 'ارفع ملف Excel يحتوي على المنتجات الجديدة. راجع القالب للأعمدة المطلوبة.',
+        'upload_update_help' => 'ارفع ملف Excel يحتوي على التحديثات. يجب أن يحتوي على عمود المعرف (ID).',
+        'file_not_found' => 'الملف غير موجود',
+
+        // التحقق
+        'validation_passed' => 'البيانات صحيحة ✓',
+        'validation_failed' => 'يوجد :count خطأ',
+        'row' => 'السطر',
+        'more_errors' => 'و :count خطأ آخر...',
+
+        // النتائج
+        'success' => 'تم بنجاح',
+        'created_success' => 'تم إضافة :count منتج جديد',
+        'updated_success' => 'تم تحديث :count منتج',
+        'partial_success' => 'تم جزئياً',
+        'some_errors' => 'تم معالجة :processed، فشل :errors',
+        'error' => 'حدث خطأ',
+
+        // معلومات
+        'stock_warning' => 'لن يتم تعديل المخزون - استخدم حركات المخزون',
+        'update_all_desc' => 'سيتم تصدير :count منتج للتحديث',
+        'create_template_desc' => 'قالب فارغ لإضافة منتجات جديدة',
+
+        // إغلاق
+        'close' => 'إغلاق',
     ],
 ];
 
