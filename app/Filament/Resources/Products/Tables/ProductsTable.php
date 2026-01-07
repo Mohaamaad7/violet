@@ -298,15 +298,15 @@ class ProductsTable
                         ->deselectRecordsAfterCompletion()
                         ->successNotificationTitle(__('admin.message.unfeatured')),
 
-                    // Export Selected as Template
+                    // Export Selected as Template (for updates)
                     BulkAction::make('export_template')
                         ->label(__('admin.import.export_selected_template'))
                         ->icon('heroicon-o-document-arrow-down')
                         ->color('info')
                         ->action(function (Collection $records) {
                             return Excel::download(
-                                new ProductTemplateExport($records),
-                                'products-template-' . now()->format('Y-m-d-His') . '.xlsx'
+                                new ProductTemplateExport('update', $records),
+                                'products-selected-' . now()->format('Y-m-d-His') . '.xlsx'
                             );
                         })
                         ->deselectRecordsAfterCompletion(),

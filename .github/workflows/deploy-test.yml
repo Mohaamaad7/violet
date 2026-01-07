@@ -1,0 +1,41 @@
+name: Deploy Test Branch
+
+# يشتغل بس لما ترفع على test branch
+on:
+  push:
+    branches:
+      - test
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # جلب الكود من GitHub
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      # النشر على بيئة الاختبار
+      - name: Deploy to Test Environment
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          port: ${{ secrets.SSH_PORT }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            echo "🧪 بدء النشر على بيئة الاختبار..."
+            
+            # الانتقال لمجلد test
+            cd ${{ secrets.TEST_DEPLOY_PATH }}
+            
+            # سحب آخر التحديثات من test branch
+            git fetch --all
+            git reset --hard origin/test
+            
+            # تعديل الصلاحيات
+            find . -type f -exec chmod 644 {} \;
+            find . -type d -exec chmod 755 {} \;
+            
+            echo "✅ تم النشر على بيئة الاختبار بنجاح!"
+            echo "Test deployment at $(date)" >> ~/test-deploy-log.txt
