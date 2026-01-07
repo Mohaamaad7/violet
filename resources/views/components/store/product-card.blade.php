@@ -4,8 +4,7 @@
 <div class="bg-white rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 group relative border border-gray-100"
     style="z-index: 1;">
     {{-- Product Image --}}
-    <a href="{{ route('product.show', $product->slug) }}"
-        class="block relative aspect-square bg-gray-50 overflow-hidden">
+    <a href="{{ route('product.show', $product->slug) }}" class="block relative aspect-square bg-white overflow-hidden">
         @php
             // Get primary image from Spatie Media Library
             $primaryMedia = $product->getMedia('product-images')
@@ -28,7 +27,8 @@
         @endphp
 
         <img src="{{ $imagePath }}" alt="{{ $product->name }}"
-            class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" loading="lazy" />
+            class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
+            loading="lazy" />
 
         {{-- Sale Badge - Minimal Style --}}
         @if($product->is_on_sale)
