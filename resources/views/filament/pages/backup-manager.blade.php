@@ -1,0 +1,194 @@
+<x-filament-panels::page>
+    <div class="space-y-6">
+        {{-- Header Stats --}}
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <x-filament::section>
+                <div class="flex items-center gap-3">
+                    <div class="p-3 bg-primary-100 dark:bg-primary-900/30 rounded-lg">
+                        <x-heroicon-o-archive-box class="w-6 h-6 text-primary-500" />
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('admin.backup.total_backups') }}</p>
+                        <p class="text-2xl font-bold">{{ count($this->getBackups()) }}</p>
+                    </div>
+                </div>
+            </x-filament::section>
+
+            <x-filament::section>
+                <div class="flex items-center gap-3">
+                    <div class="p-3 bg-success-100 dark:bg-success-900/30 rounded-lg">
+                        <x-heroicon-o-server-stack class="w-6 h-6 text-success-500" />
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('admin.backup.total_size') }}</p>
+                        <p class="text-2xl font-bold">{{ $this->getTotalBackupSize() }}</p>
+                    </div>
+                </div>
+            </x-filament::section>
+
+            <x-filament::section>
+                <div class="flex items-center gap-3">
+                    <div class="p-3 bg-warning-100 dark:bg-warning-900/30 rounded-lg">
+                        <x-heroicon-o-clock class="w-6 h-6 text-warning-500" />
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('admin.backup.retention') }}</p>
+                        <p class="text-2xl font-bold">
+                            {{ config('backup.cleanup.default_strategy.keep_all_backups_for_days', 7) }}
+                            {{ __('admin.backup.days') }}</p>
+                    </div>
+                </div>
+            </x-filament::section>
+        </div>
+
+        {{-- Create New Backup --}}
+        <x-filament::section>
+            <x-slot name="heading">
+                {{ __('admin.backup.create_new') }}
+            </x-slot>
+
+            <div class="flex flex-wrap items-center gap-4">
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" wire:model.live="includeDatabase"
+                        class="rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
+                        checked>
+                    <span class="flex items-center gap-1">
+                        <x-heroicon-o-circle-stack class="w-4 h-4" />
+                        {{ __('admin.backup.include_database') }}
+                    </span>
+                </label>
+
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" wire:model.live="includeFiles"
+                        class="rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
+                        checked>
+                    <span class="flex items-center gap-1">
+                        <x-heroicon-o-folder class="w-4 h-4" />
+                        {{ __('admin.backup.include_files') }}
+                    </span>
+                </label>
+
+                <div class="text-xs text-gray-500 dark:text-gray-400 px-2">
+                    @if($includeDatabase && $includeFiles)
+                        <span class="text-green-600 dark:text-green-400">● {{ __('admin.backup.type_full') }}</span>
+                    @elseif($includeDatabase)
+                        <span class="text-blue-600 dark:text-blue-400">● {{ __('admin.backup.type_db_only') }}</span>
+                    @elseif($includeFiles)
+                        <span class="text-yellow-600 dark:text-yellow-400">● {{ __('admin.backup.type_files_only') }}</span>
+                    @else
+                        <span class="text-red-600 dark:text-red-400">⚠ {{ __('admin.backup.select_at_least_one') }}</span>
+                    @endif
+                </div>
+
+                <x-filament::button 
+                    wire:click="createBackup" 
+                    wire:loading.attr="disabled" 
+                    icon="heroicon-o-plus"
+                    :disabled="!$includeDatabase && !$includeFiles">
+                    <span wire:loading.remove wire:target="createBackup">{{ __('admin.backup.create') }}</span>
+                    <span wire:loading wire:target="createBackup">{{ __('admin.backup.creating') }}...</span>
+                </x-filament::button>
+
+                {{-- Cleanup Button with Tooltip --}}
+                <div class="relative group">
+                    <x-filament::button 
+                        wire:click="runCleanup" 
+                        wire:loading.attr="disabled" 
+                        color="gray"
+                        icon="heroicon-o-funnel">
+                        {{ __('admin.backup.cleanup') }}
+                    </x-filament::button>
+                    <div class="absolute bottom-full mb-2 right-0 hidden group-hover:block z-50">
+                        <div class="bg-gray-900 text-white text-xs rounded py-2 px-3 whitespace-nowrap shadow-lg">
+                            {{ __('admin.backup.cleanup_tooltip') }}
+                            <div class="absolute top-full right-4 border-4 border-transparent border-t-gray-900"></div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Delete All Button --}}
+                <x-filament::button 
+                    wire:click="deleteAllBackups" 
+                    wire:confirm="{{ __('admin.backup.confirm_delete_all') }}"
+                    wire:loading.attr="disabled" 
+                    color="danger"
+                    icon="heroicon-o-trash">
+                    {{ __('admin.backup.delete_all') }}
+                </x-filament::button>
+            </div>
+        </x-filament::section>
+
+        {{-- Existing Backups List --}}
+        <x-filament::section>
+            <x-slot name="heading">
+                {{ __('admin.backup.existing_backups') }}
+            </x-slot>
+
+            @php $backups = $this->getBackups(); @endphp
+
+            @if(empty($backups))
+                <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+                    <x-heroicon-o-archive-box class="w-12 h-12 mx-auto mb-3 opacity-50" />
+                    <p>{{ __('admin.backup.no_backups') }}</p>
+                </div>
+            @else
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm">
+                        <thead class="bg-gray-50 dark:bg-gray-800">
+                            <tr>
+                                <th class="px-4 py-3 text-right font-medium text-gray-600 dark:text-gray-300">
+                                    {{ __('admin.backup.filename') }}</th>
+                                <th class="px-4 py-3 text-right font-medium text-gray-600 dark:text-gray-300">
+                                    {{ __('admin.backup.type') }}</th>
+                                <th class="px-4 py-3 text-right font-medium text-gray-600 dark:text-gray-300">
+                                    {{ __('admin.backup.size') }}</th>
+                                <th class="px-4 py-3 text-right font-medium text-gray-600 dark:text-gray-300">
+                                    {{ __('admin.backup.created_at') }}</th>
+                                <th class="px-4 py-3 text-center font-medium text-gray-600 dark:text-gray-300">
+                                    {{ __('admin.backup.actions') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y dark:divide-gray-700">
+                            @foreach($backups as $backup)
+                                <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                                    <td class="px-4 py-3">
+                                        <div class="flex items-center gap-2">
+                                            <x-heroicon-o-archive-box class="w-5 h-5 text-gray-400" />
+                                            <span class="font-mono text-sm">{{ $backup['filename'] }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <span class="px-2 py-1 text-xs rounded-full font-medium
+                                            @if($backup['type']['color'] === 'success') bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400
+                                            @elseif($backup['type']['color'] === 'info') bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400
+                                            @elseif($backup['type']['color'] === 'warning') bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400
+                                            @else bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400
+                                            @endif">
+                                            {{ $backup['type']['label'] }}
+                                        </span>
+                                    </td>
+                                    <td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ $backup['size'] }}</td>
+                                    <td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ $backup['created_at'] }}</td>
+                                    <td class="px-4 py-3">
+                                        <div class="flex items-center justify-center gap-2">
+                                            <x-filament::button wire:click="downloadBackup('{{ $backup['path'] }}')" size="sm"
+                                                color="success" icon="heroicon-o-arrow-down-tray">
+                                                {{ __('admin.backup.download') }}
+                                            </x-filament::button>
+
+                                            <x-filament::button wire:click="deleteBackup('{{ $backup['path'] }}')"
+                                                wire:confirm="{{ __('admin.backup.confirm_delete') }}" size="sm" color="danger"
+                                                icon="heroicon-o-trash">
+                                                {{ __('admin.backup.delete') }}
+                                            </x-filament::button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
+        </x-filament::section>
+    </div>
+</x-filament-panels::page>
