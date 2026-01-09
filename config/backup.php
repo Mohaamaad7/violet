@@ -13,9 +13,10 @@ return [
             'files' => [
                 /*
                  * The list of directories and files that will be included in the backup.
-                 * We only backup user-uploaded files in storage/app/public
+                 * We include the entire project + storage files
                  */
                 'include' => [
+                    base_path(),
                     storage_path('app/public'),
                 ],
 
@@ -25,12 +26,16 @@ return [
                  * Directories used by the backup process will automatically be excluded.
                  */
                 'exclude' => [
-                    // Exclude any temp or cache folders if they exist
-                    storage_path('app/public/.gitignore'),
+                    base_path('vendor'),
+                    base_path('node_modules'),
+                    base_path('.git'),
+                    storage_path('app/backup-temp'),
+                    storage_path('logs'),
                 ],
 
                 /*
                  * Determines if symlinks should be followed.
+                 * IMPORTANT: Must be true to include storage/app/public files via public/storage symlink
                  */
                 'follow_links' => true,
 
@@ -44,7 +49,7 @@ return [
                  * Set to `null` to include complete absolute path
                  * Example: base_path()
                  */
-                'relative_path' => storage_path('app/public'),
+                'relative_path' => base_path(),
             ],
 
             /*
