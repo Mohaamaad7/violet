@@ -89,9 +89,31 @@
                     <span wire:loading wire:target="createBackup">{{ __('admin.backup.creating') }}...</span>
                 </x-filament::button>
 
-                <x-filament::button wire:click="runCleanup" wire:loading.attr="disabled" color="gray"
+                {{-- Cleanup Button with Tooltip --}}
+                <div class="relative group">
+                    <x-filament::button 
+                        wire:click="runCleanup" 
+                        wire:loading.attr="disabled" 
+                        color="gray"
+                        icon="heroicon-o-funnel">
+                        {{ __('admin.backup.cleanup') }}
+                    </x-filament::button>
+                    <div class="absolute bottom-full mb-2 right-0 hidden group-hover:block z-50">
+                        <div class="bg-gray-900 text-white text-xs rounded py-2 px-3 whitespace-nowrap shadow-lg">
+                            {{ __('admin.backup.cleanup_tooltip') }}
+                            <div class="absolute top-full right-4 border-4 border-transparent border-t-gray-900"></div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Delete All Button --}}
+                <x-filament::button 
+                    wire:click="deleteAllBackups" 
+                    wire:confirm="{{ __('admin.backup.confirm_delete_all') }}"
+                    wire:loading.attr="disabled" 
+                    color="danger"
                     icon="heroicon-o-trash">
-                    {{ __('admin.backup.cleanup') }}
+                    {{ __('admin.backup.delete_all') }}
                 </x-filament::button>
             </div>
         </x-filament::section>

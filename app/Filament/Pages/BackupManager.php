@@ -294,6 +294,40 @@ class BackupManager extends Page
     }
 
     /**
+     * Delete ALL backup files
+     */
+    public function deleteAllBackups(): void
+    {
+        $backups = $this->getBackups();
+        $count = count($backups);
+
+        if ($count === 0) {
+            Notification::make()
+                ->title(__('admin.backup.no_backups'))
+                ->warning()
+                ->send();
+            return;
+        }
+
+        $disk = Storage::disk('local');
+
+        foreach ($backups as $backup) {
+            $disk->delete($backup['path']);
+        }
+
+        activity()
+            ->causedBy(auth()->user())
+            ->withProperties(['count' => $count])
+            ->log('تم حذف جميع النسخ الاحتياطية: ' . $count . ' نسخة');
+
+        Notification::make()
+            ->title(__('admin.backup.deleted_all_success'))
+            ->body(__('admin.backup.deleted_count', ['count' => $count]))
+            ->success()
+            ->send();
+    }
+
+    /**
      * Format bytes to human readable format
      */
     protected function formatBytes(int $bytes, int $precision = 2): string
