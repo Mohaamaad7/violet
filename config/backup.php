@@ -13,9 +13,10 @@ return [
             'files' => [
                 /*
                  * The list of directories and files that will be included in the backup.
+                 * We only backup user-uploaded files in storage/app/public
                  */
                 'include' => [
-                    base_path(),
+                    storage_path('app/public'),
                 ],
 
                 /*
@@ -24,26 +25,26 @@ return [
                  * Directories used by the backup process will automatically be excluded.
                  */
                 'exclude' => [
-                    base_path('vendor'),
-                    base_path('node_modules'),
+                    // Exclude any temp or cache folders if they exist
+                    storage_path('app/public/.gitignore'),
                 ],
 
                 /*
                  * Determines if symlinks should be followed.
                  */
-                'follow_links' => false,
+                'follow_links' => true,
 
                 /*
                  * Determines if it should avoid unreadable folders.
                  */
-                'ignore_unreadable_directories' => false,
+                'ignore_unreadable_directories' => true,
 
                 /*
                  * This path is used to make directories in resulting zip-file relative
                  * Set to `null` to include complete absolute path
                  * Example: base_path()
                  */
-                'relative_path' => null,
+                'relative_path' => storage_path('app/public'),
             ],
 
             /*

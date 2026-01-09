@@ -93,6 +93,8 @@
                                 <th class="px-4 py-3 text-right font-medium text-gray-600 dark:text-gray-300">
                                     {{ __('admin.backup.filename') }}</th>
                                 <th class="px-4 py-3 text-right font-medium text-gray-600 dark:text-gray-300">
+                                    {{ __('admin.backup.type') }}</th>
+                                <th class="px-4 py-3 text-right font-medium text-gray-600 dark:text-gray-300">
                                     {{ __('admin.backup.size') }}</th>
                                 <th class="px-4 py-3 text-right font-medium text-gray-600 dark:text-gray-300">
                                     {{ __('admin.backup.created_at') }}</th>
@@ -108,6 +110,16 @@
                                             <x-heroicon-o-archive-box class="w-5 h-5 text-gray-400" />
                                             <span class="font-mono text-sm">{{ $backup['filename'] }}</span>
                                         </div>
+                                    </td>
+                                    <td class="px-4 py-3">
+                                        <span class="px-2 py-1 text-xs rounded-full font-medium
+                                            @if($backup['type']['color'] === 'success') bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400
+                                            @elseif($backup['type']['color'] === 'info') bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400
+                                            @elseif($backup['type']['color'] === 'warning') bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400
+                                            @else bg-gray-100 text-gray-700 dark:bg-gray-900/30 dark:text-gray-400
+                                            @endif">
+                                            {{ $backup['type']['label'] }}
+                                        </span>
                                     </td>
                                     <td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ $backup['size'] }}</td>
                                     <td class="px-4 py-3 text-gray-600 dark:text-gray-400">{{ $backup['created_at'] }}</td>

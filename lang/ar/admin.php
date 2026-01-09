@@ -1078,6 +1078,11 @@ return [
         'cleanup' => 'تنظيف القديمة',
         'cleanup_success' => 'تم تنظيف النسخ القديمة',
         'cleanup_failed' => 'فشل تنظيف النسخ القديمة',
+        'type' => 'النوع',
+        'type_full' => 'كاملة (DB + ملفات)',
+        'type_db_only' => 'قاعدة بيانات فقط',
+        'type_files_only' => 'ملفات فقط',
+        'type_unknown' => 'غير محدد',
     ],
 
     // Navigation

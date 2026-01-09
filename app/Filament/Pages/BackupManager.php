@@ -77,12 +77,15 @@ class BackupManager extends Page
 
         foreach ($files as $file) {
             if (str_ends_with($file, '.zip')) {
+                $sizeBytes = $disk->size($file);
+
                 $backups[] = [
                     'filename' => basename($file),
                     'path' => $file,
-                    'size' => $this->formatBytes($disk->size($file)),
-                    'size_bytes' => $disk->size($file),
+                    'size' => $this->formatBytes($sizeBytes),
+                    'size_bytes' => $sizeBytes,
                     'created_at' => date('Y-m-d H:i:s', $disk->lastModified($file)),
+                    'type' => $this->detectBackupType($disk->path($file), $sizeBytes),
                 ];
             }
         }
@@ -92,6 +95,64 @@ class BackupManager extends Page
 
         return $backups;
     }
+
+    /**
+     * Detect backup type by examining the zip contents
+     */
+    protected function detectBackupType(string $zipPath, int $sizeBytes): array
+    {
+        $type = [
+            'has_db' => false,
+            'has_files' => false,
+            'label' => __('admin.backup.type_unknown'),
+            'color' => 'gray',
+        ];
+
+        try {
+            $zip = new \ZipArchive();
+            if ($zip->open($zipPath) === true) {
+                for ($i = 0; $i < $zip->numFiles; $i++) {
+                    $filename = $zip->getNameIndex($i);
+
+                    // Check for database dump
+                    if (str_ends_with($filename, '.sql') || str_contains($filename, 'db-dumps')) {
+                        $type['has_db'] = true;
+                    }
+
+                    // Check for files (images, etc)
+                    if (preg_match('/\.(jpg|jpeg|png|gif|webp|svg|pdf|mp4|mp3)$/i', $filename)) {
+                        $type['has_files'] = true;
+                    }
+                }
+                $zip->close();
+            }
+        } catch (\Exception $e) {
+            // If we can't read the zip, use size heuristics
+            // DB-only backups are usually small (< 1MB)
+            // File backups are usually larger
+            if ($sizeBytes < 500 * 1024) { // < 500KB
+                $type['has_db'] = true;
+            } else {
+                $type['has_db'] = true;
+                $type['has_files'] = true;
+            }
+        }
+
+        // Set label and color based on type
+        if ($type['has_db'] && $type['has_files']) {
+            $type['label'] = __('admin.backup.type_full');
+            $type['color'] = 'success';
+        } elseif ($type['has_db']) {
+            $type['label'] = __('admin.backup.type_db_only');
+            $type['color'] = 'info';
+        } elseif ($type['has_files']) {
+            $type['label'] = __('admin.backup.type_files_only');
+            $type['color'] = 'warning';
+        }
+
+        return $type;
+    }
+
 
     /**
      * Create a new backup
