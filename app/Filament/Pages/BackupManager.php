@@ -153,12 +153,20 @@ class BackupManager extends Page
         return $type;
     }
 
-
     /**
      * Create a new backup
      */
     public function createBackup(): void
     {
+        // Validate at least one option is selected
+        if (!$this->includeDatabase && !$this->includeFiles) {
+            Notification::make()
+                ->title(__('admin.backup.select_at_least_one'))
+                ->danger()
+                ->send();
+            return;
+        }
+
         Notification::make()
             ->title(__('admin.backup.creating'))
             ->info()
@@ -166,28 +174,35 @@ class BackupManager extends Page
 
         try {
             $options = [];
+            $backupType = 'full';
 
             if ($this->includeDatabase && !$this->includeFiles) {
                 $options['--only-db'] = true;
+                $backupType = 'db_only';
             } elseif ($this->includeFiles && !$this->includeDatabase) {
                 $options['--only-files'] = true;
+                $backupType = 'files_only';
             }
+            // If both are selected, no options = full backup (db + files)
 
             Artisan::call('backup:run', $options);
 
             Notification::make()
                 ->title(__('admin.backup.success'))
+                ->body(__('admin.backup.type_' . $backupType))
                 ->success()
                 ->send();
 
-            // Log activity
+            // Log activity with details
             activity()
                 ->causedBy(auth()->user())
                 ->withProperties([
                     'include_database' => $this->includeDatabase,
                     'include_files' => $this->includeFiles,
+                    'backup_type' => $backupType,
+                    'artisan_options' => $options,
                 ])
-                ->log('تم إنشاء نسخة احتياطية');
+                ->log('تم إنشاء نسخة احتياطية: ' . __('admin.backup.type_' . $backupType));
 
         } catch (\Exception $e) {
             Notification::make()

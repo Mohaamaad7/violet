@@ -1083,6 +1083,7 @@ return [
         'type_db_only' => 'قاعدة بيانات فقط',
         'type_files_only' => 'ملفات فقط',
         'type_unknown' => 'غير محدد',
+        'select_at_least_one' => 'اختر خياراً واحداً على الأقل',
     ],
 
     // Navigation

@@ -48,19 +48,43 @@
             </x-slot>
 
             <div class="flex flex-wrap items-center gap-4">
-                <label class="flex items-center gap-2">
-                    <input type="checkbox" wire:model="includeDatabase"
-                        class="rounded border-gray-300 dark:border-gray-600">
-                    <span>{{ __('admin.backup.include_database') }}</span>
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" wire:model.live="includeDatabase"
+                        class="rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
+                        checked>
+                    <span class="flex items-center gap-1">
+                        <x-heroicon-o-circle-stack class="w-4 h-4" />
+                        {{ __('admin.backup.include_database') }}
+                    </span>
                 </label>
 
-                <label class="flex items-center gap-2">
-                    <input type="checkbox" wire:model="includeFiles"
-                        class="rounded border-gray-300 dark:border-gray-600">
-                    <span>{{ __('admin.backup.include_files') }}</span>
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" wire:model.live="includeFiles"
+                        class="rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500"
+                        checked>
+                    <span class="flex items-center gap-1">
+                        <x-heroicon-o-folder class="w-4 h-4" />
+                        {{ __('admin.backup.include_files') }}
+                    </span>
                 </label>
 
-                <x-filament::button wire:click="createBackup" wire:loading.attr="disabled" icon="heroicon-o-plus">
+                <div class="text-xs text-gray-500 dark:text-gray-400 px-2">
+                    @if($includeDatabase && $includeFiles)
+                        <span class="text-green-600 dark:text-green-400">● {{ __('admin.backup.type_full') }}</span>
+                    @elseif($includeDatabase)
+                        <span class="text-blue-600 dark:text-blue-400">● {{ __('admin.backup.type_db_only') }}</span>
+                    @elseif($includeFiles)
+                        <span class="text-yellow-600 dark:text-yellow-400">● {{ __('admin.backup.type_files_only') }}</span>
+                    @else
+                        <span class="text-red-600 dark:text-red-400">⚠ {{ __('admin.backup.select_at_least_one') }}</span>
+                    @endif
+                </div>
+
+                <x-filament::button 
+                    wire:click="createBackup" 
+                    wire:loading.attr="disabled" 
+                    icon="heroicon-o-plus"
+                    :disabled="!$includeDatabase && !$includeFiles">
                     <span wire:loading.remove wire:target="createBackup">{{ __('admin.backup.create') }}</span>
                     <span wire:loading wire:target="createBackup">{{ __('admin.backup.creating') }}...</span>
                 </x-filament::button>
