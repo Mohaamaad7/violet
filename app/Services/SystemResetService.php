@@ -32,7 +32,7 @@ class SystemResetService
             'label' => 'العملاء',
             'icon' => 'heroicon-o-users',
             'main_table' => 'customers',
-            'tables' => ['wishlists', 'wishlist_items', 'cart_items', 'carts', 'shipping_addresses', 'customers'],
+            'tables' => ['wishlists', 'cart_items', 'carts', 'shipping_addresses', 'customers'],
             'directories' => [],
             'media_models' => [],
             'dependencies' => [],
@@ -41,7 +41,7 @@ class SystemResetService
             'label' => 'الطلبات',
             'icon' => 'heroicon-o-shopping-bag',
             'main_table' => 'orders',
-            'tables' => ['order_status_history', 'order_items', 'orders'],
+            'tables' => ['order_items', 'orders'],
             'directories' => [],
             'media_models' => [],
             'dependencies' => [],
@@ -49,8 +49,8 @@ class SystemResetService
         'returns' => [
             'label' => 'المرتجعات',
             'icon' => 'heroicon-o-arrow-uturn-left',
-            'main_table' => 'order_returns',
-            'tables' => ['return_items', 'order_returns'],
+            'main_table' => 'returns',
+            'tables' => ['return_items', 'returns'],
             'directories' => [],
             'media_models' => [],
             'dependencies' => [],
@@ -109,15 +109,7 @@ class SystemResetService
             'media_models' => [],
             'dependencies' => [],
         ],
-        'notifications' => [
-            'label' => 'الإشعارات',
-            'icon' => 'heroicon-o-bell',
-            'main_table' => 'notifications',
-            'tables' => ['notifications'],
-            'directories' => [],
-            'media_models' => [],
-            'dependencies' => [],
-        ],
+
         'failed_jobs' => [
             'label' => 'المهام الفاشلة',
             'icon' => 'heroicon-o-exclamation-triangle',
@@ -154,19 +146,19 @@ class SystemResetService
     protected array $presets = [
         'factory_reset_lite' => [
             'label' => 'حذف كل البيانات (إبقاء الإعدادات والموظفين)',
-            'categories' => ['customers', 'orders', 'returns', 'products', 'inventory', 'finance', 'influencers', 'content', 'email_logs', 'notifications', 'failed_jobs', 'activity_logs'],
+            'categories' => ['customers', 'orders', 'returns', 'products', 'inventory', 'finance', 'influencers', 'content', 'email_logs', 'failed_jobs', 'activity_logs'],
         ],
         'developer_mode' => [
             'label' => 'وضع المطور (إبقاء المنتجات)',
-            'categories' => ['customers', 'orders', 'returns', 'inventory', 'finance', 'email_logs', 'notifications', 'failed_jobs', 'activity_logs'],
+            'categories' => ['customers', 'orders', 'returns', 'inventory', 'finance', 'email_logs', 'failed_jobs', 'activity_logs'],
         ],
         'keep_products' => [
             'label' => 'الاحتفاظ بالمنتجات والإعدادات فقط',
-            'categories' => ['customers', 'orders', 'returns', 'inventory', 'finance', 'influencers', 'content', 'staff', 'email_logs', 'notifications', 'failed_jobs', 'activity_logs'],
+            'categories' => ['customers', 'orders', 'returns', 'inventory', 'finance', 'influencers', 'content', 'staff', 'email_logs', 'failed_jobs', 'activity_logs'],
         ],
         'clear_logs_only' => [
             'label' => 'تنظيف السجلات فقط',
-            'categories' => ['email_logs', 'notifications', 'failed_jobs', 'activity_logs'],
+            'categories' => ['email_logs', 'failed_jobs', 'activity_logs'],
         ],
     ];
 
