@@ -123,8 +123,17 @@ class SystemReset extends Page implements HasForms
                             ->options(
                                 collect($stats)->mapWithKeys(function ($stat, $key) {
                                     $count = number_format($stat['count']);
+                                    $related = $stat['related_count'] ?? 0;
                                     $warning = $stat['special'] ? ' ⚠️' : '';
-                                    return [$key => "{$stat['label']} ({$count} سجل){$warning}"];
+
+                                    // Show main count, and related tables count if exists
+                                    $label = "{$stat['label']} ({$count}";
+                                    if ($related > 0) {
+                                        $label .= " + " . number_format($related) . " مرتبط";
+                                    }
+                                    $label .= " سجل){$warning}";
+
+                                    return [$key => $label];
                                 })->toArray()
                             )
                             ->columns(2)

@@ -23,20 +23,34 @@ class SystemResetService
 {
     /**
      * Reset categories with their associated tables, directories, and dependencies
+     * 
+     * IMPORTANT: 'main_table' is used for accurate counting (shows only primary records)
+     * 'tables' contains all related tables to be deleted (including foreign key dependencies)
      */
     protected array $categories = [
         'customers' => [
             'label' => 'العملاء',
             'icon' => 'heroicon-o-users',
-            'tables' => ['wishlists', 'cart_items', 'carts', 'shipping_addresses', 'customers'],
+            'main_table' => 'customers',
+            'tables' => ['wishlists', 'wishlist_items', 'cart_items', 'carts', 'shipping_addresses', 'customers'],
             'directories' => [],
             'media_models' => [],
             'dependencies' => [],
         ],
         'orders' => [
-            'label' => 'الطلبات والمبيعات',
+            'label' => 'الطلبات',
             'icon' => 'heroicon-o-shopping-bag',
-            'tables' => ['order_status_history', 'return_items', 'order_returns', 'order_items', 'orders'],
+            'main_table' => 'orders',
+            'tables' => ['order_status_history', 'order_items', 'orders'],
+            'directories' => [],
+            'media_models' => [],
+            'dependencies' => [],
+        ],
+        'returns' => [
+            'label' => 'المرتجعات',
+            'icon' => 'heroicon-o-arrow-uturn-left',
+            'main_table' => 'order_returns',
+            'tables' => ['return_items', 'order_returns'],
             'directories' => [],
             'media_models' => [],
             'dependencies' => [],
@@ -44,14 +58,16 @@ class SystemResetService
         'products' => [
             'label' => 'المنتجات والتصنيفات',
             'icon' => 'heroicon-o-cube',
+            'main_table' => 'products',
             'tables' => ['product_images', 'product_reviews', 'product_variants', 'products', 'categories'],
             'directories' => ['products'],
             'media_models' => [Product::class, Category::class],
-            'dependencies' => ['orders'], // Orders depend on products
+            'dependencies' => ['orders', 'returns'],
         ],
         'inventory' => [
             'label' => 'حركات المخزون',
             'icon' => 'heroicon-o-archive-box',
+            'main_table' => 'stock_movements',
             'tables' => ['stock_count_items', 'stock_counts', 'stock_movements', 'batches', 'warehouses'],
             'directories' => [],
             'media_models' => [],
@@ -60,6 +76,7 @@ class SystemResetService
         'finance' => [
             'label' => 'المدفوعات والعمولات',
             'icon' => 'heroicon-o-banknotes',
+            'main_table' => 'payments',
             'tables' => ['payments', 'commission_payouts', 'influencer_commissions', 'code_usages'],
             'directories' => [],
             'media_models' => [],
@@ -68,23 +85,53 @@ class SystemResetService
         'influencers' => [
             'label' => 'المؤثرين وأكواد الخصم',
             'icon' => 'heroicon-o-user-group',
+            'main_table' => 'influencers',
             'tables' => ['influencer_applications', 'influencers', 'discount_codes'],
             'directories' => [],
             'media_models' => [],
             'dependencies' => ['finance'],
         ],
         'content' => [
-            'label' => 'المحتوى',
+            'label' => 'المحتوى (مقالات، صفحات، بانرات)',
             'icon' => 'heroicon-o-document-text',
+            'main_table' => 'pages',
             'tables' => ['blog_posts', 'pages', 'banners', 'sliders', 'help_entries'],
             'directories' => ['banners', 'sliders'],
             'media_models' => [],
             'dependencies' => [],
         ],
+        'email_logs' => [
+            'label' => 'سجلات الإيميلات',
+            'icon' => 'heroicon-o-envelope',
+            'main_table' => 'email_logs',
+            'tables' => ['email_logs'],
+            'directories' => [],
+            'media_models' => [],
+            'dependencies' => [],
+        ],
+        'notifications' => [
+            'label' => 'الإشعارات',
+            'icon' => 'heroicon-o-bell',
+            'main_table' => 'notifications',
+            'tables' => ['notifications'],
+            'directories' => [],
+            'media_models' => [],
+            'dependencies' => [],
+        ],
+        'failed_jobs' => [
+            'label' => 'المهام الفاشلة',
+            'icon' => 'heroicon-o-exclamation-triangle',
+            'main_table' => 'failed_jobs',
+            'tables' => ['failed_jobs', 'jobs'],
+            'directories' => [],
+            'media_models' => [],
+            'dependencies' => [],
+        ],
         'staff' => [
-            'label' => 'الموظفين',
+            'label' => 'الموظفين (ما عدا أنت)',
             'icon' => 'heroicon-o-user-circle',
-            'tables' => ['users'], // Will be handled specially to exclude current user
+            'main_table' => 'users',
+            'tables' => ['users'],
             'directories' => [],
             'media_models' => [],
             'dependencies' => [],
@@ -93,6 +140,7 @@ class SystemResetService
         'activity_logs' => [
             'label' => 'سجلات النشاط',
             'icon' => 'heroicon-o-clipboard-document-list',
+            'main_table' => 'activity_log',
             'tables' => ['activity_log'],
             'directories' => [],
             'media_models' => [],
@@ -106,15 +154,19 @@ class SystemResetService
     protected array $presets = [
         'factory_reset_lite' => [
             'label' => 'حذف كل البيانات (إبقاء الإعدادات والموظفين)',
-            'categories' => ['customers', 'orders', 'products', 'inventory', 'finance', 'influencers', 'content', 'activity_logs'],
+            'categories' => ['customers', 'orders', 'returns', 'products', 'inventory', 'finance', 'influencers', 'content', 'email_logs', 'notifications', 'failed_jobs', 'activity_logs'],
         ],
         'developer_mode' => [
             'label' => 'وضع المطور (إبقاء المنتجات)',
-            'categories' => ['customers', 'orders', 'inventory', 'finance', 'activity_logs'],
+            'categories' => ['customers', 'orders', 'returns', 'inventory', 'finance', 'email_logs', 'notifications', 'failed_jobs', 'activity_logs'],
         ],
         'keep_products' => [
             'label' => 'الاحتفاظ بالمنتجات والإعدادات فقط',
-            'categories' => ['customers', 'orders', 'inventory', 'finance', 'influencers', 'content', 'staff', 'activity_logs'],
+            'categories' => ['customers', 'orders', 'returns', 'inventory', 'finance', 'influencers', 'content', 'staff', 'email_logs', 'notifications', 'failed_jobs', 'activity_logs'],
+        ],
+        'clear_logs_only' => [
+            'label' => 'تنظيف السجلات فقط',
+            'categories' => ['email_logs', 'notifications', 'failed_jobs', 'activity_logs'],
         ],
     ];
 
@@ -136,31 +188,39 @@ class SystemResetService
 
     /**
      * Get statistics for each category (record counts)
+     * 
+     * Uses main_table for accurate counting (shows only primary records)
      */
     public function getCategoryStats(): array
     {
         $stats = [];
 
         foreach ($this->categories as $key => $category) {
-            $totalRecords = 0;
+            $mainTable = $category['main_table'] ?? $category['tables'][0] ?? null;
+            $count = 0;
 
+            if ($mainTable && Schema::hasTable($mainTable)) {
+                $count = DB::table($mainTable)->count();
+
+                // Special handling for staff - exclude current user
+                if ($mainTable === 'users' && Auth::check()) {
+                    $count = max(0, $count - 1);
+                }
+            }
+
+            // Also get count of related tables for tooltip
+            $relatedCount = 0;
             foreach ($category['tables'] as $table) {
-                if (Schema::hasTable($table)) {
-                    $count = DB::table($table)->count();
-
-                    // Special handling for staff - exclude current user
-                    if ($table === 'users' && Auth::check()) {
-                        $count = max(0, $count - 1); // Exclude current user
-                    }
-
-                    $totalRecords += $count;
+                if ($table !== $mainTable && Schema::hasTable($table)) {
+                    $relatedCount += DB::table($table)->count();
                 }
             }
 
             $stats[$key] = [
                 'label' => $category['label'],
                 'icon' => $category['icon'],
-                'count' => $totalRecords,
+                'count' => $count,
+                'related_count' => $relatedCount,
                 'special' => $category['special'] ?? false,
             ];
         }
