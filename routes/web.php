@@ -46,6 +46,11 @@ Route::view('/about', 'pages.about')->name('about');
 // Contact Us Page (Static Page with Livewire Form)
 Route::view('/contact', 'pages.contact')->name('contact');
 
+// Static Pages (Terms, Privacy, etc.) - Dynamic from database
+Route::get('/terms', App\Livewire\Store\StaticPage::class)->name('terms')->defaults('slug', 'terms');
+Route::get('/privacy', App\Livewire\Store\StaticPage::class)->name('privacy')->defaults('slug', 'privacy');
+Route::get('/page/{slug}', App\Livewire\Store\StaticPage::class)->name('page.show');
+
 // Influencer Application Page
 Route::get('/influencer/apply', App\Livewire\InfluencerApplicationForm::class)->name('influencer.apply');
 
