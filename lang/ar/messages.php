@@ -795,4 +795,7 @@ return [
     'no_sale_products' => 'لا توجد منتجات بخصم حالياً',
     'browse_all_products' => 'تصفح جميع المنتجات',
 
+    // Static Pages
+    'last_updated' => 'آخر تحديث',
+
 ];

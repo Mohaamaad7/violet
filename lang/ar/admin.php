@@ -1095,5 +1095,23 @@ return [
     'navigation' => [
         'settings' => 'الإعدادات',
     ],
+
+    // Static Pages
+    'pages' => 'الصفحات',
+    'page' => 'صفحة',
+    'page_content' => 'محتوى الصفحة',
+    'title' => 'العنوان',
+    'slug' => 'الرابط',
+    'slug_helper' => 'سيُستخدم في رابط الصفحة (مثال: terms)',
+    'content' => 'المحتوى',
+    'is_active' => 'مفعّل',
+    'seo_settings' => 'إعدادات SEO',
+    'meta_title' => 'عنوان البحث',
+    'meta_title_helper' => 'يظهر في نتائج البحث (60 حرف كحد أقصى)',
+    'meta_description' => 'وصف البحث',
+    'meta_description_helper' => 'يظهر في نتائج البحث (160 حرف كحد أقصى)',
+    'updated_at' => 'آخر تحديث',
+    'copied' => 'تم النسخ!',
+    'view_page' => 'عرض الصفحة',
 ];
 
