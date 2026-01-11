@@ -774,5 +774,25 @@ return [
         ],
     ],
 
+    // Offers Page
+    'offers_page_title' => 'العروض والتخفيضات',
+    'offers_page_subtitle' => 'اكتشف أفضل العروض والخصومات الحصرية',
+    'offers_page_description' => 'تصفح أحدث العروض والخصومات على منتجاتنا المميزة',
+    'hot_deals' => 'عروض حصرية',
+    'active_coupons' => 'كوبونات الخصم',
+    'use_at_checkout' => 'استخدمها عند إتمام الطلب',
+    'copy_code' => 'نسخ الكود',
+    'code_copied' => 'تم النسخ!',
+    'code_copied_success' => 'تم نسخ كود الخصم بنجاح',
+    'off' => 'خصم',
+    'free_shipping' => 'شحن مجاني',
+    'expires_on' => 'ينتهي',
+    'min_order' => 'الحد الأدنى للطلب',
+    'no_coupons' => 'لا توجد كوبونات متاحة حالياً',
+    'check_back_later' => 'تابعنا للحصول على عروض جديدة قريباً',
+    'discount_products' => 'منتجات بخصم',
+    'biggest_discounts' => 'أكبر الخصومات على منتجاتنا المميزة',
+    'no_sale_products' => 'لا توجد منتجات بخصم حالياً',
+    'browse_all_products' => 'تصفح جميع المنتجات',
 
 ];

@@ -12,6 +12,9 @@ Route::get('/locale/{locale}', [LanguageController::class, 'switch'])->name('loc
 // Store Front
 Route::get('/', App\Livewire\Store\Home::class)->name('home');
 
+// Offers Page
+Route::get('/offers', App\Livewire\Store\OffersPage::class)->name('offers');
+
 // Cosmetics Theme Landing Page (Task 9.8)
 Route::get('/cosmetics', App\Livewire\Cosmetics\HomePage::class)->name('cosmetics.home');
 
