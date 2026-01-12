@@ -38,25 +38,18 @@ class ProcessEmailCampaign
 
             Log::info("Starting campaign: {$this->campaign->title} for {$subscribers->count()} subscribers");
 
-            // Dispatch individual email jobs with rate limiting
-            $delay = 0;
-            $rateLimit = $this->campaign->send_rate_limit ?? 50; // emails per minute
-            $delayPerEmail = 60 / $rateLimit; // seconds between emails
-
+            // Send emails immediately (synchronous)
             foreach ($subscribers as $subscriber) {
-                SendCampaignEmail::dispatch($this->campaign, $subscriber)
-                    ->delay(now()->addSeconds($delay));
-                
-                $delay += $delayPerEmail;
+                SendCampaignEmail::dispatch($this->campaign, $subscriber);
             }
 
-            // Mark campaign as sent (will be completed when all jobs finish)
+            // Mark campaign as sent
             $this->campaign->update([
                 'status' => 'sent',
-                'completed_at' => now()->addSeconds($delay),
+                'completed_at' => now(),
             ]);
 
-            Log::info("Campaign queued successfully: {$this->campaign->title}");
+            Log::info("Campaign sent successfully: {$this->campaign->title}");
 
         } catch (\Exception $e) {
             Log::error("Campaign processing failed: {$this->campaign->title}", [
