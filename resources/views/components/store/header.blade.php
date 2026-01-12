@@ -23,10 +23,7 @@
                     </a>
                 </div>
 
-                {{-- Free Shipping Message --}}
-                <div class="mx-auto md:mx-0 text-center md:text-left">
-                    <span class="font-medium">🚚 {{ trans_db('store.header.free_shipping') }}</span>
-                </div>
+
 
                 {{-- Language Switcher --}}
                 {{-- Language Switcher --}}
