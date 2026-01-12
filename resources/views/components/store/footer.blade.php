@@ -206,7 +206,7 @@
                 <div>
                     <h5 class="text-white font-semibold text-sm mb-2">{{ trans_db('store.footer.subscribe') }}</h5>
                     <p class="text-xs text-gray-500 mb-3">{{ trans_db('store.footer.newsletter_desc') }}</p>
-                    
+
                     {{-- Livewire Newsletter Component --}}
                     <livewire:store.newsletter-subscription />
                 </div>
@@ -274,6 +274,17 @@
                             class="hover:text-violet-400 transition">{{ trans_db('store.footer.cookie_policy') }}</a>
                     </div>
                 </div>
+            </div>
+
+            {{-- Powered By - Centered --}}
+            <div class="text-center mt-6 pt-6 border-t border-gray-800">
+                <p class="text-xs text-gray-500">
+                    Powered by <span class="text-violet-400 font-semibold">Reyada E-commerce</span> v1 ·
+                    <a href="https://www.areyada.com" target="_blank" rel="noopener noreferrer"
+                        class="text-violet-400 hover:text-violet-300 font-medium transition-colors duration-200 hover:underline">
+                        Reyada Solutions
+                    </a>
+                </p>
             </div>
         </div>
     </div>

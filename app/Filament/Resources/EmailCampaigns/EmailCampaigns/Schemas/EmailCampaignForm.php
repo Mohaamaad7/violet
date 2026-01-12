@@ -64,7 +64,10 @@ class EmailCampaignForm
                                 'orderedList',
                                 'h2',
                                 'h3',
+                                'attachFiles',
                             ])
+                            ->fileAttachmentsDisk('public')
+                            ->fileAttachmentsDirectory('campaign-images')
                             ->columnSpanFull(),
 
                         Select::make('offers')
@@ -108,7 +111,7 @@ class EmailCampaignForm
                         DateTimePicker::make('scheduled_at')
                             ->label(__('newsletter.schedule_for'))
                             ->helperText(__('newsletter.send_immediately'))
-                            ->minDate(now())
+                            ->minDate(now()->startOfMinute())
                             ->seconds(false),
 
                         TextInput::make('send_rate_limit')
