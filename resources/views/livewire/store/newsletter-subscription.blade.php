@@ -59,8 +59,8 @@
 
     {{-- Privacy Note (Optional) --}}
     <p class="mt-2 text-xs text-gray-500">
-        بالاشتراك، أنت توافق على 
-        <a href="/privacy-policy" class="text-violet-400 hover:text-violet-300 underline">سياسة الخصوصية</a>
+        {{ __('newsletter.privacy_note_prefix') }}
+        <a href="/privacy-policy" class="text-violet-400 hover:text-violet-300 underline">{{ __('newsletter.privacy_policy') }}</a>
     </p>
 </div>
 

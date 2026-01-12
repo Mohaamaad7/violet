@@ -109,14 +109,14 @@
         
         <!-- Footer -->
         <div class="footer">
-            <p>&copy; {{ date('Y') }} {{ config('app.name') }}. {{ __('All rights reserved.') }}</p>
+            <p>&copy; {{ date('Y') }} {{ config('app.name') }}. {{ __('newsletter.all_rights_reserved') }}</p>
             <p>{{ \App\Models\Setting::get('site_address') }}</p>
             <p>{{ \App\Models\Setting::get('site_phone') }}</p>
             
             <div class="unsubscribe">
                 <p>
-                    {{ __('Don\'t want to receive these emails?') }}
-                    <a href="{{ $unsubscribeUrl ?? '#' }}">{{ __('Unsubscribe') }}</a>
+                    {{ __('newsletter.dont_want_emails') }}
+                    <a href="{{ $unsubscribeUrl ?? '#' }}">{{ __('newsletter.unsubscribe') }}</a>
                 </p>
             </div>
         </div>

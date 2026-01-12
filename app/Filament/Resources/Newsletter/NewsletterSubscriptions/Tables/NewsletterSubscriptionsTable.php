@@ -18,13 +18,13 @@ class NewsletterSubscriptionsTable
         return $table
             ->columns([
                 TextColumn::make('email')
-                    ->label('البريد الإلكتروني')
+                    ->label(__('newsletter.email'))
                     ->searchable()
                     ->sortable()
                     ->copyable(),
 
                 TextColumn::make('status')
-                    ->label('الحالة')
+                    ->label(__('newsletter.status'))
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
                         'active' => 'success',
@@ -32,60 +32,60 @@ class NewsletterSubscriptionsTable
                         'bounced' => 'warning',
                     })
                     ->formatStateUsing(fn (string $state): string => match ($state) {
-                        'active' => 'نشط',
-                        'unsubscribed' => 'ألغى الاشتراك',
-                        'bounced' => 'فشل التوصيل',
+                        'active' => __('newsletter.active'),
+                        'unsubscribed' => __('newsletter.unsubscribed'),
+                        'bounced' => __('newsletter.bounced'),
                         default => $state,
                     }),
 
                 TextColumn::make('source')
-                    ->label('المصدر')
+                    ->label(__('newsletter.source'))
                     ->badge()
                     ->color('info')
                     ->formatStateUsing(fn (?string $state): string => match ($state) {
-                        'footer' => 'Footer',
-                        'contact' => 'صفحة الاتصال',
-                        'popup' => 'نافذة منبثقة',
-                        'checkout' => 'صفحة الدفع',
+                        'footer' => __('newsletter.source_footer'),
+                        'contact' => __('newsletter.source_contact'),
+                        'popup' => __('newsletter.source_popup'),
+                        'checkout' => __('newsletter.source_checkout'),
                         default => $state ?? '-',
                     }),
 
                 TextColumn::make('subscribed_at')
-                    ->label('تاريخ الاشتراك')
+                    ->label(__('newsletter.subscribed_at'))
                     ->dateTime('d/m/Y H:i')
                     ->sortable(),
 
                 TextColumn::make('campaignLogs_count')
                     ->counts('campaignLogs')
-                    ->label('عدد الرسائل')
+                    ->label(__('newsletter.emails_count'))
                     ->sortable(),
 
                 TextColumn::make('created_at')
-                    ->label('تاريخ الإنشاء')
+                    ->label(__('newsletter.created'))
                     ->dateTime('d/m/Y H:i')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 SelectFilter::make('status')
-                    ->label('الحالة')
+                    ->label(__('newsletter.status'))
                     ->options([
-                        'active' => 'نشط',
-                        'unsubscribed' => 'ألغى الاشتراك',
-                        'bounced' => 'فشل التوصيل',
+                        'active' => __('newsletter.active'),
+                        'unsubscribed' => __('newsletter.unsubscribed'),
+                        'bounced' => __('newsletter.bounced'),
                     ]),
 
                 SelectFilter::make('source')
-                    ->label('المصدر')
+                    ->label(__('newsletter.source'))
                     ->options([
-                        'footer' => 'Footer',
-                        'contact' => 'صفحة الاتصال',
-                        'popup' => 'نافذة منبثقة',
-                        'checkout' => 'صفحة الدفع',
+                        'footer' => __('newsletter.source_footer'),
+                        'contact' => __('newsletter.source_contact'),
+                        'popup' => __('newsletter.source_popup'),
+                        'checkout' => __('newsletter.source_checkout'),
                     ]),
 
                 Filter::make('subscribed_last_30_days')
-                    ->label('آخر 30 يوم')
+                    ->label(__('newsletter.recent_30_days'))
                     ->query(fn (Builder $query) => $query->where('subscribed_at', '>=', now()->subDays(30))),
             ])
             ->recordActions([

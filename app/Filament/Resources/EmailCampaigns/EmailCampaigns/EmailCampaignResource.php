@@ -21,7 +21,7 @@ class EmailCampaignResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedEnvelope;
 
-    protected static UnitEnum|string|null $navigationGroup = 'Marketing';
+    protected static UnitEnum|string|null $navigationGroup = null;
     
     protected static ?int $navigationSort = 2;
 
@@ -29,12 +29,17 @@ class EmailCampaignResource extends Resource
 
     public static function getModelLabel(): string
     {
-        return __('Email Campaign');
+        return __('newsletter.email_campaign');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('Email Campaigns');
+        return __('newsletter.email_campaigns');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('newsletter.navigation_group_marketing');
     }
 
     public static function form(Schema $schema): Schema

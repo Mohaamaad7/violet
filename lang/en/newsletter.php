@@ -1,6 +1,14 @@
 <?php
 
 return [
+    // Admin / Navigation
+    'navigation_group_marketing' => 'Marketing',
+    'email_campaign' => 'Email Campaign',
+    'email_campaigns' => 'Email Campaigns',
+    'subscriber' => 'Subscriber',
+    'subscribers' => 'Subscribers',
+    'newsletter_subscriptions' => 'Newsletter Subscriptions',
+
     // Form Labels
     'subscriber_info' => 'Subscriber Information',
     'additional_info' => 'Additional Information',
@@ -11,19 +19,19 @@ return [
     'subscribed_at' => 'Subscribed At',
     'unsubscribed_at' => 'Unsubscribed At',
     'unsubscribe_reason' => 'Unsubscribe Reason',
-    
+
     // Status Options
     'active' => 'Active',
     'unsubscribed' => 'Unsubscribed',
     'bounced' => 'Bounced',
-    
+
     // Source Options
     'source_footer' => 'Footer',
     'source_contact' => 'Contact Page',
     'source_popup' => 'Pop-up',
     'source_checkout' => 'Checkout',
     'source_manual' => 'Manual',
-    
+
     // Campaign Form
     'campaign_information' => 'Campaign Information',
     'targeting_settings' => 'Targeting & Settings',
@@ -38,7 +46,7 @@ return [
     'email_content' => 'Email Content',
     'select_offers' => 'Select Offers',
     'select_offers_help' => 'Select discount codes to include in the campaign',
-    
+
     // Campaign Status
     'draft' => 'Draft',
     'scheduled' => 'Scheduled',
@@ -46,7 +54,7 @@ return [
     'sent' => 'Sent',
     'paused' => 'Paused',
     'cancelled' => 'Cancelled',
-    
+
     // Targeting
     'send_to' => 'Send To',
     'all_subscribers' => 'All Subscribers',
@@ -58,17 +66,18 @@ return [
     'send_immediately' => 'Leave empty to send immediately',
     'send_rate' => 'Send Rate (emails/minute)',
     'send_rate_help' => 'Recommended: 50-100 emails per minute',
-    
+
     // Table Columns
     'statistics' => 'Statistics',
     'audience' => 'Audience',
+    'emails_count' => 'Emails',
     'all' => 'All',
     'recent' => 'Recent',
     'custom' => 'Custom',
     'offers' => 'Offers',
     'sent_at' => 'Sent At',
     'created' => 'Created',
-    
+
     // Actions
     'send_now' => 'Send Now',
     'send_campaign' => 'Send Campaign',
@@ -79,7 +88,7 @@ return [
     'campaign_paused' => 'Campaign paused',
     'cancel' => 'Cancel',
     'campaign_cancelled' => 'Campaign cancelled',
-    
+
     // Frontend Messages
     'subscribe_placeholder' => 'Enter your email',
     'subscribe_button' => 'Subscribe',
@@ -87,12 +96,13 @@ return [
     'subscribe_error' => 'Failed to subscribe. Please try again.',
     'already_subscribed' => 'This email is already subscribed.',
     'invalid_email' => 'Please enter a valid email address.',
-    
+
     // Unsubscribe
     'unsubscribe_title' => 'Unsubscribe from Newsletter',
     'unsubscribe_sorry' => 'We\'re sorry to see you go',
     'unsubscribe_email' => 'Email',
     'subscribed_on' => 'Subscribed on',
+    'unsubscribe_reason_question' => 'Why are you unsubscribing?',
     'reason_optional' => '(Optional)',
     'feedback_helps' => 'Your feedback helps us improve',
     'unsubscribe_button' => 'Unsubscribe',
@@ -102,7 +112,7 @@ return [
     'removed_from_list' => 'You have been successfully removed from our mailing list.',
     'no_more_emails' => 'You will no longer receive promotional emails from us.',
     'back_to_home' => 'Back to Home',
-    
+
     // Email Content
     'special_offers' => 'Special Offers Just For You',
     'discount' => 'Discount',
@@ -111,88 +121,26 @@ return [
     'visit_store' => 'Visit Our Store',
     'dont_want_emails' => 'Don\'t want to receive these emails?',
     'unsubscribe' => 'Unsubscribe',
-];
-    'subscribe_placeholder' => 'Enter your email',
-    'subscribe_button' => 'Subscribe',
-    'subscribe_success' => 'Thank you for subscribing! Check your email to confirm.',
-    'subscribe_error' => 'Failed to subscribe. Please try again.',
-    'already_subscribed' => 'This email is already subscribed.',
-    'invalid_email' => 'Please enter a valid email address.',
-    
-    // Unsubscribe
-    'unsubscribe_title' => 'Unsubscribe from Newsletter',
-    'unsubscribe_sorry' => 'We\'re sorry to see you go',
-    'unsubscribe_email' => 'Email',
-    'subscribed_on' => 'Subscribed on',
-    'unsubscribe_reason' => 'Why are you unsubscribing?',
-    'reason_optional' => '(Optional)',
-    'feedback_helps' => 'Your feedback helps us improve',
-    'unsubscribe_button' => 'Unsubscribe',
-    'cancel_button' => 'Cancel',
-    'changed_mind' => 'Changed your mind? You can always resubscribe later!',
-    'successfully_unsubscribed' => 'Successfully Unsubscribed',
-    'removed_from_list' => 'You have been successfully removed from our mailing list.',
-    'no_more_emails' => 'You will no longer receive promotional emails from us.',
-    'back_to_home' => 'Back to Home',
-    
-    // Email Content
-    'special_offers' => 'Special Offers Just For You',
-    'discount' => 'Discount',
-    'valid_until' => 'Valid until',
-    'shop_now' => 'Shop Now',
-    'visit_store' => 'Visit Our Store',
-    'dont_want_emails' => 'Don\'t want to receive these emails?',
-    'unsubscribe' => 'Unsubscribe',
-    
-    // Admin
-    'email_campaign' => 'Email Campaign',
-    'email_campaigns' => 'Email Campaigns',
-    'campaign_title' => 'Campaign Title',
-    'campaign_type' => 'Campaign Type',
-    'offers_campaign' => 'Offers Campaign',
-    'custom_message' => 'Custom Message',
-    'newsletter' => 'Newsletter',
-    'email_subject' => 'Email Subject',
-    'preview_text' => 'Preview Text',
-    'preview_text_help' => 'This text appears in email previews',
-    'email_content' => 'Email Content',
-    'select_offers' => 'Select Offers',
-    'select_offers_help' => 'Select discount codes to include in the campaign',
-    'status' => 'Status',
-    'draft' => 'Draft',
-    'scheduled' => 'Scheduled',
-    'sending' => 'Sending',
-    'sent' => 'Sent',
-    'paused' => 'Paused',
-    'cancelled' => 'Cancelled',
-    'send_to' => 'Send To',
-    'all_subscribers' => 'All Subscribers',
-    'active_only' => 'Active Only',
-    'recent_30_days' => 'Recent (Last 30 Days)',
-    'custom_filters' => 'Custom Filters',
-    'choose_audience' => 'Choose your target audience',
-    'schedule_for' => 'Schedule For',
-    'send_immediately' => 'Leave empty to send immediately',
-    'send_rate' => 'Send Rate (emails/minute)',
-    'send_rate_help' => 'Recommended: 50-100 emails per minute',
-    'campaign_information' => 'Campaign Information',
-    'targeting_settings' => 'Targeting & Settings',
-    'statistics' => 'Statistics',
-    'audience' => 'Audience',
-    'all' => 'All',
-    'recent' => 'Recent',
-    'custom' => 'Custom',
-    'offers' => 'Offers',
-    'scheduled' => 'Scheduled',
-    'sent_at' => 'Sent At',
-    'created' => 'Created',
-    'send_now' => 'Send Now',
-    'send_campaign' => 'Send Campaign',
-    'send_confirm' => 'Are you sure you want to send this campaign? This action cannot be undone.',
-    'yes_send_now' => 'Yes, Send Now',
-    'campaign_queued' => 'Campaign queued for sending',
-    'pause' => 'Pause',
-    'campaign_paused' => 'Campaign paused',
-    'cancel' => 'Cancel',
-    'campaign_cancelled' => 'Campaign cancelled',
+    'all_rights_reserved' => 'All rights reserved.',
+
+    // Footer privacy note
+    'privacy_note_prefix' => 'By subscribing, you agree to',
+    'privacy_policy' => 'Privacy Policy',
+
+    // Email template editor / preview (Filament)
+    'template_info_title' => 'Template information',
+    'template_name_label' => 'Name:',
+    'template_type_label' => 'Type:',
+    'template_subject_ar_label' => 'Subject (Arabic):',
+    'template_status_label' => 'Status:',
+    'template_active' => 'Active',
+    'template_inactive' => 'Inactive',
+    'email_preview_warning_title' => 'Note:',
+    'email_preview_warning_body' => 'This preview uses sample data. Actual data will differ when sending.',
+    'email_preview_content_title' => 'Email content preview',
+    'variables_used' => 'Variables used',
+    'click_to_insert_tooltip' => 'Click to insert',
+    'how_to_use_title' => 'How to use:',
+    'how_to_use_body_1' => 'Click any variable above to insert it into the editor at the cursor position.',
+    'how_to_use_body_2' => 'Variables will be replaced with real values when sending the email.',
 ];

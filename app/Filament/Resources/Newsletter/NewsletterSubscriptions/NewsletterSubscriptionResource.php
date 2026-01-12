@@ -23,23 +23,28 @@ class NewsletterSubscriptionResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'email';
     
-    protected static UnitEnum|string|null $navigationGroup = 'Marketing';
+    protected static UnitEnum|string|null $navigationGroup = null;
     
     protected static ?int $navigationSort = 1;
 
     public static function getNavigationLabel(): string
     {
-        return __('المشتركون في النشرة');
+        return __('newsletter.newsletter_subscriptions');
+    }
+
+    public static function getNavigationGroup(): ?string
+    {
+        return __('newsletter.navigation_group_marketing');
     }
 
     public static function getModelLabel(): string
     {
-        return __('مشترك');
+        return __('newsletter.subscriber');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('المشتركون');
+        return __('newsletter.subscribers');
     }
 
     public static function form(Schema $schema): Schema

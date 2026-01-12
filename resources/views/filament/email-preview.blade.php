@@ -7,27 +7,27 @@
                 class="h-5 w-5 text-primary-500"
             />
             <h3 class="text-sm font-semibold text-gray-900 dark:text-white">
-                معلومات القالب
+                {{ __('newsletter.template_info_title') }}
             </h3>
         </div>
         <dl class="grid grid-cols-2 gap-2 text-sm">
             <div>
-                <dt class="text-gray-500 dark:text-gray-400">الاسم:</dt>
+                <dt class="text-gray-500 dark:text-gray-400">{{ __('newsletter.template_name_label') }}</dt>
                 <dd class="font-medium text-gray-900 dark:text-white">{{ $template->name }}</dd>
             </div>
             <div>
-                <dt class="text-gray-500 dark:text-gray-400">النوع:</dt>
+                <dt class="text-gray-500 dark:text-gray-400">{{ __('newsletter.template_type_label') }}</dt>
                 <dd class="font-medium text-gray-900 dark:text-white">{{ $template->type }}</dd>
             </div>
             <div>
-                <dt class="text-gray-500 dark:text-gray-400">العنوان (عربي):</dt>
+                <dt class="text-gray-500 dark:text-gray-400">{{ __('newsletter.template_subject_ar_label') }}</dt>
                 <dd class="font-medium text-gray-900 dark:text-white">{{ $template->subject_ar }}</dd>
             </div>
             <div>
-                <dt class="text-gray-500 dark:text-gray-400">الحالة:</dt>
+                <dt class="text-gray-500 dark:text-gray-400">{{ __('newsletter.template_status_label') }}</dt>
                 <dd>
                     <x-filament::badge :color="$template->is_active ? 'success' : 'danger'">
-                        {{ $template->is_active ? 'مفعّل' : 'معطّل' }}
+                        {{ $template->is_active ? __('newsletter.template_active') : __('newsletter.template_inactive') }}
                     </x-filament::badge>
                 </dd>
             </div>
@@ -42,7 +42,7 @@
                 class="h-5 w-5 text-warning-500 flex-shrink-0"
             />
             <div class="text-sm text-warning-800 dark:text-warning-200">
-                <strong>ملاحظة:</strong> هذه معاينة تستخدم بيانات تجريبية. البيانات الفعلية ستختلف عند إرسال الرسالة.
+                <strong>{{ __('newsletter.email_preview_warning_title') }}</strong> {{ __('newsletter.email_preview_warning_body') }}
             </div>
         </div>
     </div>
@@ -56,7 +56,7 @@
                     class="h-5 w-5 text-gray-500 dark:text-gray-400"
                 />
                 <span class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    معاينة محتوى الرسالة
+                    {{ __('newsletter.email_preview_content_title') }}
                 </span>
             </div>
         </div>
@@ -80,7 +80,7 @@
                 class="h-5 w-5 text-primary-500"
             />
             <h3 class="text-sm font-semibold text-gray-900 dark:text-white">
-                المتغيرات المستخدمة ({{ count($template->available_variables) }})
+                {{ __('newsletter.variables_used') }} ({{ count($template->available_variables) }})
             </h3>
         </div>
         <div class="flex flex-wrap gap-2">

@@ -20,13 +20,13 @@ class EmailCampaignsTable
         return $table
             ->columns([
                 TextColumn::make('title')
-                    ->label(__('Campaign Title'))
+                    ->label(__('newsletter.campaign_title'))
                     ->searchable()
                     ->sortable()
                     ->weight('bold'),
 
                 TextColumn::make('type')
-                    ->label(__('Type'))
+                    ->label(__('newsletter.campaign_type'))
                     ->badge()
                     ->color(fn(string $state): string => match ($state) {
                         'offers' => 'success',
@@ -35,14 +35,14 @@ class EmailCampaignsTable
                         default => 'gray',
                     })
                     ->formatStateUsing(fn(string $state): string => match ($state) {
-                        'offers' => __('Offers'),
-                        'custom' => __('Custom'),
-                        'newsletter' => __('Newsletter'),
+                        'offers' => __('newsletter.offers'),
+                        'custom' => __('newsletter.custom'),
+                        'newsletter' => __('newsletter.newsletter'),
                         default => $state,
                     }),
 
                 TextColumn::make('status')
-                    ->label(__('Status'))
+                    ->label(__('newsletter.status'))
                     ->badge()
                     ->color(fn(string $state): string => match ($state) {
                         'draft' => 'gray',
@@ -54,27 +54,27 @@ class EmailCampaignsTable
                         default => 'gray',
                     })
                     ->formatStateUsing(fn(string $state): string => match ($state) {
-                        'draft' => __('Draft'),
-                        'scheduled' => __('Scheduled'),
-                        'sending' => __('Sending'),
-                        'sent' => __('Sent'),
-                        'paused' => __('Paused'),
-                        'cancelled' => __('Cancelled'),
+                        'draft' => __('newsletter.draft'),
+                        'scheduled' => __('newsletter.scheduled'),
+                        'sending' => __('newsletter.sending'),
+                        'sent' => __('newsletter.sent'),
+                        'paused' => __('newsletter.paused'),
+                        'cancelled' => __('newsletter.cancelled'),
                         default => $state,
                     }),
 
                 TextColumn::make('send_to')
-                    ->label(__('Audience'))
+                    ->label(__('newsletter.audience'))
                     ->formatStateUsing(fn(string $state): string => match ($state) {
-                        'all' => __('All'),
-                        'active_only' => __('Active Only'),
-                        'recent' => __('Recent'),
-                        'custom' => __('Custom'),
+                        'all' => __('newsletter.all'),
+                        'active_only' => __('newsletter.active_only'),
+                        'recent' => __('newsletter.recent'),
+                        'custom' => __('newsletter.custom'),
                         default => $state,
                     }),
 
                 TextColumn::make('statistics')
-                    ->label(__('Statistics'))
+                    ->label(__('newsletter.statistics'))
                     ->html()
                     ->formatStateUsing(function ($record) {
                         if ($record->emails_sent === 0) {
@@ -93,7 +93,7 @@ class EmailCampaignsTable
                                 <div class="text-gray-600">%s%%</div>
                             </div>',
                             $record->emails_sent,
-                            __('sent'),
+                            __('newsletter.sent'),
                             $success,
                             $record->emails_failed + $record->emails_bounced,
                             $rate
@@ -101,78 +101,78 @@ class EmailCampaignsTable
                     }),
 
                 TextColumn::make('scheduled_at')
-                    ->label(__('Scheduled'))
+                    ->label(__('newsletter.scheduled'))
                     ->dateTime('d M Y, H:i')
                     ->sortable()
                     ->placeholder('—'),
 
                 TextColumn::make('sent_at')
-                    ->label(__('Sent At'))
+                    ->label(__('newsletter.sent_at'))
                     ->dateTime('d M Y, H:i')
                     ->sortable()
                     ->placeholder('—'),
 
                 TextColumn::make('created_at')
-                    ->label(__('Created'))
+                    ->label(__('newsletter.created'))
                     ->dateTime('d M Y')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 SelectFilter::make('status')
-                    ->label(__('Status'))
+                    ->label(__('newsletter.status'))
                     ->multiple()
                     ->options([
-                        'draft' => __('Draft'),
-                        'scheduled' => __('Scheduled'),
-                        'sending' => __('Sending'),
-                        'sent' => __('Sent'),
-                        'paused' => __('Paused'),
-                        'cancelled' => __('Cancelled'),
+                        'draft' => __('newsletter.draft'),
+                        'scheduled' => __('newsletter.scheduled'),
+                        'sending' => __('newsletter.sending'),
+                        'sent' => __('newsletter.sent'),
+                        'paused' => __('newsletter.paused'),
+                        'cancelled' => __('newsletter.cancelled'),
                     ]),
 
                 SelectFilter::make('type')
-                    ->label(__('Type'))
+                    ->label(__('newsletter.campaign_type'))
                     ->multiple()
                     ->options([
-                        'offers' => __('Offers'),
-                        'custom' => __('Custom'),
-                        'newsletter' => __('Newsletter'),
+                        'offers' => __('newsletter.offers'),
+                        'custom' => __('newsletter.custom'),
+                        'newsletter' => __('newsletter.newsletter'),
                     ]),
 
                 SelectFilter::make('send_to')
-                    ->label(__('Audience'))
+                    ->label(__('newsletter.audience'))
                     ->multiple()
                     ->options([
-                        'all' => __('All'),
-                        'active_only' => __('Active Only'),
-                        'recent' => __('Recent'),
-                        'custom' => __('Custom'),
+                        'all' => __('newsletter.all'),
+                        'active_only' => __('newsletter.active_only'),
+                        'recent' => __('newsletter.recent'),
+                        'custom' => __('newsletter.custom'),
                     ]),
             ])
             ->recordActions([
                 EditAction::make(),
                 
                 Action::make('send')
-                    ->label(__('Send Now'))
+                    ->label(__('newsletter.send_now'))
                     ->icon('heroicon-o-paper-airplane')
                     ->color('success')
                     ->requiresConfirmation()
-                    ->modalHeading(__('Send Campaign'))
-                    ->modalDescription(__('Are you sure you want to send this campaign? This action cannot be undone.'))
-                    ->modalSubmitActionLabel(__('Yes, Send Now'))
+                    ->modalHeading(__('newsletter.send_campaign'))
+                    ->modalDescription(__('newsletter.send_confirm'))
+                    ->modalSubmitActionLabel(__('newsletter.yes_send_now'))
                     ->visible(fn($record) => in_array($record->status, ['draft', 'scheduled', 'paused']))
                     ->action(function ($record) {
                         ProcessEmailCampaign::dispatch($record);
                         
                         Notification::make()
-                            ->title(__('Campaign queued for sending'))
+                            ->title(__('newsletter.campaign_queued'))
                             ->success()
                             ->send();
                     }),
 
                 Action::make('pause')
-                    ->label(__('Pause'))
+                    ->label(__('newsletter.pause'))
                     ->icon('heroicon-o-pause')
                     ->color('warning')
                     ->requiresConfirmation()
@@ -181,13 +181,13 @@ class EmailCampaignsTable
                         $record->update(['status' => 'paused']);
                         
                         Notification::make()
-                            ->title(__('Campaign paused'))
+                            ->title(__('newsletter.campaign_paused'))
                             ->success()
                             ->send();
                     }),
 
                 Action::make('cancel')
-                    ->label(__('Cancel'))
+                    ->label(__('newsletter.cancel'))
                     ->icon('heroicon-o-x-mark')
                     ->color('danger')
                     ->requiresConfirmation()
@@ -196,7 +196,7 @@ class EmailCampaignsTable
                         $record->update(['status' => 'cancelled']);
                         
                         Notification::make()
-                            ->title(__('Campaign cancelled'))
+                            ->title(__('newsletter.campaign_cancelled'))
                             ->success()
                             ->send();
                     }),

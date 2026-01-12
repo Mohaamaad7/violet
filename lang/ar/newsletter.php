@@ -1,6 +1,14 @@
 <?php
 
 return [
+    // Admin / Navigation
+    'navigation_group_marketing' => 'التسويق',
+    'email_campaign' => 'حملة بريدية',
+    'email_campaigns' => 'الحملات البريدية',
+    'subscriber' => 'مشترك',
+    'subscribers' => 'المشتركون',
+    'newsletter_subscriptions' => 'المشتركون في النشرة',
+
     // Form Labels
     'subscriber_info' => 'معلومات المشترك',
     'additional_info' => 'معلومات إضافية',
@@ -18,7 +26,7 @@ return [
     'bounced' => 'فشل التوصيل',
     
     // Source Options
-    'source_footer' => 'Footer',
+    'source_footer' => 'تذييل الموقع',
     'source_contact' => 'صفحة الاتصال',
     'source_popup' => 'نافذة منبثقة',
     'source_checkout' => 'صفحة الدفع',
@@ -62,6 +70,7 @@ return [
     // Table Columns
     'statistics' => 'الإحصائيات',
     'audience' => 'الجمهور',
+    'emails_count' => 'عدد الرسائل',
     'all' => 'الكل',
     'recent' => 'الأخيرون',
     'custom' => 'مخصص',
@@ -93,6 +102,7 @@ return [
     'unsubscribe_sorry' => 'نأسف لرؤيتك تغادر',
     'unsubscribe_email' => 'البريد الإلكتروني',
     'subscribed_on' => 'تاريخ الاشتراك',
+    'unsubscribe_reason_question' => 'لماذا تريد إلغاء الاشتراك؟',
     'reason_optional' => '(اختياري)',
     'feedback_helps' => 'ملاحظاتك تساعدنا على التحسين',
     'unsubscribe_button' => 'إلغاء الاشتراك',
@@ -111,4 +121,28 @@ return [
     'visit_store' => 'زيارة المتجر',
     'dont_want_emails' => 'لا تريد تلقي هذه الرسائل؟',
     'unsubscribe' => 'إلغاء الاشتراك',
+
+    // Email Footer
+    'all_rights_reserved' => 'جميع الحقوق محفوظة.',
+
+    // Footer privacy note
+    'privacy_note_prefix' => 'بالاشتراك، أنت توافق على',
+    'privacy_policy' => 'سياسة الخصوصية',
+
+    // Email template editor / preview (Filament)
+    'template_info_title' => 'معلومات القالب',
+    'template_name_label' => 'الاسم:',
+    'template_type_label' => 'النوع:',
+    'template_subject_ar_label' => 'العنوان (عربي):',
+    'template_status_label' => 'الحالة:',
+    'template_active' => 'مفعّل',
+    'template_inactive' => 'معطّل',
+    'email_preview_warning_title' => 'ملاحظة:',
+    'email_preview_warning_body' => 'هذه معاينة تستخدم بيانات تجريبية. البيانات الفعلية ستختلف عند إرسال الرسالة.',
+    'email_preview_content_title' => 'معاينة محتوى الرسالة',
+    'variables_used' => 'المتغيرات المستخدمة',
+    'click_to_insert_tooltip' => 'انقر للإدراج',
+    'how_to_use_title' => 'كيفية الاستخدام:',
+    'how_to_use_body_1' => 'انقر على أي متغير أعلاه لإدراجه مباشرة في المحرر عند موضع المؤشر.',
+    'how_to_use_body_2' => 'المتغيرات سيتم استبدالها بالقيم الفعلية عند إرسال البريد الإلكتروني.',
 ];

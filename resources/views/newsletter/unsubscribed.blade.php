@@ -9,22 +9,22 @@
             </svg>
             
             <h2 class="text-2xl font-bold text-gray-900 mb-4">
-                {{ __('Successfully Unsubscribed') }}
+                {{ __('newsletter.successfully_unsubscribed') }}
             </h2>
             
             <p class="text-gray-600 mb-6">
-                {{ __('You have been successfully removed from our mailing list.') }}
+                {{ __('newsletter.removed_from_list') }}
             </p>
             
             <p class="text-sm text-gray-500 mb-8">
-                {{ __('You will no longer receive promotional emails from us.') }}
+                {{ __('newsletter.no_more_emails') }}
             </p>
             
             <a 
                 href="{{ route('home') }}"
                 class="inline-block bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg transition duration-200"
             >
-                {{ __('Back to Home') }}
+                {{ __('newsletter.back_to_home') }}
             </a>
         </div>
     </div>
