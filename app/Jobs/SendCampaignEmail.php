@@ -14,12 +14,9 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
-class SendCampaignEmail implements ShouldQueue
+class SendCampaignEmail
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-
-    public $tries = 3;
-    public $timeout = 120;
+    use Dispatchable;
 
     public function __construct(
         public EmailCampaign $campaign,
