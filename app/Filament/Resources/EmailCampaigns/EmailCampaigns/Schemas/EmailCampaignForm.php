@@ -3,15 +3,15 @@
 namespace App\Filament\Resources\EmailCampaigns\EmailCampaigns\Schemas;
 
 use App\Models\DiscountCode;
-use Filament\Schemas\Components\DateTimePicker;
-use Filament\Schemas\Components\RichEditor;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Select;
-use Filament\Schemas\Components\Textarea;
-use Filament\Schemas\Components\TextInput;
-use Filament\Schemas\Components\Toggle;
 use Filament\Schemas\Schema;
-use Filament\Schemas\Get;
+use Filament\Forms\Get;
 
 class EmailCampaignForm
 {
