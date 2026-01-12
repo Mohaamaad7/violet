@@ -15,54 +15,54 @@ class NewsletterSubscriptionForm
     {
         return $schema
             ->schema([
-                Section::make('معلومات المشترك')
+                Section::make(__('newsletter.subscriber_info'))
                     ->schema([
                         TextInput::make('email')
-                            ->label('البريد الإلكتروني')
+                            ->label(__('newsletter.email'))
                             ->email()
                             ->required()
                             ->unique(ignoreRecord: true)
                             ->maxLength(255),
 
                         Select::make('status')
-                            ->label('الحالة')
+                            ->label(__('newsletter.status'))
                             ->options([
-                                'active' => 'نشط',
-                                'unsubscribed' => 'ألغى الاشتراك',
-                                'bounced' => 'فشل التوصيل',
+                                'active' => __('newsletter.active'),
+                                'unsubscribed' => __('newsletter.unsubscribed'),
+                                'bounced' => __('newsletter.bounced'),
                             ])
                             ->required()
                             ->default('active'),
 
                         Select::make('source')
-                            ->label('المصدر')
+                            ->label(__('newsletter.source'))
                             ->options([
-                                'footer' => 'Footer',
-                                'contact' => 'صفحة الاتصال',
-                                'popup' => 'نافذة منبثقة',
-                                'checkout' => 'صفحة الدفع',
+                                'footer' => __('newsletter.source_footer'),
+                                'contact' => __('newsletter.source_contact'),
+                                'popup' => __('newsletter.source_popup'),
+                                'checkout' => __('newsletter.source_checkout'),
                             ])
                             ->nullable(),
                     ])
                     ->columns(2),
 
-                Section::make('معلومات إضافية')
+                Section::make(__('newsletter.additional_info'))
                     ->schema([
                         TextInput::make('ip_address')
-                            ->label('عنوان IP')
+                            ->label(__('newsletter.ip_address'))
                             ->maxLength(45)
                             ->disabled(),
 
                         DateTimePicker::make('subscribed_at')
-                            ->label('تاريخ الاشتراك')
+                            ->label(__('newsletter.subscribed_at'))
                             ->default(now()),
 
                         DateTimePicker::make('unsubscribed_at')
-                            ->label('تاريخ إلغاء الاشتراك')
+                            ->label(__('newsletter.unsubscribed_at'))
                             ->nullable(),
 
                         Textarea::make('unsubscribe_reason')
-                            ->label('سبب إلغاء الاشتراك')
+                            ->label(__('newsletter.unsubscribe_reason'))
                             ->rows(3)
                             ->nullable(),
                     ])
