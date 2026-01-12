@@ -206,16 +206,9 @@
                 <div>
                     <h5 class="text-white font-semibold text-sm mb-2">{{ trans_db('store.footer.subscribe') }}</h5>
                     <p class="text-xs text-gray-500 mb-3">{{ trans_db('store.footer.newsletter_desc') }}</p>
-                    <form action="#" method="POST" class="flex gap-2">
-                        @csrf
-                        <input type="email" placeholder="{{ trans_db('store.footer.your_email') }}"
-                            class="flex-1 px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-sm text-white placeholder-gray-500 focus:border-violet-500 focus:ring-1 focus:ring-violet-500 focus:outline-none"
-                            required>
-                        <button type="submit"
-                            class="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg text-sm font-medium transition">
-                            {{ trans_db('store.footer.subscribe_button') }}
-                        </button>
-                    </form>
+                    
+                    {{-- Livewire Newsletter Component --}}
+                    <livewire:store.newsletter-subscription />
                 </div>
             </div>
         </div>

@@ -1,0 +1,148 @@
+<?php
+
+return [
+    // Admin / Navigation
+    'navigation_group_marketing' => 'التسويق',
+    'email_campaign' => 'حملة بريدية',
+    'email_campaigns' => 'الحملات البريدية',
+    'subscriber' => 'مشترك',
+    'subscribers' => 'المشتركون',
+    'newsletter_subscriptions' => 'المشتركون في النشرة',
+
+    // Form Labels
+    'subscriber_info' => 'معلومات المشترك',
+    'additional_info' => 'معلومات إضافية',
+    'email' => 'البريد الإلكتروني',
+    'status' => 'الحالة',
+    'source' => 'المصدر',
+    'ip_address' => 'عنوان IP',
+    'subscribed_at' => 'تاريخ الاشتراك',
+    'unsubscribed_at' => 'تاريخ إلغاء الاشتراك',
+    'unsubscribe_reason' => 'سبب إلغاء الاشتراك',
+    
+    // Status Options
+    'active' => 'نشط',
+    'unsubscribed' => 'ألغى الاشتراك',
+    'bounced' => 'فشل التوصيل',
+    
+    // Source Options
+    'source_footer' => 'تذييل الموقع',
+    'source_contact' => 'صفحة الاتصال',
+    'source_popup' => 'نافذة منبثقة',
+    'source_checkout' => 'صفحة الدفع',
+    'source_manual' => 'يدوي',
+    
+    // Campaign Form
+    'campaign_information' => 'معلومات الحملة',
+    'targeting_settings' => 'الاستهداف والإعدادات',
+    'campaign_title' => 'عنوان الحملة',
+    'campaign_type' => 'نوع الحملة',
+    'offers_campaign' => 'حملة عروض',
+    'custom_message' => 'رسالة مخصصة',
+    'newsletter' => 'نشرة إخبارية',
+    'email_subject' => 'موضوع البريد',
+    'preview_text' => 'نص المعاينة',
+    'preview_text_help' => 'يظهر هذا النص في معاينات البريد الإلكتروني',
+    'email_content' => 'محتوى البريد',
+    'select_offers' => 'اختر العروض',
+    'select_offers_help' => 'اختر أكواد الخصم لتضمينها في الحملة',
+    
+    // Campaign Status
+    'draft' => 'مسودة',
+    'scheduled' => 'مجدولة',
+    'sending' => 'جاري الإرسال',
+    'sent' => 'تم الإرسال',
+    'paused' => 'متوقفة',
+    'cancelled' => 'ملغاة',
+    
+    // Targeting
+    'send_to' => 'إرسال إلى',
+    'all_subscribers' => 'جميع المشتركين',
+    'active_only' => 'النشطين فقط',
+    'recent_30_days' => 'الأخيرون (آخر 30 يوم)',
+    'custom_filters' => 'فلاتر مخصصة',
+    'choose_audience' => 'اختر جمهورك المستهدف',
+    'schedule_for' => 'جدولة لـ',
+    'send_immediately' => 'اترك فارغاً للإرسال فوراً',
+    'send_rate' => 'معدل الإرسال (بريد/دقيقة)',
+    'send_rate_help' => 'موصى به: 50-100 بريد في الدقيقة',
+    
+    // Table Columns
+    'statistics' => 'الإحصائيات',
+    'audience' => 'الجمهور',
+    'emails_count' => 'عدد الرسائل',
+    'all' => 'الكل',
+    'recent' => 'الأخيرون',
+    'custom' => 'مخصص',
+    'offers' => 'عروض',
+    'sent_at' => 'تاريخ الإرسال',
+    'created' => 'تاريخ الإنشاء',
+    
+    // Actions
+    'send_now' => 'إرسال الآن',
+    'send_campaign' => 'إرسال الحملة',
+    'send_confirm' => 'هل أنت متأكد من إرسال هذه الحملة؟ لا يمكن التراجع عن هذا الإجراء.',
+    'yes_send_now' => 'نعم، أرسل الآن',
+    'campaign_queued' => 'تم وضع الحملة في قائمة الانتظار للإرسال',
+    'pause' => 'إيقاف مؤقت',
+    'campaign_paused' => 'تم إيقاف الحملة مؤقتاً',
+    'cancel' => 'إلغاء',
+    'campaign_cancelled' => 'تم إلغاء الحملة',
+    
+    // Frontend Messages
+    'subscribe_placeholder' => 'أدخل بريدك الإلكتروني',
+    'subscribe_button' => 'اشترك',
+    'subscribe_success' => 'شكراً لاشتراكك! تحقق من بريدك الإلكتروني للتأكيد.',
+    'subscribe_error' => 'فشل الاشتراك. يرجى المحاولة مرة أخرى.',
+    'already_subscribed' => 'هذا البريد الإلكتروني مشترك بالفعل.',
+    'invalid_email' => 'يرجى إدخال عنوان بريد إلكتروني صالح.',
+    
+    // Unsubscribe
+    'unsubscribe_title' => 'إلغاء الاشتراك من النشرة الإخبارية',
+    'unsubscribe_sorry' => 'نأسف لرؤيتك تغادر',
+    'unsubscribe_email' => 'البريد الإلكتروني',
+    'subscribed_on' => 'تاريخ الاشتراك',
+    'unsubscribe_reason_question' => 'لماذا تريد إلغاء الاشتراك؟',
+    'reason_optional' => '(اختياري)',
+    'feedback_helps' => 'ملاحظاتك تساعدنا على التحسين',
+    'unsubscribe_button' => 'إلغاء الاشتراك',
+    'cancel_button' => 'إلغاء',
+    'changed_mind' => 'غيرت رأيك؟ يمكنك دائماً إعادة الاشتراك لاحقاً!',
+    'successfully_unsubscribed' => 'تم إلغاء الاشتراك بنجاح',
+    'removed_from_list' => 'تم حذفك بنجاح من قائمتنا البريدية.',
+    'no_more_emails' => 'لن تتلقى المزيد من رسائل البريد الترويجية منا.',
+    'back_to_home' => 'العودة للرئيسية',
+    
+    // Email Content
+    'special_offers' => 'عروض خاصة لك فقط',
+    'discount' => 'خصم',
+    'valid_until' => 'صالح حتى',
+    'shop_now' => 'تسوق الآن',
+    'visit_store' => 'زيارة المتجر',
+    'dont_want_emails' => 'لا تريد تلقي هذه الرسائل؟',
+    'unsubscribe' => 'إلغاء الاشتراك',
+
+    // Email Footer
+    'all_rights_reserved' => 'جميع الحقوق محفوظة.',
+
+    // Footer privacy note
+    'privacy_note_prefix' => 'بالاشتراك، أنت توافق على',
+    'privacy_policy' => 'سياسة الخصوصية',
+
+    // Email template editor / preview (Filament)
+    'template_info_title' => 'معلومات القالب',
+    'template_name_label' => 'الاسم:',
+    'template_type_label' => 'النوع:',
+    'template_subject_ar_label' => 'العنوان (عربي):',
+    'template_status_label' => 'الحالة:',
+    'template_active' => 'مفعّل',
+    'template_inactive' => 'معطّل',
+    'email_preview_warning_title' => 'ملاحظة:',
+    'email_preview_warning_body' => 'هذه معاينة تستخدم بيانات تجريبية. البيانات الفعلية ستختلف عند إرسال الرسالة.',
+    'email_preview_content_title' => 'معاينة محتوى الرسالة',
+    'variables_used' => 'المتغيرات المستخدمة',
+    'click_to_insert_tooltip' => 'انقر للإدراج',
+    'how_to_use_title' => 'كيفية الاستخدام:',
+    'how_to_use_body_1' => 'انقر على أي متغير أعلاه لإدراجه مباشرة في المحرر عند موضع المؤشر.',
+    'how_to_use_body_2' => 'المتغيرات سيتم استبدالها بالقيم الفعلية عند إرسال البريد الإلكتروني.',
+];

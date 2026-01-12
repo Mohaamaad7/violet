@@ -46,6 +46,10 @@ Route::view('/about', 'pages.about')->name('about');
 // Contact Us Page (Static Page with Livewire Form)
 Route::view('/contact', 'pages.contact')->name('contact');
 
+// Newsletter Routes
+Route::get('/newsletter/unsubscribe/{token}', [App\Http\Controllers\NewsletterController::class, 'unsubscribe'])->name('newsletter.unsubscribe');
+Route::post('/newsletter/unsubscribe/{token}', [App\Http\Controllers\NewsletterController::class, 'processUnsubscribe'])->name('newsletter.unsubscribe.process');
+
 // Static Pages (Terms, Privacy, etc.) - Dynamic from database
 Route::get('/terms', App\Livewire\Store\StaticPage::class)->name('terms')->defaults('slug', 'terms');
 Route::get('/privacy', App\Livewire\Store\StaticPage::class)->name('privacy')->defaults('slug', 'privacy');
