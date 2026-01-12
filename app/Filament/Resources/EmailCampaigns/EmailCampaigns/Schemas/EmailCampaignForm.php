@@ -11,7 +11,6 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Filament\Forms\Get;
 
 class EmailCampaignForm
 {
@@ -75,7 +74,7 @@ class EmailCampaignForm
                             ->preload()
                             ->searchable()
                             ->helperText(__('Select discount codes to include in the campaign'))
-                            ->visible(fn(Get $get) => $get('type') === 'offers')
+                            ->visible(fn($get) => $get('type') === 'offers')
                             ->columnSpanFull(),
                     ]),
 
