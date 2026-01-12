@@ -97,16 +97,7 @@
     <div class="container">
         <!-- Header -->
         <div class="header">
-            @php
-                $logoPath = \App\Models\Setting::get('logo_icon');
-                $fullPath = $logoPath ? public_path($logoPath) : null;
-            @endphp
-
-            @if($fullPath && file_exists($fullPath))
-                <img src="{{ $message->embed($fullPath) }}" alt="{{ config('app.name') }}">
-            @else
-                <h1 style="color: white; margin: 0;">{{ config('app.name') }}</h1>
-            @endif
+            <h1 style="color: white; margin: 0; font-size: 28px;">{{ config('app.name') }}</h1>
         </div>
 
         <!-- Main Content -->
