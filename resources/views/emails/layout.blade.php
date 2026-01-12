@@ -98,8 +98,8 @@
         <!-- Header -->
         <div class="header">
             @php
-                $logoPath = \App\Models\Setting::get('site_logo');
-                $fullPath = $logoPath ? public_path('storage/' . $logoPath) : null;
+                $logoPath = \App\Models\Setting::get('logo_icon');
+                $fullPath = $logoPath ? public_path($logoPath) : null;
             @endphp
 
             @if($fullPath && file_exists($fullPath))
