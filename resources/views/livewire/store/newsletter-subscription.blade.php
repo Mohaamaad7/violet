@@ -1,7 +1,7 @@
 <div class="w-full">
     {{-- Success/Error Message --}}
     @if($message)
-        <div 
+        <div
             class="mb-3 p-3 rounded-lg text-sm {{ $messageType === 'success' ? 'bg-green-50 text-green-800 border border-green-200' : 'bg-red-50 text-red-800 border border-red-200' }}"
             x-data="{ show: true }"
             x-show="show"
@@ -26,23 +26,23 @@
     {{-- Newsletter Form --}}
     <form wire:submit.prevent="subscribe" class="flex gap-2">
         @csrf
-        
+
         <div class="flex-1">
-            <input 
-                type="email" 
+            <input
+                type="email"
                 wire:model="email"
                 placeholder="{{ trans_db('store.footer.your_email') }}"
                 class="w-full px-3 py-2 bg-gray-800 border rounded-lg text-sm text-white placeholder-gray-500 focus:outline-none transition
                     {{ $errors->has('email') ? 'border-red-500 focus:border-red-500 focus:ring-1 focus:ring-red-500' : 'border-gray-700 focus:border-violet-500 focus:ring-1 focus:ring-violet-500' }}"
                 {{ $loading ? 'disabled' : '' }}
             >
-            
+
             @error('email')
                 <p class="mt-1 text-xs text-red-400">{{ $message }}</p>
             @enderror
         </div>
-        
-        <button 
+
+        <button
             type="submit"
             class="px-4 py-2 bg-violet-600 hover:bg-violet-700 text-white rounded-lg text-sm font-medium transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
             {{ $loading ? 'disabled' : '' }}
@@ -60,7 +60,7 @@
     {{-- Privacy Note (Optional) --}}
     <p class="mt-2 text-xs text-gray-500">
         {{ __('newsletter.privacy_note_prefix') }}
-        <a href="/privacy-policy" class="text-violet-400 hover:text-violet-300 underline">{{ __('newsletter.privacy_policy') }}</a>
+        <a href="/page/privacy-policy" class="text-violet-400 hover:text-violet-300 underline">{{ __('newsletter.privacy_policy') }}</a>
     </p>
 </div>
 
