@@ -175,11 +175,11 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                         </svg>
                         <div class="text-sm text-gray-400">
-                            <span lang="ar" dir="rtl">9 ش محمد السادات متفرع من طه حسين، النزهة الجديدة</span><br>
-                            <span lang="en" dir="ltr">9 Mohamed El-Sadat St., off Taha Hussein, El Nozha El Gedida</span><br>
-                            <a href="https://maps.app.goo.gl/xcyq9VRPMLZEKR7Q7" target="_blank" rel="noopener noreferrer" class="text-violet-400 hover:underline inline-flex items-center gap-1 mt-1">
-                                <svg class="w-4 h-4 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                                {{ trans_db('store.footer.view_on_map') }} 
+                            <a href="https://maps.app.goo.gl/xcyq9VRPMLZEKR7Q7" target="_blank" rel="noopener noreferrer" class="text-violet-400 hover:underline block" lang="ar" dir="rtl">
+                                9 ش محمد السادات متفرع من طه حسين، النزهة الجديدة
+                            </a>
+                            <a href="https://maps.app.goo.gl/xcyq9VRPMLZEKR7Q7" target="_blank" rel="noopener noreferrer" class="text-violet-400 hover:underline block" lang="en" dir="ltr">
+                                9 Mohamed El-Sadat St., off Taha Hussein, El Nozha El Gedida
                             </a>
                         </div>
                     </div>
@@ -196,7 +196,7 @@
                         <svg class="w-5 h-5 text-violet-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
                         </svg>
-                        <a href="tel:+201091191056" class="text-sm text-gray-400 hover:text-violet-400 transition">+201091191056</a>
+                        <a href="tel:+201091191056" class="text-sm text-gray-400 hover:text-violet-400 transition">+20 109 119 1056</a>
                     </div>
                 </div>
 
