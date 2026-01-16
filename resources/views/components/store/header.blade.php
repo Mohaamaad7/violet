@@ -1,53 +1,7 @@
 {{-- Store Header Component --}}
 <header class="bg-white shadow-md sticky top-0 z-50">
-    {{-- Top Bar --}}
-    <div class="bg-gradient-to-r from-violet-600 to-violet-800 text-white py-2">
-        <div class="container mx-auto px-4">
-            <div class="flex justify-between items-center text-sm">
-                {{-- Contact Info --}}
-                <div class="hidden md:flex items-center gap-4">
-                    <a href="mailto:info@floweviolet.com"
-                        class="hover:text-cream-200 transition flex items-center gap-1">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                        </svg>
-                        info@violet.com
-                    </a>
-                    <a href="tel:+201234567890" class="hover:text-cream-200 transition flex items-center gap-1">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                        </svg>
-                        +201091191056
-                    </a>
-                </div>
-
-
-
-                {{-- Language Switcher --}}
-                {{-- Language Switcher --}}
-                <div class="hidden md:flex items-center">
-                    <a href="{{ route('locale.switch', app()->getLocale() === 'ar' ? 'en' : 'ar') }}"
-                        class="flex items-center gap-2 px-3 py-1 rounded-full hover:bg-white/10 transition-colors duration-200"
-                        aria-label="{{ app()->getLocale() === 'ar' ? 'Switch to English' : 'Switch to Arabic' }}">
-
-                        @if(app()->getLocale() === 'ar')
-                            {{-- Show UK Flag for English --}}
-                            <img src="https://flagcdn.com/w40/gb.png" alt="English"
-                                class="w-6 h-auto rounded-sm shadow-sm block">
-                            <span class="font-bold text-xs tracking-wide pt-0.5 font-sans">English</span>
-                        @else
-                            {{-- Show Egypt Flag for Arabic --}}
-                            <img src="https://flagcdn.com/w40/eg.png" alt="Arabic"
-                                class="w-6 h-auto rounded-sm shadow-sm block">
-                            <span class="font-bold text-xs tracking-wide pt-0.5 font-sans">العربية</span>
-                        @endif
-                    </a>
-                </div>
-            </div>
-        </div>
-    </div>
+    {{-- Top Bar - Decorative purple bar --}}
+    <div class="bg-gradient-to-r from-violet-600 to-violet-800 h-1.5"></div>
 
     {{-- Main Header --}}
     <div class="container mx-auto px-4 py-4">
@@ -124,6 +78,19 @@
                         x-cloak>
                     </span>
                 </button>
+
+                {{-- Language Switcher --}}
+                <a href="{{ route('locale.switch', app()->getLocale() === 'ar' ? 'en' : 'ar') }}"
+                    class="flex items-center gap-1.5 px-2 py-1.5 hover:bg-gray-100 rounded-lg transition-colors duration-200 group"
+                    aria-label="{{ app()->getLocale() === 'ar' ? 'Switch to English' : 'Switch to Arabic' }}">
+                    @if(app()->getLocale() === 'ar')
+                        <img src="https://flagcdn.com/w40/gb.png" alt="English" class="w-5 h-auto rounded-sm shadow-sm">
+                        <span class="text-xs font-medium text-gray-700 group-hover:text-violet-600 hidden sm:inline">EN</span>
+                    @else
+                        <img src="https://flagcdn.com/w40/eg.png" alt="Arabic" class="w-5 h-auto rounded-sm shadow-sm">
+                        <span class="text-xs font-medium text-gray-700 group-hover:text-violet-600 hidden sm:inline">عربي</span>
+                    @endif
+                </a>
 
                 {{-- Mobile Menu Toggle --}}
                 <button onclick="toggleMobileMenu()" class="lg:hidden p-2 hover:bg-gray-100 rounded-lg transition">

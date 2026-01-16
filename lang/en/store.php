@@ -41,4 +41,9 @@ return [
     'cart' => [
         'shopping_cart' => 'Shopping Cart',
     ],
+
+    // Footer
+    'footer' => [
+        'address' => '9 Mohamed El-Sadat St., off Taha Hussein, El Nozha El Gedida',
+    ],
 ];
