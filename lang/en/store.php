@@ -32,6 +32,8 @@ return [
 
     // Products
     'products' => [
+        'all_products' => 'All Products',
+        'all_products_description' => 'Discover our complete collection of premium products',
         'sale' => 'Sale',
         'in_stock' => 'In Stock',
         'out_of_stock' => 'Out of Stock',

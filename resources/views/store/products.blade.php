@@ -7,11 +7,11 @@
     <div class="bg-cream-100 py-4">
         <div class="container mx-auto px-4">
             <nav class="flex items-center gap-2 text-sm text-gray-600">
-                <a href="/" class="hover:text-violet-600 transition">Home</a>
+                <a href="/" class="hover:text-violet-600 transition">{{ trans_db('store.header.home') }}</a>
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                 </svg>
-                <span class="text-gray-900 font-medium">Products</span>
+                <span class="text-gray-900 font-medium">{{ trans_db('store.header.products') }}</span>
             </nav>
         </div>
     </div>
@@ -22,10 +22,10 @@
             {{-- Page Header --}}
             <div class="mb-8">
                 <h1 class="text-3xl md:text-4xl font-bold text-gray-900 mb-2 font-serif">
-                    All Products
+                    {{ trans_db('store.products.all_products') }}
                 </h1>
                 <p class="text-gray-600">
-                    Discover our complete collection of premium products
+                    {{ trans_db('store.products.all_products_description') }}
                 </p>
             </div>
 

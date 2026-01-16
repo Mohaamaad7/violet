@@ -32,6 +32,8 @@ return [
 
     // Products
     'products' => [
+        'all_products' => 'جميع المنتجات',
+        'all_products_description' => 'اكتشف مجموعتنا الكاملة من المنتجات المميزة',
         'sale' => 'تخفيض',
         'in_stock' => 'متوفر',
         'out_of_stock' => 'غير متوفر',
