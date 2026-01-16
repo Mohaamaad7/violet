@@ -51,10 +51,13 @@ Route::get('/newsletter/unsubscribe/{token}', [App\Http\Controllers\NewsletterCo
 Route::post('/newsletter/unsubscribe/{token}', [App\Http\Controllers\NewsletterController::class, 'processUnsubscribe'])->name('newsletter.unsubscribe.process');
 
 // Static Pages (Terms, Privacy, etc.) - Dynamic from database
-Route::get('/terms', App\Livewire\Store\StaticPage::class)->name('terms')->defaults('slug', 'terms');
-Route::get('/privacy', App\Livewire\Store\StaticPage::class)->name('privacy')->defaults('slug', 'privacy');
-Route::get('/returns', App\Livewire\Store\StaticPage::class)->name('returns')->defaults('slug', 'returns');
+// Use a single dynamic route for all static pages
 Route::get('/page/{slug}', App\Livewire\Store\StaticPage::class)->name('page.show');
+
+// Fallback route for common page slugs (backwards compatibility)
+Route::get('/{slug}', App\Livewire\Store\StaticPage::class)
+    ->where('slug', '^(terms|privacy|returns|cookies|shipping|faq|help|track-order)$')
+    ->name('static.page');
 
 // Influencer Application Page
 Route::get('/influencer/apply', App\Livewire\InfluencerApplicationForm::class)->name('influencer.apply');
