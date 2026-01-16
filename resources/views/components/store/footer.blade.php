@@ -243,7 +243,7 @@
                         {{ trans_db('store.footer.copyright') }}
                     </p>
                     <div class="flex items-center justify-center md:justify-end gap-4 mt-2 text-xs text-gray-600">
-                        <a href="/privacy"
+                        <a href="/pages/privacy_policy"
                             class="hover:text-violet-400 transition">{{ trans_db('store.footer.privacy_policy') }}</a>
                         <span>•</span>
                         <a href="/terms"
