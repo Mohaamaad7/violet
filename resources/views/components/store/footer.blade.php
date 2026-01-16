@@ -239,11 +239,11 @@
                 {{-- Copyright --}}
                 <div class="text-center md:text-right">
                     <p class="text-sm text-gray-500">
-                        &copy; {{ date('Y') }} <span class="text-violet-400 font-semibold">Violet</span>.
+                        &copy; {{ date('Y') }} <span class="text-violet-400 font-semibold">Flower Violet</span>.
                         {{ trans_db('store.footer.copyright') }}
                     </p>
                     <div class="flex items-center justify-center md:justify-end gap-4 mt-2 text-xs text-gray-600">
-                        <a href="/pages/privacy_policy"
+                        <a href="/page/privacy_policy"
                             class="hover:text-violet-400 transition">{{ trans_db('store.footer.privacy_policy') }}</a>
                         <span>•</span>
                         <a href="/terms"
