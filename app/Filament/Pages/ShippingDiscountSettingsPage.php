@@ -7,6 +7,8 @@ use BackedEnum;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Forms\Contracts\HasForms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
@@ -26,8 +28,10 @@ use Illuminate\Support\Facades\Cache;
  *
  * Settings read via Eloquent + Cache (no Setting::get()).
  */
-class ShippingDiscountSettingsPage extends Page
+class ShippingDiscountSettingsPage extends Page implements HasForms
 {
+    use InteractsWithForms;
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTruck;
 
     protected static ?string $navigationLabel = 'خصم الشحن';
