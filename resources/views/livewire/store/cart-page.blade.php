@@ -183,24 +183,22 @@
                                 <span class="font-semibold text-gray-900">{{ number_format($subtotal, 2) }} ج.م</span>
                             </div>
 
-                            {{-- Shipping Discount Progress Bar --}}
+                            {{-- Shipping Discount Message --}}
                             @php $prog = $this->discountProgress; @endphp
                             @if($prog['show'])
-                            <div class="rounded-lg border p-3 {{ $prog['achieved'] ? 'bg-green-50 border-green-200' : 'bg-amber-50 border-amber-200' }}">
                                 @if($prog['achieved'])
-                                    <p class="text-green-700 font-bold text-sm text-center">
-                                        🎉 تهانينا! ستحصل على خصم {{ $prog['percentage'] }}% على الشحن
-                                    </p>
+                                    <div class="rounded-lg border p-3 bg-green-50 border-green-200 text-center">
+                                        <p class="text-green-700 font-bold text-sm">
+                                            🎉 تهانينا! ستحصل على خصم {{ $prog['percentage'] }}% على الشحن
+                                        </p>
+                                    </div>
                                 @else
-                                    <p class="text-xs text-amber-800 mb-2">
-                                        أضف <strong>{{ number_format($prog['remaining'], 2) }} ج.م</strong> للحصول على خصم <strong>{{ $prog['percentage'] }}%</strong> على الشحن
-                                    </p>
-                                    <div class="w-full bg-amber-200 rounded-full h-1.5">
-                                        <div class="bg-amber-500 h-1.5 rounded-full transition-all duration-700"
-                                             style="width: {{ $prog['progress'] }}%"></div>
+                                    <div class="rounded-lg border p-3 bg-white border-gray-300 text-center">
+                                        <p class="text-sm text-gray-700">
+                                            أضف <strong>{{ number_format($prog['remaining'], 2) }} ج.م</strong> للحصول على خصم <strong>{{ $prog['percentage'] }}%</strong> على الشحن
+                                        </p>
                                     </div>
                                 @endif
-                            </div>
                             @endif
 
                             {{-- Shipping --}}
