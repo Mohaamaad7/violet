@@ -9,9 +9,9 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
-use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Illuminate\Support\Facades\Cache;
 
@@ -63,9 +63,9 @@ class ShippingDiscountSettingsPage extends Page implements HasForms
         ]);
     }
 
-    public function form(Form $form): Form
+    public function form(Schema $schema): Schema
     {
-        return $form
+        return $schema
             ->schema([
                 Section::make('إعدادات الخصم الديناميكي على الشحن')
                     ->description('يُطبَّق تلقائياً بدون كوبون عند تجاوز قيمة الطلب للحد الأدنى. نسبة 100% = شحن مجاني كامل.')
