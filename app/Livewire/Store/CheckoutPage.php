@@ -7,6 +7,7 @@ use App\Models\Customer;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Models\Setting;
 use App\Models\ShippingAddress;
 use App\Services\CartService;
 use App\Services\CouponService;
@@ -14,6 +15,7 @@ use App\Services\EmailService;
 use App\Services\PaymentService;
 use App\Models\PaymentSetting;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -59,7 +61,9 @@ class CheckoutPage extends Component
     // Cart Data
     public $cartItems = [];
     public $subtotal = 0;
-    public $shippingCost = 0; // Placeholder
+    public float $baseShippingCost = 0;        // Original cost from geography
+    public float $shippingDiscountAmount = 0;  // Auto-discount applied (separate from coupon)
+    public $shippingCost = 0;                  // Net = base - discountAmount
     public $total = 0;
 
     /**
@@ -174,26 +178,61 @@ class CheckoutPage extends Component
     }
 
     /**
-     * Calculate shipping cost based on selected governorate/city
+     * Load shipping discount config from DB with Cache to avoid repeated queries.
+     * Uses Eloquent directly (no Setting::get()) per architectural requirements.
+     */
+    private function getShippingDiscountConfig(): array
+    {
+        return Cache::remember('shipping_discount_config', 600, function () {
+            return [
+                'enabled'    => (bool)  Setting::where('key', 'shipping_discount_enabled')->value('value'),
+                'threshold'  => (float) Setting::where('key', 'shipping_discount_threshold')->value('value'),
+                'percentage' => (float) Setting::where('key', 'shipping_discount_percentage')->value('value'),
+            ];
+        });
+    }
+
+    /**
+     * Calculate shipping cost based on selected governorate/city,
+     * then apply dynamic discount if threshold is met.
+     *
+     * Strict order: base → discount → net → total
      */
     protected function calculateShippingCost(): void
     {
-        $this->shippingCost = 50; // Default fallback
+        // ① Base cost from geographic tables
+        $base = 50; // Default fallback
 
         if ($this->city_id) {
-            $city = \App\Models\City::find($this->city_id);
+            $city = \App\Models\City::with('governorate')->find($this->city_id);
             if ($city) {
-                // Use city's custom shipping cost if available, otherwise use governorate's
-                $this->shippingCost = $city->shipping_cost ?? $city->governorate->shipping_cost ?? 50;
+                $base = $city->shipping_cost ?? $city->governorate?->shipping_cost ?? 50;
             }
         } elseif ($this->governorate_id) {
             $governorate = \App\Models\Governorate::find($this->governorate_id);
             if ($governorate) {
-                $this->shippingCost = $governorate->shipping_cost ?? 50;
+                $base = $governorate->shipping_cost ?? 50;
             }
         }
 
-        // Recalculate total
+        $this->baseShippingCost      = $base;
+        $this->shippingDiscountAmount = 0;
+
+        // ② Dynamic discount check (Eloquent + Cache — no Setting::get())
+        $config = $this->getShippingDiscountConfig();
+        if (
+            $config['enabled'] &&
+            $config['threshold'] > 0 &&
+            $config['percentage'] > 0 &&
+            $this->subtotal >= $config['threshold']
+        ) {
+            $this->shippingDiscountAmount = round($base * ($config['percentage'] / 100), 2);
+        }
+
+        // ③ Net shipping cost
+        $this->shippingCost = $this->baseShippingCost - $this->shippingDiscountAmount;
+
+        // ④ Always last — recalculate total after shipping is settled
         $this->recalculateTotal();
     }
 
@@ -325,12 +364,13 @@ class CheckoutPage extends Component
             return;
         }
 
-        // Calculate discount
+        // Calculate discount — pass NET shippingCost (after auto-discount)
+        // so FREE_SHIPPING coupons only cover the remaining amount
         $coupon = $result['coupon'];
         $discountResult = $this->couponService->calculateDiscount(
             $coupon,
             $cartItemsForValidation,
-            $this->shippingCost
+            $this->shippingCost  // net cost, not baseShippingCost
         );
 
         $this->appliedCoupon = $coupon;
@@ -618,25 +658,27 @@ class CheckoutPage extends Component
                 // Determine payment status based on payment method
                 $paymentStatus = $isOnlinePayment ? 'pending' : 'unpaid';
 
-                // Create Order
+                // Create Order — shipping_cost stores ORIGINAL cost for financial reporting.
+                // shipping_discount_amount stores the auto-discount separately from coupon discounts.
                 $order = Order::create([
-                    'order_number' => $tempOrderNumber,
-                    'customer_id' => $this->getCustomerId(),
-                    'shipping_address_id' => $shippingAddress?->id,
-                    'guest_name' => $guestAddressData['name'] ?? null,
-                    'guest_email' => $guestAddressData['email'] ?? null,
-                    'guest_phone' => $guestAddressData['phone'] ?? null,
-                    'guest_governorate' => $guestAddressData['governorate'] ?? null,
-                    'guest_city' => $guestAddressData['city'] ?? null,
-                    'guest_address' => $guestAddressData['address'] ?? null,
-                    'status' => $isOnlinePayment ? OrderStatus::PENDING_PAYMENT : OrderStatus::PENDING,
-                    'payment_status' => $paymentStatus,
-                    'payment_method' => $this->paymentMethod, // Use actual selected method
-                    'subtotal' => $this->subtotal,
-                    'shipping_cost' => $this->shippingCost,
-                    'discount_amount' => 0, // TODO: Implement discount codes
-                    'tax_amount' => 0, // TODO: Implement tax calculation
-                    'total' => $this->total,
+                    'order_number'             => $tempOrderNumber,
+                    'customer_id'              => $this->getCustomerId(),
+                    'shipping_address_id'      => $shippingAddress?->id,
+                    'guest_name'               => $guestAddressData['name'] ?? null,
+                    'guest_email'              => $guestAddressData['email'] ?? null,
+                    'guest_phone'              => $guestAddressData['phone'] ?? null,
+                    'guest_governorate'        => $guestAddressData['governorate'] ?? null,
+                    'guest_city'               => $guestAddressData['city'] ?? null,
+                    'guest_address'            => $guestAddressData['address'] ?? null,
+                    'status'                   => $isOnlinePayment ? OrderStatus::PENDING_PAYMENT : OrderStatus::PENDING,
+                    'payment_status'           => $paymentStatus,
+                    'payment_method'           => $this->paymentMethod,
+                    'subtotal'                 => $this->subtotal,
+                    'shipping_cost'            => $this->baseShippingCost,       // Original geographic cost
+                    'shipping_discount_amount' => $this->shippingDiscountAmount,  // Auto-discount (new field)
+                    'discount_amount'          => $this->couponDiscount,          // Coupon discount only
+                    'tax_amount'               => 0,
+                    'total'                    => $this->total,
                 ]);
 
                 // Create Order Items & Decrement Stock

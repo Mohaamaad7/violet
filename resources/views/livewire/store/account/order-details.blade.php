@@ -165,13 +165,28 @@
                     <div class="flex justify-between text-sm">
                         <dt class="text-gray-500">{{ __('messages.account.shipping') }}</dt>
                         <dd class="text-gray-900">
-                            @if($order->shipping_cost > 0)
+                            @if($order->shipping_discount_amount > 0)
+                                {{-- Show original crossed out + discounted price --}}
+                                <span class="line-through text-gray-400 me-1">
+                                    {{ number_format($order->shipping_cost, 2) }} {{ __('messages.egp') }}
+                                </span>
+                                <span class="text-green-600 font-semibold">
+                                    {{ number_format($order->shipping_cost - $order->shipping_discount_amount, 2) }} {{ __('messages.egp') }}
+                                </span>
+                            @elseif($order->shipping_cost > 0)
                                 {{ number_format($order->shipping_cost, 2) }} {{ __('messages.egp') }}
                             @else
                                 {{ __('messages.account.free') }}
                             @endif
                         </dd>
                     </div>
+
+                    @if($order->shipping_discount_amount > 0)
+                    <div class="flex justify-between text-xs text-green-600">
+                        <dt>✅ خصم الشحن</dt>
+                        <dd>− {{ number_format($order->shipping_discount_amount, 2) }} {{ __('messages.egp') }}</dd>
+                    </div>
+                    @endif
                     
                     @if($order->tax_amount > 0)
                         <div class="flex justify-between text-sm">

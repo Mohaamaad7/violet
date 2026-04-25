@@ -59,6 +59,22 @@ class OrdersTable
                     ->weight(FontWeight::SemiBold)
                     ->color('success'),
 
+                // خصم الشحن التلقائي
+                TextColumn::make('shipping_discount_amount')
+                    ->label('خصم الشحن')
+                    ->money('EGP')
+                    ->color('success')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true)
+                    ->placeholder('-'),
+
+                // تكلفة الشحن الأصلية
+                TextColumn::make('shipping_cost')
+                    ->label('سعر الشحن')
+                    ->money('EGP')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
                 // حالة الطلب (Status Badge)
                 TextColumn::make('status')
                     ->label(__('admin.table.order_status'))
