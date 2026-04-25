@@ -2,7 +2,9 @@
 
 namespace App\Livewire\Store;
 
+use App\Models\Setting;
 use App\Services\CartService;
+use Illuminate\Support\Facades\Cache;
 use Livewire\Component;
 use Livewire\Attributes\On;
 
@@ -32,9 +34,9 @@ class CartPage extends Component
     public float $shippingCost = 0;
 
     /**
-     * Tax rate (example - 15% VAT in Saudi Arabia)
+     * Tax rate
      */
-    public float $taxRate = 0.15;
+    public float $taxRate = 0;
 
     /**
      * Tax amount
@@ -45,6 +47,11 @@ class CartPage extends Component
      * Total amount
      */
     public float $total = 0;
+
+    // Shipping discount state (for progress bar display)
+    public bool  $discountEnabled    = false;
+    public float $discountThreshold  = 0;
+    public float $discountPercentage = 0;
 
     /**
      * Inject CartService
@@ -153,18 +160,63 @@ class CartPage extends Component
     }
 
     /**
-     * Calculate totals (shipping, tax, total)
+     * Load shipping discount config using Eloquent + Cache (no Setting::get()).
+     */
+    private function getShippingDiscountConfig(): array
+    {
+        return Cache::remember('shipping_discount_config', 600, function () {
+            return [
+                'enabled'    => (bool)  Setting::where('key', 'shipping_discount_enabled')->value('value'),
+                'threshold'  => (float) Setting::where('key', 'shipping_discount_threshold')->value('value'),
+                'percentage' => (float) Setting::where('key', 'shipping_discount_percentage')->value('value'),
+            ];
+        });
+    }
+
+    /**
+     * Computed property: shipping discount progress for the cart progress bar.
+     */
+    public function getDiscountProgressProperty(): array
+    {
+        if (!$this->discountEnabled || $this->discountThreshold <= 0 || $this->subtotal <= 0) {
+            return ['show' => false];
+        }
+        $remaining = max(0, $this->discountThreshold - $this->subtotal);
+        return [
+            'show'       => true,
+            'percentage' => $this->discountPercentage,
+            'threshold'  => $this->discountThreshold,
+            'remaining'  => $remaining,
+            'progress'   => min(100, round(($this->subtotal / $this->discountThreshold) * 100, 1)),
+            'achieved'   => $remaining <= 0,
+        ];
+    }
+
+    /**
+     * Calculate totals — shipping is NOT calculated on cart page (no address yet).
+     * Only loads discount config for the progress bar display.
      */
     private function calculateTotals(): void
     {
-        // Calculate shipping (free if subtotal > 200 SAR)
-        $this->shippingCost = $this->subtotal > 200 ? 0 : 25;
+        // Edge case: empty cart
+        if ($this->subtotal <= 0) {
+            $this->shippingCost = 0;
+            $this->taxAmount    = 0;
+            $this->total        = 0;
+            $this->discountEnabled = false;
+            return;
+        }
 
-        // Calculate tax (15% VAT on subtotal + shipping)
-        $this->taxAmount = ($this->subtotal + $this->shippingCost) * $this->taxRate;
+        // Shipping is unknown before address selection — shown as 0 with disclaimer
+        $this->shippingCost = 0;
+        $this->taxAmount    = 0;
+        $this->total        = $this->subtotal;
 
-        // Calculate total
-        $this->total = $this->subtotal + $this->shippingCost + $this->taxAmount;
+        // Load discount config for the progress bar (read-only, no calculation)
+        $config = $this->getShippingDiscountConfig();
+        $this->discountEnabled    = $config['enabled'];
+        $this->discountThreshold  = $config['threshold'];
+        $this->discountPercentage = $config['percentage'];
     }
 
     /**

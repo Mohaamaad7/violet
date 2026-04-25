@@ -367,9 +367,16 @@
                                 <span class="text-gray-600">{{ __('messages.checkout.subtotal') }}</span>
                                 <span class="font-medium text-gray-900">{{ number_format($subtotal, 2) }} {{ __('messages.currency') }}</span>
                             </div>
-                            <div class="flex justify-between text-sm">
+                            <div class="flex justify-between text-sm items-center">
                                 <span class="text-gray-600">{{ __('messages.checkout.shipping') }}</span>
-                                <span class="font-medium text-gray-900">{{ number_format($shippingCost, 2) }} {{ __('messages.currency') }}</span>
+                                <div class="text-right flex items-center gap-2">
+                                    @if($shippingDiscountAmount > 0)
+                                        <span class="text-red-500 line-through text-xs">{{ number_format($baseShippingCost, 2) }} {{ __('messages.currency') }}</span>
+                                        <span class="font-bold text-green-600">{{ number_format($shippingCost, 2) }} {{ __('messages.currency') }}</span>
+                                    @else
+                                        <span class="font-medium text-gray-900">{{ number_format($shippingCost, 2) }} {{ __('messages.currency') }}</span>
+                                    @endif
+                                </div>
                             </div>
                             @if($couponDiscount > 0)
                                 <div class="flex justify-between text-sm text-green-600">

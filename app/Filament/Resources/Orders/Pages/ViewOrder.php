@@ -467,8 +467,15 @@ class ViewOrder extends ViewRecord
                                     ->color('success'),
 
                                 TextEntry::make('shipping_cost')
-                                    ->label('تكلفة الشحن')
+                                    ->label('تكلفة الشحن (الأصلية)')
                                     ->money('EGP'),
+
+                                TextEntry::make('shipping_discount_amount')
+                                    ->label('خصم الشحن التلقائي')
+                                    ->money('EGP')
+                                    ->color('success')
+                                    ->icon('heroicon-o-tag')
+                                    ->visible(fn ($record) => (float) ($record->shipping_discount_amount ?? 0) > 0),
 
                                 TextEntry::make('tax_amount')
                                     ->label('الضريبة')

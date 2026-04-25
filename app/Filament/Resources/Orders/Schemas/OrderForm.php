@@ -70,6 +70,12 @@ class OrderForm
                     ->required()
                     ->numeric()
                     ->default(0.0),
+                TextInput::make('shipping_discount_amount')
+                    ->label('خصم الشحن التلقائي')
+                    ->numeric()
+                    ->default(0.0)
+                    ->readOnly()
+                    ->helperText('خصم الشحن التلقائي (لا يُعدّل يدوياً)'),
                 TextInput::make('tax_amount')
                     ->label(__('admin.form.tax_amount'))
                     ->required()
