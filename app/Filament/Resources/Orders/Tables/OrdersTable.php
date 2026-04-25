@@ -312,7 +312,19 @@ class OrdersTable
                     ->label('تصدير Excel')
                     ->exports([
                         \pxlrbt\FilamentExcel\Exports\ExcelExport::make()
-                            ->fromTable()
+                            ->withColumns([
+                                \pxlrbt\FilamentExcel\Columns\Column::make('order_number')->heading('رقم الطلب'),
+                                \pxlrbt\FilamentExcel\Columns\Column::make('customer.name')->heading('العميل'),
+                                \pxlrbt\FilamentExcel\Columns\Column::make('guest_name')->heading('العميل (ضيف)'),
+                                \pxlrbt\FilamentExcel\Columns\Column::make('status')->heading('الحالة'),
+                                \pxlrbt\FilamentExcel\Columns\Column::make('payment_status')->heading('حالة الدفع'),
+                                \pxlrbt\FilamentExcel\Columns\Column::make('shipping_cost')->heading('تكلفة الشحن'),
+                                \pxlrbt\FilamentExcel\Columns\Column::make('shipping_discount_amount')->heading('خصم الشحن'),
+                                \pxlrbt\FilamentExcel\Columns\Column::make('discount_amount')->heading('الخصم (كوبون)'),
+                                \pxlrbt\FilamentExcel\Columns\Column::make('subtotal')->heading('الإجمالي الفرعي'),
+                                \pxlrbt\FilamentExcel\Columns\Column::make('total')->heading('الإجمالي النهائي'),
+                                \pxlrbt\FilamentExcel\Columns\Column::make('created_at')->heading('التاريخ'),
+                            ])
                             ->withFilename('orders-' . now()->format('Y-m-d'))
                     ]),
             ])

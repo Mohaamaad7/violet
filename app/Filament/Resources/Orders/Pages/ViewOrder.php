@@ -475,7 +475,7 @@ class ViewOrder extends ViewRecord
                                     ->money('EGP')
                                     ->color('success')
                                     ->icon('heroicon-o-tag')
-                                    ->visible(fn ($record) => ($record->shipping_discount_amount ?? 0) > 0),
+                                    ->visible(fn ($record) => (float) ($record->shipping_discount_amount ?? 0) > 0),
 
                                 TextEntry::make('tax_amount')
                                     ->label('الضريبة')
