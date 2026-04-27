@@ -75,6 +75,13 @@ class PaymentSettings extends Page implements HasForms
             'paymob_integration_id_wallet' => PaymentSetting::get('paymob_integration_id_wallet'),
             'paymob_integration_id_kiosk' => PaymentSetting::get('paymob_integration_id_kiosk'),
 
+            // Fawry Settings
+            'fawry_mode' => PaymentSetting::get('fawry_mode', 'test'),
+            'fawry_test_merchant_code' => PaymentSetting::get('fawry_test_merchant_code'),
+            'fawry_test_security_key' => PaymentSetting::get('fawry_test_security_key'),
+            'fawry_live_merchant_code' => PaymentSetting::get('fawry_live_merchant_code'),
+            'fawry_live_security_key' => PaymentSetting::get('fawry_live_security_key'),
+
             // Payment Methods
             'payment_cod_enabled' => (bool) PaymentSetting::get('payment_cod_enabled', true),
             'payment_card_enabled' => (bool) PaymentSetting::get('payment_card_enabled', false),
@@ -99,12 +106,17 @@ class PaymentSettings extends Page implements HasForms
                             ->options([
                                 'kashier' => '🔷 Kashier',
                                 'paymob' => '🔶 Paymob (Accept)',
+                                'fawry' => '🟡 Fawry Pay',
                             ])
                             ->default('kashier')
                             ->required()
                             ->reactive()
                             ->afterStateUpdated(function ($state) {
-                                $gatewayName = $state === 'paymob' ? 'Paymob' : 'Kashier';
+                                $gatewayName = match($state) {
+                                    'paymob' => 'Paymob',
+                                    'fawry' => 'Fawry Pay',
+                                    default => 'Kashier'
+                                };
                                 Notification::make()
                                     ->title('تم اختيار ' . $gatewayName)
                                     ->body('احفظ الإعدادات لتفعيل البوابة')
@@ -243,6 +255,57 @@ class PaymentSettings extends Page implements HasForms
                     ])
                     ->visible(fn($get) => $get('active_gateway') === 'paymob'),
 
+                // ==================== Fawry Settings (visible only when selected) ====================
+                Section::make('🟡 إعدادات Fawry Pay')
+                    ->description('بيانات الاتصال ببوابة الدفع Fawry Pay')
+                    ->schema([
+                        Select::make('fawry_mode')
+                            ->label('بيئة العمل')
+                            ->options([
+                                'test' => '🧪 تجريبي (Sandbox)',
+                                'live' => '🚀 إنتاجي (Live)',
+                            ])
+                            ->default('test')
+                            ->required()
+                            ->reactive()
+                            ->columnSpanFull(),
+
+                        // Test Credentials
+                        Section::make('بيانات التجريبي (Sandbox)')
+                            ->schema([
+                                TextInput::make('fawry_test_merchant_code')
+                                    ->label('Merchant Code')
+                                    ->placeholder('مثال: 400000037550')
+                                    ->columnSpan(1),
+
+                                TextInput::make('fawry_test_security_key')
+                                    ->label('Security Key')
+                                    ->password()
+                                    ->revealable()
+                                    ->columnSpan(1),
+                            ])
+                            ->columns(2)
+                            ->visible(fn($get) => $get('fawry_mode') === 'test'),
+
+                        // Live Credentials
+                        Section::make('بيانات الإنتاج (Live)')
+                            ->schema([
+                                TextInput::make('fawry_live_merchant_code')
+                                    ->label('Merchant Code')
+                                    ->columnSpan(1),
+
+                                TextInput::make('fawry_live_security_key')
+                                    ->label('Security Key')
+                                    ->password()
+                                    ->revealable()
+                                    ->columnSpan(1),
+                            ])
+                            ->columns(2)
+                            ->visible(fn($get) => $get('fawry_mode') === 'live'),
+                    ])
+                    ->columns(2)
+                    ->visible(fn($get) => $get('active_gateway') === 'fawry'),
+
                 // ==================== Payment Methods ====================
                 Section::make('طرق الدفع المتاحة')
                     ->description('اختر طرق الدفع التي تريد إتاحتها للعملاء')
@@ -329,6 +392,23 @@ class PaymentSettings extends Page implements HasForms
             PaymentSetting::set('paymob_integration_id_kiosk', $data['paymob_integration_id_kiosk'], 'paymob');
         }
 
+        // Fawry Settings (only save if present in form data)
+        if (isset($data['fawry_mode'])) {
+            PaymentSetting::set('fawry_mode', $data['fawry_mode'], 'fawry');
+        }
+        if (array_key_exists('fawry_test_merchant_code', $data)) {
+            PaymentSetting::set('fawry_test_merchant_code', $data['fawry_test_merchant_code'], 'fawry');
+        }
+        if (array_key_exists('fawry_test_security_key', $data)) {
+            PaymentSetting::set('fawry_test_security_key', $data['fawry_test_security_key'], 'fawry');
+        }
+        if (array_key_exists('fawry_live_merchant_code', $data)) {
+            PaymentSetting::set('fawry_live_merchant_code', $data['fawry_live_merchant_code'], 'fawry');
+        }
+        if (array_key_exists('fawry_live_security_key', $data)) {
+            PaymentSetting::set('fawry_live_security_key', $data['fawry_live_security_key'], 'fawry');
+        }
+
         // Payment Methods (always present)
         PaymentSetting::set('payment_cod_enabled', $data['payment_cod_enabled'] ?? false, 'methods');
         PaymentSetting::set('payment_card_enabled', $data['payment_card_enabled'] ?? false, 'methods');
@@ -356,11 +436,17 @@ class PaymentSettings extends Page implements HasForms
             $result = $gateway->testConnection();
 
             if ($result['success']) {
-                $gatewayName = $activeGateway === 'paymob' ? 'Paymob' : 'Kashier';
+                $gatewayName = match($activeGateway) {
+                    'paymob' => 'Paymob',
+                    'fawry' => 'Fawry Pay',
+                    default => 'Kashier'
+                };
                 $details = '';
 
                 if ($activeGateway === 'kashier') {
                     $details = "الوضع: {$result['mode']} | MID: {$result['merchant_id']}";
+                } elseif ($activeGateway === 'fawry') {
+                    $details = "الوضع: {$result['mode']} | Merchant Code: {$result['merchant_code']}";
                 } else {
                     $integrations = [];
                     if ($result['has_card_integration'] ?? false)

@@ -162,6 +162,16 @@ Route::prefix('payment')->name('payment.')->group(function () {
             ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
     });
 
+    // ============ Fawry Callbacks ============
+    Route::prefix('fawry')->name('fawry.')->group(function () {
+        Route::match(['get', 'post'], '/callback', [App\Http\Controllers\PaymentController::class, 'fawryCallback'])
+            ->name('callback')
+            ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
+        Route::post('/webhook', [App\Http\Controllers\PaymentController::class, 'fawryWebhook'])
+            ->name('webhook')
+            ->withoutMiddleware([\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
+    });
+
     // ============ Legacy Callbacks (Backwards Compatibility) ============
     // @deprecated - Use gateway-specific callbacks instead
     Route::get('/callback', [App\Http\Controllers\PaymentController::class, 'callback'])
