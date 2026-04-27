@@ -249,6 +249,35 @@ class PaymentController extends Controller
         ]);
     }
 
+    // ==================== Fawry Callbacks ====================
+
+    /**
+     * Handle callback from Fawry
+     */
+    public function fawryCallback(Request $request)
+    {
+        Log::info('Fawry callback received', $request->all());
+
+        $result = $this->paymentService->handleCallback('fawry', $request->all());
+
+        return $this->handleCallbackResult($result);
+    }
+
+    /**
+     * Handle webhook from Fawry (server-to-server)
+     */
+    public function fawryWebhook(Request $request)
+    {
+        Log::info('Fawry webhook received', $request->all());
+
+        $result = $this->paymentService->handleWebhook('fawry', $request->all());
+
+        return response()->json([
+            'status' => $result['success'] ? 'success' : 'failed',
+            'already_processed' => $result['already_processed'] ?? false,
+        ]);
+    }
+
     // ==================== Legacy Callback (backwards compatibility) ====================
 
     /**
@@ -270,6 +299,10 @@ class PaymentController extends Controller
             return $this->paymobCallback($request);
         }
 
+        if ($request->has('merchantRefNum') || $request->has('fawryRefNumber')) {
+            return $this->fawryCallback($request);
+        }
+
         // Fallback: redirect to active gateway callback
         $activeGateway = $this->gatewayManager->getActiveGatewayName();
 
@@ -280,6 +313,7 @@ class PaymentController extends Controller
 
         return match ($activeGateway) {
             'paymob' => $this->paymobCallback($request),
+            'fawry' => $this->fawryCallback($request),
             default => $this->kashierCallback($request),
         };
     }
@@ -299,10 +333,15 @@ class PaymentController extends Controller
             return $this->paymobWebhook($request);
         }
 
+        if ($request->has('merchantRefNum') || $request->has('fawryRefNumber')) {
+            return $this->fawryWebhook($request);
+        }
+
         $activeGateway = $this->gatewayManager->getActiveGatewayName();
 
         return match ($activeGateway) {
             'paymob' => $this->paymobWebhook($request),
+            'fawry' => $this->fawryWebhook($request),
             default => $this->kashierWebhook($request),
         };
     }

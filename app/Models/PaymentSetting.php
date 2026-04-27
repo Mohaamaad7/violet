@@ -27,6 +27,9 @@ class PaymentSetting extends Model
         'paymob_api_key',
         'paymob_secret_key',
         'paymob_hmac_secret',
+        // Fawry Keys
+        'fawry_test_security_key',
+        'fawry_live_security_key',
     ];
 
     // ==================== Get Setting ====================
@@ -193,6 +196,22 @@ class PaymentSetting extends Model
             'integration_id_card' => self::get('paymob_integration_id_card') ?? env('PAYMOB_INTEGRATION_ID_CARD'),
             'integration_id_wallet' => self::get('paymob_integration_id_wallet') ?? env('PAYMOB_INTEGRATION_ID_WALLET'),
             'integration_id_kiosk' => self::get('paymob_integration_id_kiosk') ?? env('PAYMOB_INTEGRATION_ID_KIOSK'),
+        ];
+    }
+
+    // ==================== Fawry Config ====================
+
+    /**
+     * Get Fawry configuration
+     */
+    public static function getFawryConfig(): array
+    {
+        $mode = self::get('fawry_mode', 'test');
+
+        return [
+            'mode' => $mode,
+            'merchant_code' => self::get("fawry_{$mode}_merchant_code") ?? env('FAWRY_MERCHANT_CODE'),
+            'security_key' => self::get("fawry_{$mode}_security_key") ?? env('FAWRY_SECURITY_KEY'),
         ];
     }
 }

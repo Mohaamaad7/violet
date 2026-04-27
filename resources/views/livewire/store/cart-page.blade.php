@@ -183,22 +183,34 @@
                                 <span class="font-semibold text-gray-900">{{ number_format($subtotal, 2) }} ج.م</span>
                             </div>
 
+                            {{-- Shipping Discount Message --}}
+                            @php $prog = $this->discountProgress; @endphp
+                            @if($prog['show'])
+                                @if($prog['achieved'])
+                                    <div class="rounded-lg border p-3 bg-green-50 border-green-200 text-center">
+                                        <p class="text-green-700 font-bold text-sm">
+                                            🎉 تهانينا! ستحصل على خصم {{ $prog['percentage'] }}% على الشحن
+                                        </p>
+                                    </div>
+                                @else
+                                    <div class="rounded-lg border p-3 bg-white border-gray-300 text-center">
+                                        <p class="text-sm text-gray-700">
+                                            أضف <strong>{{ number_format($prog['remaining'], 2) }} ج.م</strong> للحصول على خصم <strong>{{ $prog['percentage'] }}%</strong> على الشحن
+                                        </p>
+                                    </div>
+                                @endif
+                            @endif
+
                             {{-- Shipping --}}
                             <div class="flex items-center justify-between">
                                 <span class="text-gray-600">{{ __('store.cart.shipping') }}</span>
-                                <span class="font-semibold {{ $shippingCost === 0 ? 'text-green-600' : 'text-gray-900' }}">
-                                    @if($shippingCost === 0)
-                                        {{ __('store.cart.free') }} 🎉
-                                    @else
-                                        {{ number_format($shippingCost, 2) }} ج.م
-                                    @endif
-                                </span>
+                                <span class="text-sm text-gray-500 italic">يُحسب عند الدفع</span>
                             </div>
-
-                            @if($subtotal < 200 && $subtotal > 0)
-                                <div class="text-xs text-gray-500 bg-blue-50 border border-blue-200 rounded p-2">
-                                    💡 أضف {{ number_format(200 - $subtotal, 2) }} ج.م للحصول على شحن مجاني
-                                </div>
+                            {{-- UX Disclaimer --}}
+                            @if($prog['show'] ?? false)
+                            <p class="text-xs text-gray-400 bg-gray-50 border border-gray-200 rounded p-2">
+                                💡 الخصم المعروض تقدير أولي. يتم احتساب تكلفة الشحن النهائية بعد اختيار العنوان في صفحة إتمام الطلب.
+                            </p>
                             @endif
 
                             {{-- Tax (VAT 15%) --}}
