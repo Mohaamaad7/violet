@@ -6,6 +6,7 @@ use App\Contracts\PaymentGatewayInterface;
 use App\Models\PaymentSetting;
 use App\Services\Gateways\KashierGateway;
 use App\Services\Gateways\PaymobGateway;
+use App\Services\Gateways\FawryGateway;
 use InvalidArgumentException;
 
 /**
@@ -30,6 +31,7 @@ class PaymentGatewayManager
         $this->gateways = [
             'kashier' => KashierGateway::class,
             'paymob' => PaymobGateway::class,
+            'fawry' => FawryGateway::class,
         ];
     }
 
@@ -74,6 +76,7 @@ class PaymentGatewayManager
         return [
             'kashier' => 'Kashier',
             'paymob' => 'Paymob (Accept)',
+            'fawry' => 'Fawry Pay',
         ];
     }
 
