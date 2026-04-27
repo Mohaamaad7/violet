@@ -6,6 +6,7 @@ use App\Contracts\PaymentGatewayInterface;
 use App\Models\Order;
 use App\Models\Payment;
 use App\Models\PaymentSetting;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -140,93 +141,112 @@ class FawryGateway implements PaymentGatewayInterface
             ];
         }
 
-        // Create payment record
-        $payment = Payment::create([
-            'order_id' => $order->id,
-            'customer_id' => $order->customer_id,
-            'amount' => $order->total,
-            'currency' => 'EGP',
-            'payment_method' => $method,
-            'status' => 'pending',
-            'gateway' => $this->getName(),
-            'ip_address' => request()->ip(),
-            'user_agent' => request()->userAgent(),
-        ]);
-
-        try {
-            // Mapping method to Fawry PaymentMethod string if needed
-            // If empty, Fawry shows all methods the merchant is subscribed to.
-            // We can pass specific method if we want to force it
-            $fawryMethod = match($method) {
-                'card' => 'CARD',
-                'wallet' => 'MWALLET',
-                'kiosk' => 'PayAtFawry',
-                'valu' => 'VALU',
-                default => null
-            };
-
-            $chargeRequest = $this->buildChargeRequest($order, $payment, $fawryMethod);
-
-            Log::info('Fawry: Charge Request Payload', [
-                'payload' => $chargeRequest
+        return DB::transaction(function () use ($order, $method) {
+            // Create payment record
+            $payment = Payment::create([
+                'order_id' => $order->id,
+                'customer_id' => $order->customer_id,
+                'amount' => $order->total,
+                'currency' => 'EGP',
+                'payment_method' => $method,
+                'status' => 'pending',
+                'gateway' => $this->getName(),
+                'ip_address' => request()->ip(),
+                'user_agent' => substr((string) request()->userAgent(), 0, 500),
             ]);
 
-            // Call Fawry API to get checkout URL
-            // Or we can return redirect directly if using plugin, but API is better
-            // Depending on Fawry integration, usually for Hosted Checkout Link:
-            // We send POST to <baseUrl>/fawrypay-api/api/payments/init
-            
-            $apiUrl = $this->baseUrl . '/fawrypay-api/api/payments/init';
-            
-            $response = Http::post($apiUrl, $chargeRequest);
-            
-            // Check if response is just a string (URL) or JSON
-            $responseText = $response->body();
-            
-            Log::info('Fawry: Init API Response', [
-                'status' => $response->status(),
-                'body' => $responseText,
-            ]);
+            try {
+                // Validate method is known
+                $fawryMethod = match($method) {
+                    'card' => 'CARD',
+                    'wallet' => 'MWALLET',
+                    'kiosk' => 'PayAtFawry',
+                    'valu' => 'VALU',
+                    default => null
+                };
 
-            // Often Fawry returns plain text string which is the checkout URL
-            if ($response->successful() && filter_var($responseText, FILTER_VALIDATE_URL)) {
+                $chargeRequest = $this->buildChargeRequest($order, $payment, $fawryMethod);
+
+                // Log without sensitive data (signature excluded)
+                Log::info('Fawry: Charge Request', [
+                    'order_id' => $order->id,
+                    'payment_ref' => $payment->reference,
+                    'amount' => $order->total,
+                    'method' => $method,
+                ]);
+
+                $apiUrl = $this->baseUrl . '/fawrypay-api/api/payments/init';
+
+                $response = Http::timeout(15)->post($apiUrl, $chargeRequest);
+
+                $responseText = $response->body();
+
+                Log::info('Fawry: Init API Response', [
+                    'status' => $response->status(),
+                    'body_length' => strlen($responseText),
+                ]);
+
+                // Fawry returns plain text URL or JSON with redirectUrl
+                $redirectUrl = null;
+
+                if ($response->successful() && filter_var(trim($responseText), FILTER_VALIDATE_URL)) {
+                    $redirectUrl = trim($responseText);
+                } else {
+                    $jsonResponse = $response->json();
+                    if ($response->successful() && isset($jsonResponse['redirectUrl'])) {
+                        $redirectUrl = $jsonResponse['redirectUrl'];
+                    }
+                }
+
+                // Validate redirect URL belongs to Fawry domain
+                if ($redirectUrl) {
+                    $host = parse_url($redirectUrl, PHP_URL_HOST);
+                    $allowedDomains = ['atfawry.com', 'fawrystaging.com', 'atfawry.fawrystaging.com'];
+                    $isAllowed = false;
+                    foreach ($allowedDomains as $domain) {
+                        if ($host === $domain || str_ends_with($host, '.' . $domain)) {
+                            $isAllowed = true;
+                            break;
+                        }
+                    }
+
+                    if (!$isAllowed) {
+                        Log::error('Fawry: Suspicious redirect URL rejected', ['url' => $redirectUrl]);
+                        $payment->markAsFailed('Redirect URL domain mismatch');
+                        return [
+                            'success' => false,
+                            'error' => 'حدث خطأ أثناء إنشاء طلب الدفع من فوري',
+                        ];
+                    }
+
+                    return [
+                        'success' => true,
+                        'payment' => $payment,
+                        'redirect_url' => $redirectUrl,
+                    ];
+                }
+
+                $payment->markAsFailed('فشل الاتصال ببوابة فوري', null, ['response_status' => $response->status()]);
+
                 return [
-                    'success' => true,
-                    'payment' => $payment,
-                    'redirect_url' => $responseText,
+                    'success' => false,
+                    'error' => 'حدث خطأ أثناء إنشاء طلب الدفع من فوري',
                 ];
-            } 
-            
-            // Try to parse as JSON just in case
-            $jsonResponse = $response->json();
-            if ($response->successful() && isset($jsonResponse['redirectUrl'])) {
-                 return [
-                    'success' => true,
-                    'payment' => $payment,
-                    'redirect_url' => $jsonResponse['redirectUrl'],
+
+            } catch (\Exception $e) {
+                Log::error('Fawry: Failed to initiate payment', [
+                    'payment_id' => $payment->id,
+                    'error' => $e->getMessage(),
+                ]);
+
+                $payment->markAsFailed($e->getMessage());
+
+                return [
+                    'success' => false,
+                    'error' => 'حدث خطأ أثناء إنشاء طلب الدفع',
                 ];
             }
-
-            $payment->markAsFailed('فشل الاتصال ببوابة فوري', null, ['response' => $responseText]);
-
-            return [
-                'success' => false,
-                'error' => 'حدث خطأ أثناء إنشاء طلب الدفع من فوري',
-            ];
-
-        } catch (\Exception $e) {
-            Log::error('Fawry: Failed to initiate payment', [
-                'payment_id' => $payment->id,
-                'error' => $e->getMessage(),
-            ]);
-
-            $payment->markAsFailed($e->getMessage());
-
-            return [
-                'success' => false,
-                'error' => 'حدث خطأ أثناء إنشاء طلب الدفع',
-            ];
-        }
+        });
     }
 
     /**
@@ -245,9 +265,9 @@ class FawryGateway implements PaymentGatewayInterface
             ];
         }
 
-        // Validate Signature
+        // Validate Signature - MUST always validate for security
         if (!$this->validateSignature($data)) {
-            Log::error('Fawry: Invalid callback signature');
+            Log::error('Fawry: Invalid callback signature - rejecting request');
             return [
                 'success' => false,
                 'error' => 'Invalid signature',
@@ -272,43 +292,52 @@ class FawryGateway implements PaymentGatewayInterface
             ];
         }
 
+        // Verify callback amount matches payment amount to prevent tampering
+        $callbackAmount = isset($data['orderAmount']) ? (float) $data['orderAmount'] : null;
+        if ($callbackAmount !== null && abs($callbackAmount - (float) $payment->amount) > 0.01) {
+            Log::error('Fawry: Amount mismatch in callback', [
+                'expected' => $payment->amount,
+                'received' => $callbackAmount,
+                'payment_id' => $payment->id,
+            ]);
+            return [
+                'success' => false,
+                'error' => 'Amount mismatch',
+            ];
+        }
+
         // Check payment status from callback
-        // 'orderStatus' is usually 'PAID', 'UNPAID', 'CANCELED', 'EXPIRED'
+        // 'orderStatus': 'PAID', 'NEW', 'CANCELED', 'EXPIRED', 'REFUNDED', 'FAILED'
         $orderStatus = $data['orderStatus'] ?? null;
         $transactionId = $data['referenceNumber'] ?? $data['fawryRefNumber'] ?? null;
 
-        if ($orderStatus === 'PAID' || $orderStatus === 'NEW') { // NEW in callback sometimes means accepted for kiosk
-            // For card/wallet: PAID
-            // For Kiosk: Sometimes NEW if they just got the code, but callback is for payment success
-            if ($orderStatus === 'PAID') {
-                $payment->markAsCompleted($transactionId, $data);
+        if ($orderStatus === 'PAID') {
+            $payment->markAsCompleted($transactionId, $data);
 
-                $payment->order->update([
-                    'status' => \App\Enums\OrderStatus::PENDING,
-                    'payment_status' => 'paid',
-                    'payment_method' => $payment->payment_method,
-                    'payment_transaction_id' => $transactionId,
-                    'paid_at' => now(),
-                ]);
+            $payment->order->update([
+                'status' => \App\Enums\OrderStatus::PENDING,
+                'payment_status' => 'paid',
+                'payment_method' => $payment->payment_method,
+                'payment_transaction_id' => $transactionId,
+                'paid_at' => now(),
+            ]);
 
-                // Send confirmation emails
-                $this->sendConfirmationEmails($payment);
+            $this->sendConfirmationEmails($payment);
 
-                return [
-                    'success' => true,
-                    'payment' => $payment->fresh(),
-                    'order' => $payment->order,
-                    'status' => 'completed',
-                ];
-            } else {
-                // Pending Kiosk payment
-                return [
-                    'success' => true,
-                    'payment' => $payment,
-                    'order' => $payment->order,
-                    'status' => 'pending',
-                ];
-            }
+            return [
+                'success' => true,
+                'payment' => $payment->fresh(),
+                'order' => $payment->order,
+                'status' => 'completed',
+            ];
+        } elseif ($orderStatus === 'NEW') {
+            // Kiosk: reference code generated, waiting for customer to pay at outlet
+            return [
+                'success' => true,
+                'payment' => $payment,
+                'order' => $payment->order,
+                'status' => 'pending',
+            ];
         }
 
         // Failed or canceled
@@ -359,7 +388,7 @@ class FawryGateway implements PaymentGatewayInterface
 
         try {
             $apiUrl = $this->baseUrl . '/ECommerceWeb/Fawry/payments/refund';
-            $response = Http::post($apiUrl, $refundReq);
+            $response = Http::timeout(15)->post($apiUrl, $refundReq);
 
             Log::info('Fawry: Refund request', [
                 'payment_id' => $payment->id,
@@ -401,13 +430,17 @@ class FawryGateway implements PaymentGatewayInterface
     {
         $receivedSignature = $data['messageSignature'] ?? null;
         if (!$receivedSignature) {
-            return true; // Depending on Fawry, some simple callbacks might not have signature? Always better to check
+            // SECURITY: Never trust unsigned callbacks - always require signature
+            Log::error('Fawry: Callback missing messageSignature - rejecting');
+            return false;
+        }
+
+        if (empty($this->securityKey)) {
+            Log::error('Fawry: Security key not configured - cannot validate signature');
+            return false;
         }
         
-        // Signature generation logic for callback
-        // hash256(fawryRefNumber + merchantRefNum + paymentAmount + orderAmount + orderStatus + paymentMethod + paymentRefrenceNumber + secureKey)
-        // Some keys might be absent, so be careful. We check Fawry Documentation
-        
+        // Signature = SHA256(fawryRefNumber + merchantRefNum + paymentAmount + orderAmount + orderStatus + paymentMethod + paymentRefrenceNumber + secureKey)
         $fawryRefNumber = $data['fawryRefNumber'] ?? '';
         $merchantRefNum = $data['merchantRefNum'] ?? '';
         $paymentAmount = isset($data['paymentAmount']) ? number_format((float)$data['paymentAmount'], 2, '.', '') : '';
@@ -416,16 +449,16 @@ class FawryGateway implements PaymentGatewayInterface
         $paymentMethod = $data['paymentMethod'] ?? '';
         $paymentRefrenceNumber = $data['paymentRefrenceNumber'] ?? '';
         
-        // As per Fawry doc for server notification:
         $signatureString = $fawryRefNumber . $merchantRefNum . $paymentAmount . $orderAmount . $orderStatus . $paymentMethod . $paymentRefrenceNumber . $this->securityKey;
         
         $generatedSignature = hash('sha256', $signatureString);
 
-        if (strtolower($generatedSignature) !== strtolower($receivedSignature)) {
-            Log::error('Fawry: Invalid signature', [
-                'string' => $signatureString,
-                'generated' => $generatedSignature,
-                'received' => $receivedSignature,
+        // Use timing-safe comparison to prevent timing attacks
+        if (!hash_equals(strtolower($generatedSignature), strtolower($receivedSignature))) {
+            Log::error('Fawry: HMAC validation failed', [
+                'generated_prefix' => substr($generatedSignature, 0, 16) . '...',
+                'received_prefix' => substr($receivedSignature, 0, 16) . '...',
+                'field_count' => count(array_filter([$fawryRefNumber, $merchantRefNum, $paymentAmount, $orderAmount, $orderStatus])),
             ]);
             return false;
         }
