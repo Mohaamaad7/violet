@@ -15,6 +15,9 @@ return [
         'general' => 'General',
     ],
 
+    'content_pages' => 'Pages',
+    'content_page' => 'Page',
+
     // Dashboard Configuration
     'dashboard_config' => [
         'widgets' => 'Widgets',

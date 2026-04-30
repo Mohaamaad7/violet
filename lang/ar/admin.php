@@ -15,6 +15,9 @@ return [
         'general' => 'عام',
     ],
 
+    'content_pages' => 'الصفحات',
+    'content_page' => 'صفحة',
+
     // Dashboard Configuration
     'dashboard_config' => [
         'widgets' => 'الويدجات',
