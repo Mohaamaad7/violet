@@ -35,17 +35,17 @@ class PageResource extends Resource
 
     public static function getNavigationLabel(): string
     {
-        return __('admin.pages');
+        return __('admin.content_pages');
     }
 
     public static function getModelLabel(): string
     {
-        return __('admin.page');
+        return __('admin.content_page');
     }
 
     public static function getPluralModelLabel(): string
     {
-        return __('admin.pages');
+        return __('admin.content_pages');
     }
 
     public static function form(Schema $schema): Schema
