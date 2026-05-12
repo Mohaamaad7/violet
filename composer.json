@@ -23,7 +23,8 @@
         "spatie/laravel-activitylog": "^4.0",
         "spatie/laravel-backup": "^9.3",
         "spatie/laravel-medialibrary": "^11.17",
-        "spatie/laravel-permission": "^6.0"
+        "spatie/laravel-permission": "^6.0",
+        "spatie/laravel-responsecache": "^7.7"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.9",

@@ -47,20 +47,28 @@ class SliderForm
                     ])
                     ->columns(2),
                 
-                Section::make('Slider Image')
-                    ->description('Upload the main slider image')
+                Section::make('Slider Images')
+                    ->description('Upload images for different devices')
                     ->schema([
                         FileUpload::make('image_path')
-                            ->label('Image')
+                            ->label('Desktop Image')
                             ->image()
                             ->required()
                             ->disk('public')
                             ->directory('sliders')
                             ->maxSize(5120) // 5MB
                             ->imageEditor()
-                            ->helperText('Upload slider image. Max 5MB. Recommended: 1920x800px')
-                            ->columnSpanFull(),
-                    ]),
+                            ->helperText('Upload desktop slider image. Max 5MB. Recommended: 1920x800px'),
+                            
+                        FileUpload::make('mobile_image_path')
+                            ->label('Mobile Image')
+                            ->image()
+                            ->disk('public')
+                            ->directory('sliders/mobile')
+                            ->maxSize(5120) // 5MB
+                            ->imageEditor()
+                            ->helperText('Upload mobile slider image (Optional). Recommended: 800x1200px. If not provided, desktop image will be used.'),
+                    ])->columns(2),
             ]);
     }
 }

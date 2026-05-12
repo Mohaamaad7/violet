@@ -10,19 +10,21 @@ Route::get('/language/{locale}', [LanguageController::class, 'switch'])->name('l
 Route::get('/locale/{locale}', [LanguageController::class, 'switch'])->name('locale.switch');
 
 // Store Front
-Route::get('/', App\Livewire\Store\Home::class)->name('home');
-
-// Offers Page
-Route::get('/offers', App\Livewire\Store\OffersPage::class)->name('offers');
-
-// Cosmetics Theme Landing Page (Task 9.8)
-Route::get('/cosmetics', App\Livewire\Cosmetics\HomePage::class)->name('cosmetics.home');
-
-// Products Listing Page (Task 9.3)
-Route::get('/products', [App\Http\Controllers\Store\ProductsController::class, 'index'])->name('products.index');
-
-// Product Details Page (Task 9.4)
-Route::get('/products/{slug}', [App\Http\Controllers\Store\ProductDetailsController::class, 'show'])->name('product.show');
+Route::middleware(\Spatie\ResponseCache\Middlewares\CacheResponse::class)->group(function () {
+    Route::get('/', App\Livewire\Store\Home::class)->name('home');
+    
+    // Offers Page
+    Route::get('/offers', App\Livewire\Store\OffersPage::class)->name('offers');
+    
+    // Cosmetics Theme Landing Page (Task 9.8)
+    Route::get('/cosmetics', App\Livewire\Cosmetics\HomePage::class)->name('cosmetics.home');
+    
+    // Products Listing Page (Task 9.3)
+    Route::get('/products', [App\Http\Controllers\Store\ProductsController::class, 'index'])->name('products.index');
+    
+    // Product Details Page (Task 9.4)
+    Route::get('/products/{slug}', [App\Http\Controllers\Store\ProductDetailsController::class, 'show'])->name('product.show');
+});
 
 // Shopping Cart (Task 9.5)
 Route::get('/cart', App\Livewire\Store\CartPage::class)->name('cart');
