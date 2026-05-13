@@ -22,11 +22,11 @@
                             />
                         </picture>
                         {{-- Overlay for better text readability --}}
-                        <div class="absolute inset-0 bg-gradient-to-r from-black/60 to-black/30 pointer-events-none"></div>
+                        <div class="absolute inset-0 bg-gradient-to-r from-black/60 to-black/30 pointer-events-none {{ $slider->mobile_image_path ? 'hidden md:block' : '' }}"></div>
                         @endif
 
                         {{-- Content --}}
-                        <div class="relative container mx-auto px-4 h-full flex items-center">
+                        <div class="relative container mx-auto px-4 h-full {{ $slider->mobile_image_path ? 'hidden md:flex' : 'flex' }} items-center">
                             <div class="max-w-2xl text-white">
                                 {{-- Title --}}
                                 @if($slider->title)
