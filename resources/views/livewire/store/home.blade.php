@@ -1,6 +1,8 @@
 <div>
-    <!-- Hero Section -->
-    <livewire:store.hero-slider />
+    <!-- Hero Section (hidden on mobile) -->
+    <div class="hidden md:block">
+        <livewire:store.hero-slider />
+    </div>
 
     <!-- 2. Featured Products -->
     @if($featuredProducts->count() > 0)

@@ -55,4 +55,23 @@ class HeroSliderTest extends TestCase
         // Next request should see the update because cache was cleared
         $this->get('/')->assertSee('Updated Title Cache Test');
     }
+
+    public function test_hero_is_hidden_on_mobile_by_css_class()
+    {
+        ResponseCache::clear();
+
+        Slider::create([
+            'title' => 'Mobile Hidden Hero',
+            'image_path' => 'sliders/hero.jpg',
+            'is_active' => true,
+            'order' => 1,
+        ]);
+
+        $response = $this->get('/');
+
+        // The hero-slider should be wrapped in a container with hidden md:block
+        $response->assertSee('<div class="hidden md:block">', false);
+        // The slider title should still be in the HTML (hidden via CSS, not removed)
+        $response->assertSee('Mobile Hidden Hero');
+    }
 }

@@ -10,23 +10,18 @@
                     <div class="relative h-[400px] md:h-[500px] lg:h-[600px]">
                         {{-- Background Image --}}
                         @if($slider->image_path)
-                        <picture>
-                            @if($slider->mobile_image_path)
-                                <source media="(max-width: 768px)" srcset="{{ asset('storage/' . $slider->mobile_image_path) }}">
-                            @endif
-                            <img 
-                                src="{{ asset('storage/' . $slider->image_path) }}" 
-                                alt="{{ $slider->title }}"
-                                class="absolute inset-0 w-full h-full object-cover"
-                                @if($loop->first) fetchpriority="high" @else loading="lazy" @endif
-                            />
-                        </picture>
+                        <img 
+                            src="{{ asset('storage/' . $slider->image_path) }}" 
+                            alt="{{ $slider->title }}"
+                            class="absolute inset-0 w-full h-full object-cover"
+                            @if($loop->first) fetchpriority="high" @else loading="lazy" @endif
+                        />
                         {{-- Overlay for better text readability --}}
-                        <div class="absolute inset-0 bg-gradient-to-r from-black/60 to-black/30 pointer-events-none {{ $slider->mobile_image_path ? 'hidden md:block' : '' }}"></div>
+                        <div class="absolute inset-0 bg-gradient-to-r from-black/60 to-black/30 pointer-events-none"></div>
                         @endif
 
                         {{-- Content --}}
-                        <div class="relative container mx-auto px-4 h-full {{ $slider->mobile_image_path ? 'hidden md:flex' : 'flex' }} items-center">
+                        <div class="relative container mx-auto px-4 h-full flex items-center">
                             <div class="max-w-2xl text-white">
                                 {{-- Title --}}
                                 @if($slider->title)
