@@ -795,7 +795,7 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                     @foreach($products as $product)
                         <div wire:key="product-{{ $product->id }}">
-                            <x-store.product-card :product="$product" />
+                            <x-store.product-card :product="$product" :aboveFold="$loop->iteration <= 4" />
                         </div>
                     @endforeach
                 </div>

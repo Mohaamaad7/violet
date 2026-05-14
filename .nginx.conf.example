@@ -1,0 +1,119 @@
+# ============================================================
+# Nginx Configuration Example — Violet E-Commerce
+# ============================================================
+# Purpose: Performance optimization (LCP, TBT, caching) for
+# the Violet Laravel application on Nginx servers.
+#
+# Usage:
+#   1. Copy this file to your Nginx sites-available directory
+#   2. Adjust server_name, root, and ssl paths
+#   3. Run: sudo ln -s /etc/nginx/sites-available/violet /etc/nginx/sites-enabled/
+#   4. Run: sudo nginx -t && sudo systemctl reload nginx
+# ============================================================
+
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name your-domain.com www.your-domain.com;
+
+    # SSL (adjust paths to your certificates)
+    ssl_certificate     /etc/ssl/certs/your-domain.crt;
+    ssl_certificate_key /etc/ssl/private/your-domain.key;
+    ssl_protocols       TLSv1.2 TLSv1.3;
+    ssl_ciphers         HIGH:!aNULL:!MD5;
+
+    # Project root — point to the Laravel public directory
+    root /var/www/violet/public;
+    index index.php;
+
+    # ============================================================
+    # STATIC ASSETS — BROWSER CACHING (Cache-Control + Expires)
+    # ============================================================
+    # All paths below are relative to the root (/var/www/violet/public)
+
+    # Cache-Control max-age = 1 year for versioned assets
+    # Vite / mix appends content hash to filenames, so cache is safe
+    location ~* \.(jpg|jpeg|png|gif|webp|avif|svg|ico)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable, max-age=31536000";
+        access_log off;
+    }
+
+    location ~* \.(woff|woff2|ttf|eot|otf)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable, max-age=31536000";
+        access_log off;
+    }
+
+    location ~* \.(css|js)$ {
+        expires 1y;
+        add_header Cache-Control "public, immutable, max-age=31536000";
+        access_log off;
+    }
+
+    # ============================================================
+    # GZIP COMPRESSION
+    # ============================================================
+    gzip on;
+    gzip_vary on;
+    gzip_proxied any;
+    gzip_comp_level 6;
+    gzip_min_length 256;
+    gzip_types
+        text/plain
+        text/css
+        text/javascript
+        application/javascript
+        application/json
+        application/xml
+        image/svg+xml
+        font/woff
+        font/woff2
+        application/vnd.ms-fontobject
+        application/x-font-ttf;
+
+    # ============================================================
+    # SECURITY HEADERS
+    # ============================================================
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+
+    # ============================================================
+    # LARAVEL — FRONT CONTROLLER
+    # ============================================================
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    # Pass PHP requests to PHP-FPM
+    location ~ \.php$ {
+        fastcgi_pass unix:/var/run/php/php8.3-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        include fastcgi_params;
+        fastcgi_hide_header X-Powered-By;
+    }
+
+    # Deny access to hidden files (dotfiles)
+    location ~ /\. {
+        deny all;
+        access_log off;
+        log_not_found off;
+    }
+
+    # Deny access to storage and sensitive paths
+    location ~ ^/(storage/app|storage/framework|storage/logs|bootstrap/cache|vendor|node_modules) {
+        deny all;
+        access_log off;
+        log_not_found off;
+    }
+}
+
+# Redirect HTTP → HTTPS
+server {
+    listen 80;
+    listen [::]:80;
+    server_name your-domain.com www.your-domain.com;
+    return 301 https://$host$request_uri;
+}

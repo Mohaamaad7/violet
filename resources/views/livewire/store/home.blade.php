@@ -21,7 +21,7 @@
             
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 gap-y-10">
                 @foreach($featuredProducts as $product)
-                    <x-store.product-card :product="$product" />
+                    <x-store.product-card :product="$product" :aboveFold="$loop->iteration <= 4" />
                 @endforeach
             </div>
         </div>

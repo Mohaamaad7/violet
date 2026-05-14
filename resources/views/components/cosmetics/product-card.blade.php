@@ -1,6 +1,7 @@
 {{-- Cosmetics Theme - Product Card --}}
 @props([
     'product',
+    'aboveFold' => false,
 ])
 
 <div class="group bg-violet-900/50 rounded-2xl overflow-hidden border border-violet-800/50 hover:border-gold-400/30 transition-all duration-300 hover:transform hover:-translate-y-2">
@@ -11,7 +12,11 @@
                 src="{{ $product->getFirstMediaUrl('images', 'preview') }}" 
                 alt="{{ $product->name }}"
                 class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                loading="lazy"
+                @if($aboveFold)
+                    fetchpriority="high"
+                @else
+                    loading="lazy" decoding="async"
+                @endif
             >
         @else
             <div class="w-full h-full flex items-center justify-center bg-violet-800">

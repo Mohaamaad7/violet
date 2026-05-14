@@ -169,6 +169,10 @@ class Product extends Model implements HasMedia
 
     /**
      * Register media collections for Spatie Media Library
+     *
+     * Conversion strategy (tiered for LCP + zoom quality):
+     * - thumbnail / card: WebP + optimize() + quality(70) — smallest possible size for grids
+     * - preview: WebP + quality(95) — NO optimize() to preserve sharp details for zoom
      */
     public function registerMediaCollections(): void
     {
@@ -177,32 +181,30 @@ class Product extends Model implements HasMedia
             ->useDisk('public')
             ->registerMediaConversions(function () {
                 // Small thumbnail for quick loading (wishlist, mini cart)
-                // fit(Contain) places entire image inside canvas with white padding
                 $this
                     ->addMediaConversion('thumbnail')
                     ->fit(\Spatie\Image\Enums\Fit::Contain, 150, 150)
-                    ->sharpen(10)
-                    ->keepOriginalImageFormat()
+                    ->format('webp')
+                    ->quality(70)
+                    ->optimize()
                     ->background('#ffffff');
 
-                // Card-sized image for product listings
-                // Uses Contain to show entire product without cropping
+                // Card-sized image for product listings (grids)
                 $this
                     ->addMediaConversion('card')
                     ->fit(\Spatie\Image\Enums\Fit::Contain, 400, 400)
-                    ->sharpen(10)
-                    ->quality(90)
-                    ->keepOriginalImageFormat()
+                    ->format('webp')
+                    ->quality(70)
+                    ->optimize()
                     ->background('#ffffff');
 
                 // High-quality preview for product detail page zoom
-                // Larger size for zoom quality, original is also preserved for max zoom
+                // Larger size preserves zoom detail — optimize() intentionally omitted
                 $this
                     ->addMediaConversion('preview')
                     ->fit(\Spatie\Image\Enums\Fit::Contain, 1200, 1200)
-                    ->sharpen(10)
+                    ->format('webp')
                     ->quality(95)
-                    ->keepOriginalImageFormat()
                     ->background('#ffffff');
             });
     }
