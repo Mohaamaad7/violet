@@ -34,7 +34,8 @@
             {{-- Header Actions --}}
             <div class="flex items-center gap-3 flex-shrink-0">
                 {{-- Mobile Search Toggle --}}
-                <button onclick="toggleMobileSearch()" class="lg:hidden p-2 hover:bg-gray-100 rounded-lg transition">
+                <button onclick="toggleMobileSearch()" aria-label="Search"
+                    class="lg:hidden p-2 min-h-[44px] min-w-[44px] hover:bg-gray-100 rounded-lg transition">
                     <svg class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                             d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -62,8 +63,8 @@
                 <livewire:store.wishlist-counter />
 
                 {{-- Cart --}}
-                <button type="button" onclick="openCart()"
-                    class="relative p-2 hover:bg-gray-100 rounded-lg transition group"
+                <button type="button" onclick="openCart()" aria-label="{{ trans_db('store.cart.shopping_cart') }}"
+                    class="relative p-2 min-h-[44px] min-w-[44px] hover:bg-gray-100 rounded-lg transition group"
                     title="{{ trans_db('store.cart.shopping_cart') }}">
                     <svg class="w-6 h-6 text-gray-700 group-hover:text-violet-600 transition" fill="none"
                         stroke="currentColor" viewBox="0 0 24 24">
@@ -93,7 +94,8 @@
                 </a>
 
                 {{-- Mobile Menu Toggle --}}
-                <button onclick="toggleMobileMenu()" class="lg:hidden p-2 hover:bg-gray-100 rounded-lg transition">
+                <button onclick="toggleMobileMenu()" aria-label="Menu"
+                    class="lg:hidden p-2 min-h-[44px] min-w-[44px] hover:bg-gray-100 rounded-lg transition">
                     <svg id="mobile-menu-icon" class="w-6 h-6 text-gray-700" fill="none" stroke="currentColor"
                         viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -263,7 +265,8 @@
                                     </a>
                                     @if($parentCategory->children->count() > 0)
                                         <button onclick="toggleSubcategory({{ $parentCategory->id }})" 
-                                            class="p-1 text-gray-400 hover:text-violet-600">
+                                            class="p-1 text-gray-400 hover:text-violet-600"
+                                            aria-label="Toggle subcategories">
                                             <svg id="subcategory-icon-{{ $parentCategory->id }}" class="w-3 h-3 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                                             </svg>
@@ -275,7 +278,7 @@
                                     <div id="subcategory-{{ $parentCategory->id }}" class="hidden {{ app()->getLocale() === 'ar' ? 'pr-3' : 'pl-3' }} space-y-1 pb-2">
                                         @foreach($parentCategory->children as $childCategory)
                                             <a href="{{ route('category.show', $childCategory->slug) }}" 
-                                                class="block py-1.5 text-xs text-gray-500 hover:text-violet-600 flex items-center gap-2">
+                                                class="block py-1.5 text-xs text-gray-600 hover:text-violet-600 flex items-center gap-2">
                                                 <svg class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20">
                                                     <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
                                                 </svg>

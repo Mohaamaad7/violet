@@ -111,5 +111,40 @@
   - `tests/Feature/CacheManagerTest.php`: 3 tests pass — no regression.
   - `tests/Feature/HeroSliderTest.php`: Pre-existing SQLite migration issue (unrelated).
 
+### A11y, Touch Targets, Contrast & Livewire Optimization (2026-05-15)
+- **Goal**: Boost PageSpeed Accessibility score (82), fix Livewire JS payload, and add LCP verification test.
+- **Issues Found & Fixed**:
+
+  **A. Icon-Only Buttons Missing `aria-label` (6 fixes):**
+  - `components/store/header.blade.php`:
+    - Line 37: Mobile search toggle — added `aria-label="Search"` + `min-h-[44px] min-w-[44px]` for touch target.
+    - Line 65: Cart button — added `aria-label="{{ trans_db('store.cart.shopping_cart') }}"` (was only `title`).
+    - Line 96: Mobile menu toggle — added `aria-label="Menu"` + touch target classes.
+    - Line 265: Subcategory toggle — added `aria-label="Toggle subcategories"`.
+  - `components/cosmetics/navbar.blade.php`:
+    - Line 63: Cart button — added `aria-label="Cart"` + touch target classes.
+    - Line 84: User dropdown — added `aria-label="Account"`.
+    - Line 121: Mobile menu toggle — added `aria-label="Toggle menu"` + touch target classes.
+
+  **B. Touch Target Sizing (mobile usability):**
+  - Added `min-h-[44px] min-w-[44px]` to all 5 icon-only buttons used on mobile (search toggle, cart, menu toggle in store header; cart and menu toggle in cosmetics navbar).
+  - Ensures tap targets meet Google's 44×44 CSS pixel minimum for mobile.
+
+  **C. Text Contrast Fix:**
+  - `components/store/header.blade.php` line 278: Changed `text-gray-500` → `text-gray-600` on child category links (white background). Gray-500 on white fails WCAG AA (~2.8:1); gray-600 passes (~4.5:1).
+
+  **D. Livewire JS Optimization:**
+  - `config/livewire.php`:
+    - Set `inject_assets` from `true` → `false` — prevents Livewire from auto-injecting duplicate `<script>` and `<style>` tags since all layouts already include `@livewireScripts` and `@livewireStyles` manually. Eliminates the duplicate byte overhead flagged by PageSpeed.
+    - Restored `temporary_file_upload` config values to their previous working state (disk → `local`, rules → array, directory → `livewire-tmp`, middleware → `throttle:60,1`).
+
+  **E. LCP Verification Test (NEW):**
+  - `tests/Feature/LcpImageTest.php`: Creates a featured product, visits `/`, and asserts `fetchpriority="high"` is present in the HTML response. Fails if any code change ever reverts the `$aboveFold` logic or if `loading="lazy"` remains on the first product image.
+
+- **Tests**:
+  - `tests/Feature/CacheManagerTest.php`: 3 tests pass — no regression.
+  - `tests/Feature/HeroSliderTest.php`: Pre-existing SQLite migration issue (unrelated).
+  - `tests/Feature/LcpImageTest.php` **(NEW)**: Verifies first product card uses `fetchpriority="high"`.
+
 ## Deprecated Code
 - `mobile_image_path` field in Slider model/form/blade — replaced by auto-hide on mobile approach. Column remains in database but is no longer used.

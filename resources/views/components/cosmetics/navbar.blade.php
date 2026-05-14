@@ -60,9 +60,9 @@
                 </div>
 
                 {{-- Cart Button --}}
-                <button 
+                <button aria-label="Cart"
                     @click="$dispatch('toggle-cart')"
-                    class="relative p-2 text-cream-100 hover:text-gold-400 transition-colors duration-200"
+                    class="relative p-2 min-h-[44px] min-w-[44px] text-cream-100 hover:text-gold-400 transition-colors duration-200"
                 >
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
@@ -81,7 +81,7 @@
                 {{-- User Menu / Auth --}}
                 @auth
                     <div class="relative" x-data="{ open: false }">
-                        <button 
+                        <button aria-label="Account"
                             @click="open = !open" 
                             @click.outside="open = false"
                             class="flex items-center gap-2 text-cream-100 hover:text-gold-400 transition-colors duration-200"
@@ -118,9 +118,9 @@
                 @endauth
 
                 {{-- Mobile Menu Button --}}
-                <button 
+                <button aria-label="Toggle menu"
                     @click="mobileMenuOpen = !mobileMenuOpen"
-                    class="md:hidden p-2 text-cream-100 hover:text-gold-400"
+                    class="md:hidden p-2 min-h-[44px] min-w-[44px] text-cream-100 hover:text-gold-400"
                 >
                     <svg x-show="!mobileMenuOpen" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
