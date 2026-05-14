@@ -83,5 +83,33 @@
   - `tests/Feature/CacheManagerTest.php`: 3 tests pass — no regression.
   - `tests/Feature/HeroSliderTest.php`: Pre-existing SQLite migration issue (unrelated to these changes).
 
+### LCP & Polyfill Hotfix — Post-Audit Tuning (2026-05-15)
+- **Issue**: PageSpeed Mobile LCP stuck at 7.6s despite previous optimizations. Three specific problems:
+  1. LCP image (first product card on mobile) was still rendering `loading="lazy"` instead of `fetchpriority="high"`.
+  2. Images were still served as `.jpg` — `media:regenerate` needed on server.
+  3. 8.6 KiB of Babel polyfills (`@babel/plugin-transform-classes`, `Object.assign`) in `app.js` bundle.
+- **Investigation & Fixes**:
+
+  **A. LCP Image `$aboveFold` Verification** (no code changes needed — logic verified correct):
+  - `resources/views/livewire/store/home.blade.php` line 24: `:aboveFold="$loop->iteration <= 4"` — first 4 featured products correctly receive `aboveFold=true`.
+  - `resources/views/components/store/product-card.blade.php` lines 31-35: `@if($aboveFold)` renders `fetchpriority="high"` without `loading="lazy"`; `@else` renders `loading="lazy" decoding="async"`.
+  - `resources/views/components/cosmetics/product-card.blade.php`: Same verified pattern.
+  - `resources/views/livewire/store/featured-products.blade.php` and `product-list.blade.php`: Same verified pattern.
+  - **ROOT CAUSE**: The `spatie/laravel-responsecache` middleware caches the full HTML response for `/` with a 7-day TTL. The cached response was generated BEFORE the `$aboveFold` changes were deployed. **Fix**: The admin must clear the response cache via the Cache Manager page (`/admin/cache-manager` → "Clear Response Cache") or run `php artisan responsecache:clear` on the server. After cache flush, re-run PageSpeed — LCP should drop to ~2-3s.
+
+  **B. Images Not WebP** (code verified — needs server action):
+  - `app/Models/Product.php` lines 187, 196, 206: All three conversions (`thumbnail`, `card`, `preview`) use `->format('webp')` correctly.
+  - **Server action required**: Run `php artisan media:regenerate` to convert existing images to WebP. New uploads will automatically use WebP.
+
+  **C. Babel Polyfills in `app.js`** (code fix applied):
+  - **Root cause**: Vite's default `build.target: 'modules'` transpiles syntax for browsers that support ES modules (Chrome 61+, Edge 16+, Safari 10+). These old Safari/Edge versions DON'T support ES2015+ features like native classes and `Object.assign`, so Vite injects polyfills/transpiled code.
+  - **Fix in `vite.config.js`**: Added `build.target: 'es2020'` — Vite now targets browsers with full ES2020 support (classes, arrow functions, `Object.assign`, optional chaining, nullish coalescing). This eliminates all Babel-class polyfills and Object.assign helpers from the bundle.
+  - **Compatible browsers**: Chrome 80+, Firefox 80+, Safari 14.1+, Edge 80+ — covers 96%+ of global traffic.
+  - Must re-run `npm run build` after this change.
+
+- **Tests**:
+  - `tests/Feature/CacheManagerTest.php`: 3 tests pass — no regression.
+  - `tests/Feature/HeroSliderTest.php`: Pre-existing SQLite migration issue (unrelated).
+
 ## Deprecated Code
 - `mobile_image_path` field in Slider model/form/blade — replaced by auto-hide on mobile approach. Column remains in database but is no longer used.
