@@ -15,6 +15,9 @@ return [
         'general' => 'General',
     ],
 
+    'content_pages' => 'Pages',
+    'content_page' => 'Page',
+
     // Dashboard Configuration
     'dashboard_config' => [
         'widgets' => 'Widgets',
@@ -804,5 +807,30 @@ return [
     'currency' => [
         'egp_short' => 'EGP',
         'egp_full' => 'Egyptian Pound',
+    ],
+
+    // Cache Manager
+    'cache' => [
+        'title' => 'Cache Manager',
+        'manage_cache' => 'Manage Cache',
+        'description' => 'Clear cached data to refresh images, multimedia, and page content immediately.',
+        'clear_response' => 'Clear Response Cache',
+        'clear_app' => 'Clear Application Cache',
+        'clear_blade' => 'Clear Blade Cache',
+        'clear_all' => 'Clear All Cache',
+        'response_cleared' => 'Response cache cleared successfully',
+        'app_cleared' => 'Application cache cleared successfully',
+        'blade_cleared' => 'Blade view cache cleared successfully',
+        'all_cleared' => 'All caches cleared successfully',
+        'failed' => 'Failed to clear cache',
+        'current_driver' => 'Current Cache Configuration',
+        'app_cache' => 'App Cache',
+        'response_cache' => 'Response Cache',
+        'lifetime' => 'Cache Lifetime',
+        'hours' => 'hours',
+        'confirm_response' => 'Are you sure you want to clear the response cache?',
+        'confirm_app' => 'Are you sure you want to clear the application cache?',
+        'confirm_blade' => 'Are you sure you want to clear the view cache?',
+        'confirm_all' => 'Are you sure? This will clear all caches including response, application, view, config, and route caches.',
     ],
 ];

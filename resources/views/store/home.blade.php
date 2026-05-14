@@ -3,8 +3,10 @@
     description="Shop quality products at unbeatable prices"
     keywords="online shopping, e-commerce, violet store"
 >
-    {{-- Dynamic Hero Slider --}}
-    <livewire:store.hero-slider />
+    {{-- Dynamic Hero Slider (hidden on mobile) --}}
+    <div class="hidden md:block">
+        <livewire:store.hero-slider />
+    </div>
 
     {{-- Features Section --}}
     <div class="py-12 bg-white">

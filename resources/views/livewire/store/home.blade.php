@@ -1,6 +1,8 @@
 <div>
-    <!-- Hero Section -->
-    <livewire:store.hero-slider />
+    <!-- Hero Section (hidden on mobile) -->
+    <div class="hidden md:block">
+        <livewire:store.hero-slider />
+    </div>
 
     <!-- 2. Featured Products -->
     @if($featuredProducts->count() > 0)
@@ -19,7 +21,7 @@
             
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 gap-y-10">
                 @foreach($featuredProducts as $product)
-                    <x-store.product-card :product="$product" />
+                    <x-store.product-card :product="$product" :aboveFold="$loop->iteration <= 4" />
                 @endforeach
             </div>
         </div>

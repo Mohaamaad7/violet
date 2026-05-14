@@ -14,9 +14,10 @@
                             src="{{ asset('storage/' . $slider->image_path) }}" 
                             alt="{{ $slider->title }}"
                             class="absolute inset-0 w-full h-full object-cover"
+                            @if($loop->first) fetchpriority="high" @else loading="lazy" @endif
                         />
                         {{-- Overlay for better text readability --}}
-                        <div class="absolute inset-0 bg-gradient-to-r from-black/60 to-black/30"></div>
+                        <div class="absolute inset-0 bg-gradient-to-r from-black/60 to-black/30 pointer-events-none"></div>
                         @endif
 
                         {{-- Content --}}
@@ -57,8 +58,8 @@
             
             {{-- Navigation Buttons (only show if more than 1 slide) --}}
             @if($sliders->count() > 1)
-            <div class="swiper-button-prev text-white"></div>
-            <div class="swiper-button-next text-white"></div>
+            <div class="swiper-button-prev text-white hidden md:flex"></div>
+            <div class="swiper-button-next text-white hidden md:flex"></div>
             
             {{-- Pagination --}}
             <div class="swiper-pagination"></div>

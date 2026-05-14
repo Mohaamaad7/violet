@@ -15,7 +15,7 @@
         @if($products->count() > 0)
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             @foreach($products as $product)
-                <x-store.product-card :product="$product" />
+                <x-store.product-card :product="$product" :aboveFold="$loop->iteration <= 4" />
             @endforeach
         </div>
         

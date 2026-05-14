@@ -48,7 +48,7 @@ class SliderForm
                     ->columns(2),
                 
                 Section::make('Slider Image')
-                    ->description('Upload the main slider image')
+                    ->description('Upload the slider image')
                     ->schema([
                         FileUpload::make('image_path')
                             ->label('Image')
@@ -58,8 +58,7 @@ class SliderForm
                             ->directory('sliders')
                             ->maxSize(5120) // 5MB
                             ->imageEditor()
-                            ->helperText('Upload slider image. Max 5MB. Recommended: 1920x800px')
-                            ->columnSpanFull(),
+                            ->helperText('Upload slider image. Max 5MB. Recommended: 1920x800px'),
                     ]),
             ]);
     }

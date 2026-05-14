@@ -1,4 +1,4 @@
-@props(['product'])
+@props(['product', 'aboveFold' => false])
 
 {{-- Minimalist Product Card - Compact & Elegant Design --}}
 <div class="bg-white rounded-xl overflow-hidden hover:shadow-lg transition-all duration-300 group relative border border-gray-100"
@@ -28,7 +28,11 @@
 
         <img src="{{ $imagePath }}" alt="{{ $product->name }}"
             class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
-            loading="lazy" />
+            @if($aboveFold)
+                fetchpriority="high"
+            @else
+                loading="lazy" decoding="async"
+            @endif />
 
         {{-- Sale Badge - Minimal Style --}}
         @if($product->is_on_sale)
