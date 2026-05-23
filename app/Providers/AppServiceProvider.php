@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -27,6 +28,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Force HTTPS for all non-local environments
+        // This ensures @vite(), asset(), url(), route() all generate https:// URLs
+        if (! $this->app->environment('local')) {
+            URL::forceScheme('https');
+            $this->app['request']->server->set('HTTPS', 'on');
+        }
+
         // Configure password reset URL for customers
         \Illuminate\Auth\Notifications\ResetPassword::createUrlUsing(function ($user, string $token) {
             // Check if user is a Customer model
