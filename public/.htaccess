@@ -5,6 +5,16 @@
 
     RewriteEngine On
 
+    # Force HTTPS - redirect all HTTP requests to HTTPS
+    RewriteCond %{HTTPS} off [OR]
+    RewriteCond %{HTTP:X-Forwarded-Proto} !https
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+    # Set HTTPS environment variable for PHP (important for reverse proxies)
+    RewriteCond %{HTTPS} on [OR]
+    RewriteCond %{HTTP:X-Forwarded-Proto} https
+    RewriteRule .* - [E=HTTPS:on]
+
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
