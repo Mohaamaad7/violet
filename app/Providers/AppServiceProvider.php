@@ -28,10 +28,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Force HTTPS when APP_URL is configured with https://
-        // This fixes Mixed Content errors on all environments (production, staging, test)
-        if (str_starts_with(config('app.url'), 'https://')) {
+        // Force HTTPS for all non-local environments
+        // This ensures @vite(), asset(), url(), route() all generate https:// URLs
+        if (! $this->app->environment('local')) {
             URL::forceScheme('https');
+            $this->app['request']->server->set('HTTPS', 'on');
         }
 
         // Configure password reset URL for customers
