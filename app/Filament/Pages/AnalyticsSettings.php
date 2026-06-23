@@ -97,7 +97,9 @@ class AnalyticsSettings extends Page implements HasForms
 
         // مسح الكاش للإحصائيات حتى يقرأ الإعدادات الجديدة فوراً
         Cache::forget('analytics_settings');
-        Cache::tags(['analytics'])->flush(); // For tagged cache if supported
+        if (Cache::supportsTags()) {
+            Cache::tags(['analytics'])->flush(); // For tagged cache if supported
+        }
         
         // Also clear simple cache keys just in case
         Cache::forget('analytics_visitors');
