@@ -16,10 +16,6 @@ class AnalyticsTopPagesWidget extends BaseWidget
 
     protected static ?string $heading = 'أكثر الصفحات زيارة (آخر 30 يوم)';
 
-    protected function getTableQuery(): \Illuminate\Database\Eloquent\Builder|\Illuminate\Database\Query\Builder|null
-    {
-        return null;
-    }
 
     public function getTableRecords(): \Illuminate\Support\Collection|\Illuminate\Contracts\Pagination\Paginator
     {
