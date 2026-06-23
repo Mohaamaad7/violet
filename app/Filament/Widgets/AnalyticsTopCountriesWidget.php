@@ -13,7 +13,7 @@ class AnalyticsTopCountriesWidget extends BaseWidget
 
     protected static ?int $sort = 4;
 
-    protected static ?string $heading = 'أكثر الدول زيارة (آخر 30 يوم)';
+    protected string | array | null $heading = 'أكثر الدول زيارة (آخر 30 يوم)';
 
     public function getTableRecords(): \Illuminate\Support\Collection|\Illuminate\Contracts\Pagination\Paginator
     {

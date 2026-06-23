@@ -12,7 +12,7 @@ class AnalyticsVisitorsWidget extends BaseWidget
 
     protected static ?int $sort = 1;
 
-    protected static ?string $pollingInterval = null; // Do not poll to save API requests
+    protected ?string $pollingInterval = null; // Do not poll to save API requests
 
     public function getColumns(): int
     {
