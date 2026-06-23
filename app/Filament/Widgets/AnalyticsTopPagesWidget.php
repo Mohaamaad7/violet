@@ -14,7 +14,7 @@ class AnalyticsTopPagesWidget extends BaseWidget
 
     protected static ?int $sort = 2;
 
-    protected string | array | null $heading = 'أكثر الصفحات زيارة (آخر 30 يوم)';
+    protected static ?string $heading = 'أكثر الصفحات زيارة (آخر 30 يوم)';
 
 
     public function getTableRecords(): \Illuminate\Support\Collection|\Illuminate\Contracts\Pagination\Paginator
