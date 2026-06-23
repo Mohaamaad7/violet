@@ -97,6 +97,17 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     @livewireStyles
 
+    {{-- Google Analytics 4 (Dynamic Tracking ID) --}}
+    @if($gaTrackingId = \App\Models\Setting::get('ga_tracking_id'))
+        <script async src="https://www.googletagmanager.com/gtag/js?id={{ $gaTrackingId }}"></script>
+        <script>
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', '{{ $gaTrackingId }}');
+        </script>
+    @endif
+
     {{-- Additional Head Content --}}
     @stack('styles')
 </head>
