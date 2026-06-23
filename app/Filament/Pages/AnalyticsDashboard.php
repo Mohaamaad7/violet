@@ -13,7 +13,7 @@ class AnalyticsDashboard extends Page
 {
     use ChecksPageAccess;
 
-    protected static ?string $navigationIcon = 'heroicon-o-presentation-chart-line';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-presentation-chart-line';
 
     protected static string $view = 'filament.pages.analytics-dashboard';
 

@@ -19,7 +19,7 @@ class AnalyticsSettings extends Page implements HasForms
     use InteractsWithForms;
     use ChecksPageAccess;
 
-    protected static ?string $navigationIcon = 'heroicon-o-chart-bar';
+    protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-chart-bar';
 
     protected static string $view = 'filament.pages.analytics-settings';
 
