@@ -21,7 +21,7 @@ class AnalyticsTopPagesWidget extends BaseWidget
         return null;
     }
 
-    protected function getTableRecords(): \Illuminate\Support\Collection|\Illuminate\Contracts\Pagination\Paginator
+    public function getTableRecords(): \Illuminate\Support\Collection|\Illuminate\Contracts\Pagination\Paginator
     {
         $pages = AnalyticsService::getTopPages();
         

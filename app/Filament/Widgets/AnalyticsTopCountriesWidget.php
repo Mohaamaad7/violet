@@ -15,7 +15,7 @@ class AnalyticsTopCountriesWidget extends BaseWidget
 
     protected static ?string $heading = 'أكثر الدول زيارة (آخر 30 يوم)';
 
-    protected function getTableRecords(): \Illuminate\Support\Collection|\Illuminate\Contracts\Pagination\Paginator
+    public function getTableRecords(): \Illuminate\Support\Collection|\Illuminate\Contracts\Pagination\Paginator
     {
         $countries = AnalyticsService::getTopCountries();
         

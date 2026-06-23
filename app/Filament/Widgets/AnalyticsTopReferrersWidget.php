@@ -15,7 +15,7 @@ class AnalyticsTopReferrersWidget extends BaseWidget
 
     protected static ?string $heading = 'مصادر الزيارات (آخر 30 يوم)';
 
-    protected function getTableRecords(): \Illuminate\Support\Collection|\Illuminate\Contracts\Pagination\Paginator
+    public function getTableRecords(): \Illuminate\Support\Collection|\Illuminate\Contracts\Pagination\Paginator
     {
         $referrers = AnalyticsService::getTopReferrers();
         
