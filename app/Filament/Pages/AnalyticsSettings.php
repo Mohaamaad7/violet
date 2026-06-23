@@ -5,7 +5,7 @@ namespace App\Filament\Pages;
 use App\Filament\Pages\Concerns\ChecksPageAccess;
 use App\Models\Setting;
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Section;
+use Filament\Schemas\Components\Section;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
@@ -55,32 +55,32 @@ class AnalyticsSettings extends Page implements HasForms
     {
         return $schema
             ->components([
-                Section::make('إعدادات واجهة المتجر (Frontend Tracking)')
-                    ->description('يستخدم لتتبع زوار المتجر في واجهة المستخدم.')
+                Section::make(__('admin.pages.analytics_settings.frontend_tracking'))
+                    ->description(__('admin.pages.analytics_settings.frontend_tracking_desc'))
                     ->schema([
                         TextInput::make('ga_tracking_id')
-                            ->label('Tracking ID (Measurement ID)')
+                            ->label(__('admin.pages.analytics_settings.tracking_id'))
                             ->placeholder('G-XXXXXXXXXX')
-                            ->helperText('معرف التتبع الخاص بـ Google Analytics 4.')
+                            ->helperText(__('admin.pages.analytics_settings.tracking_id_help'))
                             ->columnSpanFull(),
                     ]),
 
-                Section::make('إعدادات جلب البيانات (Backend Analytics API)')
-                    ->description('يستخدم لجلب وعرض الإحصائيات داخل لوحة التحكم هذه.')
+                Section::make(__('admin.pages.analytics_settings.backend_api'))
+                    ->description(__('admin.pages.analytics_settings.backend_api_desc'))
                     ->schema([
                         TextInput::make('ga_property_id')
-                            ->label('Property ID')
+                            ->label(__('admin.pages.analytics_settings.property_id'))
                             ->numeric()
                             ->placeholder('123456789')
-                            ->helperText('رقم الـ Property الخاص بحسابك في Google Analytics.')
+                            ->helperText(__('admin.pages.analytics_settings.property_id_help'))
                             ->columnSpanFull(),
 
                         FileUpload::make('ga_service_account_json')
-                            ->label('Service Account Credentials (JSON)')
+                            ->label(__('admin.pages.analytics_settings.service_account_json'))
                             ->disk('local')
                             ->directory('private/analytics')
                             ->acceptedFileTypes(['application/json'])
-                            ->helperText('يجب رفع ملف الـ JSON الخاص بـ Service Account لربط لوحة التحكم بـ API جوجل بشكل آمن.')
+                            ->helperText(__('admin.pages.analytics_settings.service_account_json_help'))
                             ->columnSpanFull(),
                     ]),
             ])
@@ -106,7 +106,7 @@ class AnalyticsSettings extends Page implements HasForms
         Cache::forget('analytics_top_countries');
 
         Notification::make()
-            ->title('✅ تم حفظ الإعدادات بنجاح')
+            ->title(__('admin.pages.analytics_settings.saved') ?? 'تم حفظ الإعدادات بنجاح')
             ->success()
             ->send();
     }

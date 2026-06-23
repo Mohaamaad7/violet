@@ -13,7 +13,12 @@ class AnalyticsTopCountriesWidget extends BaseWidget
 
     protected static ?int $sort = 4;
 
-    protected static ?string $heading = 'أكثر الدول زيارة (آخر 30 يوم)';
+    protected static ?string $heading = null;
+
+    public function getHeading(): string
+    {
+        return __('admin.pages.analytics_dashboard.top_countries') ?? 'أكثر الدول زيارة (آخر 30 يوم)';
+    }
 
     public function getTableRecords(): \Illuminate\Support\Collection|\Illuminate\Contracts\Pagination\Paginator
     {
@@ -34,13 +39,13 @@ class AnalyticsTopCountriesWidget extends BaseWidget
             ->query(\App\Models\User::query()->whereRaw('1 = 0')) // Dummy query
             ->columns([
                 Tables\Columns\TextColumn::make('country')
-                    ->label('الدولة')
+                    ->label(__('admin.pages.analytics_dashboard.country'))
                     ->limit(50),
                 Tables\Columns\TextColumn::make('activeUsers')
-                    ->label('الزوار')
+                    ->label(__('admin.pages.analytics_dashboard.visits'))
                     ->numeric()
                     ->badge()
-                    ->color('warning'),
+                    ->color('primary'),
             ])
             ->paginated(false);
     }

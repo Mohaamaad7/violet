@@ -13,7 +13,12 @@ class AnalyticsTopReferrersWidget extends BaseWidget
 
     protected static ?int $sort = 3;
 
-    protected static ?string $heading = 'مصادر الزيارات (آخر 30 يوم)';
+    protected static ?string $heading = null;
+
+    public function getHeading(): string
+    {
+        return __('admin.pages.analytics_dashboard.top_referrers') ?? 'مصادر الزيارات (آخر 30 يوم)';
+    }
 
     public function getTableRecords(): \Illuminate\Support\Collection|\Illuminate\Contracts\Pagination\Paginator
     {
@@ -34,10 +39,10 @@ class AnalyticsTopReferrersWidget extends BaseWidget
             ->query(\App\Models\User::query()->whereRaw('1 = 0')) // Dummy query
             ->columns([
                 Tables\Columns\TextColumn::make('pageReferrer')
-                    ->label('المصدر')
+                    ->label(__('admin.pages.analytics_dashboard.source'))
                     ->limit(50),
                 Tables\Columns\TextColumn::make('screenPageViews')
-                    ->label('المشاهدات')
+                    ->label(__('admin.pages.analytics_dashboard.views'))
                     ->numeric()
                     ->badge()
                     ->color('info'),

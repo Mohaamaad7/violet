@@ -40,17 +40,16 @@ class AnalyticsVisitorsWidget extends BaseWidget
         // It returns a collection of associative arrays with 'date', 'activeUsers', 'screenPageViews'
 
         return [
-            Stat::make('إجمالي الزوار (آخر 30 يوم)', number_format($totalVisitors))
-                ->description('الزوار النشطين')
+            Stat::make(__('admin.pages.analytics_dashboard.visitors'), $totalVisitors)
+                ->description('إجمالي الزوار النشطين')
                 ->descriptionIcon('heroicon-m-users')
-                ->color('primary')
-                ->icon('heroicon-o-users'),
-                
-            Stat::make('مشاهدات الصفحات (آخر 30 يوم)', number_format($totalViews))
-                ->description('إجمالي المشاهدات')
+                ->color('primary'),
+
+            Stat::make(__('admin.pages.analytics_dashboard.page_views'), $totalViews)
+                ->description('مرات مشاهدة الصفحات')
                 ->descriptionIcon('heroicon-m-eye')
-                ->color('success')
-                ->icon('heroicon-o-eye'),
+                ->color('success'),
+
         ];
     }
 }

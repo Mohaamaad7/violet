@@ -14,7 +14,12 @@ class AnalyticsTopPagesWidget extends BaseWidget
 
     protected static ?int $sort = 2;
 
-    protected static ?string $heading = 'أكثر الصفحات زيارة (آخر 30 يوم)';
+    protected static ?string $heading = null;
+
+    public function getHeading(): string
+    {
+        return __('admin.pages.analytics_dashboard.top_pages') ?? 'أكثر الصفحات زيارة (آخر 30 يوم)';
+    }
 
 
     public function getTableRecords(): \Illuminate\Support\Collection|\Illuminate\Contracts\Pagination\Paginator
@@ -42,14 +47,14 @@ class AnalyticsTopPagesWidget extends BaseWidget
             )
             ->columns([
                 Tables\Columns\TextColumn::make('pageTitle')
-                    ->label('الصفحة')
+                    ->label(__('admin.pages.analytics_dashboard.page'))
                     ->limit(50),
                 Tables\Columns\TextColumn::make('fullPageUrl')
-                    ->label('الرابط')
+                    ->label(__('admin.pages.analytics_dashboard.url'))
                     ->limit(40)
                     ->color('gray'),
                 Tables\Columns\TextColumn::make('screenPageViews')
-                    ->label('المشاهدات')
+                    ->label(__('admin.pages.analytics_dashboard.views'))
                     ->numeric()
                     ->badge()
                     ->color('success'),
