@@ -42,7 +42,7 @@ class AnalyticsService
             ]);
 
             // Create Spatie Analytics Client
-            $analyticsClient = new AnalyticsClient($betaClient, $propertyId);
+            $analyticsClient = new AnalyticsClient($betaClient, app(\Illuminate\Contracts\Cache\Repository::class));
 
             // Return configured Analytics instance
             return new Analytics($analyticsClient, $propertyId);
