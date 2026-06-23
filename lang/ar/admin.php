@@ -1156,8 +1156,8 @@ return [
     ],
 
     // Static Pages
-    'pages' => 'الصفحات',
-    'page' => 'صفحة',
+    'content_pages' => 'الصفحات',
+    'content_page' => 'صفحة',
     'page_content' => 'محتوى الصفحة',
     'title' => 'العنوان',
     'slug' => 'الرابط',
