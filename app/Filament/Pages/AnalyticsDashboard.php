@@ -15,7 +15,7 @@ class AnalyticsDashboard extends Page
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-presentation-chart-line';
 
-    protected static string $view = 'filament.pages.analytics-dashboard';
+    protected string $view = 'filament.pages.analytics-dashboard';
 
     protected static ?int $navigationSort = 3;
 

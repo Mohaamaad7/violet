@@ -21,7 +21,7 @@ class AnalyticsSettings extends Page implements HasForms
 
     protected static string|\BackedEnum|null $navigationIcon = 'heroicon-o-chart-bar';
 
-    protected static string $view = 'filament.pages.analytics-settings';
+    protected string $view = 'filament.pages.analytics-settings';
 
     protected static ?int $navigationSort = 102;
 
