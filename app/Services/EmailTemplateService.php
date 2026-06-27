@@ -146,6 +146,7 @@ class EmailTemplateService
             'order_subtotal' => '1,150.00 ج.م',
             'order_shipping' => '50.00 ج.م',
             'order_discount' => '50.00 ج.م',
+            'combo_discount' => '20.00 ج.م',
             'order_status' => 'قيد التجهيز',
             'order_date' => date('Y/m/d'),
             'order_items_count' => '3',

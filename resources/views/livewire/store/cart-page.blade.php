@@ -213,6 +213,14 @@
                             </p>
                             @endif
 
+                            {{-- Combo Discount --}}
+                            @if($comboDiscountAmount > 0)
+                            <div class="flex items-center justify-between text-green-600">
+                                <span>خصم كومبو ({{ $comboRuleName }})</span>
+                                <span class="font-bold">-{{ number_format($comboDiscountAmount, 2) }} ج.م</span>
+                            </div>
+                            @endif
+
                             {{-- Tax (VAT 15%) --}}
                             <div class="flex items-center justify-between">
                                 <span class="text-gray-600">{{ __('store.cart.tax') }}</span>

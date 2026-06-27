@@ -31,6 +31,7 @@ class Order extends Model
         'payment_method',
         'subtotal',
         'discount_amount',
+        'combo_discount_amount',
         'shipping_cost',
         'shipping_discount_amount',
         'tax_amount',
@@ -54,6 +55,7 @@ class Order extends Model
         'status' => OrderStatus::class,
         'subtotal' => 'decimal:2',
         'discount_amount' => 'decimal:2',
+        'combo_discount_amount' => 'decimal:2',
         'shipping_cost' => 'decimal:2',
         'shipping_discount_amount' => 'decimal:2',
         'tax_amount' => 'decimal:2',
@@ -122,6 +124,11 @@ class Order extends Model
     public function discountCode(): BelongsTo
     {
         return $this->belongsTo(DiscountCode::class);
+    }
+
+    public function comboRule(): BelongsTo
+    {
+        return $this->belongsTo(ComboRule::class);
     }
 
     public function items(): HasMany

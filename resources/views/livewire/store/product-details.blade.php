@@ -244,6 +244,8 @@
             @endif
         </div>
 
+        <x-store.combo-progress-hint :product="$product" />
+
         {{-- Short Description --}}
         @if($product->short_description)
             <div class="text-gray-700 leading-relaxed">
