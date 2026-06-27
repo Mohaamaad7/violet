@@ -24,7 +24,7 @@
                         <ul class="list-disc list-inside mt-1 space-y-0.5 pr-2">
                             @foreach($rule->conditions as $condition)
                                 @if($condition->category)
-                                    <li>{{ $condition->required_quantity }} من {{ $condition->category->name_ar }}</li>
+                                    <li>{{ $condition->required_quantity }} من {{ $condition->category->name }}</li>
                                 @endif
                             @endforeach
                         </ul>

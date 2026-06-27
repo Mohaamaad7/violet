@@ -28,7 +28,7 @@
                                 @foreach($rule->conditions as $condition)
                                     @if($condition->category)
                                         <span class="bg-white/20 px-2 py-1 rounded text-xs border border-white/30">
-                                            اشتر {{ $condition->required_quantity }} من {{ $condition->category->name_ar }}
+                                            اشتر {{ $condition->required_quantity }} من {{ $condition->category->name }}
                                         </span>
                                     @endif
                                 @endforeach

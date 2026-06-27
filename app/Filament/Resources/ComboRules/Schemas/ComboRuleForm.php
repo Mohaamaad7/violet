@@ -61,7 +61,7 @@ class ComboRuleForm
                             ->schema([
                                 Select::make('category_id')
                                     ->label('القسم')
-                                    ->relationship('category', 'name_ar')
+                                    ->relationship('category', 'name')
                                     ->required()
                                     ->searchable(),
                                 TextInput::make('required_quantity')
