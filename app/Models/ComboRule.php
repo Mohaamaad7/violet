@@ -15,6 +15,7 @@ class ComboRule extends Model
     protected $fillable = [
         'name',
         'description',
+        'image_path',
         'is_active',
         'discount_type',
         'discount_percentage',

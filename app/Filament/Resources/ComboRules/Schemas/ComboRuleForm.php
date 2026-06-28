@@ -9,6 +9,7 @@ use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\FileUpload;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Grid;
 
@@ -22,9 +23,14 @@ class ComboRuleForm
                 Section::make('معلومات العرض الأساسية')
                     ->schema([
                         TextInput::make('name')
-                            ->label('اسم العرض (الكومبو)')
+                            ->label('اسم العرض (مثل: خصم العودة للمدارس)')
                             ->required()
                             ->maxLength(255),
+                        FileUpload::make('image_path')
+                            ->label('صورة العرض (اختياري)')
+                            ->image()
+                            ->directory('combo-rules')
+                            ->maxSize(2048),
                         Textarea::make('description')
                             ->label('وصف العرض')
                             ->maxLength(65535)
