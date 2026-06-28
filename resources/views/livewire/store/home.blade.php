@@ -4,9 +4,20 @@
         <livewire:store.hero-slider />
     </div>
 
-    <div class="container mx-auto px-4 mt-8">
-        <x-store.offers-grid :offers="$unifiedOffers" :showTabs="false" />
-    </div>
+    @if($unifiedOffers->count() > 0)
+    <section class="py-16 bg-violet-50/50 border-y border-violet-100 mt-8 mb-8">
+        <div class="container mx-auto px-4">
+            <div class="flex justify-between items-end mb-10 border-b border-violet-200 pb-4">
+                <div>
+                    <h2 class="text-3xl font-bold text-gray-900 section-header">عروض الكومبو المميزة</h2>
+                    <p class="text-gray-500 mt-3 text-lg">أفضل التوفير مع باقات الكومبو المخصصة لك</p>
+                </div>
+            </div>
+            
+            <x-store.offers-grid :offers="$unifiedOffers" :showTabs="false" />
+        </div>
+    </section>
+    @endif
 
     <!-- 2. Featured Products -->
     @if($featuredProducts->count() > 0)

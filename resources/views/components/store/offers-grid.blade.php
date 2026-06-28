@@ -24,8 +24,8 @@
             {{-- Vertical Offer Card --}}
             <div class="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col group">
                 {{-- Image Top --}}
-                <div class="relative w-full aspect-square bg-gray-50 overflow-hidden">
-                    <img :src="offer.image" :alt="offer.title" class="absolute inset-0 w-full h-full object-contain p-4 group-hover:scale-105 transition-transform duration-500" onerror="this.onerror=null; this.src='https://placehold.co/400x400/e9d5ff/6b21a8?text=' + encodeURIComponent(offer.title)">
+                <div class="relative w-full aspect-square bg-gray-50 overflow-hidden flex items-center justify-center">
+                    <img :src="offer.image" :alt="offer.title" class="absolute inset-0 w-full h-full object-contain p-8 group-hover:scale-105 transition-transform duration-500" onerror="this.onerror=null; this.src='https://placehold.co/400x400/e9d5ff/6b21a8?text=' + encodeURIComponent(offer.title)">
                     
                     <div x-show="offer.discount_percentage" class="absolute top-4 right-4 bg-red-500 text-white font-black px-3 py-1.5 rounded-lg text-sm shadow-md">
                         <span x-text="'-' + offer.discount_percentage + '%'"></span>
