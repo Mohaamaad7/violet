@@ -11,16 +11,16 @@
     </div>
     @endif
 
-    {{-- Centered flex layout: items wrap and center regardless of count --}}
+    {{-- mobile: 2-col portrait, full landscape --}}
     <div x-show="visibleOffers.length > 0" 
          x-transition:enter="transition ease-out duration-300"
          x-transition:enter-start="opacity-0 transform translate-y-4"
          x-transition:enter-end="opacity-100 transform translate-y-0"
-         class="flex flex-wrap justify-center gap-6 transition-all duration-500">
+         class="grid grid-cols-2 md:flex md:flex-wrap md:justify-center gap-6 transition-all duration-500">
         
         <template x-for="offer in visibleOffers" :key="offer.id">
             {{-- Vertical Offer Card --}}
-            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col group max-w-sm flex-1 min-w-[280px]">
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col group w-full md:flex-1 md:min-w-[280px] md:max-w-sm">
                 {{-- Image Top --}}
                 <div class="flex justify-center pt-6 pb-2 relative">
                     <div class="relative w-40 h-40 md:w-48 md:h-48 rounded-2xl overflow-hidden shadow-sm border border-gray-100 bg-gray-50">

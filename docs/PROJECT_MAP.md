@@ -147,11 +147,12 @@
   - `tests/Feature/LcpImageTest.php` **(NEW)**: Verifies first product card uses `fetchpriority="high"`.
 
 ### Center Combo Discount Cards on Homepage (2026-06-28)
-- **Issue**: Combo discount cards in the "عروض الكومبو المميزة" section on the homepage were left-aligned when fewer cards existed than grid columns. Tailwind's `justify-center` had no effect with `1fr` grid tracks since they always fill the container width.
+- **Issue**: Combo discount cards in the "عروض الكومبو المميزة" section on the homepage were left-aligned when fewer cards existed than grid columns. Tailwind's `justify-center` had no effect with `1fr` grid tracks since they always fill the container width. Also needed 2-column portrait mobile matching the New Arrivals pattern.
 - **Solution**:
-  - `resources/views/components/store/offers-grid.blade.php`: Replaced CSS Grid (`grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4`) with `flex flex-wrap justify-center` so cards wrap and center naturally at any count.
-  - Card items restyled from `max-w-sm mx-auto w-full` to `max-w-sm flex-1 min-w-[280px]` — equal-width growth with lower/upper bounds, no forced full-width.
-  - Inline comment added marking the change.
+  - `resources/views/components/store/offers-grid.blade.php`: Hybrid grid+flex approach —
+    Container uses `grid grid-cols-2` for exact 2-column portrait mobile, then switches to `md:flex md:flex-wrap md:justify-center` at 768px+ so odd-card counts stay centered on larger screens.
+    Card items use `w-full` in grid mode, then `md:flex-1 md:min-w-[280px] md:max-w-sm` in flex mode.
+  - Mirrors the New Arrivals section's `grid-cols-2` portrait pattern while preserving the centering fix from the previous iteration.
 - **Tests**: No test existed for offers-grid layout; all existing tests pre-date this change and are unrelated.
 
 ## Deprecated Code
