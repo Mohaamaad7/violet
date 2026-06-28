@@ -1,13 +1,15 @@
-@props(['offers'])
+@props(['offers', 'showTabs' => true])
 
 <div x-data="offersGrid(@js($offers))" id="offers-grid">
     {{-- Filter Tab Bar --}}
+    @if($showTabs)
     <div class="flex flex-wrap items-center justify-center gap-2 md:gap-4 mb-10 bg-white p-2 rounded-2xl shadow-sm border border-gray-100 max-w-3xl mx-auto">
         <button @click="setTab('all')" :class="tab === 'all' ? 'bg-violet-600 text-white shadow-md' : 'bg-transparent text-gray-600 hover:bg-gray-50'" class="px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-300">الكل</button>
         <button @click="setTab('discount')" :class="tab === 'discount' ? 'bg-violet-600 text-white shadow-md' : 'bg-transparent text-gray-600 hover:bg-gray-50'" class="px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-300">أكواد الخصم</button>
         <button @click="setTab('combo')" :class="tab === 'combo' ? 'bg-violet-600 text-white shadow-md' : 'bg-transparent text-gray-600 hover:bg-gray-50'" class="px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-300">عروض الكومبو</button>
         <button @click="setTab('bundle')" :class="tab === 'bundle' ? 'bg-violet-600 text-white shadow-md' : 'bg-transparent text-gray-600 hover:bg-gray-50'" class="px-5 py-2.5 rounded-xl font-bold text-sm transition-all duration-300">عروض المنتجات</button>
     </div>
+    @endif
 
     {{-- Dynamic Grid --}}
     <div x-show="visibleOffers.length > 0" 

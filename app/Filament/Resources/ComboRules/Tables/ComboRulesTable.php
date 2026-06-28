@@ -35,6 +35,9 @@ class ComboRulesTable
                     ->label('مفعل')
                     ->boolean()
                     ->sortable(),
+                \Filament\Tables\Columns\ToggleColumn::make('show_on_homepage')
+                    ->label('الرئيسية')
+                    ->sortable(),
                 TextColumn::make('priority')
                     ->label('الأولوية')
                     ->sortable(),

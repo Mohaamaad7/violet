@@ -39,6 +39,9 @@ class ComboRuleForm
                         Toggle::make('is_active')
                             ->label('مفعل')
                             ->default(true),
+                        Toggle::make('show_on_homepage')
+                            ->label('عرض في الصفحة الرئيسية')
+                            ->default(false),
                         Select::make('discount_type')
                             ->label('نوع الخصم')
                             ->options([

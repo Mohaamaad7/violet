@@ -5,7 +5,7 @@
     </div>
 
     <div class="container mx-auto px-4 mt-8">
-        <x-store.offers-grid :offers="$unifiedOffers" />
+        <x-store.offers-grid :offers="$unifiedOffers" :showTabs="false" />
     </div>
 
     <!-- 2. Featured Products -->

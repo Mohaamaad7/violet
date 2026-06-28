@@ -17,6 +17,7 @@ class ComboRule extends Model
         'description',
         'image_path',
         'is_active',
+        'show_on_homepage',
         'discount_type',
         'discount_percentage',
         'fixed_price',
@@ -28,6 +29,7 @@ class ComboRule extends Model
 
     protected $casts = [
         'is_active' => 'boolean',
+        'show_on_homepage' => 'boolean',
         'discount_percentage' => 'integer',
         'max_uses_per_user' => 'integer',
         'priority' => 'integer',
