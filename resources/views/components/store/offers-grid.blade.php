@@ -24,10 +24,12 @@
             {{-- Vertical Offer Card --}}
             <div class="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col group">
                 {{-- Image Top --}}
-                <div class="relative w-full aspect-square bg-gray-50 overflow-hidden flex items-center justify-center">
-                    <img :src="offer.image" :alt="offer.title" class="absolute inset-0 w-full h-full object-contain p-8 group-hover:scale-105 transition-transform duration-500" onerror="this.onerror=null; this.src='https://placehold.co/400x400/e9d5ff/6b21a8?text=' + encodeURIComponent(offer.title)">
+                <div class="flex justify-center pt-6 pb-2 relative">
+                    <div class="relative w-40 h-40 md:w-48 md:h-48 rounded-2xl overflow-hidden shadow-sm border border-gray-100 bg-gray-50">
+                        <img :src="offer.image" :alt="offer.title" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.onerror=null; this.src='https://placehold.co/400x400/e9d5ff/6b21a8?text=' + encodeURIComponent(offer.title)">
+                    </div>
                     
-                    <div x-show="offer.discount_percentage" class="absolute top-4 right-4 bg-red-500 text-white font-black px-3 py-1.5 rounded-lg text-sm shadow-md">
+                    <div x-show="offer.discount_percentage" class="absolute top-4 right-4 bg-red-500 text-white font-black px-3 py-1.5 rounded-lg text-sm shadow-md z-10">
                         <span x-text="'-' + offer.discount_percentage + '%'"></span>
                     </div>
                 </div>
