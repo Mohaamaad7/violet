@@ -157,6 +157,11 @@ class ComboDiscountService
 
         // All conditions met!
         $totalApplicablePrice = array_sum(array_column($applicableItems, 'price'));
+
+        if ($rule->discount_type === 'fixed_price') {
+            $discount = $totalApplicablePrice - $rule->fixed_price;
+            return $discount > 0 ? $discount : 0;
+        }
         
         return $totalApplicablePrice * ($rule->discount_percentage / 100);
     }

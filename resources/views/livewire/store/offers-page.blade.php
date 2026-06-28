@@ -34,6 +34,13 @@
         </div>
     </section>
 
+    {{-- Combo Offers Section --}}
+    <section class="pt-12 bg-gray-50">
+        <div class="container mx-auto px-4">
+            <x-store.combo-offer-banner />
+        </div>
+    </section>
+
     {{-- Discount Codes Section --}}
     @if($discountCodes->count() > 0)
         <section class="py-12 bg-gray-50">

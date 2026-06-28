@@ -21,6 +21,7 @@ class ComboRuleSeeder extends Seeder
             'name' => 'خصم العودة للمدارس',
             'description' => 'احصل على خصم 20% عند شراء قطعتين من أي قسم',
             'is_active' => true,
+            'discount_type' => 'percentage',
             'discount_percentage' => 20,
             'priority' => 10,
         ]);

@@ -22,9 +22,14 @@ class ComboRulesTable
                     ->label('اسم العرض')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('discount_percentage')
+                TextColumn::make('discount_type')
                     ->label('الخصم')
-                    ->formatStateUsing(fn ($state) => $state . '%')
+                    ->formatStateUsing(function ($record) {
+                        if ($record->discount_type === 'percentage') {
+                            return $record->discount_percentage . '%';
+                        }
+                        return $record->fixed_price . ' ج.م (ثابت)';
+                    })
                     ->sortable(),
                 IconColumn::make('is_active')
                     ->label('مفعل')

@@ -1,0 +1,1749 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Violet — منصة التجارة الإلكترونية العربية المتكاملة</title>
+  <meta name="description" content="Violet هي منصة تجارة إلكترونية عربية متكاملة مبنية بأحدث التقنيات، تجمع متجراً احترافياً، لوحة إدارة قوية، ونظام مؤثرين متكامل — كل ما تحتاجه لإطلاق متجرك الإلكتروني." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    /* ===== RESET & BASE ===== */
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --violet:     #7c3aed;
+      --violet-dark: #5b21b6;
+      --violet-light: #a78bfa;
+      --violet-glow: rgba(124,58,237,.35);
+      --rose:       #f43f5e;
+      --amber:      #f59e0b;
+      --emerald:    #10b981;
+      --sky:        #0ea5e9;
+      --indigo:     #6366f1;
+      --bg-dark:    #0a0a0f;
+      --bg-card:    #111118;
+      --bg-glass:   rgba(255,255,255,.04);
+      --border:     rgba(255,255,255,.08);
+      --text-primary:   #f1f5f9;
+      --text-secondary: #94a3b8;
+      --text-muted:     #64748b;
+      --font-ar:    'Cairo', sans-serif;
+      --font-en:    'Inter', sans-serif;
+      --radius:     1.25rem;
+      --radius-sm:  .75rem;
+      --shadow-glow: 0 0 60px rgba(124,58,237,.25), 0 0 120px rgba(124,58,237,.1);
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: var(--font-ar);
+      background: var(--bg-dark);
+      color: var(--text-primary);
+      line-height: 1.7;
+      overflow-x: hidden;
+    }
+
+    /* ===== BACKGROUND MESH ===== */
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: -1;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 10%, rgba(124,58,237,.18) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 80% 80%, rgba(244,63,94,.12) 0%, transparent 60%),
+        radial-gradient(ellipse 70% 70% at 50% 50%, rgba(14,165,233,.08) 0%, transparent 70%),
+        var(--bg-dark);
+      pointer-events: none;
+    }
+
+    /* ===== NAV ===== */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 4rem;
+      background: rgba(10,10,15,.85);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: .75rem;
+      font-size: 1.6rem; font-weight: 900;
+      background: linear-gradient(135deg, var(--violet-light), var(--violet));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      text-decoration: none;
+    }
+    .nav-logo-icon {
+      width: 38px; height: 38px;
+      background: linear-gradient(135deg, var(--violet), var(--violet-dark));
+      border-radius: 10px; display: grid; place-items: center; font-size: 1.2rem;
+      box-shadow: 0 0 20px var(--violet-glow);
+    }
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a {
+      color: var(--text-secondary); text-decoration: none; font-size: .92rem;
+      transition: color .2s;
+    }
+    .nav-links a:hover { color: var(--text-primary); }
+    .nav-cta {
+      background: linear-gradient(135deg, var(--violet), var(--violet-dark));
+      color: #fff; padding: .6rem 1.6rem; border-radius: 50px;
+      text-decoration: none; font-weight: 700; font-size: .9rem;
+      transition: transform .2s, box-shadow .2s;
+      box-shadow: 0 4px 20px var(--violet-glow);
+    }
+    .nav-cta:hover { transform: translateY(-2px); box-shadow: 0 8px 30px var(--violet-glow); }
+
+    /* ===== HERO ===== */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; padding: 8rem 2rem 6rem;
+      position: relative; overflow: hidden;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: .5rem;
+      background: rgba(124,58,237,.15); border: 1px solid rgba(124,58,237,.35);
+      border-radius: 50px; padding: .4rem 1.2rem; margin-bottom: 2rem;
+      font-size: .85rem; color: var(--violet-light); font-weight: 600;
+      animation: fadeDown .8s ease both;
+    }
+    .hero-badge-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: var(--emerald);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity: 1; transform: scale(1); }
+      50% { opacity: .5; transform: scale(1.4); }
+    }
+    .hero h1 {
+      font-size: clamp(2.8rem, 7vw, 5.5rem);
+      font-weight: 900; line-height: 1.15;
+      color: var(--text-primary);
+      animation: fadeDown .8s .1s ease both;
+    }
+    .hero h1 .gradient-text {
+      background: linear-gradient(135deg, var(--violet-light) 0%, var(--rose) 50%, var(--amber) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .hero-subtitle {
+      font-size: clamp(1rem, 2.5vw, 1.3rem);
+      color: var(--text-secondary); max-width: 700px; margin: 1.5rem auto 3rem;
+      animation: fadeDown .8s .2s ease both;
+    }
+    .hero-actions {
+      display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;
+      animation: fadeDown .8s .3s ease both;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, var(--violet), var(--violet-dark));
+      color: #fff; padding: .9rem 2.4rem; border-radius: 50px;
+      text-decoration: none; font-weight: 700; font-size: 1.05rem;
+      transition: all .3s; box-shadow: 0 4px 25px var(--violet-glow);
+      border: none; cursor: pointer;
+    }
+    .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 10px 40px var(--violet-glow); }
+    .btn-secondary {
+      background: var(--bg-glass); border: 1px solid var(--border);
+      color: var(--text-primary); padding: .9rem 2.4rem; border-radius: 50px;
+      text-decoration: none; font-weight: 600; font-size: 1.05rem;
+      transition: all .3s; backdrop-filter: blur(10px);
+    }
+    .btn-secondary:hover { background: rgba(255,255,255,.08); border-color: var(--violet-light); }
+
+    /* Hero Stats */
+    .hero-stats {
+      display: flex; gap: 3rem; flex-wrap: wrap; justify-content: center;
+      margin-top: 5rem;
+      animation: fadeUp .8s .5s ease both;
+    }
+    .hero-stat { text-align: center; }
+    .hero-stat-number {
+      font-size: 2.4rem; font-weight: 900;
+      background: linear-gradient(135deg, var(--violet-light), var(--violet));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .hero-stat-label { font-size: .85rem; color: var(--text-muted); margin-top: .25rem; }
+
+    /* ===== FLOATING CARDS ===== */
+    .hero-cards {
+      position: absolute; inset: 0; pointer-events: none; overflow: hidden;
+    }
+    .float-card {
+      position: absolute; background: var(--bg-card);
+      border: 1px solid var(--border); border-radius: var(--radius-sm);
+      padding: .75rem 1rem; font-size: .82rem; white-space: nowrap;
+      box-shadow: 0 8px 32px rgba(0,0,0,.4);
+      animation: float 6s ease-in-out infinite;
+    }
+    .float-card:nth-child(1) { top: 20%; right: 5%; animation-delay: 0s; }
+    .float-card:nth-child(2) { top: 35%; left: 5%; animation-delay: -2s; }
+    .float-card:nth-child(3) { bottom: 30%; right: 8%; animation-delay: -4s; }
+    .float-card-icon { margin-inline-end: .4rem; }
+    @keyframes float {
+      0%,100% { transform: translateY(0); }
+      50% { transform: translateY(-12px); }
+    }
+
+    /* ===== ANIMATIONS ===== */
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* ===== SECTION COMMONS ===== */
+    section { padding: 6rem 2rem; }
+    .container { max-width: 1200px; margin: 0 auto; }
+    .section-label {
+      display: inline-block;
+      background: rgba(124,58,237,.12); border: 1px solid rgba(124,58,237,.25);
+      color: var(--violet-light); border-radius: 50px;
+      padding: .3rem 1rem; font-size: .82rem; font-weight: 700;
+      margin-bottom: 1rem; text-transform: uppercase; letter-spacing: .08em;
+    }
+    .section-title {
+      font-size: clamp(2rem, 4vw, 3rem); font-weight: 900; line-height: 1.2;
+      margin-bottom: 1rem; color: var(--text-primary);
+    }
+    .section-subtitle {
+      font-size: 1.05rem; color: var(--text-secondary); max-width: 600px; margin-bottom: 4rem;
+    }
+    .text-center { text-align: center; }
+    .mx-auto { margin-left: auto; margin-right: auto; }
+
+    /* ===== STACK PILLS ===== */
+    .stack-pills {
+      display: flex; flex-wrap: wrap; gap: .6rem; justify-content: center; margin-bottom: 5rem;
+    }
+    .pill {
+      background: var(--bg-glass); border: 1px solid var(--border);
+      border-radius: 50px; padding: .4rem 1rem; font-size: .82rem;
+      color: var(--text-secondary); backdrop-filter: blur(8px);
+      transition: all .2s;
+    }
+    .pill:hover { border-color: var(--violet-light); color: var(--violet-light); }
+    .pill.accent { border-color: rgba(124,58,237,.4); color: var(--violet-light); background: rgba(124,58,237,.1); }
+
+    /* ===== FEATURE GRID ===== */
+    .features-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+    .feature-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 2rem;
+      transition: all .3s; position: relative; overflow: hidden;
+    }
+    .feature-card::before {
+      content: ''; position: absolute;
+      inset: 0; border-radius: var(--radius);
+      background: linear-gradient(135deg, var(--violet-glow), transparent);
+      opacity: 0; transition: opacity .3s;
+    }
+    .feature-card:hover { transform: translateY(-4px); border-color: rgba(124,58,237,.3); }
+    .feature-card:hover::before { opacity: 1; }
+    .feature-icon {
+      width: 52px; height: 52px; border-radius: var(--radius-sm);
+      display: grid; place-items: center; font-size: 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+    .feature-card h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: .5rem; color: var(--text-primary); }
+    .feature-card p { font-size: .92rem; color: var(--text-secondary); line-height: 1.6; }
+    .feature-tags { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: 1rem; }
+    .feature-tag {
+      font-size: .75rem; padding: .2rem .6rem; border-radius: 50px;
+      background: rgba(255,255,255,.06); color: var(--text-muted);
+    }
+
+    /* Icon colors */
+    .icon-violet { background: rgba(124,58,237,.15); color: var(--violet-light); }
+    .icon-rose { background: rgba(244,63,94,.15); color: #fb7185; }
+    .icon-amber { background: rgba(245,158,11,.15); color: #fbbf24; }
+    .icon-emerald { background: rgba(16,185,129,.15); color: #34d399; }
+    .icon-sky { background: rgba(14,165,233,.15); color: #38bdf8; }
+    .icon-indigo { background: rgba(99,102,241,.15); color: #818cf8; }
+
+    /* ===== BIG FEATURE ROWS ===== */
+    .big-feature {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 5rem;
+      align-items: center; padding: 4rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .big-feature:last-child { border-bottom: none; }
+    .big-feature.reverse { direction: ltr; }
+    .big-feature.reverse .big-feature-content { direction: rtl; }
+    .big-feature-visual {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 2rem;
+      position: relative; overflow: hidden;
+    }
+    .big-feature-visual::after {
+      content: ''; position: absolute;
+      top: 0; right: 0;
+      width: 60%; height: 60%;
+      background: radial-gradient(circle, var(--violet-glow), transparent);
+      pointer-events: none;
+    }
+    .big-feature-content { }
+    .big-feature-content h3 { font-size: 1.8rem; font-weight: 800; margin-bottom: 1rem; color: var(--text-primary); }
+    .big-feature-content p { color: var(--text-secondary); margin-bottom: 1.5rem; line-height: 1.8; }
+    .feature-list { list-style: none; display: flex; flex-direction: column; gap: .6rem; }
+    .feature-list li {
+      display: flex; align-items: flex-start; gap: .6rem;
+      font-size: .95rem; color: var(--text-secondary);
+    }
+    .feature-list li::before {
+      content: '✓';
+      color: var(--emerald); font-weight: 800; flex-shrink: 0;
+      margin-top: .1rem;
+    }
+
+    /* ===== PAYMENT TABLE ===== */
+    .payment-section { background: var(--bg-card); border-radius: var(--radius); padding: 3rem; margin: 2rem 0; }
+    .payment-table { width: 100%; border-collapse: collapse; }
+    .payment-table th, .payment-table td {
+      padding: 1rem 1.25rem; text-align: center;
+      border-bottom: 1px solid var(--border);
+    }
+    .payment-table th { font-weight: 700; color: var(--text-muted); font-size: .85rem; text-transform: uppercase; letter-spacing: .05em; }
+    .payment-table td:first-child { text-align: right; font-weight: 600; }
+    .check { color: var(--emerald); font-size: 1.1rem; }
+    .cross { color: var(--text-muted); font-size: 1rem; }
+    .badge-gateway {
+      display: inline-block; padding: .25rem .75rem; border-radius: 50px;
+      font-size: .78rem; font-weight: 700;
+    }
+    .badge-kashier { background: rgba(16,185,129,.15); color: #34d399; border: 1px solid rgba(16,185,129,.3); }
+    .badge-paymob { background: rgba(14,165,233,.15); color: #38bdf8; border: 1px solid rgba(14,165,233,.3); }
+
+    /* ===== STATS GRID ===== */
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1.5rem;
+    }
+    .stat-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 2rem; text-align: center;
+      transition: all .3s;
+    }
+    .stat-card:hover { border-color: rgba(124,58,237,.3); transform: translateY(-3px); }
+    .stat-number {
+      font-size: 2.5rem; font-weight: 900;
+      background: linear-gradient(135deg, var(--violet-light), var(--rose));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .stat-label { font-size: .88rem; color: var(--text-muted); margin-top: .5rem; }
+
+    /* ===== DB TABLE ===== */
+    .db-groups {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.25rem;
+    }
+    .db-group {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 1.5rem;
+    }
+    .db-group-title {
+      font-weight: 700; margin-bottom: 1rem;
+      display: flex; align-items: center; gap: .5rem;
+    }
+    .db-group ul { list-style: none; display: flex; flex-direction: column; gap: .3rem; }
+    .db-group li { font-size: .85rem; color: var(--text-secondary); }
+    .db-group li::before { content: '▸ '; color: var(--violet-light); }
+
+    /* ===== ROLES SECTION ===== */
+    .roles-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 1rem;
+    }
+    .role-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 1.25rem; text-align: center;
+      transition: all .2s;
+    }
+    .role-card:hover { border-color: rgba(124,58,237,.35); }
+    .role-icon { font-size: 1.8rem; margin-bottom: .5rem; }
+    .role-name { font-weight: 700; font-size: .95rem; color: var(--text-primary); }
+    .role-desc { font-size: .8rem; color: var(--text-muted); margin-top: .3rem; }
+
+    /* ===== TIMELINE ===== */
+    .timeline {
+      position: relative; padding-right: 2rem;
+    }
+    .timeline::before {
+      content: ''; position: absolute;
+      right: 0; top: 0; bottom: 0;
+      width: 2px;
+      background: linear-gradient(to bottom, var(--violet), transparent);
+    }
+    .timeline-item {
+      position: relative; margin-bottom: 2.5rem; padding-right: 1.5rem;
+    }
+    .timeline-dot {
+      position: absolute; right: -2.25rem;
+      width: 14px; height: 14px; border-radius: 50%;
+      background: var(--violet); border: 2px solid var(--bg-dark);
+      box-shadow: 0 0 12px var(--violet-glow);
+      top: .3rem;
+    }
+    .timeline-item h4 { font-size: 1.05rem; font-weight: 700; margin-bottom: .4rem; color: var(--text-primary); }
+    .timeline-item p { font-size: .92rem; color: var(--text-secondary); }
+
+    /* ===== SECURITY BADGES ===== */
+    .security-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1rem;
+    }
+    .security-item {
+      display: flex; align-items: flex-start; gap: 1rem;
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 1.25rem;
+    }
+    .security-icon {
+      width: 40px; height: 40px; flex-shrink: 0;
+      background: rgba(16,185,129,.12); border-radius: 50%;
+      display: grid; place-items: center; font-size: 1.1rem;
+    }
+    .security-item h4 { font-size: .95rem; font-weight: 700; margin-bottom: .2rem; color: var(--text-primary); }
+    .security-item p { font-size: .83rem; color: var(--text-muted); }
+
+    /* ===== INFLUENCER PORTAL ===== */
+    .portal-features {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+      gap: 1.25rem;
+    }
+    .portal-item {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 1.5rem;
+      transition: all .3s;
+    }
+    .portal-item:hover { border-color: rgba(167,139,250,.35); transform: translateY(-2px); }
+    .portal-item-icon { font-size: 1.8rem; margin-bottom: .8rem; }
+    .portal-item h4 { font-weight: 700; margin-bottom: .4rem; color: var(--text-primary); }
+    .portal-item p { font-size: .87rem; color: var(--text-secondary); }
+
+    /* ===== PERF SECTION ===== */
+    .perf-metrics {
+      display: flex; flex-wrap: wrap; gap: 1.5rem; justify-content: center;
+      margin: 3rem 0;
+    }
+    .perf-metric {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 1.5rem 2rem; text-align: center;
+      min-width: 160px;
+    }
+    .perf-score {
+      font-size: 3rem; font-weight: 900;
+      background: linear-gradient(135deg, var(--emerald), var(--sky));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .perf-label { font-size: .85rem; color: var(--text-muted); margin-top: .4rem; }
+    .perf-items {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1rem; margin-top: 2rem;
+    }
+    .perf-item {
+      display: flex; align-items: flex-start; gap: .8rem;
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 1rem;
+    }
+    .perf-badge {
+      flex-shrink: 0; padding: .2rem .6rem; border-radius: 50px;
+      font-size: .75rem; font-weight: 700;
+      background: rgba(16,185,129,.15); color: #34d399;
+    }
+    .perf-item-text { font-size: .88rem; color: var(--text-secondary); }
+
+    /* ===== EMAIL SECTION ===== */
+    .email-templates {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+    }
+    .email-template {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 1.25rem;
+      border-top: 3px solid var(--violet);
+    }
+    .email-template.order { border-top-color: var(--emerald); }
+    .email-template.auth  { border-top-color: var(--sky); }
+    .email-template.influ { border-top-color: var(--amber); }
+    .email-template h4 { font-size: .95rem; font-weight: 700; margin-bottom: .3rem; color: var(--text-primary); }
+    .email-template p { font-size: .82rem; color: var(--text-muted); }
+    .email-type-badge {
+      font-size: .72rem; padding: .15rem .55rem; border-radius: 50px;
+      margin-top: .5rem; display: inline-block;
+    }
+    .badge-order { background: rgba(16,185,129,.15); color: #34d399; }
+    .badge-auth  { background: rgba(14,165,233,.15); color: #38bdf8; }
+    .badge-influ { background: rgba(245,158,11,.15); color: #fbbf24; }
+
+    /* ===== ACCORDION ===== */
+    .accordion { display: flex; flex-direction: column; gap: 1rem; }
+    .accordion-item {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); overflow: hidden;
+    }
+    .accordion-header {
+      padding: 1.25rem 1.5rem; font-weight: 700; cursor: pointer;
+      display: flex; justify-content: space-between; align-items: center;
+      transition: background .2s;
+	  color:#fff;
+    }
+    .accordion-header:hover { background: rgba(255,255,255,.03); }
+    .accordion-arrow { transition: transform .3s; }
+    .accordion-item.open .accordion-arrow { transform: rotate(180deg); }
+    .accordion-body {
+      max-height: 0; overflow: hidden; transition: max-height .4s ease;
+    }
+    .accordion-item.open .accordion-body { max-height: 500px; }
+    .accordion-body-inner { padding: 0 1.5rem 1.5rem; color: var(--text-secondary); font-size: .93rem; line-height: 1.7; }
+
+    /* ===== CTA ===== */
+    .cta-section {
+      background: linear-gradient(135deg, rgba(124,58,237,.2), rgba(244,63,94,.1));
+      border: 1px solid rgba(124,58,237,.25);
+      border-radius: var(--radius); padding: 5rem 3rem; text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .cta-section::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(circle at center, rgba(124,58,237,.25), transparent 70%);
+    }
+    .cta-section h2 { font-size: 2.5rem; font-weight: 900; margin-bottom: 1rem; position: relative; color: var(--text-primary); }
+    .cta-section p { color: var(--text-secondary); font-size: 1.1rem; margin-bottom: 2.5rem; position: relative; }
+    .cta-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; position: relative; }
+
+    /* ===== FOOTER ===== */
+    footer {
+      border-top: 1px solid var(--border); padding: 3rem 2rem;
+      text-align: center; color: var(--text-muted); font-size: .88rem;
+    }
+    footer .footer-logo {
+      font-size: 1.4rem; font-weight: 900;
+      background: linear-gradient(135deg, var(--violet-light), var(--violet));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      margin-bottom: 1rem; display: block;
+    }
+    .footer-tech {
+      display: flex; flex-wrap: wrap; gap: .5rem; justify-content: center; margin-top: 1.5rem;
+    }
+    .tech-pill {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 50px; padding: .2rem .8rem; font-size: .78rem;
+      color: var(--text-muted);
+    }
+
+    /* ===== DIVIDER ===== */
+    .divider {
+      height: 1px; background: linear-gradient(to left, transparent, var(--border), transparent);
+      margin: 2rem 0;
+    }
+
+    /* ===== CODE BLOCK ===== */
+    .code-block {
+      background: #0d0d1a; border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 1.25rem;
+      font-family: 'Courier New', monospace; font-size: .88rem;
+      color: #c4b5fd; overflow-x: auto; direction: ltr;
+    }
+    .code-comment { color: var(--text-muted); }
+    .code-keyword { color: #38bdf8; }
+    .code-string { color: #86efac; }
+
+    /* ===== HIGHLIGHT BOX ===== */
+    .highlight-box {
+      background: rgba(124,58,237,.08); border: 1px solid rgba(124,58,237,.25);
+      border-radius: var(--radius-sm); padding: 1.5rem;
+      border-right: 4px solid var(--violet);
+    }
+    .highlight-box.success { border-right-color: var(--emerald); background: rgba(16,185,129,.07); }
+    .highlight-box.warning { border-right-color: var(--amber); background: rgba(245,158,11,.07); }
+
+    /* ===== SCROLL REVEAL ===== */
+    .reveal { opacity: 0; transform: translateY(30px); transition: all .6s ease; }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 900px) {
+      nav { padding: 1rem 1.5rem; }
+      .nav-links { display: none; }
+      .big-feature { grid-template-columns: 1fr; gap: 2rem; }
+      .big-feature.reverse { direction: rtl; }
+      section { padding: 4rem 1.25rem; }
+    }
+    @media (max-width: 600px) {
+      .hero h1 { font-size: 2.4rem; }
+      .hero-stats { gap: 1.5rem; }
+      .hero-stat-number { font-size: 1.8rem; }
+      .cta-section h2 { font-size: 1.8rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ===== HERO ===== -->
+<section class="hero">
+  <div class="hero-cards" aria-hidden="true">
+    <div class="float-card">
+      <span class="float-card-icon">🚀</span> PageSpeed <strong style="color:#34d399">90+</strong>
+    </div>
+    <div class="float-card">
+      <span class="float-card-icon">🛒</span> طلب جديد — محمد أحمد
+    </div>
+    <div class="float-card">
+      <span class="float-card-icon">💰</span> عمولة مؤثر: +150 ج.م
+    </div>
+  </div>
+
+  <div class="hero-badge">
+    <div class="hero-badge-dot"></div>
+    مبني بـ Laravel 12 · Filament v4 · Livewire v3
+  </div>
+
+  <h1>
+    منصة التجارة الإلكترونية<br/>
+    <span class="gradient-text">العربية المتكاملة</span>
+  </h1>
+
+  <p class="hero-subtitle">
+    Violet ليست مجرد متجر — هي نظام ERP كامل للتجارة الإلكترونية. من إدارة المنتجات
+    حتى المؤثرين والمدفوعات وتحليلات الأداء، كل شيء في مكان واحد.
+  </p>
+
+  <div class="hero-actions">
+    <a class="btn-primary" href="#features">🎯 استكشف المميزات</a>
+    <a class="btn-secondary" href="#cta">📞 تواصل معنا</a>
+  </div>
+
+  <div class="hero-stats">
+    <div class="hero-stat">
+      <div class="hero-stat-number">31</div>
+      <div class="hero-stat-label">جدول في قاعدة البيانات</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-number">90+</div>
+      <div class="hero-stat-label">نقاط PageSpeed</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-number">6</div>
+      <div class="hero-stat-label">أدوار وظيفية</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-number">125+</div>
+      <div class="hero-stat-label">ملف توثيق</div>
+    </div>
+    <div class="hero-stat">
+      <div class="hero-stat-number">44+</div>
+      <div class="hero-stat-label">اختبار تلقائي</div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== TECH STACK ===== -->
+<section style="padding-top: 2rem; padding-bottom: 4rem;">
+  <div class="container">
+    <p class="text-center" style="color: var(--text-muted); font-size:.88rem; margin-bottom: 1.5rem;">مبني بأحدث تقنيات 2026</p>
+    <div class="stack-pills">
+      <span class="pill accent">Laravel 12.37</span>
+      <span class="pill accent">PHP 8.3</span>
+      <span class="pill accent">Filament v4.2</span>
+      <span class="pill accent">Livewire v3.6</span>
+      <span class="pill">MySQL 8</span>
+      <span class="pill">Alpine.js 3.13</span>
+      <span class="pill">Tailwind CSS 4</span>
+      <span class="pill">Vite (ES2020)</span>
+      <span class="pill">Spatie Media Library</span>
+      <span class="pill">Spatie Permissions v6</span>
+      <span class="pill">Laravel Sanctum 4</span>
+      <span class="pill">Swiper.js</span>
+      <span class="pill">Cairo Font</span>
+      <span class="pill">WebP Images</span>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FEATURES OVERVIEW ===== -->
+<section id="features">
+  <div class="container">
+    <div class="text-center">
+      <span class="section-label">المميزات الشاملة</span>
+      <h2 class="section-title">كل ما تحتاجه في منصة واحدة</h2>
+      <p class="section-subtitle mx-auto">
+        من واجهة التسوق الاحترافية إلى أدوات الإدارة والتسويق وتحليلات الأداء — Violet يغطي كل جانب من جوانب متجرك الإلكتروني.
+      </p>
+    </div>
+
+    <div class="features-grid reveal">
+      <!-- Feature 1 -->
+      <div class="feature-card">
+        <div class="feature-icon icon-violet">🛍️</div>
+        <h3>واجهة متجر احترافية</h3>
+        <p>تجربة تسوق سلسة وسريعة مع صفحات منتجات بتقنية Amazon-style zoom، سلة AJAX فورية، وبحث حي مع نتائج آنية.</p>
+        <div class="feature-tags">
+          <span class="feature-tag">Hero Slider</span>
+          <span class="feature-tag">Mega Menu</span>
+          <span class="feature-tag">Live Search</span>
+          <span class="feature-tag">Wishlist</span>
+        </div>
+      </div>
+
+      <!-- Feature 2 -->
+      <div class="feature-card">
+        <div class="feature-icon icon-rose">🎛️</div>
+        <h3>لوحة إدارة Filament v4</h3>
+        <p>لوحة تحكم كاملة لإدارة المنتجات، الطلبات، العملاء، والمحتوى — مع إمكانية تخصيص الصلاحيات لكل دور وظيفي.</p>
+        <div class="feature-tags">
+          <span class="feature-tag">CRUD كامل</span>
+          <span class="feature-tag">Rich Editor</span>
+          <span class="feature-tag">Media Library</span>
+          <span class="feature-tag">Widgets</span>
+        </div>
+      </div>
+
+      <!-- Feature 3 -->
+      <div class="feature-card">
+        <div class="feature-icon icon-amber">🌟</div>
+        <h3>نظام المؤثرين المتكامل</h3>
+        <p>بوابة مخصصة للمؤثرين مع أكواد خصم، تتبع العمولات، طلبات صرف الأرباح، ودعم جميع طرق الدفع المصرية.</p>
+        <div class="feature-tags">
+          <span class="feature-tag">أكواد خصم</span>
+          <span class="feature-tag">عمولات تلقائية</span>
+          <span class="feature-tag">لوحة تحكم</span>
+        </div>
+      </div>
+
+      <!-- Feature 4 -->
+      <div class="feature-card">
+        <div class="feature-icon icon-emerald">💳</div>
+        <h3>بوابات دفع مصرية</h3>
+        <p>تكامل مع Kashier وPaymob مع دعم Visa، Meeza، Vodafone Cash، InstaPay، Fawry، وValU. اختيار البوابة من الإدارة.</p>
+        <div class="feature-tags">
+          <span class="feature-tag">Kashier</span>
+          <span class="feature-tag">Paymob</span>
+          <span class="feature-tag">HMAC Validation</span>
+        </div>
+      </div>
+
+      <!-- Feature 5 -->
+      <div class="feature-card">
+        <div class="feature-icon icon-sky">📧</div>
+        <h3>نظام إيميلات ذكي</h3>
+        <p>9 قوالب إيميل جاهزة مع محرر WYSIWYG، تتبع الحالة (مُرسَل/مُسلَّم/مفتوح/نُقر)، ودعم RTL كامل بلا Queue Worker.</p>
+        <div class="feature-tags">
+          <span class="feature-tag">WYSIWYG Editor</span>
+          <span class="feature-tag">Email Tracking</span>
+          <span class="feature-tag">RTL Support</span>
+        </div>
+      </div>
+
+      <!-- Feature 6 -->
+      <div class="feature-card">
+        <div class="feature-icon icon-indigo">🌐</div>
+        <h3>عربي 100% مع RTL</h3>
+        <p>دعم كامل للغة العربية مع خط Cairo، مرآة Layout في RTL، وترجمة ديناميكية من قاعدة البيانات بدون لمس الكود.</p>
+        <div class="feature-tags">
+          <span class="feature-tag">Cairo Font</span>
+          <span class="feature-tag">DB Translations</span>
+          <span class="feature-tag">Auto Detect</span>
+        </div>
+      </div>
+
+      <!-- Feature 7 -->
+      <div class="feature-card">
+        <div class="feature-icon icon-violet">↩️</div>
+        <h3>نظام المرتجعات الكامل</h3>
+        <p>إدارة شاملة لطلبات الإرجاع: موافقة، رفض، معالجة، استرجاع مخزون تلقائي، ورصد حركة المخزون مع Audit Trail.</p>
+        <div class="feature-tags">
+          <span class="feature-tag">Stock Restoration</span>
+          <span class="feature-tag">Return Policies</span>
+          <span class="feature-tag">6 إعدادات</span>
+        </div>
+      </div>
+
+      <!-- Feature 8 -->
+      <div class="feature-card">
+        <div class="feature-icon icon-rose">🗺️</div>
+        <h3>نظام مواقع جغرافية</h3>
+        <p>27 محافظة و207 مدينة مصرية جاهزة. Cascading Dropdowns في Checkout، حساب تكلفة شحن تلقائي، وتقارير جغرافية.</p>
+        <div class="feature-tags">
+          <span class="feature-tag">27 محافظة</span>
+          <span class="feature-tag">207 مدينة</span>
+          <span class="feature-tag">شحن تلقائي</span>
+        </div>
+      </div>
+
+      <!-- Feature 9 -->
+      <div class="feature-card">
+        <div class="feature-icon icon-amber">🏷️</div>
+        <h3>نظام الكوبونات المتقدم</h3>
+        <p>أكواد خصم مرنة: نسبة/قيمة/شحن مجاني، استهداف بمنتجات وفئات، قواعد استبعاد، وتتبع الاستخدام بدقة.</p>
+        <div class="feature-tags">
+          <span class="feature-tag">خصم نسبي</span>
+          <span class="feature-tag">خصم ثابت</span>
+          <span class="feature-tag">شحن مجاني</span>
+        </div>
+      </div>
+
+      <!-- Feature 10 -->
+      <div class="feature-card">
+        <div class="feature-icon icon-emerald">📱</div>
+        <h3>نيوزليتر وحملات بريد</h3>
+        <p>نظام اشتراك بالبريد الإلكتروني، إنشاء حملات تسويقية، استهداف المشتركين، وتتبع معدلات الفتح والنقر.</p>
+        <div class="feature-tags">
+          <span class="feature-tag">Newsletter</span>
+          <span class="feature-tag">Campaigns</span>
+          <span class="feature-tag">Queue-based</span>
+        </div>
+      </div>
+
+      <!-- Feature 11 -->
+      <div class="feature-card">
+        <div class="feature-icon icon-sky">📊</div>
+        <h3>Facebook Pixel & Analytics</h3>
+        <p>تكامل Facebook Pixel ديناميكي من قاعدة البيانات، تتبع PageView وPurchase، وتأخير ذكي لا يؤثر على الأداء.</p>
+        <div class="feature-tags">
+          <span class="feature-tag">Hybrid Delay</span>
+          <span class="feature-tag">Purchase Track</span>
+          <span class="feature-tag">DB Config</span>
+        </div>
+      </div>
+
+      <!-- Feature 12 -->
+      <div class="feature-card">
+        <div class="feature-icon icon-indigo">🧪</div>
+        <h3>اختبارات تلقائية شاملة</h3>
+        <p>44+ اختبار PHPUnit يشمل Unit, Feature, وIntegration Tests — يضمن استقرار النظام عند كل تحديث.</p>
+        <div class="feature-tags">
+          <span class="feature-tag">PHPUnit 11</span>
+          <span class="feature-tag">SQLite in-memory</span>
+          <span class="feature-tag">44+ Tests</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== STOREFRONT DETAIL ===== -->
+<section id="storefront" style="background: rgba(255,255,255,.01);">
+  <div class="container">
+    <div class="text-center">
+      <span class="section-label">واجهة المتجر</span>
+      <h2 class="section-title">تجربة تسوق لا تُنسى</h2>
+    </div>
+
+    <div class="big-feature reveal">
+      <div class="big-feature-visual">
+        <div style="padding: 1.5rem; background: rgba(124,58,237,.06); border-radius: .75rem; margin-bottom: 1rem;">
+          <div style="display:flex;gap:.5rem;margin-bottom:1rem;">
+            <div style="width:10px;height:10px;border-radius:50%;background:#ef4444;"></div>
+            <div style="width:10px;height:10px;border-radius:50%;background:#f59e0b;"></div>
+            <div style="width:10px;height:10px;border-radius:50%;background:#22c55e;"></div>
+          </div>
+          <div style="font-size:.82rem;color:var(--text-muted);direction:ltr;font-family:monospace;">
+            GET /products?search=violet&sort=price&page=1<br/>
+            <span style="color:#34d399;">→ 300ms debounce</span><br/>
+            <span style="color:#a78bfa;">→ AJAX JSON Results</span><br/>
+            <span style="color:#38bdf8;">← { name, price, image, slug }</span>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem;">
+          <div style="background:var(--bg-dark);border:1px solid var(--border);border-radius:.5rem;padding:1rem;font-size:.82rem;">
+            <div style="color:var(--emerald);font-weight:700;margin-bottom:.3rem;">✓ LCP &lt; 2.5s</div>
+            <div style="color:var(--text-muted);">fetchpriority="high" لأول 4 منتجات</div>
+          </div>
+          <div style="background:var(--bg-dark);border:1px solid var(--border);border-radius:.5rem;padding:1rem;font-size:.82rem;">
+            <div style="color:var(--sky);font-weight:700;margin-bottom:.3rem;">⚡ WebP q70</div>
+            <div style="color:var(--text-muted);">ضغط تلقائي بـ Spatie Media</div>
+          </div>
+          <div style="background:var(--bg-dark);border:1px solid var(--border);border-radius:.5rem;padding:1rem;font-size:.82rem;">
+            <div style="color:var(--amber);font-weight:700;margin-bottom:.3rem;">🔍 Live Search</div>
+            <div style="color:var(--text-muted);">AJAX مع صور مصغرة فورية</div>
+          </div>
+          <div style="background:var(--bg-dark);border:1px solid var(--border);border-radius:.5rem;padding:1rem;font-size:.82rem;">
+            <div style="color:var(--violet-light);font-weight:700;margin-bottom:.3rem;">🖼️ Amazon Zoom</div>
+            <div style="color:var(--text-muted);">معرض صور تفاعلي للمنتج</div>
+          </div>
+        </div>
+      </div>
+      <div class="big-feature-content">
+        <h3>صُمِّم لتحويل الزائر إلى مشترٍ</h3>
+        <p>
+          كل عنصر في الواجهة مصمم لتقليل الاحتكاك وزيادة معدلات التحويل.
+          من صفحة البداية الجذابة حتى إتمام الطلب في خطوة واحدة.
+        </p>
+        <ul class="feature-list">
+          <li>Hero Slider بـ Swiper.js — متحرك ومذهل</li>
+          <li>بحث حي AJAX مع نتائج وصور آنية (300ms debounce)</li>
+          <li>معرض صور بتقنية Amazon-style zoom للمنتجات</li>
+          <li>سلة تسوق AJAX كاملة مع تحديث فوري وعداد</li>
+          <li>إتمام الطلب بخطوة واحدة مع اختيار العنوان المحفوظ</li>
+          <li>صفحة نجاح الطلب مع CTA للضيوف (إنشاء حساب/تتبع)</li>
+          <li>لوحة حساب عميل: طلباتي، المفضلة، العناوين، التقييمات</li>
+          <li>مدونة متكاملة مع محرر WYSIWYG ونشر/مسودة</li>
+          <li>صفحة تقديم مؤثر مع حقول سوشيال ميديا كاملة</li>
+          <li>دعم التسوق كضيف مع ربط تلقائي بعد التسجيل</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="big-feature reverse reveal">
+      <div class="big-feature-content">
+        <h3>فلاتر بحث متقدمة وعرض منتجات احترافي</h3>
+        <p>
+          صفحة قائمة المنتجات تأتي بكل أدوات الاكتشاف التي يحتاجها العميل.
+          فلاتر بالفئة والسعر والمخزون مع فرز متعدد وعرض شبكي/قائمة.
+        </p>
+        <ul class="feature-list">
+          <li>فلاتر متقدمة: فئة، سعر، مخزون، تقييم، علامة تجارية</li>
+          <li>فرز متعدد: الأحدث، الأعلى تقييماً، الأقل سعراً، الأكثر مبيعاً</li>
+          <li>بطاقة منتج: صورة WebP، نجوم تقييم، Add to Cart، شارة خصم</li>
+          <li>مؤشر المخزون المنخفض والنفاد التلقائي</li>
+          <li>Breadcrumbs مع JSON-LD Schema للسيو</li>
+          <li>روابط سريعة وتصفح هرمي للفئات (Parent/Child)</li>
+          <li>تقييمات المنتجات مع التحقق من الشراء الفعلي</li>
+          <li>متغيرات المنتج (لون/مقاس) مع صور لكل متغير</li>
+        </ul>
+      </div>
+      <div class="big-feature-visual">
+        <div style="margin-bottom:1rem;">
+          <div style="font-size:.82rem;color:var(--text-muted);margin-bottom:.5rem;">مثال بطاقة منتج</div>
+          <div style="background:var(--bg-dark);border:1px solid var(--border);border-radius:.75rem;padding:1.25rem;">
+            <div style="background:rgba(124,58,237,.1);border-radius:.5rem;height:120px;display:grid;place-items:center;font-size:2rem;margin-bottom:.75rem;">👗</div>
+            <div style="display:flex;justify-content:space-between;align-items:start;margin-bottom:.5rem;">
+              <div>
+                <div style="font-weight:700;font-size:.95rem;">فستان سهرة فيولا</div>
+                <div style="display:flex;gap:.2rem;color:#f59e0b;font-size:.85rem;">★★★★★ <span style="color:var(--text-muted)">(42)</span></div>
+              </div>
+              <div style="text-align:left;">
+                <div style="color:#34d399;font-weight:800;">350 ج.م</div>
+                <div style="text-decoration:line-through;color:var(--text-muted);font-size:.8rem;">499 ج.م</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:.4rem;">
+              <span style="background:rgba(239,68,68,.15);color:#f87171;border-radius:50px;padding:.15rem .6rem;font-size:.75rem;font-weight:700;">30% خصم</span>
+              <span style="background:rgba(245,158,11,.15);color:#fbbf24;border-radius:50px;padding:.15rem .6rem;font-size:.75rem;">متبقي 5 فقط</span>
+            </div>
+            <div style="background:var(--violet);color:#fff;border-radius:.4rem;padding:.6rem;text-align:center;margin-top:.75rem;font-weight:700;font-size:.9rem;cursor:pointer;">
+              🛒 أضف للسلة
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== ADMIN PANEL ===== -->
+<section id="admin">
+  <div class="container">
+    <div class="text-center">
+      <span class="section-label">لوحة الإدارة</span>
+      <h2 class="section-title">تحكم كامل في كل شيء</h2>
+      <p class="section-subtitle mx-auto">
+        Filament v4 يمنحك لوحة إدارة احترافية جاهزة مع كل الموارد التي تحتاجها لإدارة متجرك الإلكتروني.
+      </p>
+    </div>
+
+    <!-- Dashboard Widgets -->
+    <div class="highlight-box reveal" style="margin-bottom:2rem;">
+      <h4 style="font-weight:700;margin-bottom:.5rem;">📊 لوحة المعلومات — 10+ Widgets قابلة للتخصيص</h4>
+      <div style="display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.75rem;">
+        <span class="pill">💰 إيرادات اليوم</span>
+        <span class="pill">📦 طلبات اليوم</span>
+        <span class="pill">👥 إجمالي العملاء</span>
+        <span class="pill">📈 مخطط المبيعات</span>
+        <span class="pill">⚠️ مخزون منخفض</span>
+        <span class="pill">↩️ إرجاعات معلقة</span>
+        <span class="pill">🧾 أحدث الطلبات</span>
+        <span class="pill">💎 قيمة المخزون</span>
+        <span class="pill">📊 حركة المخزون</span>
+      </div>
+    </div>
+
+    <div class="features-grid reveal">
+      <div class="feature-card">
+        <div class="feature-icon icon-violet">📦</div>
+        <h3>إدارة المنتجات</h3>
+        <p>CRUD كامل مع Spatie Media Library، صور متعددة بتحويل WebP تلقائي، متغيرات لون/مقاس، SKU، باركود، حالة، ومخزون.</p>
+        <div class="feature-tags">
+          <span class="feature-tag">Multi-Image</span>
+          <span class="feature-tag">Variants</span>
+          <span class="feature-tag">SKU/Barcode</span>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon icon-rose">🗂️</div>
+        <h3>إدارة الفئات</h3>
+        <p>هرمية Parent/Child بدون حد، ترتيب Drag & Drop، أيقونات، صور، وتحكم كامل في العرض والحالة.</p>
+        <div class="feature-tags">
+          <span class="feature-tag">Hierarchical</span>
+          <span class="feature-tag">Drag & Drop</span>
+          <span class="feature-tag">Icons</span>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon icon-amber">🛒</div>
+        <h3>إدارة الطلبات</h3>
+        <p>عرض/بحث/تصفية الطلبات، تغيير الحالة مع تتبع تاريخ التغييرات، إدارة المدفوعات، وربط المرتجعات.</p>
+        <div class="feature-tags">
+          <span class="feature-tag">Status History</span>
+          <span class="feature-tag">Payment Mgmt</span>
+          <span class="feature-tag">Returns Link</span>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon icon-emerald">🖼️</div>
+        <h3>السلآيدر والبانرات</h3>
+        <p>سلآيدر الصفحة الرئيسية مع صور متعددة وترتيب، وبانرات بمواضع متعددة (وسط/جانب/أسفل/منبثق) مع تواريخ صلاحية.</p>
+        <div class="feature-tags">
+          <span class="feature-tag">Auto-Hide Mobile</span>
+          <span class="feature-tag">Expiry Dates</span>
+          <span class="feature-tag">4 Positions</span>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon icon-sky">✍️</div>
+        <h3>قوالب الإيميلات</h3>
+        <p>محرر Visual/HTML مع Toggle، 11 لوناً جاهزاً بأسماء عربية، 9 قوالب MJML جاهزة، ومعاينة في المتصفح.</p>
+        <div class="feature-tags">
+          <span class="feature-tag">WYSIWYG</span>
+          <span class="feature-tag">11 ألوان</span>
+          <span class="feature-tag">Preview</span>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon icon-indigo">🌐</div>
+        <h3>نظام الترجمة DB-Backed</h3>
+        <p>تعديل الترجمات من لوحة الإدارة بدون لمس الكود، استيراد/تصدير JSON، كاش بـ Redis، وسجل تدقيق كامل.</p>
+        <div class="feature-tags">
+          <span class="feature-tag">Import/Export</span>
+          <span class="feature-tag">Cache</span>
+          <span class="feature-tag">Audit Log</span>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon icon-violet">⚙️</div>
+        <h3>إعدادات الدفع الديناميكية</h3>
+        <p>اختيار البوابة النشطة (Kashier أو Paymob) من واجهة واحدة، معاينة الإعدادات، واختبار الاتصال — كل ذلك دون نشر جديد.</p>
+        <div class="feature-tags">
+          <span class="feature-tag">Runtime Config</span>
+          <span class="feature-tag">Encrypted Keys</span>
+          <span class="feature-tag">Test Mode</span>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon icon-rose">🧹</div>
+        <h3>مدير الكاش</h3>
+        <p>صفحة Filament مخصصة لمسح Response Cache / Application Cache / Blade Cache بنقرة واحدة — مع حوارات تأكيد.</p>
+        <div class="feature-tags">
+          <span class="feature-tag">Response Cache</span>
+          <span class="feature-tag">Blade Cache</span>
+          <span class="feature-tag">One Click</span>
+        </div>
+      </div>
+
+      <div class="feature-card">
+        <div class="feature-icon icon-amber">📝</div>
+        <h3>سجل النشاط والإيميلات</h3>
+        <p>Spatie Activitylog لتتبع جميع العمليات الحساسة، وسجل إيميلات كامل مع حالة كل رسالة (مُرسَل/مُسلَّم/مفتوح/نُقر/فشل).</p>
+        <div class="feature-tags">
+          <span class="feature-tag">Activity Log</span>
+          <span class="feature-tag">Email Logs</span>
+          <span class="feature-tag">Status Track</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== RBAC SECTION ===== -->
+<section style="background: rgba(255,255,255,.01);">
+  <div class="container">
+    <div class="text-center">
+      <span class="section-label">نظام الصلاحيات</span>
+      <h2 class="section-title">6 أدوار وظيفية — Zero Config</h2>
+      <p class="section-subtitle mx-auto">
+        كل دور يرى فقط ما يخصه تلقائياً. لا حاجة لضبط يدوي — اختر الدور وخصص صلاحياته بـ Toggle واحد.
+      </p>
+    </div>
+
+    <div class="roles-grid reveal">
+      <div class="role-card">
+        <div class="role-icon">👑</div>
+        <div class="role-name">Super Admin</div>
+        <div class="role-desc">صلاحية كاملة بدون قيود — يتجاوز جميع القيود</div>
+      </div>
+      <div class="role-card">
+        <div class="role-icon">🧑‍💼</div>
+        <div class="role-name">Manager</div>
+        <div class="role-desc">إدارة كاملة للمتجر والطلبات والمحتوى</div>
+      </div>
+      <div class="role-card">
+        <div class="role-icon">💼</div>
+        <div class="role-name">Sales</div>
+        <div class="role-desc">عرض وتعديل الطلبات والعملاء والمبيعات</div>
+      </div>
+      <div class="role-card">
+        <div class="role-icon">📦</div>
+        <div class="role-name">Warehouse</div>
+        <div class="role-desc">إدارة المخزون والمنتجات والمرتجعات</div>
+      </div>
+      <div class="role-card">
+        <div class="role-icon">🎧</div>
+        <div class="role-name">Customer Service</div>
+        <div class="role-desc">دعم العملاء وعرض الطلبات والمرتجعات</div>
+      </div>
+      <div class="role-card" style="border-color:rgba(124,58,237,.3);">
+        <div class="role-icon">✨</div>
+        <div class="role-name">Auto Discovery</div>
+        <div class="role-desc">Widgets جديدة تُكتشف تلقائياً بدون كود إضافي</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== INFLUENCER PORTAL ===== -->
+<section id="influencers">
+  <div class="container">
+    <div class="text-center">
+      <span class="section-label">بوابة المؤثرين</span>
+      <h2 class="section-title">نظام تسويق بالمؤثرين</h2>
+      <p class="section-subtitle mx-auto">
+        بوابة مخصصة للمؤثرين، منفصلة تماماً عن لوحة الإدارة، بكل الأدوات التي يحتاجها المؤثر لتتبع أرباحه وأداء حملاته.
+      </p>
+    </div>
+
+    <div class="portal-features reveal">
+      <div class="portal-item">
+        <div class="portal-item-icon">📊</div>
+        <h4>إحصائيات فورية</h4>
+        <p>الرصيد الحالي، العمولات المعلقة، إجمالي الأرباح، والمبيعات في لوحة واحدة واضحة.</p>
+      </div>
+      <div class="portal-item">
+        <div class="portal-item-icon">🎫</div>
+        <h4>أكواد الخصم</h4>
+        <p>عرض ونسخ كود الخصم الشخصي بنقرة واحدة مع إشعار Clipboard فوري.</p>
+      </div>
+      <div class="portal-item">
+        <div class="portal-item-icon">💰</div>
+        <h4>جدول العمولات</h4>
+        <p>عرض كامل للعمولات مع ألوان حالة: 🟡 Pending | 🟢 Approved | 🔵 Paid | 🔴 Rejected</p>
+      </div>
+      <div class="portal-item">
+        <div class="portal-item-icon">🏦</div>
+        <h4>طلبات الصرف</h4>
+        <p>طلب صرف الأرباح عبر بنك أو Vodafone Cash أو InstaPay مع رقم مرجعي.</p>
+      </div>
+      <div class="portal-item">
+        <div class="portal-item-icon">📱</div>
+        <h4>Responsive كامل</h4>
+        <p>Sidebar احترافية مع Overlay على الموبايل وBurger Menu — تجربة مثالية على كل جهاز.</p>
+      </div>
+      <div class="portal-item">
+        <div class="portal-item-icon">🌙</div>
+        <h4>Dark Mode</h4>
+        <p>دعم كامل لوضع الظلام مع أيقونات Phosphor وعناوين مترجمة عربي/إنجليزي.</p>
+      </div>
+    </div>
+
+    <div class="highlight-box reveal" style="margin-top:2rem;">
+      <h4 style="font-weight:700;margin-bottom:.75rem;">📋 دورة حياة المؤثر في النظام</h4>
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <h4>تقديم طلب مؤثر</h4>
+          <p>من صفحة "انضم كمؤثر" في المتجر — مع بيانات حسابات السوشيال ميديا وعدد المتابعين.</p>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <h4>مراجعة وقبول من الإدارة</h4>
+          <p>الإدارة تراجع الطلب وتحدد نسبة العمولة — إشعار بريدي تلقائي عند القبول أو الرفض.</p>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <h4>توليد كود الخصم</h4>
+          <p>كود خاص بكل مؤثر مع إعدادات خصم ونسبة عمولة مخصصة وحد استخدام.</p>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <h4>تسجيل العمولة تلقائياً</h4>
+          <p>عند كل طلب مدفوع باستخدام كود المؤثر — العمولة تُحسب وتُضاف للرصيد فوراً.</p>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <h4>طلب صرف الأرباح</h4>
+          <p>المؤثر يطلب صرف رصيده — الإدارة توافق وتحول المبلغ مع أرقام مرجعية.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PAYMENTS ===== -->
+<section id="payments" style="background: rgba(255,255,255,.01);">
+  <div class="container">
+    <div class="text-center">
+      <span class="section-label">بوابات الدفع</span>
+      <h2 class="section-title">كل طرق الدفع المصرية</h2>
+      <p class="section-subtitle mx-auto">
+        تكامل مع Kashier وPaymob مع دعم جميع طرق الدفع المتاحة في السوق المصري — اختر البوابة من الإدارة بنقرة واحدة.
+      </p>
+    </div>
+
+    <div class="payment-section reveal">
+      <table class="payment-table">
+        <thead>
+          <tr>
+            <th>طريقة الدفع</th>
+            <th><span class="badge-gateway badge-kashier">Kashier ✅</span></th>
+            <th><span class="badge-gateway badge-paymob">Paymob 🆕</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>💳 Visa / Mastercard</td>
+            <td><span class="check">✓</span></td>
+            <td><span class="check">✓</span></td>
+          </tr>
+          <tr>
+            <td>🏦 Meeza (ميزة)</td>
+            <td><span class="check">✓</span></td>
+            <td><span class="check">✓</span></td>
+          </tr>
+          <tr>
+            <td>📱 Vodafone Cash</td>
+            <td><span class="check">✓</span></td>
+            <td><span class="check">✓</span></td>
+          </tr>
+          <tr>
+            <td>💸 InstaPay</td>
+            <td><span class="cross">—</span></td>
+            <td><span class="check">✓</span></td>
+          </tr>
+          <tr>
+            <td>🏪 Fawry / Kiosk</td>
+            <td><span class="cross">—</span></td>
+            <td><span class="check">✓</span></td>
+          </tr>
+          <tr>
+            <td>💼 ValU (تقسيط)</td>
+            <td><span class="check">✓</span></td>
+            <td><span class="check">✓</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="features-grid reveal" style="margin-top:2rem;">
+      <div class="feature-card">
+        <div class="feature-icon icon-emerald">🔄</div>
+        <h3>تبديل البوابة فوراً</h3>
+        <p>اختر البوابة النشطة من إعدادات الإدارة بدون لمس الكود أو إعادة نشر — التأثير فوري.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon icon-sky">🔐</div>
+        <h3>أمان الإعدادات</h3>
+        <p>مفاتيح API مشفرة في قاعدة البيانات، HMAC Validation لـ Paymob، وCallbacks منفصلة لكل بوابة.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon icon-amber">↩️</div>
+        <h3>استرجاع المبالغ</h3>
+        <p>دعم Refund كامل وجزئي مدمج مع نظام المرتجعات — استرجاع العمولة تلقائياً.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== PERFORMANCE ===== -->
+<section id="performance">
+  <div class="container">
+    <div class="text-center">
+      <span class="section-label">الأداء والسرعة</span>
+      <h2 class="section-title">PageSpeed 90+ — مضمون</h2>
+      <p class="section-subtitle mx-auto">
+        كل تحسين في النظام موثق ومختبر. من LCP حتى Accessibility — Violet يأخذ الأداء على محمل الجد.
+      </p>
+    </div>
+
+    <div class="perf-metrics reveal">
+      <div class="perf-metric">
+        <div class="perf-score">90+</div>
+        <div class="perf-label">Performance Score</div>
+      </div>
+      <div class="perf-metric">
+        <div class="perf-score" style="background: linear-gradient(135deg, var(--sky), var(--emerald)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">&lt;2.5s</div>
+        <div class="perf-label">LCP (من 7.7s)</div>
+      </div>
+      <div class="perf-metric">
+        <div class="perf-score" style="background: linear-gradient(135deg, var(--amber), var(--rose)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">&lt;50ms</div>
+        <div class="perf-label">Total Blocking Time</div>
+      </div>
+      <div class="perf-metric">
+        <div class="perf-score" style="background: linear-gradient(135deg, var(--indigo), var(--violet-light)); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">95+</div>
+        <div class="perf-label">Accessibility Score</div>
+      </div>
+    </div>
+
+    <div class="perf-items reveal">
+      <div class="perf-item">
+        <span class="perf-badge">WebP</span>
+        <div class="perf-item-text">تحويل تلقائي للصور إلى WebP بجودة 70 (بطاقات) و95 (معرض)  — توفير 50-70% من حجم الصور</div>
+      </div>
+      <div class="perf-item">
+        <span class="perf-badge">LCP</span>
+        <div class="perf-item-text">fetchpriority="high" لأول 4 منتجات فوق الطيّ — تسريع أهم عنصر في الصفحة</div>
+      </div>
+      <div class="perf-item">
+        <span class="perf-badge">JS</span>
+        <div class="perf-item-text">Facebook Pixel بتأخير ذكي (Interaction + 4s fallback) — صفر تأثير على TBT</div>
+      </div>
+      <div class="perf-item">
+        <span class="perf-badge">CSS</span>
+        <div class="perf-item-text">Font Awesome بـ media="print" onload — تحميل غير مُعيق للـ CSS</div>
+      </div>
+      <div class="perf-item">
+        <span class="perf-badge">Bundle</span>
+        <div class="perf-item-text">Vite target: es2020 — إلغاء Babel polyfills وتوفير 8.6KB من app.js</div>
+      </div>
+      <div class="perf-item">
+        <span class="perf-badge">Cache</span>
+        <div class="perf-item-text">CSS/JS + Fonts → 1 year Cache-Control مع Vite content hashes</div>
+      </div>
+      <div class="perf-item">
+        <span class="perf-badge">A11y</span>
+        <div class="perf-item-text">6 أزرار أيقونية مع aria-label + touch targets 44px لمعدل Accessibility 95+</div>
+      </div>
+      <div class="perf-item">
+        <span class="perf-badge">RTL</span>
+        <div class="perf-item-text">مرآة كاملة للـ Layout في RTL مع Tailwind CSS — sidebar يمين، أيقونات معكوسة</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== DATABASE ===== -->
+<section style="background: rgba(255,255,255,.01);">
+  <div class="container">
+    <div class="text-center">
+      <span class="section-label">قاعدة البيانات</span>
+      <h2 class="section-title">31 جدولاً — هيكل محكم</h2>
+      <p class="section-subtitle mx-auto">
+        قاعدة بيانات مُصممة بعناية مع Foreign Keys، Soft Deletes، Indexes محسّنة، وJSON Fields للبيانات المرنة.
+      </p>
+    </div>
+
+    <div class="stats-grid reveal" style="margin-bottom:2rem;">
+      <div class="stat-card">
+        <div class="stat-number">6</div>
+        <div class="stat-label">جداول المستخدمين والصلاحيات</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">6</div>
+        <div class="stat-label">جداول المنتجات</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">8</div>
+        <div class="stat-label">جداول الطلبات والمرتجعات</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">6</div>
+        <div class="stat-label">جداول المؤثرين</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-number">5</div>
+        <div class="stat-label">جداول الموقع الجغرافي</div>
+      </div>
+    </div>
+
+    <div class="db-groups reveal">
+      <div class="db-group">
+        <div class="db-group-title" style="color: var(--violet-light);">👥 المستخدمون</div>
+        <ul>
+          <li>users (Staff/Admin)</li>
+          <li>customers (منفصل — Guard مستقل)</li>
+          <li>roles + permissions</li>
+          <li>model_has_roles</li>
+          <li>model_has_permissions</li>
+          <li>role_has_permissions</li>
+        </ul>
+      </div>
+      <div class="db-group">
+        <div class="db-group-title" style="color: var(--rose);">📦 المنتجات</div>
+        <ul>
+          <li>categories (هرمية)</li>
+          <li>products</li>
+          <li>product_images</li>
+          <li>product_variants</li>
+          <li>product_reviews</li>
+          <li>product_views</li>
+        </ul>
+      </div>
+      <div class="db-group">
+        <div class="db-group-title" style="color: var(--emerald);">🛒 الطلبات</div>
+        <ul>
+          <li>orders</li>
+          <li>order_items</li>
+          <li>shipping_addresses</li>
+          <li>order_status_history</li>
+          <li>order_returns</li>
+          <li>order_return_items</li>
+          <li>return_policies</li>
+          <li>stock_movements</li>
+        </ul>
+      </div>
+      <div class="db-group">
+        <div class="db-group-title" style="color: var(--amber);">🌟 المؤثرون</div>
+        <ul>
+          <li>influencers</li>
+          <li>influencer_applications</li>
+          <li>discount_codes</li>
+          <li>code_usages</li>
+          <li>influencer_commissions</li>
+          <li>commission_payouts</li>
+        </ul>
+      </div>
+      <div class="db-group">
+        <div class="db-group-title" style="color: var(--sky);">🗺️ الجغرافيا</div>
+        <ul>
+          <li>countries</li>
+          <li>governorates (27 محافظة)</li>
+          <li>cities (207 مدينة)</li>
+          <li>newsletter_subscriptions</li>
+          <li>email_campaigns</li>
+        </ul>
+      </div>
+      <div class="db-group">
+        <div class="db-group-title" style="color: var(--indigo);">➕ إضافية</div>
+        <ul>
+          <li>carts + cart_items</li>
+          <li>wishlists</li>
+          <li>notifications</li>
+          <li>settings</li>
+          <li>pages + blog_posts</li>
+          <li>sliders + banners</li>
+          <li>email_templates + email_logs</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== EMAIL SYSTEM ===== -->
+<section>
+  <div class="container">
+    <div class="text-center">
+      <span class="section-label">نظام الإيميلات</span>
+      <h2 class="section-title">9 قوالب جاهزة — أمان 100%</h2>
+      <p class="section-subtitle mx-auto">
+        إرسال فوري بدون Queue، لا خوادم خارجية، لا API مشبوه — بيانات عملائك تبقى عندك فقط.
+      </p>
+    </div>
+
+    <div class="email-templates reveal">
+      <div class="email-template order">
+        <h4>تأكيد الطلب</h4>
+        <p>تفاصيل الطلب والمنتجات والعنوان</p>
+        <span class="email-type-badge badge-order">Order</span>
+      </div>
+      <div class="email-template order">
+        <h4>تحديث حالة الطلب</h4>
+        <p>إشعار بتغيير حالة الشحن</p>
+        <span class="email-type-badge badge-order">Order</span>
+      </div>
+      <div class="email-template order">
+        <h4>إشعار طلب جديد</h4>
+        <p>للإدارة عند ورود طلب جديد</p>
+        <span class="email-type-badge badge-order">Admin</span>
+      </div>
+      <div class="email-template auth">
+        <h4>رسالة ترحيب</h4>
+        <p>للعميل عند إنشاء حساب جديد</p>
+        <span class="email-type-badge badge-auth">Auth</span>
+      </div>
+      <div class="email-template auth">
+        <h4>استعادة كلمة المرور</h4>
+        <p>رابط إعادة تعيين آمن</p>
+        <span class="email-type-badge badge-auth">Auth</span>
+      </div>
+      <div class="email-template influ">
+        <h4>قبول المؤثر</h4>
+        <p>إشعار قبول طلب الانضمام</p>
+        <span class="email-type-badge badge-influ">Influencer</span>
+      </div>
+      <div class="email-template influ">
+        <h4>رفض المؤثر</h4>
+        <p>إشعار رفض مع سبب مخصص</p>
+        <span class="email-type-badge badge-influ">Influencer</span>
+      </div>
+      <div class="email-template influ">
+        <h4>إشعار عمولة</h4>
+        <p>عند تسجيل عمولة جديدة</p>
+        <span class="email-type-badge badge-influ">Influencer</span>
+      </div>
+      <div class="email-template influ">
+        <h4>إشعار صرف أرباح</h4>
+        <p>عند الموافقة على طلب الصرف</p>
+        <span class="email-type-badge badge-influ">Influencer</span>
+      </div>
+    </div>
+
+    <div class="highlight-box success reveal" style="margin-top:2rem;">
+      <h4 style="font-weight:700;margin-bottom:.5rem;">🔒 مبدأ الأمان الأول</h4>
+      <p style="color:var(--text-secondary);font-size:.93rem;">
+        ✓ لا بيانات تخرج لأي طرف ثالث &nbsp;•&nbsp; ✓ القوالب محلية 100% &nbsp;•&nbsp; 
+        ✓ إرسال عبر SMTP الخاص بك فقط &nbsp;•&nbsp; ✓ لا MJML API خارجي &nbsp;•&nbsp; 
+        ✓ لا Node.js على السيرفر
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== SECURITY ===== -->
+<section id="security" style="background: rgba(255,255,255,.01);">
+  <div class="container">
+    <div class="text-center">
+      <span class="section-label">الأمان</span>
+      <h2 class="section-title">حماية متعددة الطبقات</h2>
+    </div>
+
+    <div class="security-grid reveal">
+      <div class="security-item">
+        <div class="security-icon">🛡️</div>
+        <div>
+          <h4>CSRF Protection</h4>
+          <p>مُفعَّل على جميع النماذج والطلبات — لا مجال لهجمات التزوير</p>
+        </div>
+      </div>
+      <div class="security-item">
+        <div class="security-icon">🔑</div>
+        <div>
+          <h4>RBAC محكم</h4>
+          <p>Spatie Laravel Permission v6 — 6 أدوار مع صلاحيات مخصصة لكل مورد</p>
+        </div>
+      </div>
+      <div class="security-item">
+        <div class="security-icon">🔐</div>
+        <div>
+          <h4>Guard مستقل للعملاء</h4>
+          <p>جدول customers منفصل عن users — لا خلط بين بيانات الموظفين والعملاء</p>
+        </div>
+      </div>
+      <div class="security-item">
+        <div class="security-icon">🔒</div>
+        <div>
+          <h4>تشفير مفاتيح الدفع</h4>
+          <p>API Keys مشفرة في قاعدة البيانات — لا مفاتيح في الكود أو ملفات .env فقط</p>
+        </div>
+      </div>
+      <div class="security-item">
+        <div class="security-icon">📋</div>
+        <div>
+          <h4>Audit Trail كامل</h4>
+          <p>Spatie Activitylog يسجل كل العمليات الحساسة مع من قام بها ومتى</p>
+        </div>
+      </div>
+      <div class="security-item">
+        <div class="security-icon">🗑️</div>
+        <div>
+          <h4>Soft Deletes</h4>
+          <p>المستخدمون، المنتجات، الفئات، والمقالات — حذف آمن مع إمكانية الاستعادة</p>
+        </div>
+      </div>
+      <div class="security-item">
+        <div class="security-icon">🌐</div>
+        <div>
+          <h4>Nginx Security Headers</h4>
+          <p>X-Frame-Options، X-Content-Type، HSTS، Referrer-Policy جاهزة في nginx.conf</p>
+        </div>
+      </div>
+      <div class="security-item">
+        <div class="security-icon">✅</div>
+        <div>
+          <h4>Input Validation</h4>
+          <p>Form Requests محكمة على جميع النماذج — حماية من XSS وSQL Injection</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FAQ ===== -->
+<section>
+  <div class="container">
+    <div class="text-center">
+      <span class="section-label">الأسئلة الشائعة</span>
+      <h2 class="section-title">كل ما تريد معرفته</h2>
+    </div>
+
+    <div class="accordion reveal" style="max-width:800px; margin: 0 auto;">
+      <div class="accordion-item open" id="faq1">
+        <div class="accordion-header" onclick="toggleAccordion('faq1')">
+          <span>ما الفرق بين Violet ومنصات التجارة الإلكترونية الأخرى؟</span>
+          <span class="accordion-arrow">▾</span>
+        </div>
+        <div class="accordion-body">
+          <div class="accordion-body-inner">
+            Violet مبني خصيصاً للسوق العربي والمصري على وجه الخصوص. يدعم جميع بوابات الدفع المصرية (Kashier, Paymob, Vodafone Cash, InstaPay, Fawry)، ومبني بـ RTL أولاً، مع نظام مؤثرين متكامل نادر في المنصات الجاهزة. الكود مفتوح تماماً لأي تعديل مستقبلي بدون قيود ترخيص.
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item" id="faq2">
+        <div class="accordion-header" onclick="toggleAccordion('faq2')">
+          <span>هل يحتاج النظام إلى خادم خاص؟</span>
+          <span class="accordion-arrow">▾</span>
+        </div>
+        <div class="accordion-body">
+          <div class="accordion-body-inner">
+            لا — يعمل على أي Shared Hosting يدعم PHP 8.2+ وMySQL 8. للأداء الأمثل نوصي بـ VPS يدعم Redis وNginx. النظام يأتي مع إعدادات Apache و.htaccess جاهزة، وملف nginx.conf.example للمواقع الإنتاجية.
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item" id="faq3">
+        <div class="accordion-header" onclick="toggleAccordion('faq3')">
+          <span>هل يدعم النظام اللغة الإنجليزية أيضاً؟</span>
+          <span class="accordion-arrow">▾</span>
+        </div>
+        <div class="accordion-body">
+          <div class="accordion-body-inner">
+            نعم — النظام ثنائي اللغة بالكامل (عربي/إنجليزي) مع تبديل فوري من الواجهة. نظام الترجمة DB-Backed يتيح للمسؤول تعديل أي نص من لوحة الإدارة بدون لمس الكود، مع كاش ذكي وكشف تلقائي للغة المفضلة.
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item" id="faq4">
+        <div class="accordion-header" onclick="toggleAccordion('faq4')">
+          <span>كم يستغرق تثبيت النظام وإطلاقه؟</span>
+          <span class="accordion-arrow">▾</span>
+        </div>
+        <div class="accordion-body">
+          <div class="accordion-body-inner">
+            مع الإعداد الصحيح يمكن إطلاق المتجر في ساعات. قائمة النشر تشمل: git pull، composer install، php artisan migrate، npm run build. البيانات الجغرافية (27 محافظة و207 مدينة) تُحمّل بـ Seeder واحد. بوابات الدفع تُعدّ من لوحة الإدارة مباشرة.
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item" id="faq5">
+        <div class="accordion-header" onclick="toggleAccordion('faq5')">
+          <span>ما طبيعة نظام المؤثرين؟ هل هو مدمج كاملاً؟</span>
+          <span class="accordion-arrow">▾</span>
+        </div>
+        <div class="accordion-body">
+          <div class="accordion-body-inner">
+            نعم — نظام مؤثرين متكامل من الألف للياء: تقديم طلب، مراجعة وقبول/رفض، إنشاء أكواد خصم مخصصة، تسجيل عمولات تلقائي عند كل طلب مدفوع، طلبات صرف الأرباح (بنك/Vodafone Cash/InstaPay)، ولوحة تحكم مستقلة للمؤثر يرى فيها كل إحصائياته.
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-item" id="faq6">
+        <div class="accordion-header" onclick="toggleAccordion('faq6')">
+          <span>هل يمكن التخصيص والإضافة عليه؟</span>
+          <span class="accordion-arrow">▾</span>
+        </div>
+        <div class="accordion-body">
+          <div class="accordion-body-inner">
+            بالتأكيد — Laravel مشهور بمرونته. النظام مبني بمعمارية Service Layer فاصلة بين منطق الأعمال والعرض. يمكن إضافة بوابات دفع جديدة عبر PaymentGatewayInterface، إضافة Filament Resources بسطور قليلة، وتوسيع نظام الترجمة لأي لغة.
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CTA ===== -->
+<section id="cta" style="padding: 4rem 2rem;">
+  <div class="container">
+    <div class="cta-section">
+      <h2>جاهز لإطلاق متجرك الإلكتروني؟</h2>
+      <p>
+        احصل على منصة تجارة إلكترونية عربية متكاملة، مبنية بأحدث التقنيات،<br/>
+        جاهزة للإطلاق الفوري مع دعم كامل لكل احتياجات السوق المصري.
+      </p>
+      <div class="cta-actions">
+        <a class="btn-primary" href="https://test.flowerviolet.com" target="_blank" rel="noopener">
+          🚀 شاهد العرض التجريبي
+        </a>
+        <a class="btn-secondary" href="mailto:contact@flowerviolet.com">
+          📧 تواصل معنا الآن
+        </a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FOOTER ===== -->
+<footer>
+  <span class="footer-logo">🌸 Reyada E-Commerce</span>
+  <p>منصة التجارة الإلكترونية العربية المتكاملة</p>
+  <p style="margin-top:.5rem;">مبني بـ ❤️ للسوق العربي — يونيو 2026</p>
+  <div class="footer-tech">
+    <span class="tech-pill">Laravel 12.37</span>
+    <span class="tech-pill">PHP 8.3</span>
+    <span class="tech-pill">Filament v4.2</span>
+    <span class="tech-pill">Livewire v3.6</span>
+    <span class="tech-pill">Alpine.js 3.13</span>
+    <span class="tech-pill">Tailwind CSS 4</span>
+    <span class="tech-pill">MySQL 8</span>
+    <span class="tech-pill">Vite (ES2020)</span>
+  </div>
+  <p style="margin-top:1.5rem; font-size:.8rem;">
+    © 2026 Reyada E-Commerce Platform — جميع الحقوق محفوظة
+  </p>
+</footer>
+
+<!-- ===== SCRIPTS ===== -->
+<script>
+  // Accordion
+  function toggleAccordion(id) {
+    const item = document.getElementById(id);
+    const isOpen = item.classList.contains('open');
+    document.querySelectorAll('.accordion-item').forEach(el => el.classList.remove('open'));
+    if (!isOpen) item.classList.add('open');
+  }
+
+  // Scroll Reveal
+  const revealObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
+
+  document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+  // Smooth active nav
+  const sections = document.querySelectorAll('section[id]');
+  const navLinks = document.querySelectorAll('.nav-links a');
+  window.addEventListener('scroll', () => {
+    let current = '';
+    sections.forEach(section => {
+      if (window.scrollY >= section.offsetTop - 120) {
+        current = section.getAttribute('id');
+      }
+    });
+    navLinks.forEach(link => {
+      link.style.color = link.getAttribute('href') === `#${current}`
+        ? 'var(--violet-light)' : '';
+    });
+  });
+</script>
+
+</body>
+</html>

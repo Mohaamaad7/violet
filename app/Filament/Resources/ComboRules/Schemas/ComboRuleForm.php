@@ -32,12 +32,28 @@ class ComboRuleForm
                         Toggle::make('is_active')
                             ->label('مفعل')
                             ->default(true),
+                        Select::make('discount_type')
+                            ->label('نوع الخصم')
+                            ->options([
+                                'percentage' => 'نسبة مئوية',
+                                'fixed_price' => 'سعر ثابت للكومبو',
+                            ])
+                            ->default('percentage')
+                            ->required()
+                            ->live(),
                         TextInput::make('discount_percentage')
                             ->label('نسبة الخصم (%)')
                             ->numeric()
-                            ->required()
                             ->minValue(1)
-                            ->maxValue(100),
+                            ->maxValue(100)
+                            ->required(fn ($get) => $get('discount_type') === 'percentage')
+                            ->visible(fn ($get) => $get('discount_type') === 'percentage'),
+                        TextInput::make('fixed_price')
+                            ->label('سعر الكومبو الثابت')
+                            ->numeric()
+                            ->minValue(0)
+                            ->required(fn ($get) => $get('discount_type') === 'fixed_price')
+                            ->visible(fn ($get) => $get('discount_type') === 'fixed_price'),
                         TextInput::make('max_uses_per_user')
                             ->label('الحد الأقصى للاستخدام لكل مستخدم')
                             ->numeric()
