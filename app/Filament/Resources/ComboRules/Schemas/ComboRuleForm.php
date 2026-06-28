@@ -29,6 +29,7 @@ class ComboRuleForm
                         FileUpload::make('image_path')
                             ->label('صورة العرض (اختياري)')
                             ->image()
+                            ->disk('public')
                             ->directory('combo-rules')
                             ->maxSize(2048),
                         Textarea::make('description')

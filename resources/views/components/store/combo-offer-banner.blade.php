@@ -32,7 +32,7 @@
                     <!-- Image Area -->
                     <div class="w-2/5 relative h-full flex items-center justify-center">
                         @if($rule->image_path)
-                            <img src="{{ Storage::url($rule->image_path) }}" alt="{{ $rule->name }}" class="max-h-32 object-contain mix-blend-multiply drop-shadow-md">
+                            <img src="{{ asset('storage/' . $rule->image_path) }}" alt="{{ $rule->name }}" class="max-h-32 object-contain mix-blend-multiply drop-shadow-md">
                         @else
                             <img src="https://placehold.co/200x250/e9d5ff/6b21a8?text={{ urlencode($rule->name) }}" alt="{{ $rule->name }}" class="max-h-32 object-contain mix-blend-multiply drop-shadow-md">
                         @endif
