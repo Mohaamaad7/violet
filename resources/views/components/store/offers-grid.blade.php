@@ -16,21 +16,19 @@
          x-transition:enter="transition ease-out duration-300"
          x-transition:enter-start="opacity-0 transform translate-y-4"
          x-transition:enter-end="opacity-100 transform translate-y-0"
-         class="grid gap-6 transition-all duration-500" 
-         :style="`grid-template-columns: repeat(${isMobile ? 1 : Math.min(visibleOffers.length, 3)}, 1fr)`"
-         @resize.window="checkMobile()">
+         class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 justify-center transition-all duration-500">
         
         <template x-for="offer in visibleOffers" :key="offer.id">
             {{-- Vertical Offer Card --}}
-            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col group">
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col group max-w-sm mx-auto w-full">
                 {{-- Image Top --}}
                 <div class="flex justify-center pt-6 pb-2 relative">
                     <div class="relative w-40 h-40 md:w-48 md:h-48 rounded-2xl overflow-hidden shadow-sm border border-gray-100 bg-gray-50">
                         <img :src="offer.image" :alt="offer.title" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" onerror="this.onerror=null; this.src='https://placehold.co/400x400/e9d5ff/6b21a8?text=' + encodeURIComponent(offer.title)">
                     </div>
                     
-                    <div x-show="offer.discount_percentage" class="absolute top-4 right-4 bg-red-500 text-white font-black px-3 py-1.5 rounded-lg text-sm shadow-md z-10">
-                        <span x-text="'-' + offer.discount_percentage + '%'"></span>
+                    <div x-show="offer.discount_percentage || offer.offer_price" class="absolute top-4 right-4 bg-red-500 text-white font-black px-3 py-1.5 rounded-lg text-sm shadow-md z-10 flex flex-col items-center leading-none">
+                        <span x-text="offer.discount_percentage ? '-' + offer.discount_percentage + '%' : offer.offer_price + ' ' + offer.currency"></span>
                     </div>
                 </div>
                 
