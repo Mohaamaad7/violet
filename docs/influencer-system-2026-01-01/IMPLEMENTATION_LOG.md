@@ -9,20 +9,20 @@
 
 هذا السجل يتم تحديثه أثناء التنفيذ.
 
-### المرحلة 1: إصلاح Models
+### المرحلة 1: إصلاح Models ✅
 
 | الملف | التعديل | الحالة |
 |-------|---------|--------|
-| `app/Models/InfluencerApplication.php` | تحديث fillable + casts | ⏳ |
-| `app/Models/CommissionPayout.php` | تحديث fillable + casts + relations | ⏳ |
-| `app/Models/InfluencerCommission.php` | تغيير order_total → order_amount | ⏳ |
+| `app/Models/InfluencerApplication.php` | تحديث fillable + casts | ✅ |
+| `app/Models/CommissionPayout.php` | تحديث fillable + casts + relations | ✅ |
+| `app/Models/InfluencerCommission.php` | تغيير order_total → order_amount | ✅ |
 
-### المرحلة 2: الترجمات
+### المرحلة 2: الترجمات ✅
 
 | الملف | التعديل | الحالة |
 |-------|---------|--------|
-| `lang/ar/admin.php` | إضافة ترجمات المؤثرين | ⏳ |
-| `lang/en/admin.php` | إضافة ترجمات المؤثرين | ⏳ |
+| `lang/ar/admin.php` | إضافة ترجمات المؤثرين | ✅ |
+| `lang/en/admin.php` | إضافة ترجمات المؤثرين | ✅ |
 
 ### المرحلة 3: Filament Resources
 

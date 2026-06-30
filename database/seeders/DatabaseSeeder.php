@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             AdminUserSeeder::class,
             // SettingsSeeder::class, // Uncomment if you have a settings seeder
             // DemoDataSeeder::class, // Disabled for clean production install
+            ComboRuleSeeder::class,
         ]);
     }
 }

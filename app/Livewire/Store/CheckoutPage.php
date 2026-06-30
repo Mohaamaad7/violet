@@ -58,6 +58,11 @@ class CheckoutPage extends Component
     public $couponDiscount = 0;
     public $couponError = '';
 
+    // Combo Discount
+    public $comboDiscountAmount = 0;
+    public $comboRuleId = null;
+    public $comboRuleName = '';
+
     // Cart Data
     public $cartItems = [];
     public $subtotal = 0;
@@ -311,12 +316,28 @@ class CheckoutPage extends Component
 
             $this->subtotal = collect($this->cartItems)->sum('subtotal');
             $this->calculateShippingCost(); // Dynamic shipping calculation
+
+            // Load combo discount
+            $comboData = $this->cartService->getComboDiscount($this->getCustomerId());
+            if ($comboData) {
+                $this->comboRuleId = $comboData['rule_id'];
+                $this->comboRuleName = $comboData['rule_name'];
+                $this->comboDiscountAmount = $comboData['discount_amount'];
+            } else {
+                $this->comboRuleId = null;
+                $this->comboRuleName = '';
+                $this->comboDiscountAmount = 0;
+            }
+
             $this->recalculateTotal();
         } else {
             $this->cartItems = [];
             $this->subtotal = 0;
             $this->shippingCost = 0;
             $this->total = 0;
+            $this->comboRuleId = null;
+            $this->comboRuleName = '';
+            $this->comboDiscountAmount = 0;
         }
     }
 
@@ -325,7 +346,7 @@ class CheckoutPage extends Component
      */
     protected function recalculateTotal(): void
     {
-        $this->total = $this->subtotal + $this->shippingCost - $this->couponDiscount;
+        $this->total = $this->subtotal + $this->shippingCost - $this->couponDiscount - $this->comboDiscountAmount;
     }
 
     /**
@@ -677,6 +698,8 @@ class CheckoutPage extends Component
                     'shipping_cost'            => $this->baseShippingCost,       // Original geographic cost
                     'shipping_discount_amount' => $this->shippingDiscountAmount,  // Auto-discount (new field)
                     'discount_amount'          => $this->couponDiscount,          // Coupon discount only
+                    'combo_rule_id'            => $this->comboRuleId,
+                    'combo_discount_amount'    => $this->comboDiscountAmount,
                     'tax_amount'               => 0,
                     'total'                    => $this->total,
                 ]);
@@ -728,6 +751,15 @@ class CheckoutPage extends Component
                 $finalOrderNumber = "VLT-{$date}-{$time}-{$orderId}";
 
                 $order->update(['order_number' => $finalOrderNumber]);
+
+                // Record combo usage if any
+                if ($this->comboRuleId) {
+                    app(\App\Services\ComboDiscountService::class)->recordUsage(
+                        $this->comboRuleId,
+                        $order->id,
+                        $this->getCustomerId()
+                    );
+                }
 
                 // Clear cart session cookie for guests
                 if (!$this->getCustomer()) {

@@ -457,4 +457,22 @@ class CartService
 
         return $quantity <= $maxStock;
     }
+
+    /**
+     * Get combo discount amount for the current cart
+     * 
+     * @param int|null $customerId
+     * @return array|null Returns ['rule_id' => int, 'discount_amount' => float, 'rule_name' => string] or null
+     */
+    public function getComboDiscount(?int $customerId = null): ?array
+    {
+        $cart = $this->getCart();
+
+        if (!$cart || $cart->items->isEmpty()) {
+            return null;
+        }
+
+        $comboService = app(ComboDiscountService::class);
+        return $comboService->calculateDiscount($cart->items, $customerId);
+    }
 }

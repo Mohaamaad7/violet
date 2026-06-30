@@ -238,6 +238,14 @@ class ReturnService
 
             $return->order->update(['return_status' => 'completed']);
 
+            // Reverse combo discount usage if order had a combo
+            if ($return->order->combo_rule_id) {
+                app(\App\Services\ComboDiscountService::class)->decrementUsage(
+                    $return->order->combo_rule_id,
+                    $return->order->id
+                );
+            }
+
             // Send email notification
             try {
                 $this->emailService->sendReturnCompleted($return->fresh());

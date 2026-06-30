@@ -5,6 +5,7 @@ namespace App\Livewire\Store;
 use App\Models\Setting;
 use App\Services\CartService;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use Livewire\Attributes\On;
 
@@ -47,6 +48,11 @@ class CartPage extends Component
      * Total amount
      */
     public float $total = 0;
+
+    // Combo discount state
+    public float $comboDiscountAmount = 0;
+    public ?int $comboRuleId = null;
+    public string $comboRuleName = '';
 
     // Shipping discount state (for progress bar display)
     public bool  $discountEnabled    = false;
@@ -211,6 +217,19 @@ class CartPage extends Component
         $this->shippingCost = 0;
         $this->taxAmount    = 0;
         $this->total        = $this->subtotal;
+
+        // Combo discount calculation
+        $comboData = $this->cartService->getComboDiscount(Auth::guard('customer')->id());
+        if ($comboData) {
+            $this->comboRuleId = $comboData['rule_id'];
+            $this->comboRuleName = $comboData['rule_name'];
+            $this->comboDiscountAmount = $comboData['discount_amount'];
+            $this->total -= $this->comboDiscountAmount;
+        } else {
+            $this->comboRuleId = null;
+            $this->comboRuleName = '';
+            $this->comboDiscountAmount = 0;
+        }
 
         // Load discount config for the progress bar (read-only, no calculation)
         $config = $this->getShippingDiscountConfig();

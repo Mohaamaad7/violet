@@ -226,6 +226,7 @@ class EmailService
             'order_subtotal' => number_format($order->subtotal, 2) . ' ج.م',
             'order_shipping' => number_format($order->shipping_cost, 2) . ' ج.م',
             'order_discount' => number_format($order->discount_amount, 2) . ' ج.م',
+            'combo_discount' => number_format($order->combo_discount_amount, 2) . ' ج.م',
             'order_date' => $order->created_at->format('Y/m/d'),
             'order_items_count' => (string) $order->items->count(),
             'user_name' => $order->customer?->name ?? $order->guest_name,

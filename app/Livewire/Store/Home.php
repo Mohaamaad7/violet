@@ -37,11 +37,34 @@ class Home extends Component
             ->take(6)
             ->get();
 
+        $offers = collect();
+
+        $offers = collect();
+
+        // 1. Combo Rules (Only those marked for homepage)
+        $combos = \App\Models\ComboRule::active()->where('show_on_homepage', true)->ordered()->get()->map(function ($combo) {
+            return [
+                'id' => 'combo_' . $combo->id,
+                'type' => 'combo',
+                'title' => $combo->name,
+                'description' => $combo->description ?? 'عرض كومبو مميز',
+                'image' => $combo->image_path ? asset('storage/' . $combo->image_path) : 'https://placehold.co/400x400/e9d5ff/6b21a8?text=' . urlencode($combo->name),
+                'original_price' => null,
+                'offer_price' => $combo->discount_type === 'fixed' ? $combo->fixed_price : null,
+                'discount_percentage' => $combo->discount_type === 'percentage' ? $combo->discount_percentage : null,
+                'currency' => 'EGP',
+                'is_active' => $combo->is_active,
+                'valid_until' => $combo->ends_at,
+            ];
+        });
+        $offers = $offers->merge($combos);
+
         return view('livewire.store.home', [
             'featuredProducts' => $featuredProducts,
             'onSaleProducts' => $onSaleProducts,
             'newArrivals' => $newArrivals,
             'categories' => $categories,
+            'unifiedOffers' => $offers,
         ])->layout('layouts.store');
     }
 }

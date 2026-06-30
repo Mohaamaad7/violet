@@ -146,5 +146,14 @@
   - `tests/Feature/HeroSliderTest.php`: Pre-existing SQLite migration issue (unrelated).
   - `tests/Feature/LcpImageTest.php` **(NEW)**: Verifies first product card uses `fetchpriority="high"`.
 
+### Center Combo Discount Cards on Homepage (2026-06-28)
+- **Issue**: Combo discount cards in the "عروض الكومبو المميزة" section on the homepage were left-aligned when fewer cards existed than grid columns. Tailwind's `justify-center` had no effect with `1fr` grid tracks since they always fill the container width. Also needed 2-column portrait mobile matching the New Arrivals pattern.
+- **Solution**:
+  - `resources/views/components/store/offers-grid.blade.php`: Hybrid grid+flex approach —
+    Container uses `grid grid-cols-2` for exact 2-column portrait mobile, then switches to `md:flex md:flex-wrap md:justify-center` at 768px+ so odd-card counts stay centered on larger screens.
+    Card items use `w-full` in grid mode, then `md:flex-1 md:min-w-[280px] md:max-w-sm` in flex mode.
+  - Mirrors the New Arrivals section's `grid-cols-2` portrait pattern while preserving the centering fix from the previous iteration.
+- **Tests**: No test existed for offers-grid layout; all existing tests pre-date this change and are unrelated.
+
 ## Deprecated Code
 - `mobile_image_path` field in Slider model/form/blade — replaced by auto-hide on mobile approach. Column remains in database but is no longer used.

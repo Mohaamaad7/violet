@@ -151,6 +151,15 @@ class OrderService
 
             $order->update(['order_number' => $finalOrderNumber]);
 
+            // Record combo usage if applicable
+            if (!empty($data['combo_rule_id'])) {
+                app(\App\Services\ComboDiscountService::class)->recordUsage(
+                    $data['combo_rule_id'],
+                    $order->id,
+                    $data['customer_id'] ?? null
+                );
+            }
+
             return $order->fresh();
         });
     }
