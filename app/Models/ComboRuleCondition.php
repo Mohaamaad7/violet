@@ -12,27 +12,29 @@ class ComboRuleCondition extends Model
 
     protected $fillable = [
         'combo_rule_id',
+        'condition_type',
         'category_id',
+        'product_id',
         'required_quantity',
     ];
 
     protected $casts = [
+        'condition_type' => 'string',
         'required_quantity' => 'integer',
     ];
 
-    /**
-     * Get the combo rule that owns the condition.
-     */
     public function comboRule(): BelongsTo
     {
         return $this->belongsTo(ComboRule::class);
     }
 
-    /**
-     * Get the category associated with the condition.
-     */
     public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
+    }
+
+    public function product(): BelongsTo
+    {
+        return $this->belongsTo(Product::class);
     }
 }

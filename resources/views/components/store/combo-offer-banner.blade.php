@@ -1,5 +1,5 @@
 @php
-    $rules = \App\Models\ComboRule::active()->ordered()->with('conditions.category')->get();
+    $rules = \App\Models\ComboRule::active()->ordered()->with(['conditions.category', 'conditions.product'])->get();
 @endphp
 
 @if($rules->isNotEmpty())

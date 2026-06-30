@@ -119,34 +119,28 @@ class ComboDiscountService
 
         $applicableItems = [];
 
-        // Check each condition
         foreach ($rule->conditions as $condition) {
             $requiredQuantity = $condition->required_quantity;
-            $categoryId = $condition->category_id;
 
-            // Find all items matching the category, that haven't been used yet (we simulate this by picking)
-            // Wait, items might overlap if categories are the same? Typically conditions have distinct categories.
-            // Let's filter items for this category
-            $categoryItems = array_filter($items, function($item) use ($categoryId) {
-                return $item['category_id'] == $categoryId;
+            $matchingField = $condition->condition_type === 'product' ? 'product_id' : 'category_id';
+            $matchingValue = $condition->condition_type === 'product' ? $condition->product_id : $condition->category_id;
+
+            $matchingItems = array_filter($items, function($item) use ($matchingField, $matchingValue) {
+                return $item[$matchingField] == $matchingValue;
             });
 
-            if (count($categoryItems) < $requiredQuantity) {
-                return 0; // Condition not met, whole rule fails
+            if (count($matchingItems) < $requiredQuantity) {
+                return 0;
             }
 
-            // Sort by price ascending (cheapest first)
-            usort($categoryItems, function($a, $b) {
+            usort($matchingItems, function($a, $b) {
                 return $a['price'] <=> $b['price'];
             });
 
-            // Take the required quantity
-            $pickedItems = array_slice($categoryItems, 0, $requiredQuantity);
-            
-            // Add to applicable items
+            $pickedItems = array_slice($matchingItems, 0, $requiredQuantity);
+
             $applicableItems = array_merge($applicableItems, $pickedItems);
 
-            // Remove picked items from the main pool so they aren't reused for another condition (edge case)
             foreach ($pickedItems as $picked) {
                 $key = array_search($picked, $items);
                 if ($key !== false) {

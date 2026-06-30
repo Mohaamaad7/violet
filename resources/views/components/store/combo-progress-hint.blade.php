@@ -1,11 +1,18 @@
 @props(['product'])
 
 @php
-    // Find if this product's category is part of any active combo rule
     $categoryId = $product->category_id;
-    $activeRules = \App\Models\ComboRule::active()->ordered()->whereHas('conditions', function($q) use ($categoryId) {
-        $q->where('category_id', $categoryId);
-    })->with('conditions.category')->get();
+    $productId = $product->id;
+    $activeRules = \App\Models\ComboRule::active()->ordered()
+        ->where(function($q) use ($categoryId, $productId) {
+            $q->whereHas('conditions', function($q) use ($categoryId) {
+                $q->where('condition_type', 'category')->where('category_id', $categoryId);
+            })->orWhereHas('conditions', function($q) use ($productId) {
+                $q->where('condition_type', 'product')->where('product_id', $productId);
+            });
+        })
+        ->with(['conditions.category', 'conditions.product'])
+        ->get();
 @endphp
 
 @if($activeRules->isNotEmpty())
@@ -23,9 +30,14 @@
                         احصل على خصم {{ $rule->discount_percentage }}% عند شراء:
                         <ul class="list-disc list-inside mt-1 space-y-0.5 pr-2">
                             @foreach($rule->conditions as $condition)
-                                @if($condition->category)
-                                    <li>{{ $condition->required_quantity }} من {{ $condition->category->name }}</li>
-                                @endif
+                                <li>
+                                    {{ $condition->required_quantity }}
+                                    @if($condition->condition_type === 'product' && $condition->product)
+                                        من {{ $condition->product->name }}
+                                    @elseif($condition->category)
+                                        من {{ $condition->category->name }}
+                                    @endif
+                                </li>
                             @endforeach
                         </ul>
                     </div>

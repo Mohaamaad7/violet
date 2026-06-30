@@ -29,8 +29,8 @@ class ComboDiscountServiceTest extends TestCase
         ]);
 
         $rule->conditions()->createMany([
-            ['category_id' => $cat1->id, 'required_quantity' => 1],
-            ['category_id' => $cat2->id, 'required_quantity' => 2],
+            ['condition_type' => 'category', 'category_id' => $cat1->id, 'required_quantity' => 1],
+            ['condition_type' => 'category', 'category_id' => $cat2->id, 'required_quantity' => 2],
         ]);
 
         // Mock items

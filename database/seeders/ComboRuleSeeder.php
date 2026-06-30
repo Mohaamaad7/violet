@@ -27,17 +27,20 @@ class ComboRuleSeeder extends Seeder
         ]);
 
         $rule->conditions()->create([
+            'condition_type' => 'category',
             'category_id' => $category1->id,
             'required_quantity' => 1,
         ]);
 
         if ($category2) {
             $rule->conditions()->create([
+                'condition_type' => 'category',
                 'category_id' => $category2->id,
                 'required_quantity' => 1,
             ]);
         } else {
             $rule->conditions()->create([
+                'condition_type' => 'category',
                 'category_id' => $category1->id,
                 'required_quantity' => 1,
             ]);

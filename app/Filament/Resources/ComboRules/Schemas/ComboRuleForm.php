@@ -9,6 +9,7 @@ use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\FileUpload;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Grid;
@@ -85,17 +86,44 @@ class ComboRuleForm
                             ->relationship('conditions')
                             ->label('أصناف العرض')
                             ->schema([
+                                Radio::make('condition_type')
+                                    ->label('نوع الشرط')
+                                    ->options([
+                                        'category' => 'قسم',
+                                        'product' => 'منتج محدد',
+                                    ])
+                                    ->default('category')
+                                    ->inline()
+                                    ->required()
+                                    ->live()
+                                    ->afterStateUpdated(function ($set, $state) {
+                                        if ($state === 'product') {
+                                            $set('category_id', null);
+                                        } else {
+                                            $set('product_id', null);
+                                        }
+                                    }),
                                 Select::make('category_id')
                                     ->label('القسم')
                                     ->relationship('category', 'name')
-                                    ->required()
-                                    ->searchable(),
+                                    ->searchable()
+                                    ->preload()
+                                    ->required(fn ($get) => $get('condition_type') === 'category')
+                                    ->hidden(fn ($get) => $get('condition_type') !== 'category'),
+                                Select::make('product_id')
+                                    ->label('المنتج')
+                                    ->relationship('product', 'name')
+                                    ->searchable()
+                                    ->preload()
+                                    ->required(fn ($get) => $get('condition_type') === 'product')
+                                    ->hidden(fn ($get) => $get('condition_type') !== 'product'),
                                 TextInput::make('required_quantity')
                                     ->label('الكمية المطلوبة')
                                     ->numeric()
                                     ->required()
                                     ->default(1)
-                                    ->minValue(1),
+                                    ->minValue(1)
+                                    ->maxValue(99999),
                             ])
                             ->addActionLabel('إضافة شرط جديد')
                             ->columns(1)
