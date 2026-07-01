@@ -11,6 +11,7 @@ use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Placeholder;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Grid;
 
@@ -112,6 +113,7 @@ class ComboRuleForm
                                     ->hidden(fn ($get) => $get('condition_type') !== 'category'),
                                 Select::make('product_id')
                                     ->label('المنتج')
+                                    ->live(onBlur: true)
                                     ->relationship('product', 'name')
                                     ->searchable()
                                     ->preload()
@@ -119,16 +121,41 @@ class ComboRuleForm
                                     ->hidden(fn ($get) => $get('condition_type') !== 'product'),
                                 TextInput::make('required_quantity')
                                     ->label('الكمية المطلوبة')
+                                    ->live()
                                     ->numeric()
                                     ->required()
                                     ->default(1)
                                     ->minValue(1)
                                     ->maxValue(99999),
+                                Placeholder::make('original_total_display')
+                                    ->label('إجمالي السعر الأصلي')
+                                    ->content(function ($get) {
+                                        $productId = $get('product_id');
+                                        $quantity = $get('required_quantity');
+                                        if (!$productId || !$quantity) {
+                                            return '---';
+                                        }
+                                        $product = \App\Models\Product::find($productId);
+                                        if (!$product) {
+                                            return '---';
+                                        }
+                                        return number_format($product->price * (int) $quantity, 2) . ' EGP';
+                                    }),
                             ])
                             ->addActionLabel('إضافة شرط جديد')
                             ->columns(1)
                             ->required()
-                            ->minItems(2)
+                            ->minItems(1)
+                            ->rules([
+                                fn (): \Closure => function (string $attribute, mixed $value, \Closure $fail): void {
+                                    if (is_array($value) && count($value) === 1) {
+                                        $condition = $value[0];
+                                        if (($condition['required_quantity'] ?? 0) <= 1) {
+                                            $fail('عند إضافة شرط واحد فقط، يجب أن تكون الكمية المطلوبة أكبر من 1.');
+                                        }
+                                    }
+                                },
+                            ])
                     ])->columnSpan(1),
             ]);
     }
