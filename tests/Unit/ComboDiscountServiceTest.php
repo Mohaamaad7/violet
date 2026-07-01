@@ -13,6 +13,40 @@ class ComboDiscountServiceTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_single_product_combo_with_multiple_quantity()
+    {
+        $service = new ComboDiscountService();
+
+        $cat = Category::create(['name_en' => 'Cat', 'name_ar' => 'Cat', 'slug' => 'cat', 'is_active' => true]);
+
+        $product = Product::create([
+            'name_en' => 'Musk', 'name_ar' => 'Musk', 'slug' => 'musk',
+            'price' => 100, 'category_id' => $cat->id, 'status' => 'active',
+            'stock_quantity' => 10, 'sku' => '789',
+        ]);
+
+        $rule = ComboRule::create([
+            'name' => 'Buy 3 Get Discount',
+            'discount_percentage' => 10,
+            'is_active' => true,
+        ]);
+
+        $rule->conditions()->createMany([
+            ['condition_type' => 'product', 'product_id' => $product->id, 'required_quantity' => 3],
+        ]);
+
+        $items = collect([
+            (object)['product' => $product, 'quantity' => 3, 'price' => 100],
+        ]);
+
+        $result = $service->calculateDiscount($items);
+
+        // Total: 300. Discount 10% = 30.
+        $this->assertNotNull($result);
+        $this->assertEquals(30, $result['discount_amount']);
+        $this->assertEquals($rule->id, $result['rule_id']);
+    }
+
     public function test_calculate_discount()
     {
         $service = new ComboDiscountService();
