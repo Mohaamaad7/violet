@@ -46,9 +46,9 @@ class ComboRuleForm
                                 Action::make('viewOfferPage')
                                     ->icon('heroicon-m-arrow-top-right-on-square')
                                     ->tooltip('عرض صفحة العرض')
-                                    ->url(fn (?App\Models\ComboRule $record) => $record?->slug ? route('combo.show', ['slug' => $record->slug]) : null)
+                                    ->url(fn (?\App\Models\ComboRule $record) => $record?->slug ? route('combo.show', ['slug' => $record->slug]) : null)
                                     ->openUrlInNewTab()
-                                    ->visible(fn (?App\Models\ComboRule $record): bool => filled($record?->slug))
+                                    ->visible(fn (?\App\Models\ComboRule $record): bool => filled($record?->slug))
                             ),
                         FileUpload::make('image_path')
                             ->label('صورة العرض (اختياري)')
