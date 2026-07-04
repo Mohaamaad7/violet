@@ -44,11 +44,11 @@ class ComboRuleForm
                             ->maxLength(255)
                             ->suffixAction(
                                 Action::make('viewOfferPage')
-                                    ->label('عرض صفحة العرض')
-                                    ->icon('heroicon-o-arrow-top-right-on-square')
-                                    ->url(fn ($record) => $record?->slug ? route('combo.show', ['slug' => $record->slug]) : null)
+                                    ->icon('heroicon-m-arrow-top-right-on-square')
+                                    ->tooltip('عرض صفحة العرض')
+                                    ->url(fn (?App\Models\ComboRule $record) => $record?->slug ? route('combo.show', ['slug' => $record->slug]) : null)
                                     ->openUrlInNewTab()
-                                    ->visible(fn (string $operation, $record): bool => $operation === 'edit' && filled($record?->slug))
+                                    ->visible(fn (?App\Models\ComboRule $record): bool => filled($record?->slug))
                             ),
                         FileUpload::make('image_path')
                             ->label('صورة العرض (اختياري)')

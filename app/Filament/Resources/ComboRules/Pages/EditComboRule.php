@@ -14,7 +14,7 @@ class EditComboRule extends EditRecord
 
     protected function getRedirectUrl(): string
     {
-        return static::getResource()::getUrl('edit', ['record' => $this->record]);
+        return static::getResource()::getUrl('index');
     }
 
     protected function getHeaderActions(): array
