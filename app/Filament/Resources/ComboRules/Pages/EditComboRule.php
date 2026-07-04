@@ -12,6 +12,11 @@ class EditComboRule extends EditRecord
 {
     protected static string $resource = ComboRuleResource::class;
 
+    protected function getRedirectUrl(): string
+    {
+        return static::getResource()::getUrl('edit', ['record' => $this->record]);
+    }
+
     protected function getHeaderActions(): array
     {
         return [

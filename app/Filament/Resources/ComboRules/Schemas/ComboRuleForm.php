@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\ComboRules\Schemas;
 
 use Filament\Schemas\Schema;
+use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
@@ -40,7 +41,15 @@ class ComboRuleForm
                             ->required(fn (string $operation): bool => $operation === 'create')
                             ->unique(table: 'combo_rules', column: 'slug', ignoreRecord: true)
                             ->regex('/^[a-z0-9]+(?:-[a-z0-9]+)*$/')
-                            ->maxLength(255),
+                            ->maxLength(255)
+                            ->suffixAction(
+                                Action::make('viewOfferPage')
+                                    ->label('عرض صفحة العرض')
+                                    ->icon('heroicon-o-arrow-top-right-on-square')
+                                    ->url(fn ($record) => $record?->slug ? route('combo.show', ['slug' => $record->slug]) : null)
+                                    ->openUrlInNewTab()
+                                    ->visible(fn (string $operation, $record): bool => $operation === 'edit' && filled($record?->slug))
+                            ),
                         FileUpload::make('image_path')
                             ->label('صورة العرض (اختياري)')
                             ->image()
