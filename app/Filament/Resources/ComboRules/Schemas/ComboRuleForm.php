@@ -27,6 +27,19 @@ class ComboRuleForm
                         TextInput::make('name')
                             ->label('اسم العرض (مثل: خصم العودة للمدارس)')
                             ->required()
+                            ->maxLength(255)
+                            ->live(onBlur: true)
+                            ->afterStateUpdated(function ($state, $set, $get) {
+                                if (! $get('slug')) {
+                                    $set('slug', \Illuminate\Support\Str::slug($state));
+                                }
+                            }),
+                        TextInput::make('slug')
+                            ->label('رابط صفحة العرض (Slug)')
+                            ->helperText('يُستخدم في رابط صفحة الهبوط: /combo/{slug}')
+                            ->required(fn (string $operation): bool => $operation === 'create')
+                            ->unique(table: 'combo_rules', column: 'slug', ignoreRecord: true)
+                            ->regex('/^[a-z0-9]+(?:-[a-z0-9]+)*$/')
                             ->maxLength(255),
                         FileUpload::make('image_path')
                             ->label('صورة العرض (اختياري)')

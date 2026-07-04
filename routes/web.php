@@ -26,6 +26,9 @@ Route::middleware(\Spatie\ResponseCache\Middlewares\CacheResponse::class)->group
     Route::get('/products/{slug}', [App\Http\Controllers\Store\ProductDetailsController::class, 'show'])->name('product.show');
 });
 
+// Combo Landing Page (dynamic — not cached)
+Route::get('/combo/{slug}', App\Livewire\Store\ComboLandingPage::class)->name('combo.show');
+
 // Shopping Cart (Task 9.5)
 Route::get('/cart', App\Livewire\Store\CartPage::class)->name('cart');
 
