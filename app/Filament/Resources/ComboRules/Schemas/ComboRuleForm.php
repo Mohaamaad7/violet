@@ -3,7 +3,7 @@
 namespace App\Filament\Resources\ComboRules\Schemas;
 
 use Filament\Schemas\Schema;
-use Filament\Forms\Components\Actions\Action;
+use Filament\Actions\Action;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
