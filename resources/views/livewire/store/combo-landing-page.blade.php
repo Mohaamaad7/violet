@@ -60,9 +60,17 @@
                                      class="w-20 h-20 object-contain bg-gray-50 rounded-lg border border-gray-200 flex-shrink-0">
                                 <div>
                                     <p class="font-semibold text-gray-900">{{ $data['product_name'] }}</p>
-                                    <p class="text-sm text-gray-500">
-                                        {{ number_format($data['product_price'], 2) }} ج.م
-                                    </p>
+                                    @if($data['is_on_sale'] ?? false)
+                                        <p class="text-sm">
+                                            <span class="text-gray-400 line-through">{{ number_format($data['regular_price'], 2) }} ج.م</span>
+                                            <span class="text-red-600 font-semibold me-1">{{ number_format($data['product_price'], 2) }} ج.م</span>
+                                            <span class="bg-red-100 text-red-700 text-xs font-bold px-2 py-0.5 rounded-full">خصم</span>
+                                        </p>
+                                    @else
+                                        <p class="text-sm text-gray-500">
+                                            {{ number_format($data['product_price'], 2) }} ج.م
+                                        </p>
+                                    @endif
                                 </div>
                             </div>
 
@@ -118,7 +126,14 @@
                                                  class="w-14 h-14 object-contain bg-white rounded border border-gray-200 flex-shrink-0">
                                             <div class="min-w-0">
                                                 <p class="font-medium text-gray-900 text-sm truncate">{{ $product['name'] }}</p>
-                                                <p class="text-sm text-gray-500">{{ number_format($product['price'], 2) }} ج.م</p>
+                                                @if($product['is_on_sale'] ?? false)
+                                                    <p class="text-xs">
+                                                        <span class="text-gray-400 line-through">{{ number_format($product['regular_price'], 2) }} ج.م</span>
+                                                        <span class="text-red-600 font-semibold">{{ number_format($product['price'], 2) }} ج.م</span>
+                                                    </p>
+                                                @else
+                                                    <p class="text-sm text-gray-500">{{ number_format($product['price'], 2) }} ج.م</p>
+                                                @endif
                                             </div>
                                         </button>
                                     @endforeach

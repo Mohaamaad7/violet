@@ -140,7 +140,44 @@ class ComboRuleForm
                                     ->searchable()
                                     ->preload()
                                     ->required(fn ($get) => $get('condition_type') === 'product')
-                                    ->hidden(fn ($get) => $get('condition_type') !== 'product'),
+                                    ->hidden(fn ($get) => $get('condition_type') !== 'product')
+                                    ->hint(fn ($get) => {
+                                        $productId = $get('product_id');
+                                        if (!$productId) return null;
+                                        $product = \App\Models\Product::find($productId);
+                                        if ($product && $product->is_on_sale) {
+                                            return '⚠️ هذا المنتج عليه خصم حالي: ' . number_format($product->final_price, 2) . ' EGP';
+                                        }
+                                        return null;
+                                    })
+                                    ->hintColor(fn ($get) => {
+                                        $productId = $get('product_id');
+                                        if (!$productId) return null;
+                                        $product = \App\Models\Product::find($productId);
+                                        return $product && $product->is_on_sale ? 'warning' : null;
+                                    }),
+                                Placeholder::make('sale_warning')
+                                    ->label('')
+                                    ->content(function ($get) {
+                                        $productId = $get('product_id');
+                                        if (!$productId) return '';
+                                        $product = \App\Models\Product::find($productId);
+                                        if (!$product || !$product->is_on_sale) return '';
+                                        $saved = ($product->price - $product->final_price) * (int) $get('required_quantity');
+                                        return '<div class="bg-amber-50 border border-amber-200 text-amber-800 rounded-lg p-3 text-sm">
+                                            ⚠️ <strong>تنبيه:</strong> هذا المنتج عليه خصم حاليًا.<br>
+                                            سعر البيع الحالي: <strong>' . number_format($product->final_price, 2) . ' EGP</strong>
+                                            (بدلاً من ' . number_format($product->price, 2) . ' EGP)<br>
+                                            التوفير في هذا الشرط: <strong>' . number_format($saved, 2) . ' EGP</strong>
+                                        </div>';
+                                    })
+                                    ->html()
+                                    ->visible(fn ($get) => {
+                                        $productId = $get('product_id');
+                                        if (!$productId) return false;
+                                        $product = \App\Models\Product::find($productId);
+                                        return $product && $product->is_on_sale;
+                                    }),
                                 TextInput::make('required_quantity')
                                     ->label('الكمية المطلوبة')
                                     ->live()
@@ -161,7 +198,13 @@ class ComboRuleForm
                                         if (!$product) {
                                             return '---';
                                         }
-                                        return number_format($product->price * (int) $quantity, 2) . ' EGP';
+                                        $unitPrice = $product->final_price;
+                                        $total = $unitPrice * (int) $quantity;
+                                        $result = number_format($total, 2) . ' EGP';
+                                        if ($product->is_on_sale) {
+                                            $result .= ' (سعر القطعة بعد الخصم: ' . number_format($unitPrice, 2) . ' EGP)';
+                                        }
+                                        return $result;
                                     }),
                             ])
                             ->addActionLabel('إضافة شرط جديد')

@@ -49,6 +49,14 @@ class ComboRulesTable
                     ->label('ينتهي في')
                     ->dateTime()
                     ->sortable(),
+                \Filament\Tables\Columns\TextColumn::make('view_storefront')
+                    ->label('عرض في المتجر')
+                    ->formatStateUsing(fn () => '')
+                    ->icon('heroicon-m-arrow-top-right-on-square')
+                    ->url(fn ($record) => $record->slug ? route('combo.show', ['slug' => $record->slug]) : null)
+                    ->openUrlInNewTab()
+                    ->extraAttributes(['class' => 'text-primary-600 hover:text-primary-500'])
+                    ->visible(fn ($record) => filled($record?->slug)),
             ])
             ->filters([
                 TrashedFilter::make(),

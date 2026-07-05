@@ -95,6 +95,8 @@ class ComboLandingPage extends Component
                     'product_name' => $product->name,
                     'product_image' => $product->primary_image,
                     'product_price' => (float) $product->final_price,
+                    'regular_price' => (float) $product->price,
+                    'is_on_sale' => $product->is_on_sale,
                     'has_variants' => $product->variants->count() > 0,
                     'variants' => $product->variants->map(fn ($v) => [
                         'id' => $v->id,
@@ -139,6 +141,8 @@ class ComboLandingPage extends Component
                         'name' => $p->name,
                         'image' => $p->primary_image,
                         'price' => (float) $p->final_price,
+                        'regular_price' => (float) $p->price,
+                        'is_on_sale' => $p->is_on_sale,
                         'has_variants' => $p->variants->count() > 0,
                         'variants' => $p->variants->map(fn ($v) => [
                             'id' => $v->id,
