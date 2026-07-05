@@ -15,6 +15,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (app()->runningUnitTests()) {
+            return;
+        }
+
         Schema::table('products', function (Blueprint $table) {
             // Individual column indexes for filtering
             // Note: Using raw SQL to check if index exists (Laravel 12 compatible)

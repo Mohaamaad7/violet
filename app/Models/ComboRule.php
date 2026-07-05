@@ -22,16 +22,24 @@ class ComboRule extends Model
         'discount_type',
         'discount_percentage',
         'fixed_price',
+        'tiers',
         'max_uses_per_user',
         'priority',
         'starts_at',
         'ends_at',
     ];
 
+    protected $hidden = [
+        'discount_type',
+        'discount_percentage',
+        'fixed_price',
+    ];
+
     protected $casts = [
         'is_active' => 'boolean',
         'show_on_homepage' => 'boolean',
         'discount_percentage' => 'integer',
+        'tiers' => 'array',
         'max_uses_per_user' => 'integer',
         'priority' => 'integer',
         'starts_at' => 'datetime',

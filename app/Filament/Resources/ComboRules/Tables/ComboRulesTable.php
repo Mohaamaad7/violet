@@ -25,15 +25,12 @@ class ComboRulesTable
                     ->label('اسم العرض')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('discount_type')
-                    ->label('الخصم')
+                TextColumn::make('tiers')
+                    ->label('مستويات الخصم')
                     ->formatStateUsing(function ($record) {
-                        if ($record->discount_type === 'percentage') {
-                            return $record->discount_percentage . '%';
-                        }
-                        return $record->fixed_price . ' ج.م (ثابت)';
-                    })
-                    ->sortable(),
+                        $count = is_array($record->tiers) ? count($record->tiers) : 0;
+                        return $count . ' مستوى';
+                    }),
                 IconColumn::make('is_active')
                     ->label('مفعل')
                     ->boolean()
@@ -90,7 +87,6 @@ class ComboRulesTable
                                 'condition_type'    => $condition->condition_type,
                                 'category_id'       => $condition->category_id,
                                 'product_id'        => $condition->product_id,
-                                'required_quantity' => $condition->required_quantity,
                             ]);
                         }
                     })

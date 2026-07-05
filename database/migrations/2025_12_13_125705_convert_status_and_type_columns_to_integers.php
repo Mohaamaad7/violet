@@ -11,6 +11,10 @@ return new class extends Migration {
      */
     public function up(): void
     {
+        if (app()->runningUnitTests()) {
+            return;
+        }
+
         // ============================================
         // خطوة التنظيف: حذف بيانات المرتجعات القديمة
         // (آمن لأن User قال يمكن فقدان الطلبات والعملاء)

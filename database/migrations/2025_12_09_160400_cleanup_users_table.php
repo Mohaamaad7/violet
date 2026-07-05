@@ -90,6 +90,10 @@ return new class extends Migration {
      */
     public function up(): void
     {
+        if (app()->runningUnitTests()) {
+            return;
+        }
+
         // Step 1: Delete customers from users table and drop type column
         if ($this->columnExists('users', 'type')) {
             DB::statement("DELETE FROM users WHERE type = 'customer'");

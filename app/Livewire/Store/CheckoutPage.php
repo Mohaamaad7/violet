@@ -704,6 +704,25 @@ class CheckoutPage extends Component
                     'total'                    => $this->total,
                 ]);
 
+                $comboData = $this->comboDiscountAmount > 0 
+                    ? app(\App\Services\CartService::class)->getComboDiscount($this->getCustomerId()) 
+                    : null;
+                $adjustedItems = $comboData['adjusted_items'] ?? [];
+                
+                // Group adjusted items by cart_item_id and final_price
+                $groupedAdjustments = [];
+                foreach ($adjustedItems as $adj) {
+                    $cId = $adj['cart_item_id'];
+                    $fp = (string)$adj['final_price'];
+                    if (!isset($groupedAdjustments[$cId])) {
+                        $groupedAdjustments[$cId] = [];
+                    }
+                    if (!isset($groupedAdjustments[$cId][$fp])) {
+                        $groupedAdjustments[$cId][$fp] = 0;
+                    }
+                    $groupedAdjustments[$cId][$fp]++;
+                }
+
                 // Create Order Items & Decrement Stock
                 foreach ($cart->items as $cartItem) {
                     $product = Product::find($cartItem->product_id);
@@ -711,23 +730,28 @@ class CheckoutPage extends Component
                         ? $product->variants()->find($cartItem->product_variant_id)
                         : null;
 
-                    // Get price (variant or product)
-                    $price = $variant
+                    // Get base price (variant or product)
+                    $basePrice = $variant
                         ? ($variant->sale_price ?? $variant->price)
                         : ($product->sale_price ?? $product->price);
 
-                    // Create order item
-                    OrderItem::create([
-                        'order_id' => $order->id,
-                        'product_id' => $product->id,
-                        'product_variant_id' => $variant?->id,
-                        'product_name' => $product->name,
-                        'product_sku' => $variant?->sku ?? $product->sku ?? '',
-                        'variant_name' => $variant?->name,
-                        'price' => $price,
-                        'quantity' => $cartItem->quantity,
-                        'subtotal' => $price * $cartItem->quantity,
-                    ]);
+                    $adjustments = $groupedAdjustments[$cartItem->id] ?? [(string)$basePrice => $cartItem->quantity];
+
+                    foreach ($adjustments as $priceStr => $qty) {
+                        $price = (float) $priceStr;
+                        // Create order item
+                        OrderItem::create([
+                            'order_id' => $order->id,
+                            'product_id' => $product->id,
+                            'product_variant_id' => $variant?->id,
+                            'product_name' => $product->name,
+                            'product_sku' => $variant?->sku ?? $product->sku ?? '',
+                            'variant_name' => $variant?->name,
+                            'price' => $price,
+                            'quantity' => $qty,
+                            'subtotal' => $price * $qty,
+                        ]);
+                    }
 
                     // Decrement stock
                     if ($variant) {

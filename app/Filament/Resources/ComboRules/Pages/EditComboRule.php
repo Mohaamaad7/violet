@@ -47,7 +47,6 @@ class EditComboRule extends EditRecord
                             'condition_type'    => $condition->condition_type,
                             'category_id'       => $condition->category_id,
                             'product_id'        => $condition->product_id,
-                            'required_quantity' => $condition->required_quantity,
                         ]);
                     }
                 })

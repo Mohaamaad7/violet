@@ -27,6 +27,40 @@
             </div>
         @endif
 
+        {{-- Tier Selector --}}
+        @if(count($tiers) > 1)
+            <div class="mb-10 max-w-3xl mx-auto">
+                <h2 class="text-xl font-bold text-gray-900 mb-4 text-center">اختر العرض المناسب لك</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-{{ min(count($tiers), 3) }} gap-4">
+                    @foreach($tiers as $index => $tier)
+                        <button
+                            type="button"
+                            wire:click="selectTier({{ $index }})"
+                            @class([
+                                'p-5 rounded-2xl border-2 text-center transition-all duration-200 cursor-pointer',
+                                'border-violet-600 bg-violet-50 ring-2 ring-violet-200 shadow-md transform scale-105' => $selectedTierIndex === $index,
+                                'border-gray-200 bg-white hover:border-violet-400 hover:bg-gray-50' => $selectedTierIndex !== $index,
+                            ])
+                        >
+                            <div class="text-lg font-bold text-gray-900 mb-1">شراء {{ $tier['quantity'] }} قطع</div>
+                            <div class="text-violet-700 font-bold text-2xl mb-2">
+                                @if($tier['discount_type'] === 'fixed_price')
+                                    بسعر {{ number_format($tier['fixed_price'], 0) }} ج.م
+                                @else
+                                    بخصم {{ $tier['discount_percentage'] }}%
+                                @endif
+                            </div>
+                            @if($selectedTierIndex === $index)
+                                <div class="mx-auto flex items-center justify-center w-6 h-6 rounded-full bg-violet-600 text-white mt-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>
+                                </div>
+                            @endif
+                        </button>
+                    @endforeach
+                </div>
+            </div>
+        @endif
+
         {{-- Condition Sections --}}
         <div class="space-y-8 mb-10">
             @foreach($conditionData as $conditionId => $data)
@@ -263,8 +297,8 @@
                             {{ number_format($originalPrice, 2) }} ج.م
                         </span>
                         <span class="bg-red-100 text-red-700 text-sm font-bold px-3 py-1 rounded-full">
-                            @if($combo->discount_type === 'percentage')
-                                خصم {{ $combo->discount_percentage }}%
+                            @if(isset($tiers[$selectedTierIndex]) && $tiers[$selectedTierIndex]['discount_type'] === 'percentage')
+                                خصم {{ $tiers[$selectedTierIndex]['discount_percentage'] }}%
                             @else
                                 وفّر {{ number_format($originalPrice - $comboPrice, 2) }} ج.م
                             @endif
@@ -343,6 +377,7 @@
             fbq('track', 'AddToCart', {
                 content_name: data.combo_name,
                 content_ids: data.content_ids,
+                contents: data.contents,
                 content_type: 'product',
                 value: data.value,
                 currency: data.currency,

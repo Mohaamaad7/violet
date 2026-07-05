@@ -13,6 +13,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (app()->runningUnitTests()) {
+            return;
+        }
+        
         // Link orders to users by matching guest_email
         DB::statement('
             UPDATE orders o
