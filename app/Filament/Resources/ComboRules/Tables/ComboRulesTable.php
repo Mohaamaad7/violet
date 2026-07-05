@@ -5,6 +5,7 @@ namespace App\Filament\Resources\ComboRules\Tables;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\Action;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Tables\Filters\TrashedFilter;
@@ -49,19 +50,19 @@ class ComboRulesTable
                     ->label('ينتهي في')
                     ->dateTime()
                     ->sortable(),
-                \Filament\Tables\Columns\TextColumn::make('view_storefront')
-                    ->label('عرض في المتجر')
-                    ->formatStateUsing(fn () => '')
-                    ->icon('heroicon-m-arrow-top-right-on-square')
-                    ->url(fn ($record) => $record->slug ? route('combo.show', ['slug' => $record->slug]) : null)
-                    ->openUrlInNewTab()
-                    ->extraAttributes(['class' => 'text-primary-600 hover:text-primary-500'])
-                    ->visible(fn ($record) => filled($record?->slug)),
             ])
             ->filters([
                 TrashedFilter::make(),
             ])
             ->recordActions([
+                Action::make('viewStorefront')
+                    ->label('عرض في المتجر')
+                    ->icon('heroicon-m-arrow-top-right-on-square')
+                    ->color('info')
+                    ->tooltip('عرض صفحة العرض على المتجر في تبويب جديد')
+                    ->url(fn ($record) => $record->slug ? route('combo.show', ['slug' => $record->slug]) : '#')
+                    ->openUrlInNewTab()
+                    ->visible(fn ($record) => filled($record?->slug)),
                 EditAction::make(),
             ])
             ->toolbarActions([

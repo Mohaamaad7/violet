@@ -140,22 +140,7 @@ class ComboRuleForm
                                     ->searchable()
                                     ->preload()
                                     ->required(fn ($get) => $get('condition_type') === 'product')
-                                    ->hidden(fn ($get) => $get('condition_type') !== 'product')
-                                    ->hint(function ($get) {
-                                        $productId = $get('product_id');
-                                        if (!$productId) return null;
-                                        $product = \App\Models\Product::find($productId);
-                                        if ($product && $product->is_on_sale) {
-                                            return '⚠️ هذا المنتج عليه خصم حالي: ' . number_format($product->final_price, 2) . ' EGP';
-                                        }
-                                        return null;
-                                    })
-                                    ->hintColor(function ($get) {
-                                        $productId = $get('product_id');
-                                        if (!$productId) return null;
-                                        $product = \App\Models\Product::find($productId);
-                                        return $product && $product->is_on_sale ? 'warning' : null;
-                                    }),
+                                    ->hidden(fn ($get) => $get('condition_type') !== 'product'),
                                 Placeholder::make('sale_warning')
                                     ->label('')
                                     ->content(function ($get) {
@@ -168,7 +153,7 @@ class ComboRuleForm
                                             ⚠️ <strong>تنبيه:</strong> هذا المنتج عليه خصم حاليًا.<br>
                                             سعر البيع الحالي: <strong>' . number_format($product->final_price, 2) . ' EGP</strong>
                                             (بدلاً من ' . number_format($product->price, 2) . ' EGP)<br>
-                                            التوفير في هذا الشرط: <strong>' . number_format($saved, 2) . ' EGP</strong>
+                                            إجمالي التوفير للعميل في هذا الكومبو مقارنة بالسعر الفردي: <strong>' . number_format($saved, 2) . ' EGP</strong>
                                         </div>';
                                     })
                                     ->html()
@@ -202,10 +187,11 @@ class ComboRuleForm
                                         $total = $unitPrice * (int) $quantity;
                                         $result = number_format($total, 2) . ' EGP';
                                         if ($product->is_on_sale) {
-                                            $result .= ' (سعر القطعة بعد الخصم: ' . number_format($unitPrice, 2) . ' EGP)';
+                                            $result .= ' <span style="color: #dc2626; font-weight: 600;">(سعر القطعة بعد الخصم الأصلي: ' . number_format($unitPrice, 2) . ' EGP)</span>';
                                         }
                                         return $result;
-                                    }),
+                                    })
+                                    ->html(),
                             ])
                             ->addActionLabel('إضافة شرط جديد')
                             ->columns(1)
