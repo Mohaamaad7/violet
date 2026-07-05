@@ -620,7 +620,9 @@
         {{-- Products Grid Area --}}
         <div class="lg:col-span-9 relative" style="z-index: 1;">
             
+            @if(!$category)
             <x-store.combo-offer-banner />
+            @endif
 
             {{-- Active Filters Display --}}
             @if($this->hasActiveFilters)
