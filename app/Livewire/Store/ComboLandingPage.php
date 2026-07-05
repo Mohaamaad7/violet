@@ -16,24 +16,44 @@ class ComboLandingPage extends Component
 
     /**
      * Resolved condition data for the view.
+     *
      * Structure: [ conditionId => [
-     *   'condition' => ComboRuleCondition,
-     *   'type' => 'product'|'category',
-     *   'product' => Product|null,           // set for product-type
-     *   'products' => Collection|null,       // set for category-type
+     *   'type'              => 'product'|'category',
      *   'required_quantity' => int,
+     *   // product-type only:
+     *   'product_id'    => int,
+     *   'product_name'  => string,
+     *   'product_image' => string,
+     *   'product_price' => float,
+     *   'regular_price' => float,
+     *   'is_on_sale'    => bool,
+     *   'has_variants'  => bool,
+     *   'variants'      => array,
+     *   // category-type only:
+     *   'category_id'   => int,
+     *   'category_name' => string,
+     *   'products'      => array,
      * ]]
      */
     public array $conditionData = [];
 
     /**
-     * Customer selections.
-     * Structure: [ conditionId => ['product_id' => int|null, 'variant_id' => int|null] ]
+     * Customer selections — keyed by condition ID.
+     *
+     * For PRODUCT-type conditions (product fixed, only variant chosen):
+     *   [ conditionId => ['product_id' => int, 'variant_id' => int|null] ]
+     *
+     * For CATEGORY-type conditions (Mix & Match — one slot per required unit):
+     *   [ conditionId => [
+     *       0 => ['product_id' => int|null, 'variant_id' => int|null],
+     *       1 => ['product_id' => int|null, 'variant_id' => int|null],
+     *       ...
+     *   ]]
      */
     public array $selections = [];
 
     /**
-     * Error messages keyed by condition ID.
+     * Error messages keyed by "conditionId" or "conditionId.slot".
      */
     public array $errors = [];
 
@@ -57,9 +77,10 @@ class ComboLandingPage extends Component
      */
     public float $originalPrice = 0;
 
-    /**
-     * Mount the component — resolve slug to combo rule.
-     */
+    // ─────────────────────────────────────────────────────────────────────────
+    // Mount
+    // ─────────────────────────────────────────────────────────────────────────
+
     public function mount(string $slug): void
     {
         $combo = ComboRule::with(['conditions.product.variants', 'conditions.category'])
@@ -74,8 +95,12 @@ class ComboLandingPage extends Component
         $this->calculateComboPrice();
     }
 
+    // ─────────────────────────────────────────────────────────────────────────
+    // Condition Resolution
+    // ─────────────────────────────────────────────────────────────────────────
+
     /**
-     * Resolve each condition into displayable data.
+     * Resolve each condition into view-ready data and initialise selections.
      */
     private function resolveConditions(): void
     {
@@ -90,30 +115,30 @@ class ComboLandingPage extends Component
                 $product->load(['variants', 'media']);
 
                 $this->conditionData[$conditionId] = [
-                    'type' => 'product',
-                    'product_id' => $product->id,
-                    'product_name' => $product->name,
-                    'product_image' => $product->primary_image,
-                    'product_price' => (float) $product->final_price,
-                    'regular_price' => (float) $product->price,
-                    'is_on_sale' => $product->is_on_sale,
-                    'has_variants' => $product->variants->count() > 0,
-                    'variants' => $product->variants->map(fn ($v) => [
-                        'id' => $v->id,
-                        'name' => $v->name,
+                    'type'              => 'product',
+                    'product_id'        => $product->id,
+                    'product_name'      => $product->name,
+                    'product_image'     => $product->primary_image,
+                    'product_price'     => (float) $product->final_price,
+                    'regular_price'     => (float) $product->price,
+                    'is_on_sale'        => $product->is_on_sale,
+                    'has_variants'      => $product->variants->count() > 0,
+                    'variants'          => $product->variants->map(fn ($v) => [
+                        'id'    => $v->id,
+                        'name'  => $v->name,
                         'price' => (float) $v->price,
                         'stock' => $v->stock,
                     ])->toArray(),
                     'required_quantity' => $condition->required_quantity,
                 ];
 
-                // Pre-select product for product-type conditions
+                // Product-type: single flat selection (product is pre-determined)
                 $this->selections[$conditionId] = [
                     'product_id' => $product->id,
                     'variant_id' => null,
                 ];
 
-                // Auto-select first in-stock variant if product has variants
+                // Auto-select first in-stock variant
                 if ($product->variants->count() > 0) {
                     $firstInStock = $product->variants->first(fn ($v) => $v->stock > 0);
                     if ($firstInStock) {
@@ -133,20 +158,20 @@ class ComboLandingPage extends Component
                     ->get();
 
                 $this->conditionData[$conditionId] = [
-                    'type' => 'category',
-                    'category_id' => $category->id,
-                    'category_name' => $category->name,
-                    'products' => $products->map(fn ($p) => [
-                        'id' => $p->id,
-                        'name' => $p->name,
-                        'image' => $p->primary_image,
-                        'price' => (float) $p->final_price,
-                        'regular_price' => (float) $p->price,
-                        'is_on_sale' => $p->is_on_sale,
+                    'type'              => 'category',
+                    'category_id'       => $category->id,
+                    'category_name'     => $category->name,
+                    'products'          => $products->map(fn ($p) => [
+                        'id'           => $p->id,
+                        'name'         => $p->name,
+                        'image'        => $p->primary_image,
+                        'price'        => (float) $p->final_price,
+                        'regular_price'=> (float) $p->price,
+                        'is_on_sale'   => $p->is_on_sale,
                         'has_variants' => $p->variants->count() > 0,
-                        'variants' => $p->variants->map(fn ($v) => [
-                            'id' => $v->id,
-                            'name' => $v->name,
+                        'variants'     => $p->variants->map(fn ($v) => [
+                            'id'    => $v->id,
+                            'name'  => $v->name,
                             'price' => (float) $v->price,
                             'stock' => $v->stock,
                         ])->toArray(),
@@ -154,47 +179,70 @@ class ComboLandingPage extends Component
                     'required_quantity' => $condition->required_quantity,
                 ];
 
-                $this->selections[$conditionId] = [
-                    'product_id' => null,
-                    'variant_id' => null,
-                ];
+                // Category-type: one empty slot per required unit (Mix & Match)
+                $slots = [];
+                for ($i = 0; $i < $condition->required_quantity; $i++) {
+                    $slots[$i] = ['product_id' => null, 'variant_id' => null];
+                }
+                $this->selections[$conditionId] = $slots;
             }
         }
     }
 
+    // ─────────────────────────────────────────────────────────────────────────
+    // Selection Handlers
+    // ─────────────────────────────────────────────────────────────────────────
+
     /**
-     * Handle product selection for category-type conditions.
-     * Resets the variant when a new product is chosen.
+     * Handle product selection for a specific Mix & Match slot
+     * (category-type conditions only).
      */
-    public function selectProduct(int $conditionId, int $productId): void
+    public function selectProductForSlot(int $conditionId, int $slot, int $productId): void
     {
         if (!isset($this->conditionData[$conditionId])) {
             return;
         }
 
-        $this->selections[$conditionId]['product_id'] = $productId;
-        $this->selections[$conditionId]['variant_id'] = null;
+        $this->selections[$conditionId][$slot]['product_id'] = $productId;
+        $this->selections[$conditionId][$slot]['variant_id'] = null;
 
-        // Auto-select first in-stock variant
+        // Auto-select first in-stock variant for this product
         $data = $this->conditionData[$conditionId];
         if ($data['type'] === 'category') {
             $productData = collect($data['products'])->firstWhere('id', $productId);
             if ($productData && $productData['has_variants']) {
                 $firstInStock = collect($productData['variants'])->first(fn ($v) => $v['stock'] > 0);
                 if ($firstInStock) {
-                    $this->selections[$conditionId]['variant_id'] = $firstInStock['id'];
+                    $this->selections[$conditionId][$slot]['variant_id'] = $firstInStock['id'];
                 }
             }
         }
 
-        // Clear error for this condition
-        unset($this->errors[$conditionId]);
+        // Clear error for this slot
+        unset($this->errors["{$conditionId}.{$slot}"]);
 
         $this->calculateComboPrice();
     }
 
     /**
-     * Handle variant selection for a condition.
+     * Handle variant selection for a specific Mix & Match slot
+     * (category-type conditions).
+     */
+    public function selectVariantForSlot(int $conditionId, int $slot, int $variantId): void
+    {
+        if (!isset($this->selections[$conditionId][$slot])) {
+            return;
+        }
+
+        $this->selections[$conditionId][$slot]['variant_id'] = $variantId;
+
+        unset($this->errors["{$conditionId}.{$slot}"]);
+
+        $this->calculateComboPrice();
+    }
+
+    /**
+     * Handle variant selection for product-type conditions (flat, single selection).
      */
     public function selectVariant(int $conditionId, int $variantId): void
     {
@@ -204,11 +252,14 @@ class ComboLandingPage extends Component
 
         $this->selections[$conditionId]['variant_id'] = $variantId;
 
-        // Clear error for this condition
         unset($this->errors[$conditionId]);
 
         $this->calculateComboPrice();
     }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Price Calculation
+    // ─────────────────────────────────────────────────────────────────────────
 
     /**
      * Calculate the total combo price after discount.
@@ -218,41 +269,58 @@ class ComboLandingPage extends Component
         $totalOriginal = 0;
 
         foreach ($this->conditionData as $conditionId => $data) {
-            $selection = $this->selections[$conditionId] ?? null;
-            $quantity = $data['required_quantity'];
 
-            if (!$selection || !$selection['product_id']) {
-                // Use first product price as placeholder for category conditions
-                if ($data['type'] === 'category' && !empty($data['products'])) {
-                    $totalOriginal += (float) $data['products'][0]['price'] * $quantity;
-                } elseif ($data['type'] === 'product') {
-                    $totalOriginal += (float) $data['product_price'] * $quantity;
+            if ($data['type'] === 'product') {
+                // Product-type: fixed product, qty × unit price
+                $selection = $this->selections[$conditionId] ?? null;
+                $unitPrice = (float) $data['product_price'];
+
+                if ($selection && $selection['variant_id']) {
+                    $variant = collect($data['variants'])->firstWhere('id', $selection['variant_id']);
+                    if ($variant) {
+                        $unitPrice = (float) $variant['price'];
+                    }
                 }
-                continue;
-            }
 
-            $unitPrice = 0;
+                $totalOriginal += $unitPrice * $data['required_quantity'];
 
-            // Determine unit price from selection
-            if ($selection['variant_id']) {
-                // Find variant price
-                $variants = $data['type'] === 'product'
-                    ? $data['variants']
-                    : (collect($data['products'])->firstWhere('id', $selection['product_id'])['variants'] ?? []);
+            } elseif ($data['type'] === 'category') {
+                // Category-type: sum each slot's price (Mix & Match)
+                $slots = $this->selections[$conditionId] ?? [];
 
-                $variant = collect($variants)->firstWhere('id', $selection['variant_id']);
-                $unitPrice = $variant ? (float) $variant['price'] : 0;
-            } else {
-                // Use product price
-                if ($data['type'] === 'product') {
-                    $unitPrice = (float) $data['product_price'];
-                } else {
-                    $productData = collect($data['products'])->firstWhere('id', $selection['product_id']);
-                    $unitPrice = $productData ? (float) $productData['price'] : 0;
+                if (empty($slots)) {
+                    // Fallback: use first product price × qty as placeholder
+                    if (!empty($data['products'])) {
+                        $totalOriginal += (float) $data['products'][0]['price'] * $data['required_quantity'];
+                    }
+                    continue;
+                }
+
+                foreach ($slots as $slotIndex => $slot) {
+                    if (!$slot['product_id']) {
+                        // Slot not filled — use first product price as placeholder
+                        $placeholder = !empty($data['products']) ? (float) $data['products'][0]['price'] : 0;
+                        $totalOriginal += $placeholder;
+                        continue;
+                    }
+
+                    $productData = collect($data['products'])->firstWhere('id', $slot['product_id']);
+                    if (!$productData) {
+                        continue;
+                    }
+
+                    $unitPrice = (float) $productData['price'];
+
+                    if ($slot['variant_id']) {
+                        $variant = collect($productData['variants'])->firstWhere('id', $slot['variant_id']);
+                        if ($variant) {
+                            $unitPrice = (float) $variant['price'];
+                        }
+                    }
+
+                    $totalOriginal += $unitPrice;
                 }
             }
-
-            $totalOriginal += $unitPrice * $quantity;
         }
 
         $this->originalPrice = round($totalOriginal, 2);
@@ -268,9 +336,12 @@ class ComboLandingPage extends Component
         }
     }
 
+    // ─────────────────────────────────────────────────────────────────────────
+    // Cart Addition
+    // ─────────────────────────────────────────────────────────────────────────
+
     /**
-     * Validate all selections and add items to cart.
-     * Uses all-or-nothing rollback via existing CartService methods.
+     * Validate all selections and add items to cart (all-or-nothing rollback).
      */
     public function addAllToCart(): void
     {
@@ -278,28 +349,36 @@ class ComboLandingPage extends Component
         $this->globalError = '';
         $this->processing = true;
 
-        // --- Server-side validation ---
+        // ── Server-side validation ──────────────────────────────────────────
         foreach ($this->conditionData as $conditionId => $data) {
-            $selection = $this->selections[$conditionId] ?? null;
 
-            if (!$selection || !$selection['product_id']) {
-                $label = $data['type'] === 'product' ? $data['product_name'] : $data['category_name'];
-                $this->errors[$conditionId] = "يرجى اختيار المنتج لـ: {$label}";
-                continue;
-            }
-
-            // Check variant requirement
-            $hasVariants = false;
             if ($data['type'] === 'product') {
-                $hasVariants = $data['has_variants'];
-            } else {
-                $productData = collect($data['products'])->firstWhere('id', $selection['product_id']);
-                $hasVariants = $productData ? $productData['has_variants'] : false;
-            }
+                // Product-type: only validate variant when product has variants
+                $selection = $this->selections[$conditionId] ?? null;
+                if ($data['has_variants'] && (!$selection || !$selection['variant_id'])) {
+                    $this->errors[$conditionId] = "يرجى اختيار النوع لـ: {$data['product_name']}";
+                }
 
-            if ($hasVariants && !$selection['variant_id']) {
-                $label = $data['type'] === 'product' ? $data['product_name'] : $data['category_name'];
-                $this->errors[$conditionId] = "يرجى اختيار النوع لـ: {$label}";
+            } elseif ($data['type'] === 'category') {
+                // Category-type: validate every slot
+                $slots = $this->selections[$conditionId] ?? [];
+                $slotCount = $data['required_quantity'];
+
+                for ($slot = 0; $slot < $slotCount; $slot++) {
+                    $slotData = $slots[$slot] ?? null;
+
+                    if (!$slotData || !$slotData['product_id']) {
+                        $slotLabel = $slotCount > 1 ? " (القطعة " . ($slot + 1) . ")" : "";
+                        $this->errors["{$conditionId}.{$slot}"] = "يرجى اختيار المنتج من: {$data['category_name']}{$slotLabel}";
+                        continue;
+                    }
+
+                    $productData = collect($data['products'])->firstWhere('id', $slotData['product_id']);
+                    if ($productData && $productData['has_variants'] && !$slotData['variant_id']) {
+                        $slotLabel = $slotCount > 1 ? " (القطعة " . ($slot + 1) . ")" : "";
+                        $this->errors["{$conditionId}.{$slot}"] = "يرجى اختيار النوع لـ: {$productData['name']}{$slotLabel}";
+                    }
+                }
             }
         }
 
@@ -308,109 +387,120 @@ class ComboLandingPage extends Component
             return;
         }
 
-        // --- Cart addition with rollback ---
+        // ── Cart addition with rollback ─────────────────────────────────────
         $cartService = app(CartService::class);
         $existingCart = $cartService->getCart();
 
-        // Snapshot: capture existing item IDs and their quantities
+        // Snapshot existing cart
         $snapshot = [];
         if ($existingCart) {
             foreach ($existingCart->items as $item) {
                 $snapshot[$item->id] = [
-                    'product_id' => $item->product_id,
+                    'product_id'         => $item->product_id,
                     'product_variant_id' => $item->product_variant_id,
-                    'quantity' => $item->quantity,
+                    'quantity'           => $item->quantity,
                 ];
             }
         }
 
-        $newlyAddedItemKeys = []; // Track items we added so we can rollback
-        $addFailed = false;
+        $addFailed   = false;
         $failMessage = '';
 
         foreach ($this->conditionData as $conditionId => $data) {
-            $selection = $this->selections[$conditionId];
-            $quantity = $data['required_quantity'];
 
-            $result = $cartService->addToCart(
-                productId: $selection['product_id'],
-                quantity: $quantity,
-                variantId: $selection['variant_id']
-            );
+            if ($data['type'] === 'product') {
+                // Product-type: add required_quantity as a single cart call
+                $selection = $this->selections[$conditionId];
+                $result = $cartService->addToCart(
+                    productId: $selection['product_id'],
+                    quantity:  $data['required_quantity'],
+                    variantId: $selection['variant_id']
+                );
 
-            if (!$result['success']) {
-                $addFailed = true;
-                $label = $data['type'] === 'product' ? $data['product_name'] : $data['category_name'];
-                $failMessage = "{$label}: {$result['message']}";
-                break;
+                if (!$result['success']) {
+                    $addFailed   = true;
+                    $failMessage = "{$data['product_name']}: {$result['message']}";
+                    break;
+                }
+
+            } elseif ($data['type'] === 'category') {
+                // Category-type (Mix & Match): add qty=1 per slot
+                $slots = $this->selections[$conditionId];
+
+                foreach ($slots as $slot => $slotData) {
+                    $result = $cartService->addToCart(
+                        productId: $slotData['product_id'],
+                        quantity:  1,
+                        variantId: $slotData['variant_id']
+                    );
+
+                    if (!$result['success']) {
+                        $addFailed   = true;
+                        $productData = collect($data['products'])->firstWhere('id', $slotData['product_id']);
+                        $name        = $productData ? $productData['name'] : $data['category_name'];
+                        $failMessage = "{$name}: {$result['message']}";
+                        break 2; // Exit both loops
+                    }
+                }
             }
-
-            // Track this addition for potential rollback
-            $newlyAddedItemKeys[] = [
-                'product_id' => $selection['product_id'],
-                'variant_id' => $selection['variant_id'],
-            ];
         }
 
-        // --- Rollback on failure ---
+        // ── Rollback on failure ─────────────────────────────────────────────
         if ($addFailed) {
             $currentCart = $cartService->getCart();
             if ($currentCart) {
                 $currentCart->load('items');
                 foreach ($currentCart->items as $item) {
                     $snapshotEntry = $snapshot[$item->id] ?? null;
-
                     if ($snapshotEntry) {
-                        // Existed before — restore original quantity if changed
                         if ($item->quantity !== $snapshotEntry['quantity']) {
                             $cartService->updateQuantity($item->id, $snapshotEntry['quantity']);
                         }
                     } else {
-                        // Newly added — remove it
                         $cartService->removeItem($item->id);
                     }
                 }
             }
 
             $this->globalError = $failMessage;
-            $this->processing = false;
+            $this->processing  = false;
             return;
         }
 
-        // --- Success: dispatch browser event for Pixel + JS redirect ---
-        $contentIds = collect($this->selections)->pluck('product_id')->filter()->values()->toArray();
+        // ── Success: dispatch Pixel + JS redirect ───────────────────────────
+        $contentIds = [];
+        foreach ($this->selections as $conditionId => $selectionData) {
+            $data = $this->conditionData[$conditionId] ?? null;
+            if (!$data) {
+                continue;
+            }
+
+            if ($data['type'] === 'product') {
+                $contentIds[] = $selectionData['product_id'];
+            } elseif ($data['type'] === 'category') {
+                foreach ($selectionData as $slot) {
+                    if ($slot['product_id']) {
+                        $contentIds[] = $slot['product_id'];
+                    }
+                }
+            }
+        }
 
         $this->dispatch('combo-added', [
-            'combo_name' => $this->combo->name,
-            'content_ids' => $contentIds,
-            'value' => $this->comboPrice,
-            'currency' => 'EGP',
-            'num_items' => count($contentIds),
-            'redirect_url' => route('cart'),
+            'combo_name'  => $this->combo->name,
+            'content_ids' => array_values(array_unique($contentIds)),
+            'value'       => $this->comboPrice,
+            'currency'    => 'EGP',
+            'num_items'   => count($contentIds),
+            'redirect_url'=> route('cart'),
         ]);
 
         $this->processing = false;
     }
 
-    /**
-     * Get the variants for a selected product in a category-type condition.
-     */
-    public function getSelectedProductVariants(int $conditionId): array
-    {
-        $data = $this->conditionData[$conditionId] ?? null;
-        $selection = $this->selections[$conditionId] ?? null;
-
-        if (!$data || !$selection || !$selection['product_id']) {
-            return [];
-        }
-
-        if ($data['type'] === 'product') {
-            return $data['variants'];
-        }
-
-        $productData = collect($data['products'])->firstWhere('id', $selection['product_id']);
-        return $productData ? $productData['variants'] : [];
-    }
+    // ─────────────────────────────────────────────────────────────────────────
+    // Helpers
+    // ─────────────────────────────────────────────────────────────────────────
 
     /**
      * Get all product IDs in this combo for Pixel events.
@@ -437,7 +527,7 @@ class ComboLandingPage extends Component
     {
         return view('livewire.store.combo-landing-page', [
             'conditionData' => $this->conditionData,
-            'selections' => $this->selections,
+            'selections'    => $this->selections,
         ])->layout('layouts.store', ['title' => $this->combo->name]);
     }
 }

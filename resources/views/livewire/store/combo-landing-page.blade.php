@@ -30,30 +30,27 @@
         {{-- Condition Sections --}}
         <div class="space-y-8 mb-10">
             @foreach($conditionData as $conditionId => $data)
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden transition-all duration-200
-                    {{ isset($errors[$conditionId]) ? 'ring-2 ring-red-300' : '' }}">
 
-                    {{-- Section Header --}}
-                    <div class="bg-gray-50 px-6 py-4 border-b border-gray-100">
-                        <div class="flex items-center justify-between">
-                            <h2 class="text-lg font-bold text-gray-900">
-                                @if($data['type'] === 'product')
-                                    {{ $data['product_name'] }}
-                                @else
-                                    اختر من: {{ $data['category_name'] }}
+                {{-- ═══════════════════════════════════════════════════════════
+                     PRODUCT-TYPE CONDITION — fixed product, choose variant only
+                ═══════════════════════════════════════════════════════════ --}}
+                @if($data['type'] === 'product')
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden
+                        {{ isset($errors[$conditionId]) ? 'ring-2 ring-red-300' : '' }}">
+
+                        <div class="bg-gray-50 px-6 py-4 border-b border-gray-100">
+                            <div class="flex items-center justify-between">
+                                <h2 class="text-lg font-bold text-gray-900">{{ $data['product_name'] }}</h2>
+                                @if($data['required_quantity'] > 1)
+                                    <span class="text-sm font-medium text-violet-600 bg-violet-50 px-3 py-1 rounded-full">
+                                        الكمية: {{ $data['required_quantity'] }}
+                                    </span>
                                 @endif
-                            </h2>
-                            @if($data['required_quantity'] > 1)
-                                <span class="text-sm font-medium text-violet-600 bg-violet-50 px-3 py-1 rounded-full">
-                                    الكمية: {{ $data['required_quantity'] }}
-                                </span>
-                            @endif
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="p-6">
-                        {{-- PRODUCT-TYPE: Show product info + variant selection --}}
-                        @if($data['type'] === 'product')
+                        <div class="p-6">
+                            {{-- Product info --}}
                             <div class="flex items-start gap-4 mb-4">
                                 <img src="{{ $data['product_image'] }}"
                                      alt="{{ $data['product_name'] }}"
@@ -67,9 +64,7 @@
                                             <span class="bg-red-100 text-red-700 text-xs font-bold px-2 py-0.5 rounded-full">خصم</span>
                                         </p>
                                     @else
-                                        <p class="text-sm text-gray-500">
-                                            {{ number_format($data['product_price'], 2) }} ج.م
-                                        </p>
+                                        <p class="text-sm text-gray-500">{{ number_format($data['product_price'], 2) }} ج.م</p>
                                     @endif
                                 </div>
                             </div>
@@ -105,91 +100,156 @@
                                 </div>
                             @endif
 
-                        {{-- CATEGORY-TYPE: Two-level selection --}}
-                        @elseif($data['type'] === 'category')
-                            {{-- Product selection --}}
-                            <div class="space-y-4">
-                                <label class="block text-sm font-semibold text-gray-700">اختر المنتج:</label>
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                                    @foreach($data['products'] as $product)
-                                        <button
-                                            type="button"
-                                            wire:click="selectProduct({{ $conditionId }}, {{ $product['id'] }})"
-                                            @class([
-                                                'flex items-center gap-3 p-3 border-2 rounded-lg transition-all duration-200 text-start',
-                                                'border-violet-600 bg-violet-50 ring-2 ring-violet-200' => ($selections[$conditionId]['product_id'] ?? null) === $product['id'],
-                                                'border-gray-300 hover:border-violet-400 hover:bg-gray-50' => ($selections[$conditionId]['product_id'] ?? null) !== $product['id'],
-                                            ])
-                                        >
-                                            <img src="{{ $product['image'] }}"
-                                                 alt="{{ $product['name'] }}"
-                                                 class="w-14 h-14 object-contain bg-white rounded border border-gray-200 flex-shrink-0">
-                                            <div class="min-w-0">
-                                                <p class="font-medium text-gray-900 text-sm truncate">{{ $product['name'] }}</p>
-                                                @if($product['is_on_sale'] ?? false)
-                                                    <p class="text-xs">
-                                                        <span class="text-gray-400 line-through">{{ number_format($product['regular_price'], 2) }} ج.م</span>
-                                                        <span class="text-red-600 font-semibold">{{ number_format($product['price'], 2) }} ج.م</span>
-                                                    </p>
-                                                @else
-                                                    <p class="text-sm text-gray-500">{{ number_format($product['price'], 2) }} ج.م</p>
-                                                @endif
-                                            </div>
-                                        </button>
-                                    @endforeach
+                            {{-- Error --}}
+                            @if(isset($errors[$conditionId]))
+                                <div class="mt-3 text-sm text-red-600 font-medium flex items-center gap-1">
+                                    <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                    </svg>
+                                    {{ $errors[$conditionId] }}
                                 </div>
+                            @endif
+                        </div>
+                    </div>
 
-                                {{-- Dynamic variant selection for the chosen product --}}
+                {{-- ═══════════════════════════════════════════════════════════
+                     CATEGORY-TYPE CONDITION — Mix & Match: one slot per unit
+                ═══════════════════════════════════════════════════════════ --}}
+                @elseif($data['type'] === 'category')
+                    @php
+                        $slotCount = $data['required_quantity'];
+                        $categorySlots = $selections[$conditionId] ?? [];
+                    @endphp
+
+                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                        <div class="bg-gray-50 px-6 py-4 border-b border-gray-100">
+                            <div class="flex items-center justify-between">
+                                <h2 class="text-lg font-bold text-gray-900">اختر من: {{ $data['category_name'] }}</h2>
+                                @if($slotCount > 1)
+                                    <span class="text-sm font-medium text-violet-600 bg-violet-50 px-3 py-1 rounded-full">
+                                        {{ $slotCount }} قطع
+                                    </span>
+                                @endif
+                            </div>
+                            @if($slotCount > 1)
+                                <p class="text-xs text-gray-500 mt-1">يمكنك اختيار منتجات مختلفة لكل قطعة (Mix & Match)</p>
+                            @endif
+                        </div>
+
+                        <div class="divide-y divide-gray-100">
+                            @for($slot = 0; $slot < $slotCount; $slot++)
                                 @php
-                                    $selectedProductId = $selections[$conditionId]['product_id'] ?? null;
-                                    $selectedProductData = $selectedProductId
-                                        ? collect($data['products'])->firstWhere('id', $selectedProductId)
+                                    $slotData       = $categorySlots[$slot] ?? ['product_id' => null, 'variant_id' => null];
+                                    $slotError      = $errors["{$conditionId}.{$slot}"] ?? null;
+                                    $selectedProdId = $slotData['product_id'];
+                                    $selectedProd   = $selectedProdId
+                                        ? collect($data['products'])->firstWhere('id', $selectedProdId)
                                         : null;
                                 @endphp
 
-                                @if($selectedProductData && $selectedProductData['has_variants'])
-                                    <div class="mt-4 pt-4 border-t border-gray-100">
-                                        <label class="block text-sm font-semibold text-gray-700 mb-2">اختر النوع:</label>
-                                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                                            @foreach($selectedProductData['variants'] as $variant)
+                                <div class="p-6 {{ $slotError ? 'bg-red-50/40' : '' }}">
+
+                                    {{-- Slot header (only when multiple slots) --}}
+                                    @if($slotCount > 1)
+                                        <div class="flex items-center gap-2 mb-4">
+                                            <span class="w-7 h-7 rounded-full bg-violet-600 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
+                                                {{ $slot + 1 }}
+                                            </span>
+                                            <span class="text-sm font-semibold text-gray-700">القطعة {{ $slot + 1 }}</span>
+                                            @if($selectedProd)
+                                                <span class="text-xs text-violet-600 bg-violet-50 px-2 py-0.5 rounded-full font-medium ms-auto">
+                                                    ✓ {{ $selectedProd['name'] }}
+                                                </span>
+                                            @endif
+                                        </div>
+                                    @endif
+
+                                    {{-- Product grid --}}
+                                    <div>
+                                        <label class="block text-sm font-semibold text-gray-700 mb-3">اختر المنتج:</label>
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                            @foreach($data['products'] as $product)
                                                 <button
                                                     type="button"
-                                                    wire:click="selectVariant({{ $conditionId }}, {{ $variant['id'] }})"
+                                                    wire:click="selectProductForSlot({{ $conditionId }}, {{ $slot }}, {{ $product['id'] }})"
                                                     @class([
-                                                        'px-4 py-3 border-2 rounded-lg text-sm font-medium transition-all duration-200',
-                                                        'border-violet-600 bg-violet-50 text-violet-700 ring-2 ring-violet-200' => ($selections[$conditionId]['variant_id'] ?? null) === $variant['id'],
-                                                        'border-gray-300 text-gray-700 hover:border-violet-400 hover:bg-gray-50' => ($selections[$conditionId]['variant_id'] ?? null) !== $variant['id'] && $variant['stock'] > 0,
-                                                        'border-gray-200 text-gray-400 cursor-not-allowed opacity-50' => $variant['stock'] <= 0,
+                                                        'flex items-center gap-3 p-3 border-2 rounded-lg transition-all duration-200 text-start',
+                                                        'border-violet-600 bg-violet-50 ring-2 ring-violet-200' => $selectedProdId === $product['id'],
+                                                        'border-gray-300 hover:border-violet-400 hover:bg-gray-50' => $selectedProdId !== $product['id'],
                                                     ])
-                                                    {{ $variant['stock'] <= 0 ? 'disabled' : '' }}
                                                 >
-                                                    <div class="flex flex-col items-center gap-1">
-                                                        <span>{{ $variant['name'] }}</span>
-                                                        @if($variant['stock'] <= 0)
-                                                            <span class="text-xs text-red-500">نفذ من المخزون</span>
-                                                        @elseif($variant['stock'] <= 5)
-                                                            <span class="text-xs text-orange-500">متبقي {{ $variant['stock'] }}</span>
+                                                    <img src="{{ $product['image'] }}"
+                                                         alt="{{ $product['name'] }}"
+                                                         class="w-14 h-14 object-contain bg-white rounded border border-gray-200 flex-shrink-0">
+                                                    <div class="min-w-0">
+                                                        <p class="font-medium text-gray-900 text-sm truncate">{{ $product['name'] }}</p>
+                                                        @if($product['is_on_sale'] ?? false)
+                                                            <p class="text-xs">
+                                                                <span class="text-gray-400 line-through">{{ number_format($product['regular_price'], 2) }} ج.م</span>
+                                                                <span class="text-red-600 font-semibold ms-1">{{ number_format($product['price'], 2) }} ج.م</span>
+                                                            </p>
+                                                        @else
+                                                            <p class="text-sm text-gray-500">{{ number_format($product['price'], 2) }} ج.م</p>
                                                         @endif
                                                     </div>
+                                                    @if($selectedProdId === $product['id'])
+                                                        <span class="ms-auto text-violet-600 flex-shrink-0">
+                                                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                                            </svg>
+                                                        </span>
+                                                    @endif
                                                 </button>
                                             @endforeach
                                         </div>
                                     </div>
-                                @endif
-                            </div>
-                        @endif
 
-                        {{-- Per-condition error --}}
-                        @if(isset($errors[$conditionId]))
-                            <div class="mt-3 text-sm text-red-600 font-medium flex items-center gap-1">
-                                <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
-                                </svg>
-                                {{ $errors[$conditionId] }}
-                            </div>
-                        @endif
+                                    {{-- Variant picker for selected product in this slot --}}
+                                    @if($selectedProd && $selectedProd['has_variants'])
+                                        <div class="mt-4 pt-4 border-t border-gray-100">
+                                            <label class="block text-sm font-semibold text-gray-700 mb-2">اختر النوع:</label>
+                                            <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                                @foreach($selectedProd['variants'] as $variant)
+                                                    <button
+                                                        type="button"
+                                                        wire:click="selectVariantForSlot({{ $conditionId }}, {{ $slot }}, {{ $variant['id'] }})"
+                                                        @class([
+                                                            'px-4 py-3 border-2 rounded-lg text-sm font-medium transition-all duration-200',
+                                                            'border-violet-600 bg-violet-50 text-violet-700 ring-2 ring-violet-200' => ($slotData['variant_id'] ?? null) === $variant['id'],
+                                                            'border-gray-300 text-gray-700 hover:border-violet-400 hover:bg-gray-50' => ($slotData['variant_id'] ?? null) !== $variant['id'] && $variant['stock'] > 0,
+                                                            'border-gray-200 text-gray-400 cursor-not-allowed opacity-50' => $variant['stock'] <= 0,
+                                                        ])
+                                                        {{ $variant['stock'] <= 0 ? 'disabled' : '' }}
+                                                    >
+                                                        <div class="flex flex-col items-center gap-1">
+                                                            <span>{{ $variant['name'] }}</span>
+                                                            @if($variant['stock'] <= 0)
+                                                                <span class="text-xs text-red-500">نفذ من المخزون</span>
+                                                            @elseif($variant['stock'] <= 5)
+                                                                <span class="text-xs text-orange-500">متبقي {{ $variant['stock'] }}</span>
+                                                            @endif
+                                                        </div>
+                                                    </button>
+                                                @endforeach
+                                            </div>
+                                        </div>
+                                    @endif
+
+                                    {{-- Slot error --}}
+                                    @if($slotError)
+                                        <div class="mt-3 text-sm text-red-600 font-medium flex items-center gap-1">
+                                            <svg class="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                                            </svg>
+                                            {{ $slotError }}
+                                        </div>
+                                    @endif
+                                </div>
+                            @endfor
+                        </div>
                     </div>
-                </div>
+                @endif
+
             @endforeach
         </div>
 
@@ -252,7 +312,6 @@
 @push('scripts')
 {{-- Facebook Pixel: ViewContent on page load --}}
 <script>
-    // Wait for pixel to be loaded (it's lazy-loaded after user interaction or 4s timeout)
     (function() {
         function fireViewContent() {
             if (typeof fbq !== 'undefined') {
@@ -265,7 +324,6 @@
                 });
             }
         }
-        // Retry until fbq is available (pixel loads lazily)
         var attempts = 0;
         var interval = setInterval(function() {
             attempts++;

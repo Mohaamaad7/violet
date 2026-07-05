@@ -6,12 +6,14 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\Action;
+use Filament\Actions\ReplicateAction;
 use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\IconColumn;
+use Illuminate\Support\Str;
 
 class ComboRulesTable
 {
@@ -63,6 +65,39 @@ class ComboRulesTable
                     ->url(fn ($record) => $record->slug ? route('combo.show', ['slug' => $record->slug]) : '#')
                     ->openUrlInNewTab()
                     ->visible(fn ($record) => filled($record?->slug)),
+                ReplicateAction::make()
+                    ->label('نسخ')
+                    ->icon('heroicon-m-document-duplicate')
+                    ->color('gray')
+                    ->tooltip('نسخ هذا العرض وتعديله')
+                    ->excludeAttributes(['slug'])
+                    ->beforeReplicating(function ($record) {
+                        // Handled in afterReplicating
+                    })
+                    ->afterReplicating(function ($original, $replica) {
+                        // Generate a unique slug
+                        $baseSlug = $original->slug . '-copy';
+                        $slug     = $baseSlug;
+                        $counter  = 2;
+                        while (\App\Models\ComboRule::withTrashed()->where('slug', $slug)->exists()) {
+                            $slug = $baseSlug . '-' . $counter++;
+                        }
+                        $replica->slug      = $slug;
+                        $replica->name      = $original->name . ' (نسخة)';
+                        $replica->is_active = false; // Start inactive so admin can review
+                        $replica->save();
+
+                        // Deep-clone conditions
+                        foreach ($original->conditions as $condition) {
+                            $replica->conditions()->create([
+                                'condition_type'    => $condition->condition_type,
+                                'category_id'       => $condition->category_id,
+                                'product_id'        => $condition->product_id,
+                                'required_quantity' => $condition->required_quantity,
+                            ]);
+                        }
+                    })
+                    ->successNotificationTitle('تم نسخ العرض بنجاح — يمكنك تعديله الآن'),
                 EditAction::make(),
             ])
             ->toolbarActions([
