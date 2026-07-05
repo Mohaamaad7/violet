@@ -71,9 +71,6 @@ class ComboRulesTable
                     ->color('gray')
                     ->tooltip('نسخ هذا العرض وتعديله')
                     ->excludeAttributes(['slug'])
-                    ->beforeReplicating(function ($record) {
-                        // Handled in afterReplicating
-                    })
                     ->afterReplicating(function ($original, $replica) {
                         // Generate a unique slug
                         $baseSlug = $original->slug . '-copy';
