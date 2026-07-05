@@ -171,7 +171,7 @@ class ComboRuleForm
                             ->rules([
                                 fn (): \Closure => function (string $attribute, mixed $value, \Closure $fail): void {
                                     if (is_array($value) && count($value) === 1) {
-                                        $condition = $value[0];
+                                        $condition = reset($value);
                                         if (($condition['required_quantity'] ?? 0) <= 1) {
                                             $fail('عند إضافة شرط واحد فقط، يجب أن تكون الكمية المطلوبة أكبر من 1.');
                                         }
