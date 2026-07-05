@@ -25,11 +25,23 @@ class ComboRulesTable
                     ->label('اسم العرض')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('tiers')
+                TextColumn::make('tiers_summary')
                     ->label('مستويات الخصم')
-                    ->formatStateUsing(function ($record) {
+                    ->state(function ($record) {
                         $count = is_array($record->tiers) ? count($record->tiers) : 0;
                         return $count . ' مستوى';
+                    })
+                    ->badge()
+                    ->color('info')
+                    ->tooltip(function ($record) {
+                        if (!is_array($record->tiers) || empty($record->tiers)) {
+                            return 'لا يوجد مستويات';
+                        }
+                        $details = [];
+                        foreach ($record->tiers as $tier) {
+                            $details[] = ($tier['quantity'] ?? 0) . ' قطع';
+                        }
+                        return implode(', ', $details);
                     }),
                 IconColumn::make('is_active')
                     ->label('مفعل')

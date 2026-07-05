@@ -215,9 +215,9 @@
 
                             {{-- Combo Discount --}}
                             @if($comboDiscountAmount > 0)
-                            <div class="flex items-center justify-between text-green-600">
-                                <span>خصم كومبو ({{ $comboRuleName }})</span>
-                                <span class="font-bold">-{{ number_format($comboDiscountAmount, 2) }} ج.م</span>
+                            <div class="flex flex-wrap items-center justify-between text-green-600 gap-1">
+                                <span class="whitespace-normal break-words text-sm sm:text-base">خصم كومبو ({{ $comboRuleName }})</span>
+                                <span class="font-bold whitespace-nowrap text-sm sm:text-base" dir="ltr">-{{ number_format($comboDiscountAmount, 2) }} ج.م</span>
                             </div>
                             @endif
 

@@ -296,11 +296,12 @@
                         <span class="text-xl text-gray-400 line-through">
                             {{ number_format($originalPrice, 2) }} ج.م
                         </span>
-                        <span class="bg-red-100 text-red-700 text-sm font-bold px-3 py-1 rounded-full">
+                        <span class="bg-red-100 text-red-700 text-sm font-bold px-3 py-1 rounded-full flex flex-wrap items-center justify-center gap-1">
                             @if(isset($tiers[$selectedTierIndex]) && $tiers[$selectedTierIndex]['discount_type'] === 'percentage')
-                                خصم {{ $tiers[$selectedTierIndex]['discount_percentage'] }}%
+                                <span class="whitespace-nowrap" dir="ltr">خصم {{ $tiers[$selectedTierIndex]['discount_percentage'] }}%</span>
                             @else
-                                وفّر {{ number_format($originalPrice - $comboPrice, 2) }} ج.م
+                                <span class="whitespace-normal break-words text-xs sm:text-sm">وفّر</span>
+                                <span class="whitespace-nowrap text-xs sm:text-sm" dir="ltr">{{ number_format($originalPrice - $comboPrice, 2) }} ج.م</span>
                             @endif
                         </span>
                     </div>

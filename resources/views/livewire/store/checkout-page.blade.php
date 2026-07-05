@@ -379,9 +379,9 @@
                                 </div>
                             </div>
                             @if($couponDiscount > 0)
-                                <div class="flex justify-between text-sm text-green-600">
-                                    <span>{{ __('messages.checkout.discount') }}</span>
-                                    <span class="font-medium">-{{ number_format($couponDiscount, 2) }} {{ __('messages.currency') }}</span>
+                                <div class="flex flex-wrap items-center justify-between text-sm text-green-600 gap-1">
+                                    <span class="whitespace-normal break-words">{{ __('messages.checkout.discount') }}</span>
+                                    <span class="font-medium whitespace-nowrap" dir="ltr">-{{ number_format($couponDiscount, 2) }} {{ __('messages.currency') }}</span>
                                 </div>
                             @endif
                             <div class="flex justify-between text-lg font-bold pt-3 border-t border-gray-200">
