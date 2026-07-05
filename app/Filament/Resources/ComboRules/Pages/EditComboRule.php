@@ -8,6 +8,7 @@ use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\ReplicateAction;
 use Filament\Actions\RestoreAction;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Database\Eloquent\Model;
 
 class EditComboRule extends EditRecord
 {
@@ -26,22 +27,22 @@ class EditComboRule extends EditRecord
                 ->icon('heroicon-m-document-duplicate')
                 ->color('gray')
                 ->tooltip('إنشاء نسخة من هذا العرض لتعديلها')
-                ->excludeAttributes(['slug'])
-                ->afterReplicating(function ($original, $replica) {
-                    // Generate a unique slug
-                    $baseSlug = $original->slug . '-copy';
+                ->excludeAttributes(['slug', 'name', 'is_active'])
+                ->beforeReplicaSaved(function (Model $replica, Model $record) {
+                    // Set unique slug, adjusted name, and inactive status before saving
+                    $baseSlug = $record->slug . '-copy';
                     $slug     = $baseSlug;
                     $counter  = 2;
                     while (\App\Models\ComboRule::withTrashed()->where('slug', $slug)->exists()) {
                         $slug = $baseSlug . '-' . $counter++;
                     }
                     $replica->slug      = $slug;
-                    $replica->name      = $original->name . ' (نسخة)';
-                    $replica->is_active = false; // Start inactive so admin can review
-                    $replica->save();
-
-                    // Deep-clone conditions
-                    foreach ($original->conditions as $condition) {
+                    $replica->name      = $record->name . ' (نسخة)';
+                    $replica->is_active = false;
+                })
+                ->after(function (Model $replica, Model $record) {
+                    // Deep-clone conditions after replica is saved (needs its ID)
+                    foreach ($record->conditions as $condition) {
                         $replica->conditions()->create([
                             'condition_type'    => $condition->condition_type,
                             'category_id'       => $condition->category_id,
@@ -50,8 +51,7 @@ class EditComboRule extends EditRecord
                         ]);
                     }
                 })
-                ->successRedirectUrl(fn ($replica) => ComboRuleResource::getUrl('edit', ['record' => $replica]))
-                ->successNotificationTitle('تم نسخ العرض بنجاح — جاري فتح النسخة الجديدة للتعديل'),
+                ->successNotificationTitle('تم نسخ العرض — افتحه وعدّل الكمية والسعر'),
             DeleteAction::make(),
             ForceDeleteAction::make(),
             RestoreAction::make(),

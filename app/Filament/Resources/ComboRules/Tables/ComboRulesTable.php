@@ -13,7 +13,7 @@ use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\IconColumn;
-use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Model;
 
 class ComboRulesTable
 {
@@ -70,22 +70,22 @@ class ComboRulesTable
                     ->icon('heroicon-m-document-duplicate')
                     ->color('gray')
                     ->tooltip('نسخ هذا العرض وتعديله')
-                    ->excludeAttributes(['slug'])
-                    ->afterReplicating(function ($original, $replica) {
-                        // Generate a unique slug
-                        $baseSlug = $original->slug . '-copy';
+                    ->excludeAttributes(['slug', 'name', 'is_active'])
+                    ->beforeReplicaSaved(function (Model $replica, Model $record) {
+                        // Set unique slug, adjusted name, and inactive status before saving
+                        $baseSlug = $record->slug . '-copy';
                         $slug     = $baseSlug;
                         $counter  = 2;
                         while (\App\Models\ComboRule::withTrashed()->where('slug', $slug)->exists()) {
                             $slug = $baseSlug . '-' . $counter++;
                         }
                         $replica->slug      = $slug;
-                        $replica->name      = $original->name . ' (نسخة)';
-                        $replica->is_active = false; // Start inactive so admin can review
-                        $replica->save();
-
-                        // Deep-clone conditions
-                        foreach ($original->conditions as $condition) {
+                        $replica->name      = $record->name . ' (نسخة)';
+                        $replica->is_active = false;
+                    })
+                    ->after(function (Model $replica, Model $record) {
+                        // Deep-clone conditions after replica is saved (needs its ID)
+                        foreach ($record->conditions as $condition) {
                             $replica->conditions()->create([
                                 'condition_type'    => $condition->condition_type,
                                 'category_id'       => $condition->category_id,
@@ -94,7 +94,7 @@ class ComboRulesTable
                             ]);
                         }
                     })
-                    ->successNotificationTitle('تم نسخ العرض بنجاح — يمكنك تعديله الآن'),
+                    ->successNotificationTitle('تم نسخ العرض — افتحه وعدّل الكمية والسعر'),
                 EditAction::make(),
             ])
             ->toolbarActions([
