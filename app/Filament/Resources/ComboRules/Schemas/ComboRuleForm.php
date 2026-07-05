@@ -141,7 +141,7 @@ class ComboRuleForm
                                     ->preload()
                                     ->required(fn ($get) => $get('condition_type') === 'product')
                                     ->hidden(fn ($get) => $get('condition_type') !== 'product')
-                                    ->hint(fn ($get) => {
+                                    ->hint(function ($get) {
                                         $productId = $get('product_id');
                                         if (!$productId) return null;
                                         $product = \App\Models\Product::find($productId);
@@ -150,7 +150,7 @@ class ComboRuleForm
                                         }
                                         return null;
                                     })
-                                    ->hintColor(fn ($get) => {
+                                    ->hintColor(function ($get) {
                                         $productId = $get('product_id');
                                         if (!$productId) return null;
                                         $product = \App\Models\Product::find($productId);
@@ -172,7 +172,7 @@ class ComboRuleForm
                                         </div>';
                                     })
                                     ->html()
-                                    ->visible(fn ($get) => {
+                                    ->visible(function ($get) {
                                         $productId = $get('product_id');
                                         if (!$productId) return false;
                                         $product = \App\Models\Product::find($productId);
