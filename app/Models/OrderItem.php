@@ -21,12 +21,15 @@ class OrderItem extends Model
         'price',
         'quantity',
         'subtotal',
+        'combo_instance_uuid',
+        'original_price',
     ];
 
     protected $casts = [
         'price' => 'decimal:2',
         'quantity' => 'integer',
         'subtotal' => 'decimal:2',
+        'original_price' => 'decimal:2',
     ];
 
     // Relations

@@ -11,6 +11,7 @@ return new class extends Migration {
      */
     public function up(): void
     {
+        if (DB::getDriverName() === 'sqlite') return;
         // Add 'return' to category enum
         DB::statement("ALTER TABLE `email_templates` MODIFY COLUMN `category` ENUM('order', 'auth', 'notification', 'marketing', 'return') NOT NULL DEFAULT 'notification'");
     }
@@ -20,6 +21,7 @@ return new class extends Migration {
      */
     public function down(): void
     {
+        if (DB::getDriverName() === 'sqlite') return;
         // Remove 'return' from category enum
         DB::statement("ALTER TABLE `email_templates` MODIFY COLUMN `category` ENUM('order', 'auth', 'notification', 'marketing') NOT NULL DEFAULT 'notification'");
     }

@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\DB;
 return new class extends Migration {
     public function up(): void
     {
-        // Modify payment_method enum to include wallet and kiosk
+        if (DB::getDriverName() === 'sqlite') return;
         DB::statement("ALTER TABLE payments MODIFY COLUMN payment_method ENUM(
             'card',
             'vodafone_cash',
@@ -26,7 +26,7 @@ return new class extends Migration {
 
     public function down(): void
     {
-        // Revert to original enum values
+        if (DB::getDriverName() === 'sqlite') return;
         DB::statement("ALTER TABLE payments MODIFY COLUMN payment_method ENUM(
             'card',
             'vodafone_cash',

@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 return new class extends Migration {
     public function up(): void
     {
+        if (DB::getDriverName() === 'sqlite') return;
         // Use raw SQL to modify the enum since Laravel's enum change has limitations
         DB::statement("ALTER TABLE orders MODIFY COLUMN payment_method ENUM(
             'cod',
@@ -29,6 +30,7 @@ return new class extends Migration {
 
     public function down(): void
     {
+        if (DB::getDriverName() === 'sqlite') return;
         DB::statement("ALTER TABLE orders MODIFY COLUMN payment_method ENUM(
             'cod',
             'card',

@@ -16,10 +16,14 @@ class CartItem extends Model
         'product_variant_id',
         'quantity',
         'price',
+        'combo_instance_uuid',
+        'original_price',
     ];
 
     protected $casts = [
         'quantity' => 'integer',
+        'price' => 'decimal:2',
+        'original_price' => 'decimal:2',
     ];
 
     public function cart(): BelongsTo

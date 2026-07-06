@@ -11,6 +11,7 @@ return new class extends Migration {
      */
     public function up(): void
     {
+        if (DB::getDriverName() === 'sqlite') return;
         // Add 'stock_count' to the type enum
         DB::statement("ALTER TABLE stock_movements MODIFY COLUMN type ENUM('restock', 'sale', 'return', 'adjustment', 'expired', 'damaged', 'stock_count') NOT NULL");
     }
@@ -20,6 +21,7 @@ return new class extends Migration {
      */
     public function down(): void
     {
+        if (DB::getDriverName() === 'sqlite') return;
         DB::statement("ALTER TABLE stock_movements MODIFY COLUMN type ENUM('restock', 'sale', 'return', 'adjustment', 'expired', 'damaged') NOT NULL");
     }
 };

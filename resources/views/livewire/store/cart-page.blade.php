@@ -1,5 +1,5 @@
 {{-- Shopping Cart Page --}}
-<div>
+<div x-data="{ comboDeleteModal: @entangle('comboDeleteModal') }">
     {{-- Breadcrumbs --}}
     <div class="bg-gray-50 border-b border-gray-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -46,111 +46,145 @@
 
                         {{-- Cart Items List --}}
                         <div class="divide-y divide-gray-200">
-                            @foreach($cart->items as $item)
-                                <div class="p-6 hover:bg-gray-50 transition" wire:key="cart-item-{{ $item->id }}">
-                                    <div class="flex gap-4">
-                                        {{-- Product Image --}}
-                                        <div
-                                            class="w-24 h-24 flex-shrink-0 bg-white rounded-lg overflow-hidden border-2 border-gray-200">
-                                            @php
-                                                $primaryMedia = $item->product->getMedia('product-images')->first();
-                                                $imagePath = $primaryMedia
-                                                    ? ($primaryMedia->hasGeneratedConversion('thumbnail')
-                                                        ? $primaryMedia->getUrl('thumbnail')
-                                                        : $primaryMedia->getUrl())
-                                                    : asset('images/default-product.svg');
-                                            @endphp
-                                            <a href="{{ route('product.show', $item->product->slug) }}" wire:navigate>
-                                                <img src="{{ $imagePath }}" alt="{{ $item->product->name }}"
-                                                    class="w-full h-full object-cover hover:scale-110 transition-transform duration-300">
-                                            </a>
+                            @if($groupedItems)
+                                @foreach($groupedItems as $groupKey => $items)
+                                    @php
+                                        $isComboGroup = $items->first()->combo_instance_uuid !== null;
+                                    @endphp
+
+                                    {{-- Combo Group Header --}}
+                                    @if($isComboGroup)
+                                        <div class="bg-violet-50 border-b-2 border-violet-200 px-6 py-3">
+                                            <div class="flex items-center gap-2">
+                                                <span class="text-lg">🎁</span>
+                                                <span class="text-sm font-bold text-violet-700">عرض كومبو / Combo Offer</span>
+                                            </div>
+                                            <p class="text-xs text-violet-500 mt-1">لتغيير الاختيار، احذف العرض وابدأ من جديد</p>
                                         </div>
+                                    @endif
 
-                                        {{-- Product Details --}}
-                                        <div class="flex-1 min-w-0">
-                                            {{-- Product Name --}}
-                                            <a href="{{ route('product.show', $item->product->slug) }}" wire:navigate
-                                                class="text-lg font-semibold text-gray-900 hover:text-violet-600 transition">
-                                                {{ $item->product->name }}
-                                            </a>
-
-                                            {{-- Variant Info --}}
-                                            @if($item->variant)
-                                                <p class="text-sm text-gray-500 mt-1">
-                                                    <span class="font-medium">{{ __('store.cart.option') }}:</span>
-                                                    {{ $item->variant->name }}
-                                                </p>
-                                            @endif
-
-                                            {{-- Category --}}
-                                            @if($item->product->category)
-                                                <p class="text-xs text-gray-400 mt-1">
-                                                    {{ $item->product->category->name }}
-                                                </p>
-                                            @endif
-
-                                            {{-- Price & Quantity Controls --}}
-                                            <div class="flex items-center justify-between mt-4">
-                                                {{-- Quantity Controls --}}
-                                                <div class="flex items-center gap-3">
-                                                    <span
-                                                        class="text-sm text-gray-600 font-medium">{{ __('store.cart.quantity') }}:</span>
-                                                    <div class="flex items-center gap-2">
-                                                        <button
-                                                            wire:click="updateQuantity({{ $item->id }}, {{ $item->quantity - 1 }})"
-                                                            class="w-8 h-8 flex items-center justify-center bg-gray-200 hover:bg-gray-300 rounded-lg transition"
-                                                            {{ $item->quantity <= 1 ? 'disabled' : '' }}>
-                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor"
-                                                                viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    stroke-width="2" d="M20 12H4" />
-                                                            </svg>
-                                                        </button>
-
-                                                        <input type="number" wire:model.lazy="item.quantity"
-                                                            wire:change="updateQuantity({{ $item->id }}, $event.target.value)"
-                                                            class="w-16 text-center font-semibold text-gray-900 border-2 border-gray-300 rounded-lg focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none"
-                                                            min="1" value="{{ $item->quantity }}">
-
-                                                        <button
-                                                            wire:click="updateQuantity({{ $item->id }}, {{ $item->quantity + 1 }})"
-                                                            class="w-8 h-8 flex items-center justify-center bg-gray-200 hover:bg-gray-300 rounded-lg transition">
-                                                            <svg class="w-4 h-4" fill="none" stroke="currentColor"
-                                                                viewBox="0 0 24 24">
-                                                                <path stroke-linecap="round" stroke-linejoin="round"
-                                                                    stroke-width="2" d="M12 4v16m8-8H4" />
-                                                            </svg>
-                                                        </button>
-                                                    </div>
+                                    @foreach($items as $item)
+                                        <div class="p-6 hover:bg-gray-50 transition {{ $isComboGroup ? 'border-s-4 border-violet-300 bg-violet-50/30' : '' }}" wire:key="cart-item-{{ $item->id }}">
+                                            <div class="flex gap-4">
+                                                {{-- Product Image --}}
+                                                <div
+                                                    class="w-24 h-24 flex-shrink-0 bg-white rounded-lg overflow-hidden border-2 border-gray-200">
+                                                    @php
+                                                        $primaryMedia = $item->product->getMedia('product-images')->first();
+                                                        $imagePath = $primaryMedia
+                                                            ? ($primaryMedia->hasGeneratedConversion('thumbnail')
+                                                                ? $primaryMedia->getUrl('thumbnail')
+                                                                : $primaryMedia->getUrl())
+                                                            : asset('images/default-product.svg');
+                                                    @endphp
+                                                    <a href="{{ route('product.show', $item->product->slug) }}" wire:navigate>
+                                                        <img src="{{ $imagePath }}" alt="{{ $item->product->name }}"
+                                                            class="w-full h-full object-cover hover:scale-110 transition-transform duration-300">
+                                                    </a>
                                                 </div>
 
-                                                {{-- Item Total Price --}}
-                                                <div class="text-right">
-                                                    <p class="text-sm text-gray-500">{{ __('store.cart.price') }}</p>
-                                                    <p class="text-xl font-bold text-violet-600">
-                                                        {{ number_format($item->price * $item->quantity, 2) }} ج.م
-                                                    </p>
-                                                    @if($item->quantity > 1)
-                                                        <p class="text-xs text-gray-400">
-                                                            ({{ number_format($item->price, 2) }} × {{ $item->quantity }})
+                                                {{-- Product Details --}}
+                                                <div class="flex-1 min-w-0">
+                                                    {{-- Product Name --}}
+                                                    <a href="{{ route('product.show', $item->product->slug) }}" wire:navigate
+                                                        class="text-lg font-semibold text-gray-900 hover:text-violet-600 transition">
+                                                        {{ $item->product->name }}
+                                                    </a>
+
+                                                    {{-- Variant Info --}}
+                                                    @if($item->variant)
+                                                        <p class="text-sm text-gray-500 mt-1">
+                                                            <span class="font-medium">{{ __('store.cart.option') }}:</span>
+                                                            {{ $item->variant->name }}
                                                         </p>
                                                     @endif
+
+                                                    {{-- Category --}}
+                                                    @if($item->product->category)
+                                                        <p class="text-xs text-gray-400 mt-1">
+                                                            {{ $item->product->category->name }}
+                                                        </p>
+                                                    @endif
+
+                                                    {{-- Price & Quantity Controls --}}
+                                                    <div class="flex items-center justify-between mt-4">
+                                                        {{-- Quantity Controls --}}
+                                                        <div class="flex items-center gap-3">
+                                                            <span
+                                                                class="text-sm text-gray-600 font-medium">{{ __('store.cart.quantity') }}:</span>
+
+                                                            @if($isComboGroup)
+                                                                {{-- COMBO: Static quantity (disabled) --}}
+                                                                <div class="flex items-center gap-2">
+                                                                    <span class="w-16 text-center font-semibold text-gray-900 border-2 border-gray-200 rounded-lg py-1 bg-gray-100 cursor-not-allowed">
+                                                                        {{ $item->quantity }}
+                                                                    </span>
+                                                                </div>
+                                                            @else
+                                                                {{-- REGULAR: Interactive quantity --}}
+                                                                <div class="flex items-center gap-2">
+                                                                    <button
+                                                                        wire:click="updateQuantity({{ $item->id }}, {{ $item->quantity - 1 }})"
+                                                                        class="w-8 h-8 flex items-center justify-center bg-gray-200 hover:bg-gray-300 rounded-lg transition"
+                                                                        {{ $item->quantity <= 1 ? 'disabled' : '' }}>
+                                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                                            viewBox="0 0 24 24">
+                                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                                stroke-width="2" d="M20 12H4" />
+                                                                        </svg>
+                                                                    </button>
+
+                                                                    <input type="number" wire:model.lazy="item.quantity"
+                                                                        wire:change="updateQuantity({{ $item->id }}, $event.target.value)"
+                                                                        class="w-16 text-center font-semibold text-gray-900 border-2 border-gray-300 rounded-lg focus:border-violet-500 focus:ring-2 focus:ring-violet-200 focus:outline-none"
+                                                                        min="1" value="{{ $item->quantity }}">
+
+                                                                    <button
+                                                                        wire:click="updateQuantity({{ $item->id }}, {{ $item->quantity + 1 }})"
+                                                                        class="w-8 h-8 flex items-center justify-center bg-gray-200 hover:bg-gray-300 rounded-lg transition">
+                                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor"
+                                                                            viewBox="0 0 24 24">
+                                                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                                                stroke-width="2" d="M12 4v16m8-8H4" />
+                                                                        </svg>
+                                                                    </button>
+                                                                </div>
+                                                            @endif
+                                                        </div>
+
+                                                        {{-- Item Total Price --}}
+                                                        <div class="text-right">
+                                                            <p class="text-sm text-gray-500">{{ __('store.cart.price') }}</p>
+                                                            <p class="text-xl font-bold text-violet-600">
+                                                                <span dir="ltr" class="whitespace-nowrap">{{ number_format($item->price * $item->quantity, 2) }} ج.م</span>
+                                                            </p>
+                                                            @if($item->original_price && $item->original_price > $item->price)
+                                                                <p class="text-xs text-gray-400 line-through" dir="ltr">
+                                                                    {{ number_format($item->original_price * $item->quantity, 2) }} ج.م
+                                                                </p>
+                                                            @elseif($item->quantity > 1 && !$isComboGroup)
+                                                                <p class="text-xs text-gray-400">
+                                                                    ({{ number_format($item->price, 2) }} × {{ $item->quantity }})
+                                                                </p>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+
+                                                    {{-- Remove Button --}}
+                                                    <button wire:click="confirmRemoveItem({{ $item->id }})"
+                                                        class="mt-3 text-sm text-red-600 hover:text-red-800 font-medium flex items-center gap-1">
+                                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                        </svg>
+                                                        {{ __('store.cart.remove') }}
+                                                    </button>
                                                 </div>
                                             </div>
-
-                                            {{-- Remove Button --}}
-                                            <button wire:click="removeItem({{ $item->id }})"
-                                                class="mt-3 text-sm text-red-600 hover:text-red-800 font-medium flex items-center gap-1">
-                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                </svg>
-                                                {{ __('store.cart.remove') }}
-                                            </button>
                                         </div>
-                                    </div>
-                                </div>
-                            @endforeach
+                                    @endforeach
+                                @endforeach
+                            @endif
                         </div>
 
                         {{-- Continue Shopping --}}
@@ -180,7 +214,7 @@
                             {{-- Subtotal --}}
                             <div class="flex items-center justify-between">
                                 <span class="text-gray-600">{{ __('store.cart.subtotal') }}</span>
-                                <span class="font-semibold text-gray-900">{{ number_format($subtotal, 2) }} ج.م</span>
+                                <span class="font-semibold text-gray-900" dir="ltr">{{ number_format($subtotal, 2) }} ج.م</span>
                             </div>
 
                             {{-- Shipping Discount Message --}}
@@ -195,7 +229,7 @@
                                 @else
                                     <div class="rounded-lg border p-3 bg-white border-gray-300 text-center">
                                         <p class="text-sm text-gray-700">
-                                            أضف <strong>{{ number_format($prog['remaining'], 2) }} ج.م</strong> للحصول على خصم <strong>{{ $prog['percentage'] }}%</strong> على الشحن
+                                            أضف <strong><span dir="ltr" class="whitespace-nowrap">{{ number_format($prog['remaining'], 2) }} ج.م</span></strong> للحصول على خصم <strong>{{ $prog['percentage'] }}%</strong> على الشحن
                                         </p>
                                     </div>
                                 @endif
@@ -213,18 +247,18 @@
                             </p>
                             @endif
 
-                            {{-- Combo Discount --}}
-                            @if($comboDiscountAmount > 0)
-                            <div class="flex items-center justify-between text-green-600">
-                                <span>خصم كومبو ({{ $comboRuleName }})</span>
-                                <span class="font-bold">-{{ number_format($comboDiscountAmount, 2) }} ج.م</span>
+                            {{-- Combo Savings (replaces old comboDiscountAmount line) --}}
+                            @if($comboSavings > 0)
+                            <div class="flex flex-wrap items-center justify-between text-green-600 gap-1">
+                                <span class="whitespace-normal break-words text-sm sm:text-base">🎁 وفّرت مع الكومبو</span>
+                                <span class="font-bold whitespace-nowrap text-sm sm:text-base" dir="ltr">-{{ number_format($comboSavings, 2) }} ج.م</span>
                             </div>
                             @endif
 
                             {{-- Tax (VAT 15%) --}}
                             <div class="flex items-center justify-between">
                                 <span class="text-gray-600">{{ __('store.cart.tax') }}</span>
-                                <span class="font-semibold text-gray-900">{{ number_format($taxAmount, 2) }} ج.م</span>
+                                <span class="font-semibold text-gray-900" dir="ltr">{{ number_format($taxAmount, 2) }} ج.م</span>
                             </div>
 
                             {{-- Divider --}}
@@ -232,7 +266,7 @@
                                 {{-- Total --}}
                                 <div class="flex items-center justify-between">
                                     <span class="text-lg font-bold text-gray-900">{{ __('store.cart.total') }}</span>
-                                    <span class="text-2xl font-bold text-violet-600">{{ number_format($total, 2) }}
+                                    <span class="text-2xl font-bold text-violet-600" dir="ltr">{{ number_format($total, 2) }}
                                         ج.م</span>
                                 </div>
                             </div>
@@ -275,5 +309,62 @@
                 </div>
             </div>
         @endif
+    </div>
+
+    {{-- Custom Combo Delete Confirmation Modal (Alpine.js) --}}
+    <div x-show="comboDeleteModal.show"
+         x-transition:enter="transition ease-out duration-200"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-50 flex items-center justify-center"
+         x-cloak>
+        {{-- Backdrop --}}
+        <div class="fixed inset-0 bg-black/50" @click="$wire.dismissComboDeleteModal()"></div>
+
+        {{-- Modal Content --}}
+        <div class="relative bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 p-6 z-10"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 scale-95"
+             x-transition:enter-end="opacity-100 scale-100">
+            {{-- Icon --}}
+            <div class="flex items-center justify-center w-12 h-12 mx-auto mb-4 rounded-full bg-red-100">
+                <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" />
+                </svg>
+            </div>
+
+            {{-- Title --}}
+            <h3 class="text-lg font-bold text-gray-900 text-center mb-2">حذف عرض الكومبو</h3>
+
+            {{-- Dynamic Message --}}
+            <p class="text-sm text-gray-600 text-center mb-4">
+                هذا المنتج جزء من عرض كومبو. سيتم حذف جميع المنتجات التالية معه:
+            </p>
+
+            {{-- Sibling Product List --}}
+            <ul class="bg-gray-50 rounded-lg p-3 mb-6 space-y-2" x-show="comboDeleteModal.siblingNames && comboDeleteModal.siblingNames.length > 0">
+                <template x-for="(name, index) in comboDeleteModal.siblingNames" :key="index">
+                    <li class="flex items-center gap-2 text-sm text-gray-700">
+                        <span class="text-red-500">✕</span>
+                        <span x-text="name"></span>
+                    </li>
+                </template>
+            </ul>
+
+            {{-- Action Buttons --}}
+            <div class="flex gap-3">
+                <button @click="$wire.dismissComboDeleteModal()"
+                    class="flex-1 py-2.5 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition">
+                    إلغاء
+                </button>
+                <button @click="$wire.confirmComboDelete()"
+                    class="flex-1 py-2.5 px-4 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg transition">
+                    حذف العرض بالكامل
+                </button>
+            </div>
+        </div>
     </div>
 </div>

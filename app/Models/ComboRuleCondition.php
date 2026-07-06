@@ -18,6 +18,10 @@ class ComboRuleCondition extends Model
         'required_quantity',
     ];
 
+    protected $hidden = [
+        'required_quantity',
+    ];
+
     protected $casts = [
         'condition_type' => 'string',
         'required_quantity' => 'integer',

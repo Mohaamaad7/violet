@@ -11,7 +11,7 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        // Add 'pending' to payment_status enum
+        if (DB::getDriverName() === 'sqlite') return;
         DB::statement("ALTER TABLE orders MODIFY COLUMN payment_status ENUM('unpaid', 'pending', 'paid', 'failed', 'refunded') DEFAULT 'unpaid'");
     }
 
@@ -20,7 +20,7 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        // Revert to original enum values
+        if (DB::getDriverName() === 'sqlite') return;
         DB::statement("ALTER TABLE orders MODIFY COLUMN payment_status ENUM('unpaid', 'paid', 'failed', 'refunded') DEFAULT 'unpaid'");
     }
 };

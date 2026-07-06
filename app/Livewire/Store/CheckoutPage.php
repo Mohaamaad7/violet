@@ -58,10 +58,8 @@ class CheckoutPage extends Component
     public $couponDiscount = 0;
     public $couponError = '';
 
-    // Combo Discount
-    public $comboDiscountAmount = 0;
-    public $comboRuleId = null;
-    public $comboRuleName = '';
+    // Combo Savings (aggregated from locked proportional prices in cart_items)
+    public $comboSavings = 0;
 
     // Cart Data
     public $cartItems = [];
@@ -303,31 +301,26 @@ class CheckoutPage extends Component
                     $imageUrl = is_string($mediaUrl) ? $mediaUrl : '';
                 }
 
+                // Use locked price from cart_item (already proportionally distributed for combos)
                 return [
                     'id' => $item->id,
                     'product_id' => $item->product_id,
+                    'product_variant_id' => $item->product_variant_id,
                     'name' => $productName,
-                    'price' => $item->product->sale_price ?? $item->product->price ?? 0,
+                    'price' => (float) $item->price,
+                    'original_price' => $item->original_price ? (float) $item->original_price : null,
                     'quantity' => $item->quantity,
                     'image' => $imageUrl,
-                    'subtotal' => $item->quantity * ($item->product->sale_price ?? $item->product->price ?? 0),
+                    'subtotal' => $item->quantity * (float) $item->price,
+                    'combo_instance_uuid' => $item->combo_instance_uuid,
                 ];
             })->toArray();
 
             $this->subtotal = collect($this->cartItems)->sum('subtotal');
             $this->calculateShippingCost(); // Dynamic shipping calculation
 
-            // Load combo discount
-            $comboData = $this->cartService->getComboDiscount($this->getCustomerId());
-            if ($comboData) {
-                $this->comboRuleId = $comboData['rule_id'];
-                $this->comboRuleName = $comboData['rule_name'];
-                $this->comboDiscountAmount = $comboData['discount_amount'];
-            } else {
-                $this->comboRuleId = null;
-                $this->comboRuleName = '';
-                $this->comboDiscountAmount = 0;
-            }
+            // Combo savings from locked proportional prices
+            $this->comboSavings = $this->cartService->getComboSavings();
 
             $this->recalculateTotal();
         } else {
@@ -335,9 +328,7 @@ class CheckoutPage extends Component
             $this->subtotal = 0;
             $this->shippingCost = 0;
             $this->total = 0;
-            $this->comboRuleId = null;
-            $this->comboRuleName = '';
-            $this->comboDiscountAmount = 0;
+            $this->comboSavings = 0;
         }
     }
 
@@ -346,7 +337,7 @@ class CheckoutPage extends Component
      */
     protected function recalculateTotal(): void
     {
-        $this->total = $this->subtotal + $this->shippingCost - $this->couponDiscount - $this->comboDiscountAmount;
+        $this->total = $this->subtotal + $this->shippingCost - $this->couponDiscount;
     }
 
     /**
@@ -698,25 +689,22 @@ class CheckoutPage extends Component
                     'shipping_cost'            => $this->baseShippingCost,       // Original geographic cost
                     'shipping_discount_amount' => $this->shippingDiscountAmount,  // Auto-discount (new field)
                     'discount_amount'          => $this->couponDiscount,          // Coupon discount only
-                    'combo_rule_id'            => $this->comboRuleId,
-                    'combo_discount_amount'    => $this->comboDiscountAmount,
+                    'combo_discount_amount'    => $this->comboSavings,            // Informational: total combo savings
                     'tax_amount'               => 0,
                     'total'                    => $this->total,
                 ]);
 
                 // Create Order Items & Decrement Stock
+                // Prices are already locked on cart_items (proportionally distributed for combos)
                 foreach ($cart->items as $cartItem) {
                     $product = Product::find($cartItem->product_id);
                     $variant = $cartItem->product_variant_id
                         ? $product->variants()->find($cartItem->product_variant_id)
                         : null;
 
-                    // Get price (variant or product)
-                    $price = $variant
-                        ? ($variant->sale_price ?? $variant->price)
-                        : ($product->sale_price ?? $product->price);
+                    // Use the locked price from the cart item
+                    $price = (float) $cartItem->price;
 
-                    // Create order item
                     OrderItem::create([
                         'order_id' => $order->id,
                         'product_id' => $product->id,
@@ -727,6 +715,8 @@ class CheckoutPage extends Component
                         'price' => $price,
                         'quantity' => $cartItem->quantity,
                         'subtotal' => $price * $cartItem->quantity,
+                        'combo_instance_uuid' => $cartItem->combo_instance_uuid,
+                        'original_price' => $cartItem->original_price,
                     ]);
 
                     // Decrement stock
@@ -751,15 +741,6 @@ class CheckoutPage extends Component
                 $finalOrderNumber = "VLT-{$date}-{$time}-{$orderId}";
 
                 $order->update(['order_number' => $finalOrderNumber]);
-
-                // Record combo usage if any
-                if ($this->comboRuleId) {
-                    app(\App\Services\ComboDiscountService::class)->recordUsage(
-                        $this->comboRuleId,
-                        $order->id,
-                        $this->getCustomerId()
-                    );
-                }
 
                 // Clear cart session cookie for guests
                 if (!$this->getCustomer()) {

@@ -43,7 +43,8 @@
                     @if($cart && $cart->items->count() > 0)
                         <div class="space-y-4">
                             @foreach($cart->items as $item)
-                                <div class="flex gap-4 p-4 bg-gray-50 rounded-lg" wire:key="cart-item-{{ $item->id }}">
+                                @php $isCombo = $item->combo_instance_uuid !== null; @endphp
+                                <div class="flex gap-4 p-4 {{ $isCombo ? 'bg-violet-50 border border-violet-200' : 'bg-gray-50' }} rounded-lg" wire:key="cart-item-{{ $item->id }}">
                                     {{-- Product Image --}}
                                     <div
                                         class="w-20 h-20 flex-shrink-0 bg-white rounded-lg overflow-hidden border border-gray-200">
@@ -61,6 +62,9 @@
 
                                     {{-- Product Info --}}
                                     <div class="flex-1 min-w-0">
+                                        @if($isCombo)
+                                            <span class="inline-block text-xs font-bold text-violet-600 bg-violet-100 px-2 py-0.5 rounded-full mb-1">🎁 كومبو</span>
+                                        @endif
                                         <h3 class="text-sm font-semibold text-gray-900 truncate">
                                             {{ $item->product->name }}
                                         </h3>
@@ -74,36 +78,48 @@
                                         <div class="flex items-center justify-between mt-2">
                                             {{-- Quantity Controls --}}
                                             <div class="flex items-center gap-2">
-                                                {{-- Decrease Button --}}
-                                                <button wire:click="updateQuantity({{ $item->id }}, {{ $item->quantity - 1 }})"
-                                                    @disabled($item->quantity <= 1)
-                                                    class="w-7 h-7 flex items-center justify-center bg-white border border-gray-300 rounded hover:bg-gray-100 transition disabled:opacity-50 disabled:cursor-not-allowed">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                            d="M20 12H4" />
-                                                    </svg>
-                                                </button>
+                                                @if($isCombo)
+                                                    {{-- COMBO: Static quantity --}}
+                                                    <span class="w-8 text-center font-semibold text-gray-500 bg-gray-100 rounded px-2 py-0.5">
+                                                        {{ $item->quantity }}
+                                                    </span>
+                                                @else
+                                                    {{-- Decrease Button --}}
+                                                    <button wire:click="updateQuantity({{ $item->id }}, {{ $item->quantity - 1 }})"
+                                                        @disabled($item->quantity <= 1)
+                                                        class="w-7 h-7 flex items-center justify-center bg-white border border-gray-300 rounded hover:bg-gray-100 transition disabled:opacity-50 disabled:cursor-not-allowed">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                                d="M20 12H4" />
+                                                        </svg>
+                                                    </button>
 
-                                                {{-- Quantity Display --}}
-                                                <span class="w-8 text-center font-semibold text-gray-900">
-                                                    {{ $item->quantity }}
-                                                </span>
+                                                    {{-- Quantity Display --}}
+                                                    <span class="w-8 text-center font-semibold text-gray-900">
+                                                        {{ $item->quantity }}
+                                                    </span>
 
-                                                {{-- Increase Button --}}
-                                                <button wire:click="updateQuantity({{ $item->id }}, {{ $item->quantity + 1 }})"
-                                                    class="w-7 h-7 flex items-center justify-center bg-white border border-gray-300 rounded hover:bg-gray-100 transition">
-                                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                            d="M12 4v16m8-8H4" />
-                                                    </svg>
-                                                </button>
+                                                    {{-- Increase Button --}}
+                                                    <button wire:click="updateQuantity({{ $item->id }}, {{ $item->quantity + 1 }})"
+                                                        class="w-7 h-7 flex items-center justify-center bg-white border border-gray-300 rounded hover:bg-gray-100 transition">
+                                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                                d="M12 4v16m8-8H4" />
+                                                        </svg>
+                                                    </button>
+                                                @endif
                                             </div>
 
                                             {{-- Price --}}
                                             <div class="text-right">
-                                                <p class="text-sm font-bold text-violet-600">
+                                                <p class="text-sm font-bold text-violet-600" dir="ltr">
                                                     {{ number_format($item->price * $item->quantity, 2) }} ج.م
                                                 </p>
+                                                @if($item->original_price && $item->original_price > $item->price)
+                                                    <p class="text-xs text-gray-400 line-through" dir="ltr">
+                                                        {{ number_format($item->original_price * $item->quantity, 2) }} ج.م
+                                                    </p>
+                                                @endif
                                             </div>
                                         </div>
 

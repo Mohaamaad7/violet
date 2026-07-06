@@ -160,10 +160,11 @@ class CartService
 
         $cart = $this->getOrCreateCart();
 
-        // Check if item already exists in cart
+        // Check if item already exists in cart (only non-combo items can merge)
         $existingItem = $cart->items()
             ->where('product_id', $productId)
             ->where('product_variant_id', $variantId)
+            ->whereNull('combo_instance_uuid')
             ->first();
 
         if ($existingItem) {
@@ -217,7 +218,65 @@ class CartService
     }
 
     /**
+     * Add a locked combo bundle to the cart.
+     *
+     * Each item receives the pre-calculated proportional price and original price.
+     * Items in a combo bundle are NEVER merged with existing cart items.
+     *
+     * @param array $items Array of ['product_id', 'variant_id', 'quantity', 'price', 'original_price']
+     * @param string $comboInstanceUuid The unique bundle grouping key
+     * @return array ['success' => bool, 'message' => string]
+     */
+    public function addComboToCart(array $items, string $comboInstanceUuid): array
+    {
+        // IDOR: Ensure we are writing to the correct cart for this session/user
+        $cart = $this->getOrCreateCart();
+
+        // Validate stock for ALL items first (atomic: all-or-nothing)
+        foreach ($items as $item) {
+            $product = Product::with('variants')->find($item['product_id']);
+
+            if (!$product) {
+                return [
+                    'success' => false,
+                    'message' => 'المنتج غير موجود',
+                ];
+            }
+
+            $maxStock = $this->getProductMaxStock($product, $item['variant_id'] ?? null);
+
+            if ($maxStock < ($item['quantity'] ?? 1)) {
+                return [
+                    'success' => false,
+                    'message' => "{$product->name}: المنتج غير متوفر بالكمية المطلوبة (متبقي {$maxStock})",
+                ];
+            }
+        }
+
+        // All stock checks passed — insert items
+        foreach ($items as $item) {
+            CartItem::create([
+                'cart_id' => $cart->id,
+                'product_id' => $item['product_id'],
+                'product_variant_id' => $item['variant_id'] ?? null,
+                'quantity' => $item['quantity'] ?? 1,
+                'price' => $item['price'],
+                'original_price' => $item['original_price'],
+                'combo_instance_uuid' => $comboInstanceUuid,
+            ]);
+        }
+
+        return [
+            'success' => true,
+            'message' => 'تمت إضافة عرض الكومبو للسلة',
+        ];
+    }
+
+    /**
      * Update cart item quantity
+     * 
+     * SECURITY: Rejects quantity changes on combo-locked items.
+     * IDOR: Only operates on items within the current user's cart.
      * 
      * @param int $cartItemId
      * @param int $quantity
@@ -234,12 +293,21 @@ class CartService
             ];
         }
 
+        // IDOR: Strictly find item within the user's own cart
         $cartItem = $cart->items()->find($cartItemId);
 
         if (!$cartItem) {
             return [
                 'success' => false,
                 'message' => 'المنتج غير موجود في السلة',
+            ];
+        }
+
+        // SECURITY: Reject quantity changes on combo-locked items
+        if ($cartItem->combo_instance_uuid) {
+            return [
+                'success' => false,
+                'message' => 'لا يمكن تعديل كمية منتجات العرض المجمع مباشرة. لتغيير الاختيار، احذف العرض وابدأ من جديد.',
             ];
         }
 
@@ -269,6 +337,10 @@ class CartService
     /**
      * Remove item from cart
      * 
+     * SECURITY: If the item belongs to a combo bundle, cascade-delete ALL items
+     * sharing the same combo_instance_uuid.
+     * IDOR: Only operates on items within the current user's cart.
+     * 
      * @param int $cartItemId
      * @return array ['success' => bool, 'message' => string]
      */
@@ -283,6 +355,7 @@ class CartService
             ];
         }
 
+        // IDOR: Strictly find item within the user's own cart
         $cartItem = $cart->items()->find($cartItemId);
 
         if (!$cartItem) {
@@ -292,7 +365,14 @@ class CartService
             ];
         }
 
-        $cartItem->delete();
+        // SERVER-SIDE CASCADE DELETE: If combo item, delete the entire bundle
+        if ($cartItem->combo_instance_uuid) {
+            $cart->items()
+                ->where('combo_instance_uuid', $cartItem->combo_instance_uuid)
+                ->delete();
+        } else {
+            $cartItem->delete();
+        }
 
         // If cart is empty, optionally delete the cart
         if ($cart->items()->count() === 0) {
@@ -301,7 +381,9 @@ class CartService
 
         return [
             'success' => true,
-            'message' => 'تم إزالة المنتج من السلة',
+            'message' => $cartItem->combo_instance_uuid
+                ? 'تم إزالة عرض الكومبو من السلة'
+                : 'تم إزالة المنتج من السلة',
         ];
     }
 
@@ -348,6 +430,7 @@ class CartService
 
     /**
      * Get cart subtotal (before shipping and discounts)
+     * Uses the locked `price` on each cart_item (already proportionally distributed for combos).
      * 
      * @return float
      */
@@ -362,6 +445,25 @@ class CartService
         return $cart->items->sum(function ($item) {
             return $item->price * $item->quantity;
         });
+    }
+
+    /**
+     * Get total combo savings from locked prices in the cart.
+     * Calculates: sum((original_price - price) * quantity) for all combo items.
+     *
+     * @return float
+     */
+    public function getComboSavings(): float
+    {
+        $cart = $this->getCart();
+
+        if (!$cart) {
+            return 0.0;
+        }
+
+        return $cart->items
+            ->filter(fn ($item) => $item->combo_instance_uuid && $item->original_price)
+            ->sum(fn ($item) => ($item->original_price - $item->price) * $item->quantity);
     }
 
     /**
@@ -391,10 +493,17 @@ class CartService
 
         // Merge items
         foreach ($guestCart->items as $guestItem) {
-            // Check if customer already has this product in cart
+            // Combo items: move entire bundle as-is (never merge)
+            if ($guestItem->combo_instance_uuid) {
+                $guestItem->update(['cart_id' => $customerCart->id]);
+                continue;
+            }
+
+            // Check if customer already has this product in cart (non-combo only)
             $existingItem = $customerCart->items()
                 ->where('product_id', $guestItem->product_id)
                 ->where('product_variant_id', $guestItem->product_variant_id)
+                ->whereNull('combo_instance_uuid')
                 ->first();
 
             if ($existingItem) {
@@ -456,23 +565,5 @@ class CartService
         $maxStock = $this->getProductMaxStock($product, $variantId);
 
         return $quantity <= $maxStock;
-    }
-
-    /**
-     * Get combo discount amount for the current cart
-     * 
-     * @param int|null $customerId
-     * @return array|null Returns ['rule_id' => int, 'discount_amount' => float, 'rule_name' => string] or null
-     */
-    public function getComboDiscount(?int $customerId = null): ?array
-    {
-        $cart = $this->getCart();
-
-        if (!$cart || $cart->items->isEmpty()) {
-            return null;
-        }
-
-        $comboService = app(ComboDiscountService::class);
-        return $comboService->calculateDiscount($cart->items, $customerId);
     }
 }

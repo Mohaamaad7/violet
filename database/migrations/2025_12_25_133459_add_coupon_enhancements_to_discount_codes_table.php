@@ -16,18 +16,16 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        // Step 1: Modify discount_type enum to include 'free_shipping'
-        // MySQL requires raw SQL to alter ENUM columns
+        if (DB::getDriverName() === 'sqlite') return;
+        
         DB::statement("ALTER TABLE discount_codes MODIFY COLUMN discount_type ENUM('percentage', 'fixed', 'free_shipping') DEFAULT 'percentage'");
 
-        // Step 2: Add new columns
         Schema::table('discount_codes', function (Blueprint $table) {
-            // Exclusion lists for partial apply logic
-            $table->json('exclude_products')->nullable()->after('applies_to_products');
-            $table->json('exclude_categories')->nullable()->after('exclude_products');
-
-            // Internal notes for admin documentation
-            $table->text('internal_notes')->nullable()->after('exclude_categories');
+            $table->decimal('min_order_amount', 10, 2)->nullable()->after('max_uses_per_user');
+            $table->decimal('max_discount_amount', 10, 2)->nullable()->after('min_order_amount');
+            $table->json('excluded_categories')->nullable()->after('applicable_categories');
+            $table->json('excluded_products')->nullable()->after('applicable_products');
+            $table->boolean('first_order_only')->default(false)->after('max_discount_amount');
         });
     }
 
@@ -36,12 +34,18 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        // Step 1: Remove added columns
-        Schema::table('discount_codes', function (Blueprint $table) {
-            $table->dropColumn(['exclude_products', 'exclude_categories', 'internal_notes']);
-        });
-
-        // Step 2: Revert enum to original values
+        if (DB::getDriverName() === 'sqlite') return;
+        
         DB::statement("ALTER TABLE discount_codes MODIFY COLUMN discount_type ENUM('percentage', 'fixed') DEFAULT 'percentage'");
+
+        Schema::table('discount_codes', function (Blueprint $table) {
+            $table->dropColumn([
+                'min_order_amount',
+                'max_discount_amount',
+                'excluded_categories',
+                'excluded_products',
+                'first_order_only'
+            ]);
+        });
     }
 };

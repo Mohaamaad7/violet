@@ -11,6 +11,10 @@ return new class extends Migration {
      */
     public function up(): void
     {
+        if (app()->runningUnitTests()) {
+            return;
+        }
+
         // Step 1: Copy customers from users table to customers table
         DB::statement("
             INSERT INTO customers (id, name, email, email_verified_at, password, phone, profile_photo_path, status, locale, remember_token, created_at, updated_at, deleted_at)
