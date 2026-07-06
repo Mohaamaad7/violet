@@ -10,6 +10,8 @@ return new class extends Migration {
      */
     public function up(): void
     {
+        if (DB::getDriverName() === 'sqlite') return;
+
         // Set default value for commission_value column
         DB::statement('ALTER TABLE discount_codes ALTER COLUMN commission_value SET DEFAULT 0');
 
@@ -22,6 +24,8 @@ return new class extends Migration {
      */
     public function down(): void
     {
+        if (DB::getDriverName() === 'sqlite') return;
+
         DB::statement('ALTER TABLE discount_codes ALTER COLUMN commission_value DROP DEFAULT');
     }
 };

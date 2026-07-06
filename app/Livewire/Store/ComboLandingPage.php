@@ -5,6 +5,8 @@ namespace App\Livewire\Store;
 use App\Models\ComboRule;
 use App\Models\Product;
 use App\Services\CartService;
+use App\Services\ComboDiscountService;
+use Illuminate\Support\Str;
 use Livewire\Component;
 
 class ComboLandingPage extends Component
@@ -331,14 +333,146 @@ class ComboLandingPage extends Component
     }
 
     // ─────────────────────────────────────────────────────────────────────────
+    // Proportional Price Distribution (DP-aware)
+    // ─────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Build the flat list of items with their base prices from the current selection.
+     * Each item is expanded to quantity=1 for proportional distribution.
+     *
+     * @return array Array of ['product_id', 'variant_id', 'base_price']
+     */
+    private function buildFlatItemList(): array
+    {
+        $items = [];
+
+        foreach ($this->conditionData as $conditionId => $data) {
+            if ($data['type'] === 'product') {
+                $selection = $this->selections[$conditionId] ?? null;
+                $unitPrice = (float) $data['product_price'];
+
+                if ($selection && $selection['variant_id']) {
+                    $variant = collect($data['variants'])->firstWhere('id', $selection['variant_id']);
+                    if ($variant) {
+                        $unitPrice = (float) $variant['price'];
+                    }
+                }
+
+                for ($i = 0; $i < $data['required_quantity']; $i++) {
+                    $items[] = [
+                        'product_id' => $selection['product_id'],
+                        'variant_id' => $selection['variant_id'],
+                        'base_price' => $unitPrice,
+                    ];
+                }
+
+            } elseif ($data['type'] === 'category') {
+                $slots = $this->selections[$conditionId] ?? [];
+
+                foreach ($slots as $slot) {
+                    if (!$slot['product_id']) continue;
+
+                    $productData = collect($data['products'])->firstWhere('id', $slot['product_id']);
+                    if (!$productData) continue;
+
+                    $unitPrice = (float) $productData['price'];
+
+                    if ($slot['variant_id']) {
+                        $variant = collect($productData['variants'])->firstWhere('id', $slot['variant_id']);
+                        if ($variant) {
+                            $unitPrice = (float) $variant['price'];
+                        }
+                    }
+
+                    $items[] = [
+                        'product_id' => $slot['product_id'],
+                        'variant_id' => $slot['variant_id'],
+                        'base_price' => $unitPrice,
+                    ];
+                }
+            }
+        }
+
+        return $items;
+    }
+
+    /**
+     * Distribute the combo tier price proportionally across items using the
+     * Largest Remainder Method for ETA/ERP-compliant rounding.
+     *
+     * @param array $flatItems Array of ['product_id', 'variant_id', 'base_price']
+     * @param float $tierPrice The total discounted price for this tier
+     * @return array Array of ['product_id', 'variant_id', 'price', 'original_price']
+     */
+    private function distributeProportionally(array $flatItems, float $tierPrice): array
+    {
+        $totalBase = array_sum(array_column($flatItems, 'base_price'));
+
+        if ($totalBase <= 0) {
+            // Fallback: equal split
+            $equalPrice = round($tierPrice / max(count($flatItems), 1), 2);
+            return array_map(fn($item) => [
+                'product_id'     => $item['product_id'],
+                'variant_id'     => $item['variant_id'],
+                'price'          => $equalPrice,
+                'original_price' => $item['base_price'],
+            ], $flatItems);
+        }
+
+        // Step 1: Calculate exact proportional amounts
+        $exactAmounts = [];
+        foreach ($flatItems as $idx => $item) {
+            $exactAmounts[$idx] = $tierPrice * ($item['base_price'] / $totalBase);
+        }
+
+        // Step 2: Floor to 2 decimal places
+        $floored = array_map(fn($v) => floor($v * 100) / 100, $exactAmounts);
+        $distributed = array_sum($floored);
+
+        // Step 3: Largest Remainder Correction
+        $remainder = round($tierPrice - $distributed, 2);
+        $remainderPiastres = (int) round($remainder * 100);
+
+        // Build remainder list sorted by fractional part descending
+        $remainders = [];
+        foreach ($exactAmounts as $idx => $exact) {
+            $remainders[$idx] = ($exact * 100) - floor($exact * 100);
+        }
+        arsort($remainders);
+
+        // Add 0.01 to each item with the largest remainder until budget is spent
+        foreach ($remainders as $idx => $fracPart) {
+            if ($remainderPiastres <= 0) break;
+            $floored[$idx] += 0.01;
+            $remainderPiastres--;
+        }
+
+        // Build output
+        $result = [];
+        foreach ($flatItems as $idx => $item) {
+            $result[] = [
+                'product_id'     => $item['product_id'],
+                'variant_id'     => $item['variant_id'],
+                'price'          => round($floored[$idx], 2),
+                'original_price' => $item['base_price'],
+            ];
+        }
+
+        return $result;
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
     // Cart Addition
     // ─────────────────────────────────────────────────────────────────────────
 
-    public function addAllToCart(): void
+    /**
+     * Validate all selections before cart insertion.
+     * Returns true if valid, false if errors were set.
+     */
+    private function validateSelections(): bool
     {
         $this->errors = [];
         $this->globalError = '';
-        $this->processing = true;
 
         foreach ($this->conditionData as $conditionId => $data) {
             if ($data['type'] === 'product') {
@@ -368,93 +502,20 @@ class ComboLandingPage extends Component
             }
         }
 
-        if (!empty($this->errors)) {
-            $this->processing = false;
-            return;
-        }
+        return empty($this->errors);
+    }
 
-        $cartService = app(CartService::class);
-        $existingCart = $cartService->getCart();
-
-        $snapshot = [];
-        if ($existingCart) {
-            foreach ($existingCart->items as $item) {
-                $snapshot[$item->id] = [
-                    'product_id'         => $item->product_id,
-                    'product_variant_id' => $item->product_variant_id,
-                    'quantity'           => $item->quantity,
-                ];
-            }
-        }
-
-        $addFailed   = false;
-        $failMessage = '';
-
-        foreach ($this->conditionData as $conditionId => $data) {
-            if ($data['type'] === 'product') {
-                $selection = $this->selections[$conditionId];
-                $result = $cartService->addToCart(
-                    productId: $selection['product_id'],
-                    quantity:  $data['required_quantity'],
-                    variantId: $selection['variant_id']
-                );
-
-                if (!$result['success']) {
-                    $addFailed   = true;
-                    $failMessage = "{$data['product_name']}: {$result['message']}";
-                    break;
-                }
-            } elseif ($data['type'] === 'category') {
-                $slots = $this->selections[$conditionId];
-                
-                // Add items slot by slot
-                foreach ($slots as $slot => $slotData) {
-                    $result = $cartService->addToCart(
-                        productId: $slotData['product_id'],
-                        quantity:  1,
-                        variantId: $slotData['variant_id']
-                    );
-
-                    if (!$result['success']) {
-                        $addFailed   = true;
-                        $productData = collect($data['products'])->firstWhere('id', $slotData['product_id']);
-                        $name        = $productData ? $productData['name'] : $data['category_name'];
-                        $failMessage = "{$name}: {$result['message']}";
-                        break 2;
-                    }
-                }
-            }
-        }
-
-        if ($addFailed) {
-            $currentCart = $cartService->getCart();
-            if ($currentCart) {
-                $currentCart->load('items');
-                foreach ($currentCart->items as $item) {
-                    $snapshotEntry = $snapshot[$item->id] ?? null;
-                    if ($snapshotEntry) {
-                        if ($item->quantity !== $snapshotEntry['quantity']) {
-                            $cartService->updateQuantity($item->id, $snapshotEntry['quantity']);
-                        }
-                    } else {
-                        $cartService->removeItem($item->id);
-                    }
-                }
-            }
-
-            $this->globalError = $failMessage;
-            $this->processing  = false;
-            return;
-        }
-
+    /**
+     * Build pixel event data from selections.
+     */
+    private function buildPixelData(): array
+    {
         $contentIds = [];
         $contentsMap = []; // product_id => quantity
-        
+
         foreach ($this->selections as $conditionId => $selectionData) {
             $data = $this->conditionData[$conditionId] ?? null;
-            if (!$data) {
-                continue;
-            }
+            if (!$data) continue;
 
             if ($data['type'] === 'product') {
                 $pid = $selectionData['product_id'];
@@ -470,22 +531,135 @@ class ComboLandingPage extends Component
                 }
             }
         }
-        
+
         $contents = [];
         foreach ($contentsMap as $id => $qty) {
             $contents[] = ['id' => (string) $id, 'quantity' => $qty];
         }
 
-        $this->dispatch('combo-added', [
-            'combo_name'  => $this->combo->name,
-            'content_ids' => array_values(array_unique($contentIds)),
-            'contents'    => $contents,
-            'value'       => $this->comboPrice,
-            'currency'    => 'EGP',
-            'num_items'   => count($contentIds),
-            'redirect_url'=> route('cart'),
-        ]);
+        return [
+            'combo_name'   => $this->combo->name,
+            'content_ids'  => array_values(array_unique($contentIds)),
+            'contents'     => $contents,
+            'value'        => $this->comboPrice,
+            'currency'     => 'EGP',
+            'num_items'    => array_sum($contentsMap),
+        ];
+    }
 
+    /**
+     * Execute the actual combo → cart insertion with proportional pricing.
+     * Returns true on success, false on failure (sets globalError).
+     */
+    private function executeComboToCart(): bool
+    {
+        $flatItems = $this->buildFlatItemList();
+
+        if (empty($flatItems)) {
+            $this->globalError = 'لا توجد منتجات مختارة';
+            return false;
+        }
+
+        // Distribute the tier price proportionally across items
+        $distributedItems = $this->distributeProportionally($flatItems, $this->comboPrice);
+
+        // Group by product_id + variant_id to consolidate duplicate selections
+        $grouped = [];
+        foreach ($distributedItems as $item) {
+            $key = $item['product_id'] . '_' . ($item['variant_id'] ?? 'null');
+            if (!isset($grouped[$key])) {
+                $grouped[$key] = [
+                    'product_id'     => $item['product_id'],
+                    'variant_id'     => $item['variant_id'],
+                    'quantity'       => 0,
+                    'price'          => $item['price'],
+                    'original_price' => $item['original_price'],
+                    // Track individual prices for accurate aggregation
+                    '_prices'        => [],
+                    '_originals'     => [],
+                ];
+            }
+            $grouped[$key]['quantity']++;
+            $grouped[$key]['_prices'][] = $item['price'];
+            $grouped[$key]['_originals'][] = $item['original_price'];
+        }
+
+        // Build final cart items — for grouped items with multiple units,
+        // we insert each unit separately to preserve per-unit proportional pricing
+        $cartItems = [];
+        foreach ($grouped as $group) {
+            for ($i = 0; $i < $group['quantity']; $i++) {
+                $cartItems[] = [
+                    'product_id'     => $group['product_id'],
+                    'variant_id'     => $group['variant_id'],
+                    'quantity'       => 1,
+                    'price'          => $group['_prices'][$i],
+                    'original_price' => $group['_originals'][$i],
+                ];
+            }
+        }
+
+        $comboInstanceUuid = Str::uuid()->toString();
+        $cartService = app(CartService::class);
+
+        $result = $cartService->addComboToCart($cartItems, $comboInstanceUuid);
+
+        if (!$result['success']) {
+            $this->globalError = $result['message'];
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Add combo selection to cart (existing behavior).
+     */
+    public function addAllToCart(): void
+    {
+        $this->processing = true;
+
+        if (!$this->validateSelections()) {
+            $this->processing = false;
+            return;
+        }
+
+        if (!$this->executeComboToCart()) {
+            $this->processing = false;
+            return;
+        }
+
+        $pixelData = $this->buildPixelData();
+        $pixelData['redirect_url'] = route('cart');
+        $pixelData['action'] = 'add_to_cart';
+
+        $this->dispatch('combo-added', $pixelData);
+        $this->processing = false;
+    }
+
+    /**
+     * Buy Now: Add combo to cart then redirect to checkout.
+     * The redirect_url is set to /checkout and fires InitiateCheckout pixel.
+     */
+    public function buyNow(): void
+    {
+        $this->processing = true;
+
+        if (!$this->validateSelections()) {
+            $this->processing = false;
+            return;
+        }
+
+        if (!$this->executeComboToCart()) {
+            $this->processing = false;
+            return;
+        }
+
+        $pixelData = $this->buildPixelData();
+        $pixelData['redirect_url'] = route('checkout');
+        $pixelData['action'] = 'buy_now';
+
+        $this->dispatch('combo-added', $pixelData);
         $this->processing = false;
     }
 

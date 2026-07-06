@@ -49,10 +49,22 @@ class CartPage extends Component
      */
     public float $total = 0;
 
-    // Combo discount state
-    public float $comboDiscountAmount = 0;
-    public ?int $comboRuleId = null;
-    public string $comboRuleName = '';
+    /**
+     * Combo savings: aggregated from locked proportional prices.
+     * Calculated as sum((original_price - price) * quantity) for combo items.
+     */
+    public float $comboSavings = 0;
+
+    /**
+     * Data for the combo delete confirmation modal.
+     * Contains the UUID and sibling product names.
+     */
+    public array $comboDeleteModal = [
+        'show' => false,
+        'cartItemId' => null,
+        'comboUuid' => null,
+        'siblingNames' => [],
+    ];
 
     // Shipping discount state (for progress bar display)
     public bool  $discountEnabled    = false;
@@ -116,7 +128,64 @@ class CartPage extends Component
     }
 
     /**
-     * Remove item from cart
+     * Initiate combo item removal — shows dynamic confirmation modal.
+     * For non-combo items, removes directly.
+     */
+    public function confirmRemoveItem(int $cartItemId): void
+    {
+        $cart = $this->cartService->getCart();
+        if (!$cart) return;
+
+        $cartItem = $cart->items->firstWhere('id', $cartItemId);
+        if (!$cartItem) return;
+
+        // If combo item, show confirmation modal with sibling names
+        if ($cartItem->combo_instance_uuid) {
+            $siblings = $cart->items
+                ->where('combo_instance_uuid', $cartItem->combo_instance_uuid)
+                ->where('id', '!=', $cartItemId);
+
+            $siblingNames = $siblings->map(fn ($item) => $item->product->name ?? 'منتج غير معروف')->toArray();
+
+            $this->comboDeleteModal = [
+                'show' => true,
+                'cartItemId' => $cartItemId,
+                'comboUuid' => $cartItem->combo_instance_uuid,
+                'siblingNames' => array_values($siblingNames),
+            ];
+            return;
+        }
+
+        // Non-combo: remove directly
+        $this->removeItem($cartItemId);
+    }
+
+    /**
+     * Confirm and execute combo bundle deletion.
+     */
+    public function confirmComboDelete(): void
+    {
+        if ($this->comboDeleteModal['cartItemId']) {
+            $this->removeItem($this->comboDeleteModal['cartItemId']);
+        }
+        $this->dismissComboDeleteModal();
+    }
+
+    /**
+     * Dismiss the combo delete confirmation modal.
+     */
+    public function dismissComboDeleteModal(): void
+    {
+        $this->comboDeleteModal = [
+            'show' => false,
+            'cartItemId' => null,
+            'comboUuid' => null,
+            'siblingNames' => [],
+        ];
+    }
+
+    /**
+     * Remove item from cart (handles cascade via CartService)
      */
     public function removeItem(int $cartItemId): void
     {
@@ -163,6 +232,7 @@ class CartPage extends Component
     {
         $this->cartCount = $this->cartService->getCartCount();
         $this->subtotal = $this->cartService->getSubtotal();
+        $this->comboSavings = $this->cartService->getComboSavings();
     }
 
     /**
@@ -218,19 +288,6 @@ class CartPage extends Component
         $this->taxAmount    = 0;
         $this->total        = $this->subtotal;
 
-        // Combo discount calculation
-        $comboData = $this->cartService->getComboDiscount(Auth::guard('customer')->id());
-        if ($comboData) {
-            $this->comboRuleId = $comboData['rule_id'];
-            $this->comboRuleName = $comboData['rule_name'];
-            $this->comboDiscountAmount = $comboData['discount_amount'];
-            $this->total -= $this->comboDiscountAmount;
-        } else {
-            $this->comboRuleId = null;
-            $this->comboRuleName = '';
-            $this->comboDiscountAmount = 0;
-        }
-
         // Load discount config for the progress bar (read-only, no calculation)
         $config = $this->getShippingDiscountConfig();
         $this->discountEnabled    = $config['enabled'];
@@ -245,8 +302,17 @@ class CartPage extends Component
     {
         $cart = $this->cartService->getCart();
 
+        // Group cart items by combo_instance_uuid for visual bundling
+        $groupedItems = null;
+        if ($cart && $cart->items->count() > 0) {
+            $groupedItems = $cart->items->groupBy(function ($item) {
+                return $item->combo_instance_uuid ?? 'regular_' . $item->id;
+            });
+        }
+
         return view('livewire.store.cart-page', [
             'cart' => $cart,
+            'groupedItems' => $groupedItems,
         ])->layout('layouts.store');
     }
 }

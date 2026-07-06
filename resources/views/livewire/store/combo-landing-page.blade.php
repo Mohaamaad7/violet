@@ -312,27 +312,54 @@
                 <p class="text-sm text-gray-500 mt-1">السعر الإجمالي للعرض</p>
             </div>
 
-            {{-- CTA Button --}}
-            <button
-                type="button"
-                wire:click="addAllToCart"
-                wire:loading.attr="disabled"
-                class="w-full flex items-center justify-center gap-3 px-8 py-4 bg-violet-600 hover:bg-violet-700 text-white font-bold text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-                <span wire:loading.remove wire:target="addAllToCart">
-                    <svg class="w-6 h-6 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z"/>
-                    </svg>
-                    أضف الكل إلى السلة
-                </span>
-                <span wire:loading wire:target="addAllToCart">
-                    <svg class="animate-spin h-5 w-5 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    جاري الإضافة...
-                </span>
-            </button>
+            {{-- CTA Buttons --}}
+            <div class="space-y-3">
+                {{-- Add to Cart --}}
+                <button
+                    type="button"
+                    wire:click="addAllToCart"
+                    wire:loading.attr="disabled"
+                    wire:target="addAllToCart,buyNow"
+                    class="w-full flex items-center justify-center gap-3 px-8 py-4 bg-violet-600 hover:bg-violet-700 text-white font-bold text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    <span wire:loading.remove wire:target="addAllToCart">
+                        <svg class="w-6 h-6 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z"/>
+                        </svg>
+                        أضف الكل إلى السلة
+                    </span>
+                    <span wire:loading wire:target="addAllToCart">
+                        <svg class="animate-spin h-5 w-5 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        جاري الإضافة...
+                    </span>
+                </button>
+
+                {{-- Buy Now --}}
+                <button
+                    type="button"
+                    wire:click="buyNow"
+                    wire:loading.attr="disabled"
+                    wire:target="addAllToCart,buyNow"
+                    class="w-full flex items-center justify-center gap-3 px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                    <span wire:loading.remove wire:target="buyNow">
+                        <svg class="w-6 h-6 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                        </svg>
+                        اشتري الآن
+                    </span>
+                    <span wire:loading wire:target="buyNow">
+                        <svg class="animate-spin h-5 w-5 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        جاري المعالجة...
+                    </span>
+                </button>
+            </div>
         </div>
 
         {{-- Offer validity --}}
@@ -371,10 +398,12 @@
         }, 500);
     })();
 
-    // AddToCart event listener — dispatched from Livewire on success
+    // AddToCart / BuyNow event listener — dispatched from Livewire on success
     window.addEventListener('combo-added', event => {
         const data = event.detail[0];
+
         if (typeof fbq !== 'undefined') {
+            // Always fire AddToCart
             fbq('track', 'AddToCart', {
                 content_name: data.combo_name,
                 content_ids: data.content_ids,
@@ -384,11 +413,26 @@
                 currency: data.currency,
                 num_items: data.num_items
             });
+
+            // If Buy Now, also fire InitiateCheckout
+            if (data.action === 'buy_now') {
+                fbq('track', 'InitiateCheckout', {
+                    content_name: data.combo_name,
+                    content_ids: data.content_ids,
+                    contents: data.contents,
+                    content_type: 'product',
+                    value: data.value,
+                    currency: data.currency,
+                    num_items: data.num_items
+                });
+            }
         }
-        // JS redirect ensures pixel fires before navigation
+
+        // JS redirect ensures pixel fires before navigation (300ms buffer)
         setTimeout(() => {
             window.location.href = data.redirect_url;
         }, 300);
     });
 </script>
 @endpush
+
