@@ -1,3 +1,22 @@
+{{-- Protocol 2: New Alpine Toast Component & Auto-scroll Listener --}}
+<div x-data="{ toasts: [] }"
+     x-on:show-toast.window="
+        const toast = $event.detail;
+        toasts.push(toast);
+        setTimeout(() => toasts.shift(), 4000);
+     "
+     x-on:scroll-to-missing.window="
+        const el = document.getElementById($event.detail.targetId);
+        if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+     "
+     class="fixed top-4 left-1/2 -translate-x-1/2 z-50 space-y-2 w-11/12 max-w-sm">
+  <template x-for="toast in toasts" :key="toast.message">
+    <div class="p-3 rounded-lg shadow-lg text-white text-sm font-medium"
+         :class="toast.type === 'error' ? 'bg-red-600' : 'bg-green-600'"
+         x-text="toast.message"></div>
+  </template>
+</div>
+
 <div class="min-h-screen bg-gradient-to-b from-violet-50 to-white py-8 md:py-12">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
 
@@ -69,12 +88,24 @@
                      PRODUCT-TYPE CONDITION — fixed product, choose variant only
                 ═══════════════════════════════════════════════════════════ --}}
                 @if($data['type'] === 'product')
-                    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden
+                    {{-- Protocol 3: Add ID and scroll-mt-20 for auto-scroll --}}
+                    <div id="piece-{{ $conditionId }}" 
+                         class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden scroll-mt-20
                         {{ isset($errors[$conditionId]) ? 'ring-2 ring-red-300' : '' }}">
 
                         <div class="bg-gray-50 px-6 py-4 border-b border-gray-100">
                             <div class="flex items-center justify-between">
-                                <h2 class="text-lg font-bold text-gray-900">{{ $data['product_name'] }}</h2>
+                                <h2 class="text-lg font-bold text-gray-900">
+                                    {{ $data['product_name'] }}
+                                    @if($showScrollNudge && $this->getFirstUnselectedSlot() === (string)$conditionId)
+                                        <span class="inline-block animate-bounce ml-2 text-violet-600">
+                                            <svg class="w-5 h-5 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                            <span class="text-xs">اختر أدناه</span>
+                                        </span>
+                                    @endif
+                                </h2>
                                 @if($data['required_quantity'] > 1)
                                     <span class="text-sm font-medium text-violet-600 bg-violet-50 px-3 py-1 rounded-full">
                                         الكمية: {{ $data['required_quantity'] }}
@@ -113,13 +144,16 @@
                                                 type="button"
                                                 wire:click="selectVariant({{ $conditionId }}, {{ $variant['id'] }})"
                                                 @class([
-                                                    'px-4 py-3 border-2 rounded-lg text-sm font-medium transition-all duration-200',
-                                                    'border-violet-600 bg-violet-50 text-violet-700 ring-2 ring-violet-200' => ($selections[$conditionId]['variant_id'] ?? null) === $variant['id'],
-                                                    'border-gray-300 text-gray-700 hover:border-violet-400 hover:bg-gray-50' => ($selections[$conditionId]['variant_id'] ?? null) !== $variant['id'] && $variant['stock'] > 0,
-                                                    'border-gray-200 text-gray-400 cursor-not-allowed opacity-50' => $variant['stock'] <= 0,
+                                                    'px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 relative',
+                                                    'border-[3px] border-violet-600 bg-violet-50 text-violet-700' => ($selections[$conditionId]['variant_id'] ?? null) === $variant['id'],
+                                                    'border-2 border-gray-300 text-gray-700 hover:border-violet-400 hover:bg-gray-50' => ($selections[$conditionId]['variant_id'] ?? null) !== $variant['id'] && $variant['stock'] > 0,
+                                                    'border-2 border-gray-200 text-gray-400 cursor-not-allowed opacity-50' => $variant['stock'] <= 0,
                                                 ])
                                                 {{ $variant['stock'] <= 0 ? 'disabled' : '' }}
                                             >
+                                                @if(($selections[$conditionId]['variant_id'] ?? null) === $variant['id'])
+                                                    <svg class="w-6 h-6 text-violet-600 absolute top-2 right-2" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z" clip-rule="evenodd" /></svg>
+                                                @endif
                                                 <div class="flex flex-col items-center gap-1">
                                                     <span>{{ $variant['name'] }}</span>
                                                     @if($variant['stock'] <= 0)
@@ -181,15 +215,28 @@
                                         : null;
                                 @endphp
 
-                                <div class="p-6 {{ $slotError ? 'bg-red-50/40' : '' }}">
+                                {{-- Protocol 3: Add ID and scroll-mt-20 --}}
+                                <div id="piece-{{ $conditionId }}-{{ $slot }}" class="p-6 scroll-mt-20 {{ $slotError ? 'bg-red-50/40' : '' }}">
 
                                     {{-- Slot header (only when multiple slots) --}}
                                     @if($slotCount > 1)
-                                        <div class="flex items-center gap-2 mb-4">
-                                            <span class="w-7 h-7 rounded-full bg-violet-600 text-white text-xs font-bold flex items-center justify-center flex-shrink-0">
+                                        {{-- Protocol 5: Prominent Piece Title --}}
+                                        <div class="flex items-center gap-3 mb-4 pb-2 border-b border-gray-100">
+                                            <span class="w-8 h-8 rounded-full bg-violet-100 text-violet-700 text-sm font-bold flex items-center justify-center flex-shrink-0">
                                                 {{ $slot + 1 }}
                                             </span>
-                                            <span class="text-sm font-semibold text-gray-700">القطعة {{ $slot + 1 }}</span>
+                                            <span class="text-lg font-bold text-gray-900">
+                                                القطعة {{ $slot + 1 }}
+                                                {{-- Protocol 2: Proactive Nudge --}}
+                                                @if($showScrollNudge && $this->getFirstUnselectedSlot() === "{$conditionId}.{$slot}")
+                                                    <span class="inline-block animate-bounce ml-2 text-violet-600">
+                                                        <svg class="w-5 h-5 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                                        </svg>
+                                                        <span class="text-xs">اختر أدناه</span>
+                                                    </span>
+                                                @endif
+                                            </span>
                                             @if($selectedProd)
                                                 <span class="text-xs text-violet-600 bg-violet-50 px-2 py-0.5 rounded-full font-medium ms-auto">
                                                     ✓ {{ $selectedProd['name'] }}
@@ -207,11 +254,15 @@
                                                     type="button"
                                                     wire:click="selectProductForSlot({{ $conditionId }}, {{ $slot }}, {{ $product['id'] }})"
                                                     @class([
-                                                        'flex items-center gap-3 p-3 border-2 rounded-lg transition-all duration-200 text-start',
-                                                        'border-violet-600 bg-violet-50 ring-2 ring-violet-200' => $selectedProdId === $product['id'],
-                                                        'border-gray-300 hover:border-violet-400 hover:bg-gray-50' => $selectedProdId !== $product['id'],
+                                                        'flex items-center gap-3 p-3 rounded-lg transition-all duration-200 text-start relative',
+                                                        'border-[3px] border-violet-600 bg-violet-50' => $selectedProdId === $product['id'],
+                                                        'border-2 border-gray-300 hover:border-violet-400 hover:bg-gray-50' => $selectedProdId !== $product['id'],
                                                     ])
                                                 >
+                                                    {{-- Protocol 4: Selected State Checkmark --}}
+                                                    @if($selectedProdId === $product['id'])
+                                                        <svg class="w-6 h-6 text-violet-600 absolute top-2 right-2" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z" clip-rule="evenodd" /></svg>
+                                                    @endif
                                                     <img src="{{ $product['image'] }}"
                                                          alt="{{ $product['name'] }}"
                                                          class="w-14 h-14 object-contain bg-white rounded border border-gray-200 flex-shrink-0">
@@ -248,13 +299,16 @@
                                                         type="button"
                                                         wire:click="selectVariantForSlot({{ $conditionId }}, {{ $slot }}, {{ $variant['id'] }})"
                                                         @class([
-                                                            'px-4 py-3 border-2 rounded-lg text-sm font-medium transition-all duration-200',
-                                                            'border-violet-600 bg-violet-50 text-violet-700 ring-2 ring-violet-200' => ($slotData['variant_id'] ?? null) === $variant['id'],
-                                                            'border-gray-300 text-gray-700 hover:border-violet-400 hover:bg-gray-50' => ($slotData['variant_id'] ?? null) !== $variant['id'] && $variant['stock'] > 0,
-                                                            'border-gray-200 text-gray-400 cursor-not-allowed opacity-50' => $variant['stock'] <= 0,
+                                                            'px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 relative',
+                                                            'border-[3px] border-violet-600 bg-violet-50 text-violet-700' => ($slotData['variant_id'] ?? null) === $variant['id'],
+                                                            'border-2 border-gray-300 text-gray-700 hover:border-violet-400 hover:bg-gray-50' => ($slotData['variant_id'] ?? null) !== $variant['id'] && $variant['stock'] > 0,
+                                                            'border-2 border-gray-200 text-gray-400 cursor-not-allowed opacity-50' => $variant['stock'] <= 0,
                                                         ])
                                                         {{ $variant['stock'] <= 0 ? 'disabled' : '' }}
                                                     >
+                                                        @if(($slotData['variant_id'] ?? null) === $variant['id'])
+                                                            <svg class="w-6 h-6 text-violet-600 absolute top-2 right-2" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M2.25 12c0-5.385 4.365-9.75 9.75-9.75s9.75 4.365 9.75 9.75-4.365 9.75-9.75 9.75S2.25 17.385 2.25 12Zm13.36-1.814a.75.75 0 1 0-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 0 0-1.06 1.06l2.25 2.25a.75.75 0 0 0 1.14-.094l3.75-5.25Z" clip-rule="evenodd" /></svg>
+                                                        @endif
                                                         <div class="flex flex-col items-center gap-1">
                                                             <span>{{ $variant['name'] }}</span>
                                                             @if($variant['stock'] <= 0)
@@ -288,9 +342,19 @@
         </div>
 
         {{-- Price Summary + CTA --}}
-        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 md:p-8 sticky bottom-4">
+        {{-- Protocol 1 & 6: Compact sticky bar and ResizeObserver --}}
+        <div class="bg-white rounded-t-2xl md:rounded-2xl shadow-[0_-8px_30px_rgb(0,0,0,0.06)] md:shadow-lg border-t md:border border-gray-100 p-3 md:p-8 sticky bottom-0 md:bottom-4 z-40"
+             x-data
+             x-init="
+                const observer = new ResizeObserver(entries => {
+                    for (let entry of entries) {
+                        document.documentElement.style.setProperty('--sticky-bar-height', entry.target.offsetHeight + 'px');
+                    }
+                });
+                observer.observe($el);
+             ">
             {{-- Price Display --}}
-            <div class="text-center mb-6">
+            <div class="text-center mb-2 md:mb-6">
                 @if($originalPrice > $comboPrice)
                     <div class="flex items-center justify-center gap-3 mb-1">
                         <span class="text-xl text-gray-400 line-through">
@@ -306,30 +370,31 @@
                         </span>
                     </div>
                 @endif
-                <div class="text-4xl font-bold text-violet-700">
+                <div class="text-2xl md:text-4xl font-bold text-violet-700">
                     {{ number_format($comboPrice, 2) }} ج.م
                 </div>
-                <p class="text-sm text-gray-500 mt-1">السعر الإجمالي للعرض</p>
+                <p class="text-xs md:text-sm text-gray-500 mt-0.5 md:mt-1">السعر الإجمالي للعرض</p>
             </div>
 
             {{-- CTA Buttons --}}
-            <div class="space-y-3">
+            <div class="grid grid-cols-2 gap-2 md:flex md:flex-col md:space-y-3">
                 {{-- Add to Cart --}}
                 <button
                     type="button"
                     wire:click="addAllToCart"
                     wire:loading.attr="disabled"
                     wire:target="addAllToCart,buyNow"
-                    class="w-full flex items-center justify-center gap-3 px-8 py-4 bg-violet-600 hover:bg-violet-700 text-white font-bold text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    class="w-full flex items-center justify-center gap-1 md:gap-3 px-2 py-3 md:px-8 md:py-4 bg-violet-600 hover:bg-violet-700 text-white font-bold text-sm md:text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     <span wire:loading.remove wire:target="addAllToCart">
-                        <svg class="w-6 h-6 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 md:w-6 md:h-6 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 100 4 2 2 0 000-4z"/>
                         </svg>
-                        أضف الكل إلى السلة
+                        <span class="md:hidden">أضف للسلة</span>
+                        <span class="hidden md:inline">أضف الكل إلى السلة</span>
                     </span>
                     <span wire:loading wire:target="addAllToCart">
-                        <svg class="animate-spin h-5 w-5 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <svg class="animate-spin h-4 w-4 md:h-5 md:w-5 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
@@ -343,16 +408,16 @@
                     wire:click="buyNow"
                     wire:loading.attr="disabled"
                     wire:target="addAllToCart,buyNow"
-                    class="w-full flex items-center justify-center gap-3 px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                    class="w-full flex items-center justify-center gap-1 md:gap-3 px-2 py-3 md:px-8 md:py-4 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white font-bold text-sm md:text-lg rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     <span wire:loading.remove wire:target="buyNow">
-                        <svg class="w-6 h-6 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 md:w-6 md:h-6 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                         </svg>
                         اشتري الآن
                     </span>
                     <span wire:loading wire:target="buyNow">
-                        <svg class="animate-spin h-5 w-5 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <svg class="animate-spin h-4 w-4 md:h-5 md:w-5 inline-block" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                             <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                         </svg>
@@ -370,6 +435,20 @@
         @endif
     </div>
 </div>
+
+{{-- Protocol 6: Floating WhatsApp Button --}}
+<a href="https://wa.me/{{ env('WHATSAPP_NUMBER', '201091191056') }}?text={{ urlencode('مرحباً، أريد الاستفسار عن منتج: ' . $combo->name) }}"
+   target="_blank"
+   rel="noopener noreferrer"
+   class="fixed left-6 z-30 flex items-center justify-center w-14 h-14 bg-[#25D366] text-white rounded-full shadow-lg p-3 hover:bg-[#20ba5a] transition-all duration-300 hover:scale-110 group"
+   style="bottom: calc(var(--sticky-bar-height, 0px) + 16px)"
+   aria-label="Contact on WhatsApp"
+>
+    <svg class="w-8 h-8 transition-transform group-hover:rotate-12" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
+    </svg>
+    <span class="absolute inline-flex h-full w-full rounded-full bg-[#25D366] opacity-40 animate-ping -z-10"></span>
+</a>
 
 @push('scripts')
 {{-- Facebook Pixel: ViewContent on page load --}}

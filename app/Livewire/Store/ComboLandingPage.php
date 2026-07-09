@@ -61,6 +61,11 @@ class ComboLandingPage extends Component
      */
     public int $selectedTierIndex = 0;
 
+    /**
+     * Show proactive scroll nudge.
+     */
+    public bool $showScrollNudge = false;
+
     // ─────────────────────────────────────────────────────────────────────────
     // Mount
     // ─────────────────────────────────────────────────────────────────────────
@@ -210,6 +215,9 @@ class ComboLandingPage extends Component
         // Reset errors
         $this->errors = [];
         $this->calculateComboPrice();
+        
+        // Protocol 2: Show proactive nudge if there are unselected slots
+        $this->showScrollNudge = $this->getFirstUnselectedSlot() !== null;
     }
 
     public function selectProductForSlot(int $conditionId, int $slot, int $productId): void
@@ -234,6 +242,11 @@ class ComboLandingPage extends Component
 
         unset($this->errors["{$conditionId}.{$slot}"]);
         $this->calculateComboPrice();
+        
+        // Protocol 2: Reset nudge if all selections are complete
+        if ($this->getFirstUnselectedSlot() === null) {
+            $this->showScrollNudge = false;
+        }
     }
 
     public function selectVariantForSlot(int $conditionId, int $slot, int $variantId): void
@@ -244,6 +257,11 @@ class ComboLandingPage extends Component
         $this->selections[$conditionId][$slot]['variant_id'] = $variantId;
         unset($this->errors["{$conditionId}.{$slot}"]);
         $this->calculateComboPrice();
+        
+        // Protocol 2: Reset nudge if all selections are complete
+        if ($this->getFirstUnselectedSlot() === null) {
+            $this->showScrollNudge = false;
+        }
     }
 
     public function selectVariant(int $conditionId, int $variantId): void
@@ -254,6 +272,55 @@ class ComboLandingPage extends Component
         $this->selections[$conditionId]['variant_id'] = $variantId;
         unset($this->errors[$conditionId]);
         $this->calculateComboPrice();
+        
+        // Protocol 2: Reset nudge if all selections are complete
+        if ($this->getFirstUnselectedSlot() === null) {
+            $this->showScrollNudge = false;
+        }
+    }
+
+    // Protocol 1: Helper to get the first missing slot ID
+    public function getFirstUnselectedSlot(): ?string
+    {
+        foreach ($this->conditionData as $conditionId => $data) {
+            if ($data['type'] === 'product') {
+                $selection = $this->selections[$conditionId] ?? null;
+                if ($data['has_variants'] && (!$selection || !$selection['variant_id'])) {
+                    return (string) $conditionId;
+                }
+            } elseif ($data['type'] === 'category') {
+                $slots = $this->selections[$conditionId] ?? [];
+                $slotCount = $data['required_quantity'];
+
+                for ($slot = 0; $slot < $slotCount; $slot++) {
+                    $slotData = $slots[$slot] ?? null;
+
+                    if (!$slotData || !$slotData['product_id']) {
+                        return "{$conditionId}.{$slot}";
+                    }
+
+                    $productData = collect($data['products'])->firstWhere('id', $slotData['product_id']);
+                    if ($productData && $productData['has_variants'] && !$slotData['variant_id']) {
+                        return "{$conditionId}.{$slot}";
+                    }
+                }
+            }
+        }
+
+        return null;
+    }
+
+    // Protocol 2: Handle CTA validation failure (toast + auto-scroll)
+    private function handleValidationError(): void
+    {
+        if (empty($this->errors)) return;
+        
+        $firstErrorKey = array_key_first($this->errors);
+        $targetId = 'piece-' . str_replace('.', '-', (string)$firstErrorKey);
+
+        $this->dispatch('show-toast', type: 'error', message: 'يرجى اختيار جميع القطع أولاً');
+        $this->showScrollNudge = true;
+        $this->dispatch('scroll-to-missing', targetId: $targetId);
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -621,6 +688,7 @@ class ComboLandingPage extends Component
 
         if (!$this->validateSelections()) {
             $this->processing = false;
+            $this->handleValidationError(); // Protocol 2: Handle validation visually
             return;
         }
 
@@ -647,6 +715,7 @@ class ComboLandingPage extends Component
 
         if (!$this->validateSelections()) {
             $this->processing = false;
+            $this->handleValidationError(); // Protocol 2: Handle validation visually
             return;
         }
 
