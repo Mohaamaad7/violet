@@ -27,6 +27,8 @@ class ComboRule extends Model
         'priority',
         'starts_at',
         'ends_at',
+        'meta_title',
+        'meta_description',
     ];
 
     protected $hidden = [
