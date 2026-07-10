@@ -470,6 +470,12 @@
             attempts++;
             if (typeof fbq !== 'undefined') {
                 clearInterval(interval);
+                @if($combo->custom_pixel_id)
+                {{-- Initialize the custom per-offer pixel. Per FB standard behavior,
+                     subsequent fbq('track') calls will fire to BOTH this pixel
+                     and the global store pixel already initialized in the layout. --}}
+                fbq('init', '{{ $combo->custom_pixel_id }}');
+                @endif
                 fireViewContent();
             } else if (attempts > 20) {
                 clearInterval(interval);
