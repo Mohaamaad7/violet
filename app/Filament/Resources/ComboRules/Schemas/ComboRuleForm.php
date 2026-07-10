@@ -5,6 +5,7 @@ namespace App\Filament\Resources\ComboRules\Schemas;
 use Filament\Schemas\Schema;
 use Filament\Actions\Action;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\DateTimePicker;
@@ -55,10 +56,22 @@ class ComboRuleForm
                             ->disk('public')
                             ->directory('combo-rules')
                             ->maxSize(2048),
-                        Textarea::make('description')
+                        RichEditor::make('description')
                             ->label('وصف العرض')
-                            ->maxLength(65535)
-                            ->columnSpanFull(),
+                            ->columnSpanFull()
+                            ->toolbarButtons([
+                                'bold',
+                                'italic',
+                                'underline',
+                                'strike',
+                                'h2',
+                                'h3',
+                                'bulletList',
+                                'orderedList',
+                                'link',
+                                'undo',
+                                'redo',
+                            ]),
                         Toggle::make('is_active')
                             ->label('مفعل')
                             ->default(true),
@@ -153,7 +166,7 @@ class ComboRuleForm
                         DateTimePicker::make('ends_at')
                             ->label('تاريخ نهاية العرض'),
                     ])->columnSpan(2),
-                    
+
                 Section::make('شروط العرض (الفئة أو المنتج)')
                     ->schema([
                         Repeater::make('conditions')
@@ -198,6 +211,20 @@ class ComboRuleForm
                             ->required()
                             ->minItems(1)
                     ])->columnSpan(1),
+
+                Section::make('إعدادات تحسين محركات البحث (SEO)')
+                    ->schema([
+                        TextInput::make('meta_title')
+                            ->label('عنوان SEO (Meta Title)')
+                            ->maxLength(60)
+                            ->helperText('العنوان الذي يظهر في نتائج البحث — يُفضل ألا يتجاوز 60 حرفاً'),
+                        Textarea::make('meta_description')
+                            ->label('وصف SEO (Meta Description)')
+                            ->maxLength(160)
+                            ->rows(2)
+                            ->helperText('الوصف الذي يظهر أسفل الرابط في نتائج البحث — يُفضل ألا يتجاوز 160 حرفاً'),
+                    ])
+                    ->collapsed(),
             ]);
     }
 }

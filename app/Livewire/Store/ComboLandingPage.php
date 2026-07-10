@@ -752,6 +752,9 @@ class ComboLandingPage extends Component
         return view('livewire.store.combo-landing-page', [
             'conditionData' => $this->conditionData,
             'selections'    => $this->selections,
-        ])->layout('layouts.store', ['title' => $this->combo->name]);
+        ])->layout('layouts.store', [
+            'title'       => $this->combo->meta_title ?: $this->combo->name,
+            'description' => $this->combo->meta_description ?: strip_tags($this->combo->description ?: config('app.name', 'Violet Store')),
+        ]);
     }
 }

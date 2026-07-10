@@ -33,9 +33,9 @@
                 {{ $combo->name }}
             </h1>
             @if($combo->description)
-                <p class="text-lg text-gray-600 max-w-2xl mx-auto">
-                    {{ $combo->description }}
-                </p>
+                <div class="text-lg text-gray-600 max-w-2xl mx-auto prose prose-violet">
+                    {!! $combo->description !!}
+                </div>
             @endif
         </div>
 
