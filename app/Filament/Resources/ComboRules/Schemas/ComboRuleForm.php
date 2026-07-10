@@ -167,20 +167,6 @@ class ComboRuleForm
                             ->label('تاريخ نهاية العرض'),
                     ])->columnSpan(2),
 
-                Section::make('إعدادات تحسين محركات البحث (SEO)')
-                    ->schema([
-                        TextInput::make('meta_title')
-                            ->label('عنوان SEO (Meta Title)')
-                            ->maxLength(60)
-                            ->helperText('العنوان الذي يظهر في نتائج البحث — يُفضل ألا يتجاوز 60 حرفاً'),
-                        Textarea::make('meta_description')
-                            ->label('وصف SEO (Meta Description)')
-                            ->maxLength(160)
-                            ->rows(2)
-                            ->helperText('الوصف الذي يظهر أسفل الرابط في نتائج البحث — يُفضل ألا يتجاوز 160 حرفاً'),
-                    ])
-                    ->collapsed(),
-
                 Section::make('شروط العرض (الفئة أو المنتج)')
                     ->schema([
                         Repeater::make('conditions')
@@ -225,6 +211,20 @@ class ComboRuleForm
                             ->required()
                             ->minItems(1)
                     ])->columnSpan(1),
+
+                Section::make('إعدادات تحسين محركات البحث (SEO)')
+                    ->schema([
+                        TextInput::make('meta_title')
+                            ->label('عنوان SEO (Meta Title)')
+                            ->maxLength(60)
+                            ->helperText('العنوان الذي يظهر في نتائج البحث — يُفضل ألا يتجاوز 60 حرفاً'),
+                        Textarea::make('meta_description')
+                            ->label('وصف SEO (Meta Description)')
+                            ->maxLength(160)
+                            ->rows(2)
+                            ->helperText('الوصف الذي يظهر أسفل الرابط في نتائج البحث — يُفضل ألا يتجاوز 160 حرفاً'),
+                    ])
+                    ->collapsed(),
             ]);
     }
 }
