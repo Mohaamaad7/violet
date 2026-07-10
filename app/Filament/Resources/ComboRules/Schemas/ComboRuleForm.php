@@ -223,6 +223,11 @@ class ComboRuleForm
                             ->maxLength(160)
                             ->rows(2)
                             ->helperText('الوصف الذي يظهر أسفل الرابط في نتائج البحث — يُفضل ألا يتجاوز 160 حرفاً'),
+                        TextInput::make('custom_pixel_id')
+                            ->label('Facebook Pixel ID مخصص (اختياري)')
+                            ->placeholder('مثال: 1234567890')
+                            ->helperText('إذا أُدخل، سيُهيَّأ هذا البيكسل على صفحة الهبوط وسترسل أحداث ViewContent وAddToCart إلى البيكسل العام وهذا البيكسل معاً.')
+                            ->maxLength(20),
                     ])
                     ->collapsed(),
             ]);
