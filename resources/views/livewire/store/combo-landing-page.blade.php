@@ -62,23 +62,23 @@
                             type="button"
                             wire:click="selectTier({{ $index }})"
                             @class([
-                                'relative p-4 rounded-2xl border-2 text-center transition-all duration-200 cursor-pointer',
+                                'flex flex-col items-center gap-1 p-4 rounded-2xl border-2 text-center transition-all duration-200 cursor-pointer',
                                 'col-span-2'                                                              => $index === 0,
                                 'border-violet-600 bg-violet-50 ring-2 ring-violet-200 shadow-md'        => $selectedTierIndex === $index,
                                 'border-gray-200 bg-white hover:border-violet-400 hover:bg-gray-50'      => $selectedTierIndex !== $index,
                             ])
                         >
-                            {{-- "Best Value" badge — only on the featured (index 0) tier --}}
+                            {{-- "Best Value" badge in natural flow — no absolute positioning --}}
                             @if($index === 0)
-                                <span class="absolute -top-2.5 left-1/2 -translate-x-1/2 whitespace-nowrap bg-violet-600 text-white text-xs font-bold px-3 py-0.5 rounded-full shadow-sm">
+                                <span class="inline-flex items-center bg-violet-600 text-white text-xs font-bold px-3 py-0.5 rounded-full shadow-sm whitespace-nowrap">
                                     الأوفر 🔥
                                 </span>
                             @endif
 
-                            <div class="text-base font-bold text-gray-900 mt-1">
+                            <div class="text-base font-bold text-gray-900">
                                 {{ $tier['quantity'] }} {{ $tier['quantity'] == 1 ? 'قطعة' : 'قطع' }}
                             </div>
-                            <div class="font-bold mt-1 {{ $index === 0 ? 'text-2xl text-violet-700' : 'text-lg text-violet-600' }}">
+                            <div class="font-bold {{ $index === 0 ? 'text-2xl text-violet-700' : 'text-lg text-violet-600' }}">
                                 @if($tier['discount_type'] === 'fixed_price')
                                     {{ number_format($tier['fixed_price'], 0) }} ج.م
                                 @else
@@ -87,7 +87,7 @@
                             </div>
 
                             @if($selectedTierIndex === $index)
-                                <div class="mt-2 flex justify-center">
+                                <div class="flex justify-center">
                                     <svg class="w-5 h-5 text-violet-600" fill="currentColor" viewBox="0 0 20 20">
                                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
                                     </svg>
@@ -109,6 +109,7 @@
                 ->map(fn($d, $id) => ['conditionId' => (int)$id, 'has_variants' => (bool)$d['has_variants']])
                 ->values()
                 ->toArray();
+            $tierQuantitiesJson = json_encode(array_column($tiers, 'quantity'));
         @endphp
 
         {{-- ═══════════════════════════════════════════════════════════════════
@@ -213,7 +214,9 @@
                 {{-- ───────────────────────────────────────────────────────────
                      CATEGORY-TYPE CONDITION — Smart Quantity Selector
                      Alpine manages all +/− state client-side (zero latency).
-                     wire:key forces re-init when tier (and thus limit) changes.
+                     Interactive shell is isolated with wire:ignore so Livewire
+                     tier re-renders do not tear down Alpine state. Limit sync
+                     still reacts via $watch('$wire.selectedTierIndex', ...).
                 ─────────────────────────────────────────────────────────────── --}}
                 @elseif($data['type'] === 'category')
                     @php
@@ -226,16 +229,24 @@
                         id="piece-{{ $conditionId }}"
                         class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden scroll-mt-20
                                {{ $conditionHasAnyError ? 'ring-2 ring-red-300' : '' }}"
-                        wire:key="cat-cond-{{ $conditionId }}-{{ $selectedTierIndex }}"
-                        x-data="{
-                            conditionId: {{ $conditionId }},
-                            limit: {{ $data['required_quantity'] }},
-                            products: {{ $productsJson }},
-                            quantities: {},
+                        wire:key="cat-cond-{{ $conditionId }}"
+                    >
+                        <div
+                            wire:ignore
+                            x-data="{
+                            conditionId:     {{ $conditionId }},
+                            limit:           {{ $data['required_quantity'] }},
+                            tierQuantities:  {{ $tierQuantitiesJson }},
+                            products:        {{ $productsJson }},
+                            quantities:      {},
                             variantSelections: {},
 
                             get total() {
                                 return Object.values(this.quantities).reduce(function(s, v){ return s + v; }, 0);
+                            },
+
+                            get overflow() {
+                                return Math.max(0, this.total - this.limit);
                             },
 
                             isFulfilled() {
@@ -298,23 +309,31 @@
                                 });
                             }
                         }"
-                        x-init="broadcast()"
-                    >
+                        x-init="
+                            broadcast();
+                            $watch('$wire.selectedTierIndex', function(idx) {
+                                limit = tierQuantities[idx];
+                                broadcast();
+                            });
+                        "
+                        >
                         {{-- Card header with live progress pill --}}
                         <div class="bg-gray-50 px-4 py-3 border-b border-gray-100">
                             <div class="flex items-center justify-between gap-2">
-                                <h2 class="text-base font-bold text-gray-900 leading-tight">
-                                    اختر من: {{ $data['category_name'] }}
+                                <h2 class="text-base font-bold text-gray-900 leading-tight flex items-center gap-1.5">
+                                    <span>اختر من: {{ $data['category_name'] }}</span>
+                                    <span class="text-sm font-bold text-violet-700 tabular-nums"
+                                          x-text="total + ' / ' + limit"></span>
                                 </h2>
                                 <span class="shrink-0 text-sm font-bold px-3 py-1 rounded-full transition-colors duration-200"
-                                      :class="total === limit ? 'bg-green-100 text-green-700' : 'bg-violet-50 text-violet-700'">
-                                    <span x-text="total"></span> / {{ $data['required_quantity'] }}
+                                      :class="total > limit ? 'bg-red-100 text-red-700' : total === limit ? 'bg-green-100 text-green-700' : 'bg-violet-50 text-violet-700'">
+                                    <span x-text="total + ' / ' + limit"></span>
                                 </span>
                             </div>
                             {{-- Animated progress bar --}}
                             <div class="mt-2 h-1.5 bg-gray-200 rounded-full overflow-hidden">
                                 <div class="h-full rounded-full transition-all duration-300"
-                                     :class="total === limit ? 'bg-green-500' : 'bg-violet-500'"
+                                     :class="total > limit ? 'bg-red-500' : total === limit ? 'bg-green-500' : 'bg-violet-500'"
                                      :style="'width: ' + Math.min(Math.round(total / limit * 100), 100) + '%'">
                                 </div>
                             </div>
@@ -323,16 +342,16 @@
                         {{-- ── Product list: each product shown ONCE with +/− stepper ── --}}
                         <div class="divide-y divide-gray-50">
                             @foreach($data['products'] as $product)
-                                <div class="px-4 py-3">
+                                <div class="px-4 py-3" x-data="{ product: { id: {{ $product['id'] }} } }">
 
                                     {{-- Product row: image · name+price · stepper --}}
-                                    <div class="flex items-center gap-3">
+                                    <div class="flex items-center gap-2">
                                         <img src="{{ $product['image'] }}"
                                              alt="{{ $product['name'] }}"
-                                             class="w-14 h-14 object-contain bg-gray-50 rounded-xl border border-gray-100 shrink-0">
+                                             class="w-12 h-12 object-contain bg-gray-50 rounded-xl border border-gray-100 flex-shrink-0">
 
                                         <div class="flex-1 min-w-0">
-                                            <p class="font-semibold text-gray-900 text-sm leading-snug truncate">{{ $product['name'] }}</p>
+                                            <p class="font-semibold text-gray-900 text-sm leading-snug break-words">{{ $product['name'] }}</p>
                                             @if($product['is_on_sale'] ?? false)
                                                 <p class="text-xs mt-0.5">
                                                     <span class="text-gray-400 line-through">{{ number_format($product['regular_price'], 0) }}</span>
@@ -344,14 +363,14 @@
                                         </div>
 
                                         {{-- +/− Quantity Stepper --}}
-                                        <div class="flex items-center gap-1.5 shrink-0">
+                                        <div class="w-24 flex-shrink-0 flex items-center justify-center gap-1.5">
                                             {{-- Minus --}}
                                             <button
                                                 type="button"
-                                                @click="decrement({{ $product['id'] }})"
-                                                :disabled="!quantities[{{ $product['id'] }}] || quantities[{{ $product['id'] }}] <= 0"
+                                                @click="decrement(product.id)"
+                                                :disabled="!quantities[product.id] || quantities[product.id] <= 0"
                                                 class="w-8 h-8 rounded-full border-2 flex items-center justify-center font-bold text-base leading-none transition-all duration-150 select-none"
-                                                :class="(!quantities[{{ $product['id'] }}] || quantities[{{ $product['id'] }}] <= 0)
+                                                :class="(!quantities[product.id] || quantities[product.id] <= 0)
                                                     ? 'border-gray-200 text-gray-300 cursor-not-allowed'
                                                     : 'border-violet-500 text-violet-600 hover:bg-violet-50 active:scale-90'"
                                                 aria-label="تقليل كمية {{ $product['name'] }}"
@@ -359,12 +378,12 @@
 
                                             {{-- Count --}}
                                             <span class="w-6 text-center font-bold text-gray-900 text-sm tabular-nums"
-                                                  x-text="quantities[{{ $product['id'] }}] || 0"></span>
+                                                  x-text="quantities[product.id] || 0"></span>
 
                                             {{-- Plus --}}
                                             <button
                                                 type="button"
-                                                @click="increment({{ $product['id'] }})"
+                                                @click="increment(product.id)"
                                                 :disabled="total >= limit"
                                                 class="w-8 h-8 rounded-full border-2 flex items-center justify-center font-bold text-base leading-none transition-all duration-150 select-none"
                                                 :class="total >= limit
@@ -378,7 +397,7 @@
                                     {{-- ── Inline Variant Picker — reveals when qty > 0 ── --}}
                                     @if($product['has_variants'])
                                         <div
-                                            x-show="quantities[{{ $product['id'] }}] > 0"
+                                            x-show="quantities[product.id] > 0"
                                             x-transition:enter="transition ease-out duration-150"
                                             x-transition:enter-start="opacity-0 -translate-y-1"
                                             x-transition:enter-end="opacity-100 translate-y-0"
@@ -392,8 +411,8 @@
                                                 @foreach($product['variants'] as $variant)
                                                     <button
                                                         type="button"
-                                                        @click="pickVariant({{ $product['id'] }}, {{ $variant['id'] }})"
-                                                        :class="variantSelections[{{ $product['id'] }}] === {{ $variant['id'] }}
+                                                        @click="pickVariant(product.id, {{ $variant['id'] }})"
+                                                        :class="variantSelections[product.id] === {{ $variant['id'] }}
                                                             ? 'border-violet-600 bg-violet-50 text-violet-700 font-bold'
                                                             : '{{ $variant['stock'] <= 0 ? 'border-gray-200 text-gray-300 cursor-not-allowed opacity-50' : 'border-gray-300 text-gray-600 hover:border-violet-400 active:bg-violet-50' }}'"
                                                         class="px-3 py-1.5 rounded-lg border-2 text-xs transition-all duration-150 relative"
@@ -409,7 +428,7 @@
                                                 @endforeach
                                             </div>
                                             {{-- Variant-required inline warning --}}
-                                            <p x-show="quantities[{{ $product['id'] }}] > 0 && !variantSelections[{{ $product['id'] }}]"
+                                            <p x-show="quantities[product.id] > 0 && !variantSelections[product.id]"
                                                class="text-xs text-orange-600 font-medium mt-1.5 flex items-center gap-1">
                                                 <svg class="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                                     <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
@@ -425,7 +444,7 @@
 
                         {{-- Limit-reached success banner --}}
                         <div
-                            x-show="total >= limit"
+                            x-show="total === limit"
                             x-transition:enter="transition ease-out duration-200"
                             x-transition:enter-start="opacity-0"
                             x-transition:enter-end="opacity-100"
@@ -439,16 +458,18 @@
                             </p>
                         </div>
 
-                        {{-- Livewire-side validation error (edge case: stock issue on submit) --}}
-                        @if($conditionHasAnyError)
-                            <div class="bg-red-50 border-t border-red-100 px-4 py-2.5 text-sm text-red-600 font-medium flex items-center gap-1.5">
-                                <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
-                                </svg>
-                                يرجى اختيار منتجات صحيحة من هذا القسم
-                            </div>
-                        @endif
                     </div>
+
+                    {{-- Livewire-side validation error (edge case: stock issue on submit) --}}
+                    @if($conditionHasAnyError)
+                        <div class="bg-red-50 border-t border-red-100 px-4 py-2.5 text-sm text-red-600 font-medium flex items-center gap-1.5">
+                            <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                            </svg>
+                            يرجى اختيار منتجات صحيحة من هذا القسم
+                        </div>
+                    @endif
+                </div>
 
                 @endif
             @endforeach
@@ -505,7 +526,11 @@
             },
 
             isReady(wireSelections) {
-                return this.allCategoryFulfilled() && this.allProductsFulfilled(wireSelections);
+                return this.overflowQuantity === 0 && this.allCategoryFulfilled() && this.allProductsFulfilled(wireSelections);
+            },
+
+            get overflowQuantity() {
+                return Math.max(0, this.totalSelected - this.totalRequired);
             },
 
             onConditionUpdate(detail) {
@@ -513,7 +538,6 @@
             }
         }"
         x-init="
-            $watch('$wire.selectedTierIndex', function(){ conditionStats = {}; });
             var stickyEl = $el;
             var ro = new ResizeObserver(function(entries) {
                 for (var i = 0; i < entries.length; i++) {
@@ -528,7 +552,19 @@
 
             {{-- Progress row (only when category conditions exist) --}}
             @if($categoryConditionCount > 0)
-                <div class="flex items-center justify-between mb-2.5 gap-3" x-show="totalRequired > 0">
+                {{-- Overflow warning (downgrade scenario) --}}
+                <div x-show="overflowQuantity > 0"
+                     x-transition
+                     class="flex items-center gap-2 mb-2.5 px-3 py-2 bg-red-50 border border-red-200 rounded-xl text-sm text-red-700 font-medium">
+                    <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+                    </svg>
+                    <span x-text="'اختياراتك الحالية تتجاوز العرض المختار. يرجى إزالة ' + overflowQuantity + ' قطعة.'"></span>
+                </div>
+
+                {{-- Normal progress row --}}
+                <div class="flex items-center justify-between mb-2.5 gap-3"
+                     x-show="overflowQuantity === 0 && totalRequired > 0">
                     <div class="flex items-center gap-1.5 text-sm">
                         <span class="font-bold transition-colors duration-200"
                               :class="totalSelected === totalRequired && totalRequired > 0 ? 'text-green-600' : 'text-violet-700'"
@@ -551,7 +587,7 @@
                 {{-- Mini progress bar --}}
                 <div class="h-1 bg-gray-200 rounded-full mb-3 overflow-hidden" x-show="totalRequired > 0">
                     <div class="h-full rounded-full transition-all duration-300"
-                         :class="totalSelected === totalRequired && totalRequired > 0 ? 'bg-green-500' : 'bg-violet-500'"
+                         :class="overflowQuantity > 0 ? 'bg-red-500' : totalSelected === totalRequired && totalRequired > 0 ? 'bg-green-500' : 'bg-violet-500'"
                          :style="totalRequired > 0 ? 'width: ' + Math.min(Math.round(totalSelected / totalRequired * 100), 100) + '%' : 'width:0'">
                     </div>
                 </div>
@@ -730,4 +766,3 @@
     });
 </script>
 @endpush
-
