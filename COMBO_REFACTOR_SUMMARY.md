@@ -88,7 +88,7 @@ Therefore **`$index === 0` always holds the highest-quantity / greatest-savings 
 }
 ```
 
-**`wire:key`**: Every category condition wrapper has `wire:key="cat-cond-{{ $conditionId }}-{{ $selectedTierIndex }}"`. When the user selects a different tier, Livewire re-renders and this key changes, causing Alpine to **destroy and reinitialize** the component with the new `limit`. This resets all quantities cleanly.
+**`wire:key` + survival strategy**: Every category condition wrapper now uses stable `wire:key="cat-cond-{{ $conditionId }}"`, and the interactive Alpine subtree is isolated with `wire:ignore`. Tier changes no longer tear down the active Alpine state, so quantities survive while `limit` updates reactively.
 
 ---
 
@@ -108,7 +108,7 @@ A `fixed bottom-0 left-0 right-0 z-50` bar replaces the original `sticky` bar. I
 x-bind:disabled="!allCategoryFulfilled() || !allProductsFulfilled($wire.selections) || processing"
 ```
 
-**Tier change reset:** `x-init` installs a `$watch('$wire.selectedTierIndex', ...)` watcher. When tier changes, `conditionStats = {}` is cleared. The category condition components re-broadcast via `x-init` on re-mount, repopulating stats correctly.
+**Tier change sync:** each category condition watches `$wire.selectedTierIndex` and re-broadcasts with the updated `limit`. Sticky stats stay synchronized without clearing `conditionStats` on tier switch.
 
 ---
 
@@ -373,3 +373,63 @@ The success banner (`"اختياراتك مكتملة! 🎉"`) now uses `x-show=
 | 5 | Switch back to Tier 1 (limit=3) | `$watch` fires → `limit=3`. `quantities` unchanged. `total=5, overflow=2` → red pill, sticky bar warning shown, CTA disabled |
 | 6 | Click `−` twice on any items | `total=3, overflow=0` → green pill, warning disappears, normal progress shows, CTA active |
 
+---
+
+## Phase 3: State Desynchronization Fix
+
+**Date:** 2026-07-11  
+**Problem:** On tier switch, sticky bar could show updated progress while product-row steppers visually reset to zero, indicating Alpine UI state teardown inside a Livewire-morphed zone.
+
+### P3.1 Component Survival Enforcement
+
+The category card was structurally split:
+
+- **Outer wrapper** stays Livewire-reactive (`wire:key="cat-cond-{{ $conditionId }}"`)
+- **Inner interactive shell** is `wire:ignore` + `x-data`
+
+This prevents Livewire tier morphing from tearing down the Alpine quantity tree during `selectTier()` roundtrips.
+
+```blade
+<div wire:key="cat-cond-{{ $conditionId }}">
+    <div wire:ignore x-data="{ ... }" x-init="...">
+        {{-- steppers + header progress + variant picker --}}
+    </div>
+    {{-- server-side error block remains outside wire:ignore --}}
+</div>
+```
+
+### P3.2 Counter Binding Locked to Alpine State
+
+Each product row now has a local Alpine product object:
+
+```blade
+<div x-data="{ product: { id: {{ $product['id'] }} } }">
+```
+
+Stepper count display is now strictly:
+
+```blade
+x-text="quantities[product.id] || 0"
+```
+
+All row controls (`increment`, `decrement`, `pickVariant`) now use `product.id`, ensuring runtime counters always resolve from the same `quantities` state object.
+
+### P3.3 Header/Sticky Progress Synchronization
+
+Category header progress now uses the same Alpine properties as sticky condition events:
+
+```blade
+<span x-text="total + ' / ' + limit"></span>
+```
+
+This replaced static Blade quantity fragments and keeps per-condition header progress aligned with sticky-bar condition totals.
+
+### P3 Dry Run Trace
+
+| Step | Action | Observed State |
+|---|---|---|
+| 1 | Select 3-tier and add Product A twice | Row counter `2`, header `2 / 3` |
+| 2 | Switch to 5-tier | `limit` updates to `5`, Alpine shell survives (no reset) |
+| 3 | Read Product A row counter | Still `2` from `quantities[product.id]` |
+| 4 | Compare header vs sticky | Both show `2 / 5` for the condition |
+| 5 | Continue +/− | Counters, header, and sticky remain synchronized |

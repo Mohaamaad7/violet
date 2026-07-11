@@ -214,8 +214,9 @@
                 {{-- ───────────────────────────────────────────────────────────
                      CATEGORY-TYPE CONDITION — Smart Quantity Selector
                      Alpine manages all +/− state client-side (zero latency).
-                     State is PRESERVED across tier changes via $watch on
-                     $wire.selectedTierIndex — quantities survive upgrade/downgrade.
+                     Interactive shell is isolated with wire:ignore so Livewire
+                     tier re-renders do not tear down Alpine state. Limit sync
+                     still reacts via $watch('$wire.selectedTierIndex', ...).
                 ─────────────────────────────────────────────────────────────── --}}
                 @elseif($data['type'] === 'category')
                     @php
@@ -229,7 +230,10 @@
                         class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden scroll-mt-20
                                {{ $conditionHasAnyError ? 'ring-2 ring-red-300' : '' }}"
                         wire:key="cat-cond-{{ $conditionId }}"
-                        x-data="{
+                    >
+                        <div
+                            wire:ignore
+                            x-data="{
                             conditionId:     {{ $conditionId }},
                             limit:           {{ $data['required_quantity'] }},
                             tierQuantities:  {{ $tierQuantitiesJson }},
@@ -312,16 +316,18 @@
                                 broadcast();
                             });
                         "
-                    >
+                        >
                         {{-- Card header with live progress pill --}}
                         <div class="bg-gray-50 px-4 py-3 border-b border-gray-100">
                             <div class="flex items-center justify-between gap-2">
-                                <h2 class="text-base font-bold text-gray-900 leading-tight">
-                                    اختر من: {{ $data['category_name'] }}
+                                <h2 class="text-base font-bold text-gray-900 leading-tight flex items-center gap-1.5">
+                                    <span>اختر من: {{ $data['category_name'] }}</span>
+                                    <span class="text-sm font-bold text-violet-700 tabular-nums"
+                                          x-text="total + ' / ' + limit"></span>
                                 </h2>
                                 <span class="shrink-0 text-sm font-bold px-3 py-1 rounded-full transition-colors duration-200"
                                       :class="total > limit ? 'bg-red-100 text-red-700' : total === limit ? 'bg-green-100 text-green-700' : 'bg-violet-50 text-violet-700'">
-                                    <span x-text="total"></span> / {{ $data['required_quantity'] }}
+                                    <span x-text="total + ' / ' + limit"></span>
                                 </span>
                             </div>
                             {{-- Animated progress bar --}}
@@ -336,7 +342,7 @@
                         {{-- ── Product list: each product shown ONCE with +/− stepper ── --}}
                         <div class="divide-y divide-gray-50">
                             @foreach($data['products'] as $product)
-                                <div class="px-4 py-3">
+                                <div class="px-4 py-3" x-data="{ product: { id: {{ $product['id'] }} } }">
 
                                     {{-- Product row: image · name+price · stepper --}}
                                     <div class="flex items-center gap-2">
@@ -361,10 +367,10 @@
                                             {{-- Minus --}}
                                             <button
                                                 type="button"
-                                                @click="decrement({{ $product['id'] }})"
-                                                :disabled="!quantities[{{ $product['id'] }}] || quantities[{{ $product['id'] }}] <= 0"
+                                                @click="decrement(product.id)"
+                                                :disabled="!quantities[product.id] || quantities[product.id] <= 0"
                                                 class="w-8 h-8 rounded-full border-2 flex items-center justify-center font-bold text-base leading-none transition-all duration-150 select-none"
-                                                :class="(!quantities[{{ $product['id'] }}] || quantities[{{ $product['id'] }}] <= 0)
+                                                :class="(!quantities[product.id] || quantities[product.id] <= 0)
                                                     ? 'border-gray-200 text-gray-300 cursor-not-allowed'
                                                     : 'border-violet-500 text-violet-600 hover:bg-violet-50 active:scale-90'"
                                                 aria-label="تقليل كمية {{ $product['name'] }}"
@@ -372,12 +378,12 @@
 
                                             {{-- Count --}}
                                             <span class="w-6 text-center font-bold text-gray-900 text-sm tabular-nums"
-                                                  x-text="quantities[{{ $product['id'] }}] || 0"></span>
+                                                  x-text="quantities[product.id] || 0"></span>
 
                                             {{-- Plus --}}
                                             <button
                                                 type="button"
-                                                @click="increment({{ $product['id'] }})"
+                                                @click="increment(product.id)"
                                                 :disabled="total >= limit"
                                                 class="w-8 h-8 rounded-full border-2 flex items-center justify-center font-bold text-base leading-none transition-all duration-150 select-none"
                                                 :class="total >= limit
@@ -391,7 +397,7 @@
                                     {{-- ── Inline Variant Picker — reveals when qty > 0 ── --}}
                                     @if($product['has_variants'])
                                         <div
-                                            x-show="quantities[{{ $product['id'] }}] > 0"
+                                            x-show="quantities[product.id] > 0"
                                             x-transition:enter="transition ease-out duration-150"
                                             x-transition:enter-start="opacity-0 -translate-y-1"
                                             x-transition:enter-end="opacity-100 translate-y-0"
@@ -405,8 +411,8 @@
                                                 @foreach($product['variants'] as $variant)
                                                     <button
                                                         type="button"
-                                                        @click="pickVariant({{ $product['id'] }}, {{ $variant['id'] }})"
-                                                        :class="variantSelections[{{ $product['id'] }}] === {{ $variant['id'] }}
+                                                        @click="pickVariant(product.id, {{ $variant['id'] }})"
+                                                        :class="variantSelections[product.id] === {{ $variant['id'] }}
                                                             ? 'border-violet-600 bg-violet-50 text-violet-700 font-bold'
                                                             : '{{ $variant['stock'] <= 0 ? 'border-gray-200 text-gray-300 cursor-not-allowed opacity-50' : 'border-gray-300 text-gray-600 hover:border-violet-400 active:bg-violet-50' }}'"
                                                         class="px-3 py-1.5 rounded-lg border-2 text-xs transition-all duration-150 relative"
@@ -422,7 +428,7 @@
                                                 @endforeach
                                             </div>
                                             {{-- Variant-required inline warning --}}
-                                            <p x-show="quantities[{{ $product['id'] }}] > 0 && !variantSelections[{{ $product['id'] }}]"
+                                            <p x-show="quantities[product.id] > 0 && !variantSelections[product.id]"
                                                class="text-xs text-orange-600 font-medium mt-1.5 flex items-center gap-1">
                                                 <svg class="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
                                                     <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
@@ -452,16 +458,18 @@
                             </p>
                         </div>
 
-                        {{-- Livewire-side validation error (edge case: stock issue on submit) --}}
-                        @if($conditionHasAnyError)
-                            <div class="bg-red-50 border-t border-red-100 px-4 py-2.5 text-sm text-red-600 font-medium flex items-center gap-1.5">
-                                <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
-                                </svg>
-                                يرجى اختيار منتجات صحيحة من هذا القسم
-                            </div>
-                        @endif
                     </div>
+
+                    {{-- Livewire-side validation error (edge case: stock issue on submit) --}}
+                    @if($conditionHasAnyError)
+                        <div class="bg-red-50 border-t border-red-100 px-4 py-2.5 text-sm text-red-600 font-medium flex items-center gap-1.5">
+                            <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
+                            </svg>
+                            يرجى اختيار منتجات صحيحة من هذا القسم
+                        </div>
+                    @endif
+                </div>
 
                 @endif
             @endforeach
@@ -758,4 +766,3 @@
     });
 </script>
 @endpush
-
