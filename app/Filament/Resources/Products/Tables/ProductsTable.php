@@ -311,6 +311,24 @@ class ProductsTable
                         })
                         ->deselectRecordsAfterCompletion(),
 
+                    BulkAction::make('change_category')
+                        ->label('تغيير القسم')
+                        ->icon('heroicon-o-tag')
+                        ->form([
+                            \Filament\Forms\Components\Select::make('category_id')
+                                ->label('اختر القسم الجديد')
+                                ->options(fn() => \App\Models\Category::pluck('name', 'id')->toArray())
+                                ->required(),
+                        ])
+                        ->action(function (Collection $records, array $data) {
+                            $records->toQuery()->update(['category_id' => $data['category_id']]);
+                            \Filament\Notifications\Notification::make()
+                                ->success()
+                                ->title('تم تحديث القسم بنجاح')
+                                ->send();
+                        })
+                        ->deselectRecordsAfterCompletion(),
+
                     DeleteBulkAction::make()
                         ->visible(fn() => auth()->user()->can('delete products')),
                     ForceDeleteBulkAction::make()
