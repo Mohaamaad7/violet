@@ -29,6 +29,7 @@ class ComboRule extends Model
         'ends_at',
         'meta_title',
         'meta_description',
+        'custom_pixel_id',
     ];
 
     protected $hidden = [
