@@ -1172,5 +1172,21 @@ return [
     'updated_at' => 'آخر تحديث',
     'copied' => 'تم النسخ!',
     'view_page' => 'عرض الصفحة',
+
+    // CMS Structured Content
+    'about_us_content' => 'محتوى صفحة من نحن',
+    'about_us_content_desc' => 'الرؤية، القيم والإنجازات الخاصة بصفحة من نحن.',
+    'vision' => 'الرؤية',
+    'vision_helper' => 'رؤية الشركة التي ستعرض في صفحة من نحن.',
+    'values' => 'القيم',
+    'value_title' => 'عنوان القيمة',
+    'value_description' => 'الوصف',
+    'icon' => 'الأيقونة',
+    'icon_helper' => 'اسم الأيقونة (مثال: heroicon-o-heart)',
+    'add_value' => 'إضافة قيمة',
+    'achievements' => 'الإنجازات',
+    'achievement_number' => 'الرقم / الإحصائية',
+    'achievement_label' => 'الوصف / التسمية',
+    'add_achievement' => 'إضافة إنجاز',
 ];
 

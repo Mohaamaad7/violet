@@ -71,8 +71,8 @@ class PageResource extends Resource
 
                         Forms\Components\RichEditor::make('content')
                             ->label(__('admin.content'))
-                            ->required(fn (\Filament\Schemas\Components\Utilities\Get $get): bool => $get('slug') !== 'about')
-                            ->hidden(fn (\Filament\Schemas\Components\Utilities\Get $get): bool => $get('slug') === 'about')
+                            ->required(fn (\Filament\Schemas\Components\Utilities\Get $get): bool => ! in_array($get('slug'), ['about', 'contact']))
+                            ->hidden(fn (\Filament\Schemas\Components\Utilities\Get $get): bool => in_array($get('slug'), ['about', 'contact']))
                             ->columnSpanFull()
                             ->toolbarButtons([
                                 'bold',
