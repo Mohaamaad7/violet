@@ -13,6 +13,7 @@ class Page extends Model
         'title',
         'slug',
         'content',
+        'metadata',
         'is_active',
         'meta_title',
         'meta_description',
@@ -20,6 +21,7 @@ class Page extends Model
 
     protected $casts = [
         'is_active' => 'boolean',
+        'metadata' => 'array',
     ];
 
     public function scopeActive($query)

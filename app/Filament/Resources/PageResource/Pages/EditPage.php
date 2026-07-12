@@ -10,6 +10,8 @@ class EditPage extends EditRecord
 {
     protected static string $resource = PageResource::class;
 
+    public static bool $formActionsAreSticky = true;
+
     protected function getHeaderActions(): array
     {
         return [
@@ -20,5 +22,14 @@ class EditPage extends EditRecord
                 ->url(fn(): string => route('page.show', $this->record->slug))
                 ->openUrlInNewTab(),
         ];
+    }
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        if (!isset($data['content'])) {
+            $data['content'] = '';
+        }
+
+        return $data;
     }
 }
