@@ -71,8 +71,8 @@ class PageResource extends Resource
 
                         Forms\Components\RichEditor::make('content')
                             ->label(__('admin.content'))
-                            ->required(fn (Forms\Get $get): bool => $get('slug') !== 'about')
-                            ->hidden(fn (Forms\Get $get): bool => $get('slug') === 'about')
+                            ->required(fn (\Filament\Schemas\Components\Utilities\Get $get): bool => $get('slug') !== 'about')
+                            ->hidden(fn (\Filament\Schemas\Components\Utilities\Get $get): bool => $get('slug') === 'about')
                             ->columnSpanFull()
                             ->toolbarButtons([
                                 'bold',
@@ -102,12 +102,13 @@ class PageResource extends Resource
                 Components\Section::make(__('admin.about_us_content', ['default' => 'About Us — Structured Content']))
                     ->description(__('admin.about_us_content_desc', ['default' => 'Vision, Values, and Achievements for the About Us page. This data is stored as structured JSON metadata.']))
                     ->icon('heroicon-o-building-office-2')
-                    ->visible(fn (Forms\Get $get): bool => $get('slug') === 'about')
+                    ->visible(fn (\Filament\Schemas\Components\Utilities\Get $get): bool => $get('slug') === 'about')
                     ->schema([
                         // ── Vision ──
                         Forms\Components\Textarea::make('metadata.vision')
                             ->label(__('admin.vision', ['default' => 'Vision']))
                             ->helperText(__('admin.vision_helper', ['default' => 'The company\'s vision statement displayed on the About Us page.']))
+                            ->default(fn () => __('about.our_vision.content'))
                             ->rows(3)
                             ->columnSpanFull(),
 
@@ -132,7 +133,12 @@ class PageResource extends Resource
                                     ->maxLength(100),
                             ])
                             ->columns(2)
-                            ->defaultItems(0)
+                            ->default([
+                                ['title' => __('about.our_values.quality.title'), 'description' => __('about.our_values.quality.description'), 'icon' => 'heroicon-o-check-badge'],
+                                ['title' => __('about.our_values.transparency.title'), 'description' => __('about.our_values.transparency.description'), 'icon' => 'heroicon-o-eye'],
+                                ['title' => __('about.our_values.innovation.title'), 'description' => __('about.our_values.innovation.description'), 'icon' => 'heroicon-o-light-bulb'],
+                                ['title' => __('about.our_values.customer_satisfaction.title'), 'description' => __('about.our_values.customer_satisfaction.description'), 'icon' => 'heroicon-o-heart'],
+                            ])
                             ->addActionLabel(__('admin.add_value', ['default' => 'Add Value']))
                             ->reorderable()
                             ->collapsible()
@@ -156,7 +162,12 @@ class PageResource extends Resource
                                     ->maxLength(255),
                             ])
                             ->columns(2)
-                            ->defaultItems(0)
+                            ->default([
+                                ['number' => '1000+', 'label' => __('about.our_achievements.happy_customers')],
+                                ['number' => '500+', 'label' => __('about.our_achievements.diverse_products')],
+                                ['number' => '5+', 'label' => __('about.our_achievements.years_experience')],
+                                ['number' => '100%', 'label' => __('about.our_achievements.quality_guarantee')],
+                            ])
                             ->addActionLabel(__('admin.add_achievement', ['default' => 'Add Achievement']))
                             ->reorderable()
                             ->collapsible()
@@ -172,27 +183,31 @@ class PageResource extends Resource
                 Components\Section::make('محتوى صفحة اتصل بنا')
                     ->description('النصوص المخصصة لصفحة اتصل بنا.')
                     ->icon('heroicon-o-phone')
-                    ->visible(fn (Forms\Get $get): bool => $get('slug') === 'contact')
+                    ->visible(fn (\Filament\Schemas\Components\Utilities\Get $get): bool => $get('slug') === 'contact')
                     ->schema([
                         Forms\Components\TextInput::make('metadata.hero_title')
                             ->label('عنوان رئيسي لصفحة اتصل بنا')
                             ->helperText('مثال: تواصل معنا')
+                            ->default(fn () => __('contact.hero.title'))
                             ->maxLength(255),
 
                         Forms\Components\Textarea::make('metadata.hero_subtitle')
                             ->label('نص ترحيبي')
                             ->helperText('مثال: نحن هنا للإجابة على استفساراتك')
+                            ->default(fn () => __('contact.hero.subtitle'))
                             ->rows(2)
                             ->maxLength(500),
 
                         Forms\Components\TextInput::make('metadata.contact_info_title')
                             ->label('عنوان معلومات الاتصال')
                             ->helperText('مثال: معلومات الاتصال')
+                            ->default(fn () => __('contact.contact_info.title'))
                             ->maxLength(255),
 
                         Forms\Components\Textarea::make('metadata.working_hours_text')
                             ->label('ساعات العمل النصية')
                             ->helperText('النص الذي يظهر في قسم ساعات العمل. يمكنك استخدام أسطر متعددة.')
+                            ->default(fn () => __('contact.contact_info.hours.weekdays') . "\n" . __('contact.contact_info.hours.friday'))
                             ->rows(2)
                             ->maxLength(500),
                     ])
