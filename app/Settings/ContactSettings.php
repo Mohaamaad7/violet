@@ -27,13 +27,13 @@ namespace App\Settings {
 
     class ContactSettings extends Settings
     {
-        public string $phone = '';
+        public ?string $phone = '';
 
-        public string $email = '';
+        public ?string $email = '';
 
-        public string $address = '';
+        public ?string $address = '';
 
-        public string $working_hours = '';
+        public ?string $working_hours = '';
 
         public bool $show_map = false;
 
