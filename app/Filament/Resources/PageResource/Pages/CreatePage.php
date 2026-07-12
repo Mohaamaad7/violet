@@ -13,4 +13,13 @@ class CreatePage extends CreateRecord
     {
         return $this->getResource()::getUrl('index');
     }
+
+    protected function mutateFormDataBeforeCreate(array $data): array
+    {
+        if (!isset($data['content'])) {
+            $data['content'] = '';
+        }
+
+        return $data;
+    }
 }

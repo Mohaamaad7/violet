@@ -21,4 +21,13 @@ class EditPage extends EditRecord
                 ->openUrlInNewTab(),
         ];
     }
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        if (!isset($data['content'])) {
+            $data['content'] = '';
+        }
+
+        return $data;
+    }
 }
