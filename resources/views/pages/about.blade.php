@@ -1,6 +1,9 @@
+@php
+    $page = \App\Models\Page::where('slug', 'about')->first();
+@endphp
 <x-store-layout>
-    <x-slot name="title">{{ __('about.page_title') }}</x-slot>
-    <x-slot name="description">{{ __('about.meta_description') }}</x-slot>
+    <x-slot name="title">{{ $page->meta_title ?? __('about.page_title') }}</x-slot>
+    <x-slot name="description">{{ $page->meta_description ?? __('about.meta_description') }}</x-slot>
 
     {{-- Hero Section --}}
     <div class="relative bg-gradient-to-br from-violet-600 via-violet-700 to-purple-800 text-white overflow-hidden">
@@ -69,7 +72,7 @@
                     </h2>
                 </div>
                 <p class="text-gray-700 text-lg leading-relaxed">
-                    {{ __('about.our_vision.content') }}
+                    {{ $page->metadata['vision'] ?? __('about.our_vision.content') }}
                 </p>
             </div>
 
@@ -83,77 +86,32 @@
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {{-- Quality --}}
-                    <div
-                        class="group bg-gradient-to-br from-violet-50 to-purple-50 rounded-xl p-6 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-violet-100">
-                        <div
-                            class="w-14 h-14 bg-violet-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                            <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
-                        <h3 class="text-xl font-bold text-purple-900 mb-3">
-                            {{ __('about.our_values.quality.title') }}
-                        </h3>
-                        <p class="text-gray-600 leading-relaxed">
-                            {{ __('about.our_values.quality.description') }}
-                        </p>
-                    </div>
-
-                    {{-- Transparency --}}
-                    <div
-                        class="group bg-gradient-to-br from-violet-50 to-purple-50 rounded-xl p-6 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-violet-100">
-                        <div
-                            class="w-14 h-14 bg-violet-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                            <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
-                        <h3 class="text-xl font-bold text-purple-900 mb-3">
-                            {{ __('about.our_values.transparency.title') }}
-                        </h3>
-                        <p class="text-gray-600 leading-relaxed">
-                            {{ __('about.our_values.transparency.description') }}
-                        </p>
-                    </div>
-
-                    {{-- Innovation --}}
-                    <div
-                        class="group bg-gradient-to-br from-violet-50 to-purple-50 rounded-xl p-6 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-violet-100">
-                        <div
-                            class="w-14 h-14 bg-violet-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                            <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                            </svg>
-                        </div>
-                        <h3 class="text-xl font-bold text-purple-900 mb-3">
-                            {{ __('about.our_values.innovation.title') }}
-                        </h3>
-                        <p class="text-gray-600 leading-relaxed">
-                            {{ __('about.our_values.innovation.description') }}
-                        </p>
-                    </div>
-
-                    {{-- Customer Satisfaction --}}
-                    <div
-                        class="group bg-gradient-to-br from-violet-50 to-purple-50 rounded-xl p-6 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-violet-100">
-                        <div
-                            class="w-14 h-14 bg-violet-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
-                            <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                    d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                        </div>
-                        <h3 class="text-xl font-bold text-purple-900 mb-3">
-                            {{ __('about.our_values.customer_satisfaction.title') }}
-                        </h3>
-                        <p class="text-gray-600 leading-relaxed">
-                            {{ __('about.our_values.customer_satisfaction.description') }}
-                        </p>
-                    </div>
+                    @if(!empty($page->metadata['values']))
+                        @foreach($page->metadata['values'] as $value)
+                            <div
+                                class="group bg-gradient-to-br from-violet-50 to-purple-50 rounded-xl p-6 hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-violet-100">
+                                <div
+                                    class="w-14 h-14 bg-violet-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+                                    @if(!empty($value['icon']) && str_starts_with($value['icon'], 'heroicon-'))
+                                        <x-dynamic-component :component="$value['icon']" class="w-7 h-7 text-white" />
+                                    @elseif(!empty($value['icon']))
+                                        <span class="text-2xl">{{ $value['icon'] }}</span>
+                                    @else
+                                        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                        </svg>
+                                    @endif
+                                </div>
+                                <h3 class="text-xl font-bold text-purple-900 mb-3">
+                                    {{ $value['title'] ?? '' }}
+                                </h3>
+                                <p class="text-gray-600 leading-relaxed">
+                                    {{ $value['description'] ?? '' }}
+                                </p>
+                            </div>
+                        @endforeach
+                    @endif
                 </div>
             </div>
 
@@ -167,37 +125,15 @@
                 </div>
 
                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-6">
-                    {{-- Happy Customers --}}
-                    <div
-                        class="bg-gradient-to-br from-violet-600 to-purple-700 rounded-xl p-6 text-center text-white transform hover:scale-105 transition-transform duration-300 shadow-lg">
-                        <div class="text-5xl font-bold mb-2">1000+</div>
-                        <div class="text-violet-100 font-medium">{{ __('about.our_achievements.happy_customers') }}
-                        </div>
-                    </div>
-
-                    {{-- Diverse Products --}}
-                    <div
-                        class="bg-gradient-to-br from-violet-600 to-purple-700 rounded-xl p-6 text-center text-white transform hover:scale-105 transition-transform duration-300 shadow-lg">
-                        <div class="text-5xl font-bold mb-2">500+</div>
-                        <div class="text-violet-100 font-medium">{{ __('about.our_achievements.diverse_products') }}
-                        </div>
-                    </div>
-
-                    {{-- Years Experience --}}
-                    <div
-                        class="bg-gradient-to-br from-violet-600 to-purple-700 rounded-xl p-6 text-center text-white transform hover:scale-105 transition-transform duration-300 shadow-lg">
-                        <div class="text-5xl font-bold mb-2">5+</div>
-                        <div class="text-violet-100 font-medium">{{ __('about.our_achievements.years_experience') }}
-                        </div>
-                    </div>
-
-                    {{-- Quality Guarantee --}}
-                    <div
-                        class="bg-gradient-to-br from-violet-600 to-purple-700 rounded-xl p-6 text-center text-white transform hover:scale-105 transition-transform duration-300 shadow-lg">
-                        <div class="text-5xl font-bold mb-2">100%</div>
-                        <div class="text-violet-100 font-medium">{{ __('about.our_achievements.quality_guarantee') }}
-                        </div>
-                    </div>
+                    @if(!empty($page->metadata['achievements']))
+                        @foreach($page->metadata['achievements'] as $achievement)
+                            <div
+                                class="bg-gradient-to-br from-violet-600 to-purple-700 rounded-xl p-6 text-center text-white transform hover:scale-105 transition-transform duration-300 shadow-lg">
+                                <div class="text-5xl font-bold mb-2">{{ $achievement['number'] ?? '' }}</div>
+                                <div class="text-violet-100 font-medium">{{ $achievement['label'] ?? '' }}</div>
+                            </div>
+                        @endforeach
+                    @endif
                 </div>
             </div>
 

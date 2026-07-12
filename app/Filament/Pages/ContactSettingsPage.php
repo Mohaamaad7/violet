@@ -19,12 +19,12 @@ class ContactSettingsPage extends SettingsPage
 
     public static function getNavigationLabel(): string
     {
-        return __('admin.contact_settings', ['default' => 'Contact Settings']);
+        return 'إعدادات الاتصال';
     }
 
     public static function getNavigationGroup(): ?string
     {
-        return __('admin.nav.settings', ['default' => 'Settings']);
+        return 'إدارة المحتوى';
     }
 
     public static function getNavigationSort(): ?int
@@ -34,48 +34,48 @@ class ContactSettingsPage extends SettingsPage
 
     public function getTitle(): string
     {
-        return __('admin.contact_settings', ['default' => 'Contact Settings']);
+        return 'إعدادات الاتصال';
     }
 
     public function form(Schema $schema): Schema
     {
         return $schema
             ->schema([
-                Components\Section::make(__('admin.contact_info', ['default' => 'Contact Information']))
+                Components\Section::make('معلومات الاتصال')
                     ->schema([
                         Forms\Components\TextInput::make('phone')
-                            ->label(__('admin.phone', ['default' => 'Phone']))
+                            ->label('رقم الهاتف')
                             ->tel()
                             ->maxLength(255),
 
                         Forms\Components\TextInput::make('email')
-                            ->label(__('admin.email', ['default' => 'Email']))
+                            ->label('البريد الإلكتروني')
                             ->email()
                             ->maxLength(255),
 
                         Forms\Components\Textarea::make('address')
-                            ->label(__('admin.address', ['default' => 'Address']))
+                            ->label('العنوان')
                             ->rows(3)
                             ->maxLength(1000),
 
                         Forms\Components\TextInput::make('working_hours')
-                            ->label(__('admin.working_hours', ['default' => 'Working Hours']))
+                            ->label('ساعات العمل')
                             ->placeholder('e.g. Sun - Thu: 9 AM - 5 PM')
                             ->maxLength(255),
 
                         Forms\Components\Toggle::make('show_map')
-                            ->label(__('admin.show_map', ['default' => 'Show Map on Contact Page']))
-                            ->helperText(__('admin.show_map_helper', ['default' => 'Toggle the embedded map visibility on the contact page.'])),
+                            ->label('إظهار الخريطة في صفحة اتصل بنا')
+                            ->helperText('تفعيل أو تعطيل ظهور الخريطة في صفحة اتصل بنا'),
                     ])
                     ->columns(2),
 
-                Components\Section::make(__('admin.social_links', ['default' => 'Social Media Links']))
+                Components\Section::make('روابط التواصل الاجتماعي')
                     ->schema([
                         Forms\Components\Repeater::make('social_links')
                             ->label('')
                             ->schema([
                                 Forms\Components\Select::make('platform')
-                                    ->label(__('admin.platform', ['default' => 'Platform']))
+                                    ->label('المنصة')
                                     ->options([
                                         'facebook' => 'Facebook',
                                         'instagram' => 'Instagram',
@@ -92,7 +92,7 @@ class ContactSettingsPage extends SettingsPage
                                     ->searchable(),
 
                                 Forms\Components\TextInput::make('url')
-                                    ->label(__('admin.url', ['default' => 'URL']))
+                                    ->label('الرابط')
                                     ->url()
                                     ->required()
                                     ->maxLength(500)
@@ -100,7 +100,7 @@ class ContactSettingsPage extends SettingsPage
                             ])
                             ->columns(2)
                             ->defaultItems(0)
-                            ->addActionLabel(__('admin.add_social_link', ['default' => 'Add Social Link']))
+                            ->addActionLabel('إضافة رابط')
                             ->reorderable()
                             ->collapsible()
                             ->itemLabel(fn (array $state): ?string => $state['platform'] ?? null)

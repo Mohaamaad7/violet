@@ -165,6 +165,39 @@ class PageResource extends Resource
                     ])
                     ->collapsible(),
 
+                // ──────────────────────────────────────────────
+                // Contact Us Page — Structured Metadata Section
+                // Visible ONLY when slug === 'contact'
+                // ──────────────────────────────────────────────
+                Components\Section::make('محتوى صفحة اتصل بنا')
+                    ->description('النصوص المخصصة لصفحة اتصل بنا.')
+                    ->icon('heroicon-o-phone')
+                    ->visible(fn (Forms\Get $get): bool => $get('slug') === 'contact')
+                    ->schema([
+                        Forms\Components\TextInput::make('metadata.hero_title')
+                            ->label('عنوان رئيسي لصفحة اتصل بنا')
+                            ->helperText('مثال: تواصل معنا')
+                            ->maxLength(255),
+
+                        Forms\Components\Textarea::make('metadata.hero_subtitle')
+                            ->label('نص ترحيبي')
+                            ->helperText('مثال: نحن هنا للإجابة على استفساراتك')
+                            ->rows(2)
+                            ->maxLength(500),
+
+                        Forms\Components\TextInput::make('metadata.contact_info_title')
+                            ->label('عنوان معلومات الاتصال')
+                            ->helperText('مثال: معلومات الاتصال')
+                            ->maxLength(255),
+
+                        Forms\Components\Textarea::make('metadata.working_hours_text')
+                            ->label('ساعات العمل النصية')
+                            ->helperText('النص الذي يظهر في قسم ساعات العمل. يمكنك استخدام أسطر متعددة.')
+                            ->rows(2)
+                            ->maxLength(500),
+                    ])
+                    ->collapsible(),
+
                 Components\Section::make(__('admin.seo_settings'))
                     ->schema([
                         Forms\Components\TextInput::make('meta_title')
