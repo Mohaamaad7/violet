@@ -15,7 +15,7 @@ class ContactSettingsPage extends SettingsPage
 {
     protected static string $settings = ContactSettings::class;
 
-    protected static bool $formActionsAreSticky = true;
+    public static bool $formActionsAreSticky = true;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedPhone;
 

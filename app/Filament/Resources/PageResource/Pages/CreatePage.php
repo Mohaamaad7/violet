@@ -9,7 +9,7 @@ class CreatePage extends CreateRecord
 {
     protected static string $resource = PageResource::class;
 
-    protected static bool $formActionsAreSticky = true;
+    public static bool $formActionsAreSticky = true;
 
     protected function getRedirectUrl(): string
     {

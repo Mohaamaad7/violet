@@ -10,7 +10,7 @@ class EditPage extends EditRecord
 {
     protected static string $resource = PageResource::class;
 
-    protected static bool $formActionsAreSticky = true;
+    public static bool $formActionsAreSticky = true;
 
     protected function getHeaderActions(): array
     {
