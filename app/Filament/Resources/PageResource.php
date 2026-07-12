@@ -18,7 +18,7 @@ class PageResource extends Resource
 {
     protected static ?string $model = Page::class;
 
-    public static function getNavigationIcon(): ?string
+    public static function getNavigationIcon(): string|\BackedEnum|\Illuminate\Contracts\Support\Htmlable|null
     {
         return 'heroicon-o-document-text';
     }
@@ -66,11 +66,13 @@ class PageResource extends Resource
                             ->required()
                             ->maxLength(255)
                             ->unique(ignoreRecord: true)
+                            ->live(onBlur: true)
                             ->helperText(__('admin.slug_helper')),
 
                         Forms\Components\RichEditor::make('content')
                             ->label(__('admin.content'))
-                            ->required()
+                            ->required(fn (Forms\Get $get): bool => $get('slug') !== 'about')
+                            ->hidden(fn (Forms\Get $get): bool => $get('slug') === 'about')
                             ->columnSpanFull()
                             ->toolbarButtons([
                                 'bold',
@@ -91,6 +93,77 @@ class PageResource extends Resource
                             ->default(true),
                     ])
                     ->columns(2),
+
+                // ──────────────────────────────────────────────
+                // About Us Page — Structured Metadata Section
+                // Visible ONLY when slug === 'about'
+                // Data is stored in `pages.metadata` (JSON)
+                // ──────────────────────────────────────────────
+                Components\Section::make(__('admin.about_us_content', ['default' => 'About Us — Structured Content']))
+                    ->description(__('admin.about_us_content_desc', ['default' => 'Vision, Values, and Achievements for the About Us page. This data is stored as structured JSON metadata.']))
+                    ->icon('heroicon-o-building-office-2')
+                    ->visible(fn (Forms\Get $get): bool => $get('slug') === 'about')
+                    ->schema([
+                        // ── Vision ──
+                        Forms\Components\Textarea::make('metadata.vision')
+                            ->label(__('admin.vision', ['default' => 'Vision']))
+                            ->helperText(__('admin.vision_helper', ['default' => 'The company\'s vision statement displayed on the About Us page.']))
+                            ->rows(3)
+                            ->columnSpanFull(),
+
+                        // ── Values ──
+                        Forms\Components\Repeater::make('metadata.values')
+                            ->label(__('admin.values', ['default' => 'Values']))
+                            ->schema([
+                                Forms\Components\TextInput::make('title')
+                                    ->label(__('admin.value_title', ['default' => 'Value Title']))
+                                    ->required()
+                                    ->maxLength(255),
+
+                                Forms\Components\Textarea::make('description')
+                                    ->label(__('admin.value_description', ['default' => 'Description']))
+                                    ->required()
+                                    ->rows(2)
+                                    ->maxLength(500),
+
+                                Forms\Components\TextInput::make('icon')
+                                    ->label(__('admin.icon', ['default' => 'Icon']))
+                                    ->helperText(__('admin.icon_helper', ['default' => 'Heroicon name or emoji (e.g. "✨" or "heroicon-o-heart")']))
+                                    ->maxLength(100),
+                            ])
+                            ->columns(2)
+                            ->defaultItems(0)
+                            ->addActionLabel(__('admin.add_value', ['default' => 'Add Value']))
+                            ->reorderable()
+                            ->collapsible()
+                            ->itemLabel(fn (array $state): ?string => $state['title'] ?? null)
+                            ->columnSpanFull(),
+
+                        // ── Achievements ──
+                        Forms\Components\Repeater::make('metadata.achievements')
+                            ->label(__('admin.achievements', ['default' => 'Achievements']))
+                            ->schema([
+                                Forms\Components\TextInput::make('number')
+                                    ->label(__('admin.achievement_number', ['default' => 'Number / Stat']))
+                                    ->required()
+                                    ->placeholder('e.g. 1000+')
+                                    ->maxLength(50),
+
+                                Forms\Components\TextInput::make('label')
+                                    ->label(__('admin.achievement_label', ['default' => 'Label']))
+                                    ->required()
+                                    ->placeholder('e.g. Happy Customers')
+                                    ->maxLength(255),
+                            ])
+                            ->columns(2)
+                            ->defaultItems(0)
+                            ->addActionLabel(__('admin.add_achievement', ['default' => 'Add Achievement']))
+                            ->reorderable()
+                            ->collapsible()
+                            ->itemLabel(fn (array $state): ?string => isset($state['number'], $state['label']) ? "{$state['number']} — {$state['label']}" : null)
+                            ->columnSpanFull(),
+                    ])
+                    ->collapsible(),
 
                 Components\Section::make(__('admin.seo_settings'))
                     ->schema([
