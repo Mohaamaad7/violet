@@ -137,6 +137,24 @@ class CategoryResource extends Resource
                         Forms\Components\Toggle::make('is_active')
                             ->label(__('admin.form.is_active'))
                             ->default(true),
+
+                        Forms\Components\Toggle::make('show_in_header')
+                            ->label(__('storefront.categories.show_in_header'))
+                            ->helperText(__('storefront.categories.visibility_help'))
+                            ->default(false),
+
+                        Forms\Components\Toggle::make('show_on_home')
+                            ->label(__('storefront.categories.show_on_home'))
+                            ->helperText(__('storefront.categories.visibility_help'))
+                            ->default(false),
+
+                        Forms\Components\TextInput::make('sort_order')
+                            ->label(__('storefront.categories.sort_order'))
+                            ->integer()->minValue(0)->required()->default(0),
+
+                        Forms\Components\TextInput::make('home_sort_order')
+                            ->label(__('storefront.categories.home_sort_order'))
+                            ->integer()->minValue(0)->required()->default(0),
                     ])
                     ->columns(2),
 

@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             // SettingsSeeder::class, // Uncomment if you have a settings seeder
             // DemoDataSeeder::class, // Disabled for clean production install
             ComboRuleSeeder::class,
+            StorefrontCategoriesSeeder::class,
         ]);
     }
 }

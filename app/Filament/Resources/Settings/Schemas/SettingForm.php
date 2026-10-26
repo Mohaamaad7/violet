@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\Settings\Schemas;
 
+use App\Services\StorefrontLayout;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -24,6 +25,7 @@ class SettingForm
                             ->required()
                             ->unique(ignoreRecord: true)
                             ->maxLength(255)
+                            ->live(onBlur: true)
                             ->disabled(fn($record) => $record !== null)
                             ->helperText('المفتاح الفريد للإعداد (لا يمكن تعديله بعد الإنشاء)'),
 
@@ -90,8 +92,19 @@ class SettingForm
                             ->label('القيمة')
                             ->rows(3)
                             ->maxLength(65535)
-                            ->visible(fn($get) => $get('type') !== 'boolean' && $get('type') !== 'image')
+                            ->visible(fn($get) => $get('key') !== StorefrontLayout::SETTING_KEY && $get('type') !== 'boolean' && $get('type') !== 'image')
                             ->helperText('قيمة الإعداد')
+                            ->columnSpanFull(),
+
+                        Select::make('value')
+                            ->label(__('storefront.settings.template'))
+                            ->options([
+                                'classic' => __('storefront.settings.classic'),
+                                'category_first' => __('storefront.settings.category_first'),
+                            ])
+                            ->visible(fn($get) => $get('key') === StorefrontLayout::SETTING_KEY)
+                            ->required()
+                            ->in(['classic', 'category_first'])
                             ->columnSpanFull(),
 
                         Toggle::make('value')

@@ -2,6 +2,45 @@
 
 ## Recent Modifications
 
+### Storefront Multi-Template Layout & Category Straps (2026-10-25)
+- **Goal**: Keep the existing `classic` storefront and add an editable `category_first` layout without deleting catalog data or changing the hero/LCP loading contract.
+- **Architecture & Admin**:
+  - `app/Enums/StorefrontTemplate.php` **(NEW)**: Defines `classic` and `category_first`.
+  - `app/Services/StorefrontLayout.php` **(NEW)**: Resolves `settings.storefront_template` with a safe classic fallback, queries visible main categories, builds an active hierarchy in one query, and loads up to eight products per homepage section with category/media eager loading.
+  - `app/Filament/Pages/StorefrontSettings.php` **(NEW)** + `resources/views/filament/pages/storefront-settings.blade.php` **(NEW)**: Layout selector at `/admin/storefront-settings`, using the existing page access controls and server-side option validation.
+  - `app/Models/Setting.php`: Saving or deleting the template setting automatically calls `ResponseCache::clear()`, including changes through the generic Settings resource or `Setting::set()`.
+  - `app/Filament/Resources/Settings/Schemas/SettingForm.php`: Uses a validated template select for the `storefront_template` key.
+  - `lang/en/storefront.php` + `lang/ar/storefront.php` **(NEW)**: Admin labels, strap labels, view-all links, and empty-category messages; frontend strings use `trans_db()`.
+- **Catalog Visibility & Data Preservation**:
+  - `database/migrations/2026_10_25_000001_add_storefront_visibility_to_categories.php` **(NEW)**: Adds `show_in_header`, `show_on_home`, `sort_order`, and `home_sort_order`. The original `order` remains the classic ordering field.
+  - `app/Models/Category.php`: Adds fillable fields/casts, clears response cache after save/delete/restore, and reuses prefetched active product counts when available.
+  - `app/Filament/Resources/CategoryResource.php`: Adds independent header/home visibility and ordering controls. Only active root categories are eligible for header/home placement; children remain available through their parent straps.
+  - `database/seeders/StorefrontCategoriesSeeder.php` **(NEW)**: Repeatable, additive setup. Header order: Body Care → Skin Care → Fragrance. Home order: Fragrance → Body Care → Skin Care. Reuses existing legacy slugs (`body_care`, `Skin_Care`, `fragrance`/`fragrances`, `msk`, `mkhmry`, `cleansers_toners`, and nested `90ml`/`240ml`). Creates missing required branches only; never deletes, renames, reparents, or moves existing products. An existing template choice is preserved.
+  - `database/seeders/DatabaseSeeder.php`: Includes the new storefront setup for installations using the main seeder. Do not use the older destructive `CosmeticsCategoriesSeeder` for this update.
+- **Storefront Views & Livewire**:
+  - `resources/views/components/store/header.blade.php`: Classic retains its dropdown and nested mobile navigation. Category first places configured main-category links immediately after Products on desktop/mobile, with touch targets, accessible labels, contrast, and responsive spacing.
+  - `app/Livewire/Store/Home.php`: Supplies category sections only for category first and eager-loads product media to avoid per-card media queries.
+  - `resources/views/components/store/category-sections.blade.php` **(NEW)**: Reuses the existing product-grid/card styling. Only the first nonempty category section passes `:aboveFold="$loop->iteration <= 4"`; subsequent sections remain lazy-loaded.
+  - `resources/views/livewire/store/home.blade.php`: Inserts category product sections immediately after the hero, ahead of offers/featured/new arrivals. Classic keeps the existing circular category grid and section order. Image priority falls back to the first available featured/new-arrivals section when configured categories have no products.
+  - `resources/views/store/home.blade.php`: Adds the same category sections to the standalone homepage. Both homepage files retain the exact `<div class="hidden md:block">` hero wrapper.
+  - `app/Livewire/Store/CategoryShow.php`: In category first, existing category URLs redirect to the product listing with the category slug; classic behavior remains unchanged.
+  - `app/Livewire/Store/ProductList.php`: Adds validated one-click category selection, an active hierarchy and computed strap path, descendant-aware filtering, URL restoration, pagination reset, and root-scoped filter clearing. Selecting a child replaces its parent filter, preventing sibling products from leaking into the results. Reuses the prefetched hierarchy/product counts in the sidebar.
+  - `resources/views/livewire/store/product-list.blade.php`: Adds horizontal accessible pills above the listing; selecting Women/Men reveals their own 90 ml/240 ml row. Additional categories/deeper levels are driven by the real hierarchy, without hardcoded IDs or names.
+  - `resources/views/components/store/product-card.blade.php`: Inspected and unchanged; its `fetchpriority="high"` / `loading="lazy" decoding="async"` contract is retained.
+  - `public/build/manifest.json`, `public/build/assets/app-CKyK4PgM.css`, and `public/build/assets/theme-tUSrUiqc.css`: Regenerated tracked Vite assets for the new Tailwind classes, replacing `app-CwEE5uRD.css` and `theme-B6Foz9L6.css`. No JavaScript or Filament theme source changes.
+- **Tests & Verification**:
+  - `tests/Feature/StorefrontTemplateTest.php` **(NEW)**: Covers template switching and cache invalidation, desktop/mobile navigation order, visibility, classic fallback, homepage ordering, first-four image priority, empty sections, category redirects, body/skin filtering, both fragrance branches/sizes, URL restoration, pagination, inactive/unrelated categories, existing filters, Arabic accessibility, standalone home, repeatable seeding, legacy-slug reuse, Filament validation, and bounded product-query counts.
+  - `tests/Feature/LcpImageTest.php`: Fixes the pre-existing missing required `sku` fixture and checks the first product image specifically; the same product can correctly be lazy-loaded again in New Arrivals below the fold.
+  - Regression commands: `php artisan test --filter=HeroSliderTest`, `php artisan test --filter=LcpImageTest`, `php artisan test --filter=CacheManagerTest`, and `php artisan test tests/Feature/StorefrontTemplateTest.php`.
+  - `npm run build`: Successful; the ES2020 target and JavaScript bundle are unchanged.
+  - Requested/new regression set: **25 tests passed (172 assertions)**. Real-browser checks confirmed the Arabic navigation, homepage section order, and Women → 90 ml filtering to seven existing products; classic was restored after preview.
+  - Existing `tests/Feature/ProductFilteringTest.php` also passes unchanged: **14 tests (28 assertions)**. Total verified: **39 tests, 200 assertions**.
+  - Local catalog verification: **32 categories before and after**; original IDs, names, slugs, parent relationships, classic order, active status, and all product-category assignments are identical. The additive migration and setup seeder have been applied locally; `classic` remains selected.
+- **Deployment / Usage**:
+  1. Run `php artisan migrate` and `php artisan db:seed --class=StorefrontCategoriesSeeder` on the target environment, then `npm run build` and `php artisan responsecache:clear` so cached HTML references the current assets.
+  2. Open **System → Storefront layout** (`/admin/storefront-settings`) and select the desired template. Every save clears the seven-day response cache automatically.
+  3. Edit root-category visibility/order in Categories. Arrange Women/Men as children of Fragrance and the size categories as their children; keep products assigned to the relevant leaves. Existing custom names and catalog relationships are preserved.
+
 ### Hide Hero on Mobile & Cache Manager (2026-05-14)
 - **Issue**: 
   1. The hero section needed to be completely hidden on mobile (not just the text overlay).

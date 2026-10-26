@@ -8,6 +8,42 @@
     openSale: false,
     showFilters: false 
 }">
+    @if($this->categoryFirst && $this->categoryRoot)
+        <section class="mb-8 space-y-4" aria-label="{{ $this->categoryRoot->name }}" data-category-strap="{{ $this->categoryRoot->slug }}">
+            <h2 class="text-2xl font-bold text-gray-900">{{ $this->categoryRoot->name }}</h2>
+            @foreach($this->strapPath as $level => $strapParent)
+                @if($strapParent->children->isNotEmpty())
+                    @php
+                        $strapAllActive = count($selectedCategories) <= 1 && !isset($this->strapPath[$level + 1]);
+                    @endphp
+                    <div wire:key="strap-{{ $strapParent->id }}" data-strap-level="{{ $level + 1 }}"
+                        role="group" aria-label="{{ trans_db('storefront.subcategories') }}: {{ $strapParent->name }}"
+                        class="flex items-center gap-3 overflow-x-auto pb-2">
+                        <button type="button" wire:click="selectStrapCategory({{ $strapParent->id }})"
+                            aria-label="{{ trans_db('storefront.all') }} {{ $strapParent->name }}"
+                            aria-pressed="{{ $strapAllActive ? 'true' : 'false' }}"
+                            @class(['min-h-[44px] min-w-[44px] shrink-0 rounded-full border px-5 py-2 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-violet-600',
+                                'bg-violet-600 border-violet-600 text-white' => $strapAllActive,
+                                'bg-white border-gray-300 text-gray-600 hover:border-violet-600 hover:text-violet-600' => !$strapAllActive])>
+                            {{ trans_db('storefront.all') }}
+                        </button>
+                        @foreach($strapParent->children as $strapCategory)
+                            @php
+                                $strapActive = isset($this->strapPath[$level + 1]) && $this->strapPath[$level + 1]->id === $strapCategory->id;
+                            @endphp
+                            <button type="button" wire:key="strap-pill-{{ $strapCategory->id }}" wire:click="selectStrapCategory({{ $strapCategory->id }})"
+                                aria-label="{{ $strapCategory->name }}" aria-pressed="{{ $strapActive ? 'true' : 'false' }}"
+                                @class(['min-h-[44px] min-w-[44px] shrink-0 rounded-full border px-5 py-2 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-violet-600',
+                                    'bg-violet-600 border-violet-600 text-white' => $strapActive,
+                                    'bg-white border-gray-300 text-gray-600 hover:border-violet-600 hover:text-violet-600' => !$strapActive])>
+                                {{ $strapCategory->name }}
+                            </button>
+                        @endforeach
+                    </div>
+                @endif
+            @endforeach
+        </section>
+    @endif
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {{-- Dark Overlay for Mobile Off-Canvas --}}
         <div x-show="showFilters" @click="showFilters = false" x-transition:enter="transition ease-out duration-300"

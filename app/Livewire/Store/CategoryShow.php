@@ -3,6 +3,7 @@
 namespace App\Livewire\Store;
 
 use App\Models\Category;
+use App\Services\StorefrontLayout;
 use Livewire\Component;
 
 class CategoryShow extends Component
@@ -12,6 +13,13 @@ class CategoryShow extends Component
     public function mount(Category $category)
     {
         $this->category = $category;
+
+        if (app(StorefrontLayout::class)->isCategoryFirst()) {
+            abort_unless($category->is_active, 404);
+            $this->redirect(route('products.index', ['category' => $category->slug]));
+
+            return;
+        }
 
         // التحقق مما إذا كان القسم يحتوي على أقسام فرعية
         $hasChildren = $this->category->children()->where('is_active', true)->exists();

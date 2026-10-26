@@ -4,6 +4,10 @@
         <livewire:store.hero-slider />
     </div>
 
+    @if($categoryFirst)
+        <x-store.category-sections :sections="$categorySections" />
+    @endif
+
     @if($unifiedOffers->count() > 0)
     <section class="py-16 bg-violet-50/50 border-y border-violet-100 mt-8 mb-8">
         <div class="container mx-auto px-4">
@@ -36,7 +40,7 @@
             
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 gap-y-10">
                 @foreach($featuredProducts as $product)
-                    <x-store.product-card :product="$product" :aboveFold="$loop->iteration <= 4" />
+                    <x-store.product-card :product="$product" :aboveFold="(!$categoryFirst || !$categorySections->contains(fn ($section) => $section->products->isNotEmpty())) && $loop->iteration <= 4" />
                 @endforeach
             </div>
         </div>
@@ -60,7 +64,7 @@
             
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 gap-y-10">
                 @foreach($newArrivals as $product)
-                    <x-store.product-card :product="$product" />
+                    <x-store.product-card :product="$product" :aboveFold="$categoryFirst && $featuredProducts->isEmpty() && !$categorySections->contains(fn ($section) => $section->products->isNotEmpty()) && $loop->iteration <= 4" />
                 @endforeach
             </div>
         </div>
