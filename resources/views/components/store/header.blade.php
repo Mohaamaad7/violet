@@ -1,4 +1,8 @@
 {{-- Store Header Component --}}
+@php
+    $categoryFirst = app(\App\Services\StorefrontLayout::class)->isCategoryFirst();
+    $headerCategories = $categoryFirst ? app(\App\Services\StorefrontLayout::class)->headerCategories() : collect();
+@endphp
 <header class="bg-white shadow-md sticky top-0 z-50">
     {{-- Top Bar - Decorative purple bar --}}
     <div class="bg-gradient-to-r from-violet-600 to-violet-800 h-1.5"></div>
@@ -119,7 +123,7 @@
     {{-- Main Navigation (Desktop) --}}
     <nav class="hidden lg:block border-t border-gray-200 bg-cream-50">
         <div class="container mx-auto px-4">
-            <ul class="flex items-center gap-8 py-3">
+            <ul class="flex items-center {{ $categoryFirst ? 'flex-wrap gap-x-4 gap-y-2 xl:gap-x-8' : 'gap-8' }} py-3">
                 <li>
                     <a href="/"
                         class="text-gray-700 hover:text-violet-600 font-medium transition flex items-center gap-1">
@@ -135,6 +139,17 @@
                         {{ trans_db('store.header.products') }}
                     </a>
                 </li>
+                @if($categoryFirst)
+                    @foreach($headerCategories as $headerCategory)
+                        <li>
+                            <a href="{{ route('products.index', ['category' => $headerCategory->slug]) }}"
+                                aria-label="{{ $headerCategory->localized_name }}"
+                                class="min-h-[44px] min-w-[44px] inline-flex items-center text-gray-600 hover:text-violet-600 font-medium transition">
+                                {{ $headerCategory->localized_name }}
+                            </a>
+                        </li>
+                    @endforeach
+                @else
                 <li class="relative group">
                     <button class="text-gray-700 hover:text-violet-600 font-medium transition flex items-center gap-1">
                         {{ trans_db('store.header.categories') }}
@@ -158,7 +173,7 @@
                                         @else
                                             @svg('heroicon-o-tag', 'w-4 h-4')
                                         @endif
-                                        {{ $parentCategory->name }}
+                                        {{ $parentCategory->localized_name }}
                                     </span>
                                     @if($parentCategory->children->count() > 0)
                                         <svg class="w-4 h-4 {{ app()->getLocale() === 'ar' ? 'rotate-180' : '' }}"
@@ -182,7 +197,7 @@
                                                                 d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
                                                                 clip-rule="evenodd" />
                                                         </svg>
-                                                        {{ $childCategory->name }}
+                                                        {{ $childCategory->localized_name }}
                                                     </span>
                                                 </a>
                                             </li>
@@ -204,6 +219,7 @@
                         </li>
                     </ul>
                 </li>
+                @endif
                 <li>
                     <a href="/offers"
                         class="text-red-600 hover:text-red-700 font-bold transition flex items-center gap-1">
@@ -229,17 +245,28 @@
         <nav class="container mx-auto px-4 py-4">
             <ul class="space-y-1">
                 <li>
-                    <a href="/" class="block py-2 text-gray-700 hover:text-violet-600 font-medium transition">
+                    <a href="/" class="block py-2 text-gray-700 hover:text-violet-600 font-medium transition {{ $categoryFirst ? 'min-h-[44px] min-w-[44px]' : '' }}">
                         🏠 {{ trans_db('store.header.home') }}
                     </a>
                 </li>
                 <li>
-                    <a href="/products" class="block py-2 text-gray-700 hover:text-violet-600 font-medium transition">
+                    <a href="/products" class="block py-2 text-gray-700 hover:text-violet-600 font-medium transition {{ $categoryFirst ? 'min-h-[44px] min-w-[44px]' : '' }}">
                         {{ trans_db('store.header.products') }}
                     </a>
                 </li>
                 
                 {{-- Categories with nested structure --}}
+                @if($categoryFirst)
+                    @foreach($headerCategories as $headerCategory)
+                        <li>
+                            <a href="{{ route('products.index', ['category' => $headerCategory->slug]) }}"
+                                aria-label="{{ $headerCategory->localized_name }}"
+                                class="min-h-[44px] min-w-[44px] flex items-center py-2 text-gray-600 hover:text-violet-600 font-medium transition">
+                                {{ $headerCategory->localized_name }}
+                            </a>
+                        </li>
+                    @endforeach
+                @else
                 <li>
                     <button onclick="toggleMobileCategories()" 
                         class="w-full flex items-center justify-between py-2 text-gray-700 hover:text-violet-600 font-medium transition">
@@ -261,7 +288,7 @@
                                                 <i class="{{ $parentCategory->icon }} text-xs"></i>
                                             @endif
                                         @endif
-                                        {{ $parentCategory->name }}
+                                        {{ $parentCategory->localized_name }}
                                     </a>
                                     @if($parentCategory->children->count() > 0)
                                         <button onclick="toggleSubcategory({{ $parentCategory->id }})" 
@@ -282,7 +309,7 @@
                                                 <svg class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20">
                                                     <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
                                                 </svg>
-                                                {{ $childCategory->name }}
+                                                {{ $childCategory->localized_name }}
                                             </a>
                                         @endforeach
                                     </div>
@@ -292,23 +319,24 @@
                     </div>
                 </li>
                 
+                @endif
                 <li>
-                    <a href="/offers" class="block py-2 text-red-600 hover:text-red-700 font-bold transition">
+                    <a href="/offers" class="block py-2 text-red-600 hover:text-red-700 font-bold transition {{ $categoryFirst ? 'min-h-[44px] min-w-[44px]' : '' }}">
                         🔥 {{ trans_db('store.header.offers') }}
                     </a>
                 </li>
                 <li>
-                    <a href="/about" class="block py-2 text-gray-700 hover:text-violet-600 font-medium transition">
+                    <a href="/about" class="block py-2 text-gray-700 hover:text-violet-600 font-medium transition {{ $categoryFirst ? 'min-h-[44px] min-w-[44px]' : '' }}">
                         {{ trans_db('store.header.about') }}
                     </a>
                 </li>
                 <li>
-                    <a href="/contact" class="block py-2 text-gray-700 hover:text-violet-600 font-medium transition">
+                    <a href="/contact" class="block py-2 text-gray-700 hover:text-violet-600 font-medium transition {{ $categoryFirst ? 'min-h-[44px] min-w-[44px]' : '' }}">
                         {{ trans_db('store.header.contact') }}
                     </a>
                 </li>
                 <li class="pt-3 border-t border-gray-200">
-                    <a href="/account" class="block py-2 text-gray-700 hover:text-violet-600 font-medium transition">
+                    <a href="/account" class="block py-2 text-gray-700 hover:text-violet-600 font-medium transition {{ $categoryFirst ? 'min-h-[44px] min-w-[44px]' : '' }}">
                         👤 {{ trans_db('store.header.my_account') }}
                     </a>
                 </li>

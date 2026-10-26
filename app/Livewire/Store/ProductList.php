@@ -2,12 +2,14 @@
 
 namespace App\Livewire\Store;
 
-use App\Models\Product;
 use App\Models\Category;
-use Livewire\Component;
-use Livewire\WithPagination;
+use App\Models\Product;
+use App\Services\StorefrontLayout;
+use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
+use Livewire\Component;
+use Livewire\WithPagination;
 
 class ProductList extends Component
 {
@@ -51,15 +53,98 @@ class ProductList extends Component
 
     public function mount()
     {
+        if ($this->categoryFirst && $this->category) {
+            abort_unless($this->categoryRoot, 404);
+        }
+
+        if ($this->categoryFirst && $this->categoryRoot) {
+            $root = $this->categoryRoot;
+            $allowedIds = [$root->id, ...$root->getDescendantIds()];
+            $incoming = $this->storefrontCategories->firstWhere('slug', $this->category);
+            $selected = array_values(array_intersect(array_map('intval', $this->selectedCategories), $allowedIds));
+            $this->selectedCategories = $selected ?: [$incoming->id];
+            $this->category = $root->slug;
+
+            return;
+        }
+
         // If 'category' slug is provided in URL, pre-select it
         if ($this->category) {
             $categoryModel = Category::where('slug', $this->category)->first();
             if ($categoryModel) {
-                if (!in_array($categoryModel->id, $this->selectedCategories)) {
+                if (! in_array($categoryModel->id, $this->selectedCategories)) {
                     $this->selectedCategories[] = $categoryModel->id;
                 }
             }
         }
+    }
+
+    #[Computed]
+    public function categoryFirst(): bool
+    {
+        return app(StorefrontLayout::class)->isCategoryFirst();
+    }
+
+    #[Computed]
+    public function storefrontCategories(): Collection
+    {
+        return $this->categoryFirst ? app(StorefrontLayout::class)->categoryTree(withProductCounts: true) : new Collection;
+    }
+
+    #[Computed]
+    public function categoryRoot(): ?Category
+    {
+        $category = $this->storefrontCategories->firstWhere('slug', $this->category);
+        $visited = [];
+
+        while ($category && $category->parent_id) {
+            if (in_array($category->id, $visited, true)) {
+                return null;
+            }
+            $visited[] = $category->id;
+            $category = $this->storefrontCategories->find($category->parent_id);
+        }
+
+        return $category;
+    }
+
+    /** Each entry supplies the children for one horizontal strap. */
+    #[Computed]
+    public function strapPath(): array
+    {
+        $root = $this->categoryRoot;
+        if (! $root) {
+            return [];
+        }
+
+        $selected = count($this->selectedCategories) === 1
+            ? $this->storefrontCategories->find((int) $this->selectedCategories[0])
+            : null;
+        $path = [];
+        $visited = [];
+
+        while ($selected && $selected->id !== $root->id) {
+            if (in_array($selected->id, $visited, true)) {
+                return [$root];
+            }
+            $visited[] = $selected->id;
+            array_unshift($path, $selected);
+            $selected = $this->storefrontCategories->find($selected->parent_id);
+        }
+
+        return $selected ? [$root, ...$path] : [$root];
+    }
+
+    public function selectStrapCategory(int $categoryId): void
+    {
+        $root = $this->categoryRoot;
+        abort_unless($this->categoryFirst && $root
+            && in_array($categoryId, [$root->id, ...$root->getDescendantIds()], true), 404);
+
+        // Replace the parent filter: combining parent + child would include siblings.
+        $this->selectedCategories = [$categoryId];
+        unset($this->strapPath, $this->products);
+        $this->resetPage();
     }
 
     /**
@@ -99,11 +184,11 @@ class ProductList extends Component
     #[Computed]
     public function hasActiveFilters(): bool
     {
-        return !empty($this->selectedCategories)
+        return ! empty($this->selectedCategories)
             || $this->minPrice !== ''
             || $this->maxPrice !== ''
             || $this->selectedRating !== null
-            || !empty($this->selectedBrands)
+            || ! empty($this->selectedBrands)
             || $this->onSaleOnly
             || $this->stockStatus !== 'all'
             || $this->search !== '';
@@ -123,6 +208,7 @@ class ProductList extends Component
         $count += $this->onSaleOnly ? 1 : 0;
         $count += $this->stockStatus !== 'all' ? 1 : 0;
         $count += $this->search !== '' ? 1 : 0;
+
         return $count;
     }
 
@@ -135,7 +221,7 @@ class ProductList extends Component
         $this->selectedCategories = array_values(
             array_filter(
                 array_map('intval', (array) $value),
-                fn($v) => $v > 0
+                fn ($v) => $v > 0
             )
         );
         $this->resetPage();
@@ -198,7 +284,7 @@ class ProductList extends Component
     {
         // Remove null/empty values
         $this->selectedBrands = array_values(
-            array_filter((array) $value, fn($v) => $v !== null && $v !== '')
+            array_filter((array) $value, fn ($v) => $v !== null && $v !== '')
         );
         $this->resetPage();
     }
@@ -223,15 +309,13 @@ class ProductList extends Component
         $this->resetPage();
     }
 
-
-
     /**
      * Remove a single category from filter
      */
     public function removeCategory(int $categoryId): void
     {
         $this->selectedCategories = array_values(
-            array_filter($this->selectedCategories, fn($id) => $id != $categoryId)
+            array_filter($this->selectedCategories, fn ($id) => $id != $categoryId)
         );
         $this->resetPage();
     }
@@ -242,7 +326,7 @@ class ProductList extends Component
     public function removeBrand(string $brand): void
     {
         $this->selectedBrands = array_values(
-            array_filter($this->selectedBrands, fn($b) => $b !== $brand)
+            array_filter($this->selectedBrands, fn ($b) => $b !== $brand)
         );
         $this->resetPage();
     }
@@ -280,8 +364,9 @@ class ProductList extends Component
      */
     public function clearFilters(): void
     {
-        $this->selectedCategories = [];
-        $this->category = null;
+        $root = $this->categoryFirst ? $this->categoryRoot : null;
+        $this->selectedCategories = $root ? [$root->id] : [];
+        $this->category = $root?->slug;
         $this->minPrice = '';
         $this->maxPrice = '';
         $this->selectedRating = null;
@@ -302,25 +387,30 @@ class ProductList extends Component
         $query = Product::with(['category', 'media'])
             ->where('status', 'active');
 
+        if ($this->categoryRoot) {
+            $query->whereIn('category_id', [$this->categoryRoot->id, ...$this->categoryRoot->getDescendantIds()]);
+        }
+
         // Search filter
         if ($this->search !== '') {
-            $searchTerm = '%' . $this->search . '%';
+            $searchTerm = '%'.$this->search.'%';
             $query->where(function ($q) use ($searchTerm) {
-                $q->where('name', 'like', $searchTerm)
-                    ->orWhere('description', 'like', $searchTerm)
+                $q->where(fn ($q) => $q->searchCatalog($searchTerm))
                     ->orWhere('sku', 'like', $searchTerm)
                     ->orWhere('brand', 'like', $searchTerm);
             });
         }
 
         // Filter by categories (including children categories)
-        if (!empty($this->selectedCategories)) {
-            $categoryIds = $this->selectedCategories;
+        if (! empty($this->selectedCategories)) {
+            $categoryIds = $this->categoryFirst ? [] : $this->selectedCategories;
 
             foreach ($this->selectedCategories as $categoryId) {
-                $category = Category::find($categoryId);
+                $category = $this->categoryFirst
+                    ? $this->storefrontCategories->find((int) $categoryId)
+                    : Category::find($categoryId);
                 if ($category && method_exists($category, 'getDescendantIds')) {
-                    $categoryIds = array_merge($categoryIds, $category->getDescendantIds());
+                    $categoryIds = array_merge($categoryIds, [$category->id], $category->getDescendantIds());
                 }
             }
 
@@ -361,7 +451,7 @@ class ProductList extends Component
         }
 
         // Filter by brands
-        if (!empty($this->selectedBrands)) {
+        if (! empty($this->selectedBrands)) {
             $query->whereIn('brand', $this->selectedBrands);
         }
 
@@ -410,11 +500,13 @@ class ProductList extends Component
     {
         return view('livewire.store.product-list', [
             'products' => $this->products,
-            'categories' => Category::with('children')
-                ->whereNull('parent_id')
-                ->where('is_active', true)
-                ->orderBy('order')
-                ->get(),
+            'categories' => $this->categoryFirst
+                ? $this->storefrontCategories->whereNull('parent_id')->values()
+                : Category::with('children')
+                    ->whereNull('parent_id')
+                    ->where('is_active', true)
+                    ->orderBy('order')
+                    ->get(),
         ]);
     }
 }

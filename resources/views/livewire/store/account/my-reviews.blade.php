@@ -39,7 +39,7 @@
                             @if($review->product?->getFirstMediaUrl('images', 'thumb'))
                                 <img 
                                     src="{{ $review->product->getFirstMediaUrl('images', 'thumb') }}" 
-                                    alt="{{ $review->product->name }}"
+                                    alt="{{ $review->product->localized_name }}"
                                     class="w-20 h-20 object-cover rounded-lg"
                                 />
                             @else
@@ -53,7 +53,7 @@
                                 <div class="flex items-start justify-between">
                                     <div>
                                         <a href="{{ route('product.show', $review->product?->slug ?? '#') }}" class="font-semibold text-gray-900 hover:text-violet-600">
-                                            {{ $review->product?->name ?? __('messages.reviews.product_deleted') }}
+                                            {{ $review->product?->localized_name ?? __('messages.reviews.product_deleted') }}
                                         </a>
                                         <div class="flex items-center gap-2 mt-1">
                                             {{-- Stars --}}

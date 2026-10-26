@@ -26,7 +26,7 @@
                 : asset('images/default-product.svg');
         @endphp
 
-        <img src="{{ $imagePath }}" alt="{{ $product->name }}"
+        <img src="{{ $imagePath }}" alt="{{ $product->localized_name }}"
             class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
             @if($aboveFold)
                 fetchpriority="high"
@@ -67,7 +67,7 @@
         @if($product->category)
             <a href="{{ route('category.show', $product->category->slug) }}"
                 class="text-[11px] text-gray-400 hover:text-violet-600 transition uppercase tracking-wide">
-                {{ $product->category->name }}
+                {{ $product->category->localized_name }}
             </a>
         @endif
 
@@ -75,7 +75,7 @@
         <h3
             class="font-medium text-gray-800 text-sm mt-1 mb-2 line-clamp-2 leading-snug hover:text-violet-600 transition">
             <a href="{{ route('product.show', $product->slug) }}">
-                {{ $product->name }}
+                {{ $product->localized_name }}
             </a>
         </h3>
 

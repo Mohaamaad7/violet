@@ -2,18 +2,20 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasCatalogTranslations;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
+use Spatie\ResponseCache\Facades\ResponseCache;
 
 class Category extends Model implements HasMedia
 {
-    use HasFactory, SoftDeletes, InteractsWithMedia;
+    use HasCatalogTranslations;
+    use HasFactory, InteractsWithMedia, SoftDeletes;
 
     protected $fillable = [
         'parent_id',
@@ -23,6 +25,10 @@ class Category extends Model implements HasMedia
         'image',
         'icon',
         'order',
+        'show_in_header',
+        'show_on_home',
+        'sort_order',
+        'home_sort_order',
         'is_active',
         'meta_title',
         'meta_description',
@@ -31,7 +37,18 @@ class Category extends Model implements HasMedia
     protected $casts = [
         'is_active' => 'boolean',
         'order' => 'integer',
+        'show_in_header' => 'boolean',
+        'show_on_home' => 'boolean',
+        'sort_order' => 'integer',
+        'home_sort_order' => 'integer',
     ];
+
+    protected static function booted(): void
+    {
+        static::saved(fn () => ResponseCache::clear());
+        static::deleted(fn () => ResponseCache::clear());
+        static::restored(fn () => ResponseCache::clear());
+    }
 
     // Relations
     public function parent(): BelongsTo
@@ -68,7 +85,8 @@ class Category extends Model implements HasMedia
     public function getTotalActiveProductsCount(): int
     {
         // Count products directly in this category
-        $count = $this->products()->where('status', 'active')->count();
+        $count = $this->getAttribute('active_products_count')
+            ?? $this->products()->where('status', 'active')->count();
 
         // Recursively count products from all children
         foreach ($this->children as $child) {

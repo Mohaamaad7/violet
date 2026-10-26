@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Services\StorefrontLayout;
+use Spatie\ResponseCache\Facades\ResponseCache;
 
 class Setting extends Model
 {
@@ -17,6 +19,18 @@ class Setting extends Model
     ];
 
     // Removed 'value' cast - let accessor/mutator handle type conversion
+
+    protected static function booted(): void
+    {
+        $clearStorefront = function (Setting $setting): void {
+            if ($setting->key === StorefrontLayout::SETTING_KEY) {
+                ResponseCache::clear();
+            }
+        };
+
+        static::saved($clearStorefront);
+        static::deleted($clearStorefront);
+    }
 
 
     public static function get(string $key, $default = null)

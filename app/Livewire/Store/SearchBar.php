@@ -3,8 +3,8 @@
 namespace App\Livewire\Store;
 
 use App\Models\Product;
-use Livewire\Component;
 use Livewire\Attributes\Url;
+use Livewire\Component;
 
 class SearchBar extends Component
 {
@@ -12,8 +12,11 @@ class SearchBar extends Component
     public $search = '';
 
     public $results = [];
+
     public $showResults = false;
+
     public $selectedIndex = -1;
+
     public $isMobile = false;
 
     protected $queryString = ['search' => ['as' => 'q', 'except' => '']];
@@ -25,6 +28,7 @@ class SearchBar extends Component
         if (strlen($this->search) < 2) {
             $this->results = [];
             $this->showResults = false;
+
             return;
         }
 
@@ -33,16 +37,15 @@ class SearchBar extends Component
 
     public function performSearch()
     {
-        $searchTerm = '%' . $this->search . '%';
+        $searchTerm = '%'.$this->search.'%';
 
         $this->results = Product::query()
             ->where('status', 'active')
             ->where(function ($query) use ($searchTerm) {
-                $query->where('name', 'like', $searchTerm)
-                    ->orWhere('description', 'like', $searchTerm)
+                $query->where(fn ($q) => $q->searchCatalog($searchTerm))
                     ->orWhere('sku', 'like', $searchTerm)
                     ->orWhereHas('category', function ($q) use ($searchTerm) {
-                        $q->where('name', 'like', $searchTerm);
+                        $q->searchCatalog($searchTerm);
                     });
             })
             ->with(['media', 'category'])
@@ -51,13 +54,13 @@ class SearchBar extends Component
             ->map(function ($product) {
                 return [
                     'id' => $product->id,
-                    'name' => $product->name,
+                    'name' => $product->localized_name,
                     'slug' => $product->slug,
                     'price' => $product->final_price,
                     'original_price' => $product->price,
                     'is_on_sale' => $product->is_on_sale,
                     'image' => $product->getFirstMediaUrl('product-images', 'thumbnail') ?: asset('images/default-product.svg'),
-                    'category' => $product->category?->name ?? '',
+                    'category' => $product->category?->localized_name ?? '',
                     'rating' => $product->average_rating ?? 0,
                     'in_stock' => $product->stock > 0,
                 ];

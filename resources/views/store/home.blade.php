@@ -8,6 +8,10 @@
         <livewire:store.hero-slider />
     </div>
 
+    @if(app(\App\Services\StorefrontLayout::class)->isCategoryFirst())
+        <x-store.category-sections :sections="app(\App\Services\StorefrontLayout::class)->homeSections()" />
+    @endif
+
     {{-- Features Section --}}
     <div class="py-12 bg-white">
         <div class="container mx-auto px-4">

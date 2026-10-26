@@ -59,7 +59,7 @@
                                     @if($item->product->getFirstMediaUrl('images', 'thumb'))
                                         <img 
                                             src="{{ $item->product->getFirstMediaUrl('images', 'thumb') }}" 
-                                            alt="{{ $item->product->name }}"
+                                            alt="{{ $item->product->localized_name }}"
                                             class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                         >
                                     @else
@@ -104,7 +104,7 @@
                             @if($item->product)
                                 <a href="{{ route('product.show', $item->product->slug) }}" class="block">
                                     <h3 class="font-semibold text-gray-900 truncate hover:text-violet-600 transition-colors">
-                                        {{ $item->product->name }}
+                                        {{ $item->product->localized_name }}
                                     </h3>
                                 </a>
                                 

@@ -4,6 +4,10 @@
         <livewire:store.hero-slider />
     </div>
 
+    @if($categoryFirst)
+        <x-store.category-sections :sections="$categorySections" />
+    @endif
+
     @if($unifiedOffers->count() > 0)
     <section class="py-16 bg-violet-50/50 border-y border-violet-100 mt-8 mb-8">
         <div class="container mx-auto px-4">
@@ -13,7 +17,7 @@
                     <p class="text-gray-500 mt-3 text-lg">أفضل التوفير مع باقات الكومبو المخصصة لك</p>
                 </div>
             </div>
-            
+
             <x-store.offers-grid :offers="$unifiedOffers" :showTabs="false" />
         </div>
     </section>
@@ -33,10 +37,10 @@
                     <span class="transform group-hover:translate-x-1 {{ app()->getLocale() === 'ar' ? 'group-hover:-translate-x-1' : '' }} transition-transform">&rarr;</span>
                 </a>
             </div>
-            
+
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 gap-y-10">
                 @foreach($featuredProducts as $product)
-                    <x-store.product-card :product="$product" :aboveFold="$loop->iteration <= 4" />
+                    <x-store.product-card :product="$product" :aboveFold="(!$categoryFirst || !$categorySections->contains(fn ($section) => $section->products->isNotEmpty())) && $loop->iteration <= 4" />
                 @endforeach
             </div>
         </div>
@@ -57,10 +61,10 @@
                     <span class="transform group-hover:translate-x-1 {{ app()->getLocale() === 'ar' ? 'group-hover:-translate-x-1' : '' }} transition-transform">&rarr;</span>
                 </a>
             </div>
-            
+
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 gap-y-10">
                 @foreach($newArrivals as $product)
-                    <x-store.product-card :product="$product" />
+                    <x-store.product-card :product="$product" :aboveFold="$categoryFirst && $featuredProducts->isEmpty() && !$categorySections->contains(fn ($section) => $section->products->isNotEmpty()) && $loop->iteration <= 4" />
                 @endforeach
             </div>
         </div>
@@ -83,7 +87,7 @@
                     <span class="transform group-hover:translate-x-1 {{ app()->getLocale() === 'ar' ? 'group-hover:-translate-x-1' : '' }} transition-transform">&rarr;</span>
                 </a>
             </div>
-            
+
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 gap-y-10">
                 @foreach($onSaleProducts as $product)
                     <x-store.product-card :product="$product" />
@@ -100,7 +104,7 @@
             <div class="text-center mb-10">
                 <h2 class="text-3xl font-bold text-gray-900 section-header mb-2">{{ __('messages.all_categories') }}</h2>
             </div>
-            
+
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-8 justify-center max-w-7xl mx-auto">
                 @foreach($categories as $category)
                     <a href="/categories/{{ $category->slug }}" class="group block text-center">
@@ -108,13 +112,13 @@
                             @php
                                 $imageUrl = $category->getFirstMediaUrl('category-images', 'card');
                                 if (!$imageUrl) {
-                                    $imageUrl = asset('images/default-category.png'); 
+                                    $imageUrl = asset('images/default-category.png');
                                 }
                             @endphp
-                            
+
                             @if($category->hasMedia('category-images'))
-                                <img src="{{ $imageUrl }}" 
-                                     alt="{{ $category->name }}" 
+                                <img src="{{ $imageUrl }}"
+                                     alt="{{ $category->localized_name }}"
                                      class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
                             @else
                                 <div class="w-full h-full flex items-center justify-center bg-violet-50 text-violet-300 group-hover:text-violet-500 transition-colors">
@@ -126,9 +130,9 @@
                                 </div>
                             @endif
                         </div>
-                        
+
                         <h3 class="font-bold text-base text-gray-900 group-hover:text-violet-700 transition font-sans">
-                            {{ $category->name }} &rarr;
+                            {{ $category->localized_name }} &rarr;
                         </h3>
                     </a>
                 @endforeach

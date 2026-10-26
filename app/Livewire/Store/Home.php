@@ -4,33 +4,36 @@ namespace App\Livewire\Store;
 
 use App\Models\Product;
 use App\Models\Category;
+use App\Services\StorefrontLayout;
 use Livewire\Component;
 
 class Home extends Component
 {
     public function render()
     {
-        $featuredProducts = Product::with('category')
+        $categoryFirst = app(StorefrontLayout::class)->isCategoryFirst();
+
+        $featuredProducts = Product::with(['category', 'media'])
             ->where('is_featured', true)
             ->active()
             ->where('stock', '>', 0)
             ->take(8)
             ->get();
 
-        $onSaleProducts = Product::with('category')
+        $onSaleProducts = Product::with(['category', 'media'])
             ->whereNotNull('sale_price')
             ->active()
             ->where('stock', '>', 0)
             ->take(8)
             ->get();
 
-        $newArrivals = Product::with('category')
+        $newArrivals = Product::with(['category', 'media'])
             ->active()
             ->latest()
             ->take(8)
             ->get();
 
-        $categories = Category::whereNull('parent_id')
+        $categories = $categoryFirst ? collect() : Category::whereNull('parent_id')
             ->where('is_active', true) // Categories table DOES have is_active, checking just in case
             ->withCount('products')
             ->orderBy('order')
@@ -65,6 +68,8 @@ class Home extends Component
             'newArrivals' => $newArrivals,
             'categories' => $categories,
             'unifiedOffers' => $offers,
+            'categoryFirst' => $categoryFirst,
+            'categorySections' => $categoryFirst ? app(StorefrontLayout::class)->homeSections() : collect(),
         ])->layout('layouts.store');
     }
 }

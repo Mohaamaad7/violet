@@ -56,7 +56,7 @@
                     @if($featuredProduct && $featuredProduct->getFirstMediaUrl('images'))
                         <img 
                             src="{{ $featuredProduct->getFirstMediaUrl('images') }}" 
-                            alt="{{ $featuredProduct->name }}"
+                            alt="{{ $featuredProduct->localized_name }}"
                             class="relative w-80 h-80 sm:w-96 sm:h-96 object-contain animate-float drop-shadow-2xl"
                         >
                     @else

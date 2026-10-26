@@ -33,9 +33,9 @@
                                 <li>
                                     {{ $condition->required_quantity }}
                                     @if($condition->condition_type === 'product' && $condition->product)
-                                        من {{ $condition->product->name }}
+                                        من {{ $condition->product->localized_name }}
                                     @elseif($condition->category)
-                                        من {{ $condition->category->name }}
+                                        من {{ $condition->category->localized_name }}
                                     @endif
                                 </li>
                             @endforeach

@@ -25,16 +25,15 @@ class CategoryService
 
         if (isset($filters['search'])) {
             $query->where(function ($q) use ($filters) {
-                $q->where('name', 'like', "%{$filters['search']}%")
-                  ->orWhere('description', 'like', "%{$filters['search']}%");
+                $q->searchCatalog("%{$filters['search']}%");
             });
         }
 
         return $query->with('parent', 'children')
-                     ->withCount('products')
-                     ->orderBy('order')
-                     ->orderBy('name')
-                     ->get();
+            ->withCount('products')
+            ->orderBy('order')
+            ->orderBy('name')
+            ->get();
     }
 
     /**
@@ -91,7 +90,7 @@ class CategoryService
     public function createCategory(array $data): Category
     {
         // Auto-generate slug if not provided
-        if (!isset($data['slug']) || empty($data['slug'])) {
+        if (! isset($data['slug']) || empty($data['slug'])) {
             $data['slug'] = Str::slug($data['name']);
         }
 
@@ -110,13 +109,14 @@ class CategoryService
 
         // Update slug if name changed
         if (isset($data['name']) && $data['name'] !== $category->name) {
-            if (!isset($data['slug']) || empty($data['slug'])) {
+            if (! isset($data['slug']) || empty($data['slug'])) {
                 $data['slug'] = Str::slug($data['name']);
             }
             $data['slug'] = $this->ensureUniqueSlug($data['slug'], $id);
         }
 
         $category->update($data);
+
         return $category->fresh();
     }
 
@@ -147,6 +147,7 @@ class CategoryService
     {
         $category = Category::withTrashed()->findOrFail($id);
         $category->restore();
+
         return $category->fresh();
     }
 
@@ -156,7 +157,11 @@ class CategoryService
     public function toggleActive(int $id): Category
     {
         $category = $this->findCategory($id);
-        $category->update(['is_active' => !$category->is_active]);
+        if (! $category->is_active) {
+            $category->validateCatalogPublication();
+        }
+        $category->update(['is_active' => ! $category->is_active]);
+
         return $category->fresh();
     }
 
@@ -167,6 +172,7 @@ class CategoryService
     {
         $category = $this->findCategory($id);
         $category->update(['order' => $order]);
+
         return $category->fresh();
     }
 
@@ -187,6 +193,7 @@ class CategoryService
         }
 
         $category->update(['parent_id' => $newParentId]);
+
         return $category->fresh();
     }
 
@@ -217,16 +224,16 @@ class CategoryService
 
         while (true) {
             $query = Category::where('slug', $slug);
-            
+
             if ($excludeId) {
                 $query->where('id', '!=', $excludeId);
             }
 
-            if (!$query->exists()) {
+            if (! $query->exists()) {
                 break;
             }
 
-            $slug = $originalSlug . '-' . $counter;
+            $slug = $originalSlug.'-'.$counter;
             $counter++;
         }
 

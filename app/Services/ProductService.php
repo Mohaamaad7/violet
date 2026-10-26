@@ -52,9 +52,8 @@ class ProductService
         // Search
         if (isset($filters['search'])) {
             $query->where(function ($q) use ($filters) {
-                $q->where('name', 'like', "%{$filters['search']}%")
-                  ->orWhere('description', 'like', "%{$filters['search']}%")
-                  ->orWhere('sku', 'like', "%{$filters['search']}%");
+                $q->where(fn ($query) => $query->searchCatalog("%{$filters['search']}%"))
+                    ->orWhere('sku', 'like', "%{$filters['search']}%");
             });
         }
 
@@ -117,7 +116,7 @@ class ProductService
     public function createProduct(array $data): Product
     {
         // Auto-generate slug if not provided
-        if (!isset($data['slug']) || empty($data['slug'])) {
+        if (! isset($data['slug']) || empty($data['slug'])) {
             $data['slug'] = Str::slug($data['name']);
         }
 
@@ -125,7 +124,7 @@ class ProductService
         $data['slug'] = $this->ensureUniqueSlug($data['slug']);
 
         // Auto-generate SKU if not provided
-        if (!isset($data['sku']) || empty($data['sku'])) {
+        if (! isset($data['sku']) || empty($data['sku'])) {
             $data['sku'] = $this->generateSKU();
         }
 
@@ -134,107 +133,107 @@ class ProductService
 
     /**
      * Create product with images
-     * 
-     * @param array $data Product data including 'images' array
-     * @return Product
+     *
+     * @param  array  $data  Product data including 'images' array
+     *
      * @throws \Exception
      */
     public function createWithImages(array $data): Product
     {
         \DB::beginTransaction();
-        
+
         try {
             // Extract images data if provided
             $images = $data['images'] ?? [];
             unset($data['images']);
-            
+
             // Create product
             $product = $this->createProduct($data);
-            
+
             // Add images if provided
-            if (!empty($images)) {
+            if (! empty($images)) {
                 $this->syncImages($product, $images);
             }
-            
+
             \DB::commit();
+
             return $product->fresh(['images', 'variants']);
-            
+
         } catch (\Exception $e) {
             \DB::rollBack();
-            throw new \Exception("Failed to create product with images: " . $e->getMessage());
+            throw new \Exception('Failed to create product with images: '.$e->getMessage());
         }
     }
 
     /**
      * Update product with images
-     * 
-     * @param Product $product
-     * @param array $data Product data including optional 'images' array
-     * @return Product
+     *
+     * @param  array  $data  Product data including optional 'images' array
+     *
      * @throws \Exception
      */
     public function updateWithImages(Product $product, array $data): Product
     {
         \DB::beginTransaction();
-        
+
         try {
             // Extract images data if provided
             $images = $data['images'] ?? null;
             unset($data['images']);
-            
+
             // Update slug if name changed
             if (isset($data['name']) && $data['name'] !== $product->name) {
-                if (!isset($data['slug']) || empty($data['slug'])) {
+                if (! isset($data['slug']) || empty($data['slug'])) {
                     $data['slug'] = Str::slug($data['name']);
                 }
                 $data['slug'] = $this->ensureUniqueSlug($data['slug'], $product->id);
             }
-            
+
             // Update product
             $product->update($data);
-            
+
             // Update images if provided
             if ($images !== null) {
                 $this->syncImages($product, $images);
             }
-            
+
             \DB::commit();
+
             return $product->fresh(['images', 'variants']);
-            
+
         } catch (\Exception $e) {
             \DB::rollBack();
-            throw new \Exception("Failed to update product with images: " . $e->getMessage());
+            throw new \Exception('Failed to update product with images: '.$e->getMessage());
         }
     }
 
     /**
      * Sync product variants
-     * 
-     * @param Product $product
-     * @param array $variants Array of variant data [['sku' => '...', 'name' => '...', ...], ...]
-     * @return Product
+     *
+     * @param  array  $variants  Array of variant data [['sku' => '...', 'name' => '...', ...], ...]
+     *
      * @throws \Exception
      */
     public function syncVariants(Product $product, array $variants): Product
     {
         \DB::beginTransaction();
-        
+
         try {
             // Delete existing variants
             $product->variants()->delete();
-            
+
             // Create new variants
             foreach ($variants as $variantData) {
                 // Validate required fields
-                if (!isset($variantData['sku']) || !isset($variantData['name'])) {
+                if (! isset($variantData['sku']) || ! isset($variantData['name'])) {
                     throw new \Exception("Variant must have 'sku' and 'name' fields");
                 }
-                
+
                 // Ensure variant SKU is unique
                 if (\App\Models\ProductVariant::where('sku', $variantData['sku'])->exists()) {
                     throw new \Exception("Variant SKU '{$variantData['sku']}' already exists");
                 }
-                
+
                 $product->variants()->create([
                     'sku' => $variantData['sku'],
                     'name' => $variantData['name'],
@@ -243,47 +242,46 @@ class ProductService
                     'attributes' => $variantData['attributes'] ?? [],
                 ]);
             }
-            
+
             \DB::commit();
+
             return $product->fresh(['variants']);
-            
+
         } catch (\Exception $e) {
             \DB::rollBack();
-            throw new \Exception("Failed to sync variants: " . $e->getMessage());
+            throw new \Exception('Failed to sync variants: '.$e->getMessage());
         }
     }
 
     /**
      * Sync product images
-     * 
-     * @param Product $product
-     * @param array $images Array of image data [['image' => '...', 'is_primary' => true, ...], ...]
-     * @return void
+     *
+     * @param  array  $images  Array of image data [['image' => '...', 'is_primary' => true, ...], ...]
      */
     protected function syncImages(Product $product, array $images): void
     {
         // Delete existing images
         $product->images()->delete();
-        
+
         // Ensure only one primary image
         $hasPrimary = false;
-        
+
         foreach ($images as $index => $imageData) {
-            if (!isset($imageData['image']) && !isset($imageData['image_path'])) {
+            if (! isset($imageData['image']) && ! isset($imageData['image_path'])) {
                 continue;
             }
-            
+
             // Set first image as primary if no primary specified
-            $isPrimary = $imageData['is_primary'] ?? ($index === 0 && !$hasPrimary);
-            
+            $isPrimary = $imageData['is_primary'] ?? ($index === 0 && ! $hasPrimary);
+
             if ($isPrimary && $hasPrimary) {
                 $isPrimary = false; // Only allow one primary
             }
-            
+
             if ($isPrimary) {
                 $hasPrimary = true;
             }
-            
+
             $product->images()->create([
                 'image_path' => $imageData['image'] ?? $imageData['image_path'],
                 'is_primary' => $isPrimary,
@@ -301,13 +299,14 @@ class ProductService
 
         // Update slug if name changed
         if (isset($data['name']) && $data['name'] !== $product->name) {
-            if (!isset($data['slug']) || empty($data['slug'])) {
+            if (! isset($data['slug']) || empty($data['slug'])) {
                 $data['slug'] = Str::slug($data['name']);
             }
             $data['slug'] = $this->ensureUniqueSlug($data['slug'], $id);
         }
 
         $product->update($data);
+
         return $product->fresh();
     }
 
@@ -342,6 +341,7 @@ class ProductService
     {
         $product = Product::withTrashed()->findOrFail($id);
         $product->restore();
+
         return $product->fresh();
     }
 
@@ -351,7 +351,8 @@ class ProductService
     public function toggleActive(int $id): Product
     {
         $product = $this->findProduct($id);
-        $product->update(['is_active' => !$product->is_active]);
+        $product->update(['is_active' => ! $product->is_active]);
+
         return $product->fresh();
     }
 
@@ -361,7 +362,8 @@ class ProductService
     public function toggleFeatured(int $id): Product
     {
         $product = $this->findProduct($id);
-        $product->update(['is_featured' => !$product->is_featured]);
+        $product->update(['is_featured' => ! $product->is_featured]);
+
         return $product->fresh();
     }
 
@@ -372,6 +374,7 @@ class ProductService
     {
         $product = $this->findProduct($id);
         $product->update(['stock' => $quantity]);
+
         return $product->fresh();
     }
 
@@ -387,6 +390,7 @@ class ProductService
         }
 
         $product->decrement('stock', $quantity);
+
         return $product->fresh();
     }
 
@@ -397,6 +401,7 @@ class ProductService
     {
         $product = $this->findProduct($id);
         $product->increment('stock', $quantity);
+
         return $product->fresh();
     }
 
@@ -406,13 +411,14 @@ class ProductService
     public function updatePrice(int $id, float $price, ?float $salePrice = null): Product
     {
         $product = $this->findProduct($id);
-        
+
         $updateData = ['price' => $price];
         if ($salePrice !== null) {
             $updateData['sale_price'] = $salePrice;
         }
 
         $product->update($updateData);
+
         return $product->fresh();
     }
 
@@ -422,7 +428,7 @@ class ProductService
     protected function generateSKU(): string
     {
         do {
-            $sku = 'PRD-' . strtoupper(Str::random(8));
+            $sku = 'PRD-'.strtoupper(Str::random(8));
         } while (Product::where('sku', $sku)->exists());
 
         return $sku;
@@ -438,16 +444,16 @@ class ProductService
 
         while (true) {
             $query = Product::where('slug', $slug);
-            
+
             if ($excludeId) {
                 $query->where('id', '!=', $excludeId);
             }
 
-            if (!$query->exists()) {
+            if (! $query->exists()) {
                 break;
             }
 
-            $slug = $originalSlug . '-' . $counter;
+            $slug = $originalSlug.'-'.$counter;
             $counter++;
         }
 
@@ -508,11 +514,11 @@ class ProductService
     public function addStock(int $productId, int $quantity, ?string $notes = null, ?array $batchData = null): Product
     {
         $stockMovementService = app(StockMovementService::class);
-        
+
         $product = Product::findOrFail($productId);
-        
+
         $batchId = null;
-        
+
         // Create batch if batch data provided
         if ($batchData) {
             $batchService = app(BatchService::class);
@@ -533,7 +539,7 @@ class ProductService
                 null
             );
         }
-        
+
         return $product->fresh();
     }
 
@@ -543,13 +549,13 @@ class ProductService
     public function deductStock(int $productId, int $quantity, $reference = null): Product
     {
         $stockMovementService = app(StockMovementService::class);
-        
+
         $product = Product::findOrFail($productId);
-        
+
         if ($product->stock < $quantity) {
             throw new \Exception("Insufficient stock for product: {$product->name}. Available: {$product->stock}, Required: {$quantity}");
         }
-        
+
         $stockMovementService->deductStock(
             $productId,
             $quantity,
@@ -557,7 +563,7 @@ class ProductService
             null,
             null
         );
-        
+
         return $product->fresh();
     }
 
@@ -567,11 +573,11 @@ class ProductService
     public function checkStockAvailability(int $productId, int $quantity): bool
     {
         $product = Product::find($productId);
-        
-        if (!$product) {
+
+        if (! $product) {
             return false;
         }
-        
+
         return $product->stock >= $quantity;
     }
 
@@ -583,7 +589,7 @@ class ProductService
         $product = Product::with(['batches' => function ($query) {
             $query->where('status', 'active')->orderBy('expiry_date');
         }])->findOrFail($productId);
-        
+
         return [
             'product_id' => $product->id,
             'product_name' => $product->name,

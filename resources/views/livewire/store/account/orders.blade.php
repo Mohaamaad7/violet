@@ -137,7 +137,7 @@
                                     <div class="flex-shrink-0 w-16 h-16 bg-gray-100 rounded-lg overflow-hidden">
                                         @if($item->product && $item->product->getFirstMediaUrl('images', 'thumb'))
                                             <img src="{{ $item->product->getFirstMediaUrl('images', 'thumb') }}"
-                                                alt="{{ $item->product->name ?? '' }}" class="w-full h-full object-cover">
+                                                alt="{{ $item->product->localized_name ?? '' }}" class="w-full h-full object-cover">
                                         @else
                                             <div class="w-full h-full flex items-center justify-center">
                                                 <svg class="w-8 h-8 text-gray-300" fill="none" stroke="currentColor"
