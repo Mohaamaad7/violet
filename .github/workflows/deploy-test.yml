@@ -53,7 +53,10 @@ jobs:
               echo "Configured test path is invalid; looking for the existing test checkout under the account domains directory."
               candidates=()
               if [ -d "$HOME/domains" ]; then
+                # Jailed hosting shells may not expose /dev/fd for process substitution.
+                artisan_files="$(find "$HOME/domains" -maxdepth 7 -type f -name artisan 2>/dev/null || true)"
                 while IFS= read -r artisan_file; do
+                  [ -n "$artisan_file" ] || continue
                   candidate="$(dirname "$artisan_file")"
                   if is_test_checkout "$candidate"; then
                     candidate="$(realpath "$candidate")"
@@ -61,7 +64,7 @@ jobs:
                       candidates+=("$candidate")
                     fi
                   fi
-                done < <(find "$HOME/domains" -maxdepth 7 -type f -name artisan 2>/dev/null)
+                done <<< "$artisan_files"
               fi
               if [ "${#candidates[@]}" -ne 1 ]; then
                 echo "Cannot uniquely identify the test checkout. Correct the TEST_DEPLOY_PATH repository secret. No deployment changes were made."
