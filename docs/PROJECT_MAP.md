@@ -2,6 +2,51 @@
 
 ## Recent Modifications
 
+### Bilingual Catalog Content & Safe Test Deployment (2026-10-26)
+- **Goal**: Store Arabic/English catalog content separately, display only the selected language, preserve original data/IDs/URLs, and initialize the missing test header categories during deployment.
+- **Storage / Compatibility**:
+  - `database/migrations/2026_10_26_000001_add_catalog_translations.php` **(NEW)**: Adds nullable `_ar`/`_en` columns for product/category names, descriptions and SEO; products also receive localized short/long descriptions, specifications and usage. Backfills only unambiguous content in chunks, without changing original columns, IDs, prices, SKU, slugs or relationships.
+  - `app/Support/LegacyCatalogTranslation.php` **(NEW)**: Conservatively extracts clear `Arabic (English)` names or single-language content; does not guess translations for ambiguous mixed text.
+  - `app/Models/Concerns/HasCatalogTranslations.php` **(NEW)** + `app/Models/Product.php` + `app/Models/Category.php`: Localized accessors, bilingual search and missing-translation scopes, publication checks, automatic legacy-name initialization for new records, and response-cache invalidation when translations change. Missing names use a localized review label, never the other language's text; the original remains available for review/import/order snapshots.
+- **Filament Data Entry**:
+  - `app/Filament/Schemas/CatalogTranslationFields.php` **(NEW)**: Reusable Arabic/English tabs with language-specific direction, rich text and SEO inputs. Both names are required for active records; draft/inactive records can be incomplete. Slugs are generated on initial English name entry only, preserving existing URLs on edits.
+  - `app/Filament/Resources/Products/Schemas/ProductForm.php`: Uses the tabs, preserves an original-name reference, starts new products as drafts, and supports bilingual inline category creation.
+  - `app/Filament/Resources/CategoryResource.php`: Bilingual category entry/labels, translation-completeness indicator/filter, and guarded inline activation.
+  - `app/Filament/Resources/Products/Tables/ProductsTable.php`: Localized labels, bilingual search, completeness indicator/filter and full-selection validation before bulk publishing, with a visible notification on incomplete translations.
+  - `lang/ar/catalog.php` + `lang/en/catalog.php` **(NEW)**: Entry labels and localized missing-translation messages.
+- **Storefront / Search**:
+  - `app/Livewire/Store/SearchBar.php`, `app/Livewire/Store/ProductList.php`, `app/Services/ProductService.php`, `app/Services/CategoryService.php`: Search both translations plus original content for compatibility, while displaying names in the current locale. Category service activation validates both names.
+  - `app/Livewire/Store/CheckoutPage.php`, `app/Livewire/Store/ComboLandingPage.php`, `app/Livewire/Store/OffersPage.php`: Use localized catalog names in customer-facing prepared data; historical order snapshots remain intact.
+  - `resources/views/components/store/header.blade.php`, `resources/views/components/store/category-sections.blade.php`, `resources/views/components/store/product-card.blade.php`, `resources/views/components/store/combo-progress-hint.blade.php`: Localized category/product labels and alt text, retaining the existing image-priority behavior.
+  - `resources/views/components/cosmetics/hero.blade.php`, `resources/views/components/cosmetics/product-card.blade.php`: Same locale-specific catalog display in the alternate storefront.
+  - `resources/views/livewire/store/home.blade.php`, `resources/views/livewire/store/product-list.blade.php`, `resources/views/livewire/store/category-show.blade.php`, `resources/views/livewire/store/product-details.blade.php`: Localized category/product content throughout grids, filters, straps and detail tabs. The exact hero wrapper and first-four-card LCP priority remain intact.
+  - `resources/views/livewire/store/cart-manager.blade.php`, `resources/views/livewire/store/cart-page.blade.php`, `resources/views/livewire/store/wishlist-page.blade.php`, `resources/views/livewire/store/account/my-reviews.blade.php`, `resources/views/livewire/store/account/order-details.blade.php`, `resources/views/livewire/store/account/orders.blade.php`: Localized related-product labels where the catalog record is available.
+  - `resources/views/store/product-details.blade.php` + `resources/views/components/store-layout.blade.php`: Bind localized product SEO/title/keywords and translated breadcrumbs through explicit layout props.
+  - `app/Support/LocaleAwareResponseHasher.php` **(NEW, previous local fix)** + `config/responsecache.php`: Include the prior locale cache fix in this release so Arabic/English cached pages remain isolated.
+- **Test Environment Setup / Deployment**:
+  - `database/seeders/StorefrontCategoriesSeeder.php`: Initializes bilingual main-category labels and reuses the old active root `Body_mist` or matching fragrance name when present; never moves products or overwrites custom translations. Missing gender branches are additive and require human product classification.
+  - `app/Console/Commands/PrepareStorefront.php` **(NEW)**: `storefront:prepare --activate-category-first` initializes visibility/order/template once, records a setup marker, reports missing names, and preserves later administrator choices on repeat runs.
+  - `.github/workflows/deploy-test.yml`: Validates the test checkout before any write, safely resolves a single existing test checkout when the configured path is invalid, serializes deploys, runs Composer/migrations/setup/cache refresh, and limits permission updates to Laravel writable directories. The previous failed deployment was confirmed to have an invalid `TEST_DEPLOY_PATH`; the old script continued after `cd` failed. The replacement stops before modifying anything when a unique verified test path cannot be established.
+- **Validation / Instructions**:
+  - `tests/Feature/CatalogLocalizationTest.php` **(NEW)**: Covers localized fields/header/home/search/SEO, cache invalidation in both languages, missing-name behavior, source-preserving migration, legacy fragrance-root reuse, repeatable deployment setup, Filament draft/publish validation and all-or-nothing bulk publication.
+  - `tests/Feature/StorefrontLanguageSwitchTest.php` **(NEW, previous local fix)**: Cache isolation and both language routes under both templates.
+  - `tests/Feature/StorefrontTemplateTest.php` + `tests/Feature/LcpImageTest.php`: Set an explicit locale for English fixtures; existing slider, cache and product-filter tests are retained.
+  - `docs/CATALOG_LOCALIZATION_TESTING_AR.md` **(NEW)**: Arabic administrator acceptance steps, legacy-data review guidance and deployment commands.
+  - Verified **57 tests / 414 assertions** across the catalog, locale-cache, template, hero, LCP, cache-manager and existing product-filter suites. `npm run build` succeeds with unchanged JS/CSS bundle hashes. Workflow YAML and shell syntax are validated.
+
+### Fix Arabic / English Switching with Response Cache (2026-10-26)
+- **Issue**: The language controller correctly updated the session, but Spatie's default response hasher did not include the resolved locale. A cached Arabic homepage or product listing was therefore returned after selecting English, including the stale language-switcher link and RTL direction.
+- **Solution**:
+  - `app/Support/LocaleAwareResponseHasher.php` **(NEW)**: Extends Spatie's default hasher with the locale resolved by `SetLocale`, while retaining URL/query-string, user, and explicit cache-suffix isolation.
+  - `config/responsecache.php`: Registers the locale-aware hasher. Arabic and English now have separate server-side response cache entries; the existing seven-day TTL and cache invalidation behavior remain unchanged. Changing language does not flush the other language's cached pages.
+  - `tests/Feature/StorefrontLanguageSwitchTest.php` **(NEW)**: Reproduces the original failure and verifies Arabic → English → Arabic on homepage and product listing under both templates. Covers both `/locale/{locale}` and legacy `/language/{locale}`, session persistence, redirect destination, language/direction, switcher target, and actual cache hits when revisiting either language.
+  - `docs/PROJECT_MAP.md`: Records the cause, changed files, verification, and activation steps.
+- **Verification**:
+  - New regression tests failed in all four cases before the fix (`en` expected, cached `ar` returned), then passed after enabling the locale-aware hasher.
+  - `php artisan test tests/Feature/StorefrontLanguageSwitchTest.php tests/Feature/StorefrontTemplateTest.php tests/Feature/HeroSliderTest.php tests/Feature/LcpImageTest.php tests/Feature/CacheManagerTest.php`: **29 tests passed (288 assertions)**.
+  - Actual HTTPS requests to `violet.test` using one cookie session returned `ar`, then `en` after `/locale/en`, then `ar` after `/locale/ar`.
+  - Applied locally with `php artisan config:clear` and `php artisan responsecache:clear`. Run these commands after deploying the fix to another environment. No frontend asset build or catalog migration is required.
+
 ### Storefront Multi-Template Layout & Category Straps (2026-10-25)
 - **Goal**: Keep the existing `classic` storefront and add an editable `category_first` layout without deleting catalog data or changing the hero/LCP loading contract.
 - **Architecture & Admin**:

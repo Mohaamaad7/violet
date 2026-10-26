@@ -10,7 +10,7 @@
         @if($product->getFirstMediaUrl('images'))
             <img 
                 src="{{ $product->getFirstMediaUrl('images', 'preview') }}" 
-                alt="{{ $product->name }}"
+                alt="{{ $product->localized_name }}"
                 class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                 @if($aboveFold)
                     fetchpriority="high"
@@ -80,21 +80,21 @@
         {{-- Category --}}
         @if($product->category)
             <p class="text-gold-400 text-xs font-medium uppercase tracking-wider mb-2">
-                {{ $product->category->name }}
+                {{ $product->category->localized_name }}
             </p>
         @endif
 
         {{-- Product Name --}}
         <h3 class="text-cream-100 font-semibold text-lg mb-2 line-clamp-2 group-hover:text-gold-400 transition-colors duration-200">
             <a href="{{ route('product.show', $product->slug) }}">
-                {{ $product->name }}
+                {{ $product->localized_name }}
             </a>
         </h3>
 
         {{-- Short Description --}}
-        @if($product->short_description)
+        @if($product->localized_short_description)
             <p class="text-cream-400 text-sm mb-4 line-clamp-2">
-                {{ $product->short_description }}
+                {{ $product->localized_short_description }}
             </p>
         @endif
 

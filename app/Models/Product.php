@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Models\Concerns\HasCatalogTranslations;
 use App\Traits\HasFullAudit;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -13,7 +14,14 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 
 class Product extends Model implements HasMedia
 {
-    use HasFactory, SoftDeletes, InteractsWithMedia, HasFullAudit;
+    use HasCatalogTranslations;
+    use HasFactory, HasFullAudit, InteractsWithMedia, SoftDeletes;
+
+    public static function translatedCatalogFields(): array
+    {
+        return ['name', 'description', 'short_description', 'long_description', 'specifications',
+            'how_to_use', 'meta_title', 'meta_description', 'meta_keywords'];
+    }
 
     protected $fillable = [
         'category_id',
@@ -118,12 +126,12 @@ class Product extends Model implements HasMedia
 
     public function getIsOnSaleAttribute()
     {
-        return !is_null($this->sale_price) && $this->sale_price < $this->price;
+        return ! is_null($this->sale_price) && $this->sale_price < $this->price;
     }
 
     public function getDiscountPercentageAttribute()
     {
-        if (!$this->is_on_sale) {
+        if (! $this->is_on_sale) {
             return 0;
         }
 
@@ -134,7 +142,7 @@ class Product extends Model implements HasMedia
     {
         // Try Spatie Media Library first
         $primaryMedia = $this->getMedia('product-images')
-            ->filter(fn($media) => $media->getCustomProperty('is_primary') === true)
+            ->filter(fn ($media) => $media->getCustomProperty('is_primary') === true)
             ->first();
 
         if ($primaryMedia) {
@@ -150,7 +158,7 @@ class Product extends Model implements HasMedia
         // Fallback to old system (for backwards compatibility)
         $primary = $this->images()->where('is_primary', true)->first();
         if ($primary && $primary->image_path) {
-            return asset('storage/' . $primary->image_path);
+            return asset('storage/'.$primary->image_path);
         }
 
         // Final fallback to placeholder

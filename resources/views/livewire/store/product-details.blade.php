@@ -50,7 +50,7 @@
                             id="product-main-image"
                             :src="currentImageUrl"
                             :data-zoom="currentImageUrl"
-                            alt="{{ $product->name }}"
+                            alt="{{ $product->localized_name }}"
                             class="w-full h-full object-contain cursor-crosshair"
                             @click="openLightbox()"
                         >
@@ -178,7 +178,7 @@
         {{-- Product Title & Basic Info --}}
         <div class="space-y-3">
             <h1 class="text-3xl lg:text-4xl font-bold text-gray-900 leading-tight">
-                {{ $product->name }}
+                {{ $product->localized_name }}
             </h1>
             
             <div class="flex flex-wrap items-center gap-4 text-sm text-gray-600">
@@ -247,9 +247,9 @@
         <x-store.combo-progress-hint :product="$product" />
 
         {{-- Short Description --}}
-        @if($product->short_description)
+        @if($product->localized_short_description)
             <div class="text-gray-700 leading-relaxed">
-                {{ $product->short_description }}
+                {{ $product->localized_short_description }}
             </div>
         @endif
 
@@ -374,7 +374,7 @@
             Description
         </button>
         
-        @if($product->specifications)
+        @if($product->localized_specifications)
             <button 
                 @click="activeTab = 'specifications'"
                 :class="activeTab === 'specifications' ? 'border-violet-600 text-violet-600' : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'"
@@ -384,7 +384,7 @@
             </button>
         @endif
         
-        @if($product->how_to_use)
+        @if($product->localized_how_to_use)
             <button 
                 @click="activeTab = 'howToUse'"
                 :class="activeTab === 'howToUse' ? 'border-violet-600 text-violet-600' : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'"
@@ -408,10 +408,10 @@
         {{-- Description Tab --}}
         <div x-show="activeTab === 'description'" x-cloak>
             <div class="prose prose-violet max-w-none text-gray-700 leading-relaxed">
-                @if($product->long_description)
-                    {!! $product->long_description !!}
-                @elseif($product->description)
-                    {!! $product->description !!}
+                @if($product->localized_long_description)
+                    {!! $product->localized_long_description !!}
+                @elseif($product->localized_description)
+                    {!! $product->localized_description !!}
                 @else
                     <p class="text-gray-500 italic">No description available.</p>
                 @endif
@@ -419,19 +419,19 @@
         </div>
 
         {{-- Specifications Tab --}}
-        @if($product->specifications)
+        @if($product->localized_specifications)
             <div x-show="activeTab === 'specifications'" x-cloak>
                 <div class="prose prose-violet max-w-none text-gray-700 leading-relaxed">
-                    {!! $product->specifications !!}
+                    {!! $product->localized_specifications !!}
                 </div>
             </div>
         @endif
 
         {{-- How to Use Tab --}}
-        @if($product->how_to_use)
+        @if($product->localized_how_to_use)
             <div x-show="activeTab === 'howToUse'" x-cloak>
                 <div class="prose prose-violet max-w-none text-gray-700 leading-relaxed">
-                    {!! $product->how_to_use !!}
+                    {!! $product->localized_how_to_use !!}
                 </div>
             </div>
         @endif

@@ -6,6 +6,7 @@ use App\Enums\OrderStatus;
 use App\Models\Customer;
 use App\Models\Order;
 use App\Models\OrderItem;
+use App\Models\PaymentSetting;
 use App\Models\Product;
 use App\Models\Setting;
 use App\Models\ShippingAddress;
@@ -13,12 +14,10 @@ use App\Services\CartService;
 use App\Services\CouponService;
 use App\Services\EmailService;
 use App\Services\PaymentService;
-use App\Models\PaymentSetting;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Livewire\Attributes\Title;
 use Livewire\Component;
 
@@ -26,27 +25,37 @@ use Livewire\Component;
 class CheckoutPage extends Component
 {
     protected CartService $cartService;
+
     protected CouponService $couponService;
+
     protected PaymentService $paymentService;
 
     // Address Selection (for authenticated users)
     public $selectedAddressId = null;
+
     public $showAddressForm = false;
 
     // Address Form Fields
     public $first_name = '';
+
     public $last_name = '';
+
     public $email = '';
+
     public $phone = '';
 
     // Geographic Location (New System)
     public $country_id = null;
+
     public $governorate_id = null;
+
     public $city_id = null;
 
     // Old fields (kept for backward compatibility during transition)
     public $governorate = '';
+
     public $city = '';
+
     public $address_details = '';
 
     // Payment Method (Placeholder for Part 2)
@@ -54,8 +63,11 @@ class CheckoutPage extends Component
 
     // Coupon
     public $couponCode = '';
+
     public $appliedCoupon = null;
+
     public $couponDiscount = 0;
+
     public $couponError = '';
 
     // Combo Savings (aggregated from locked proportional prices in cart_items)
@@ -63,10 +75,15 @@ class CheckoutPage extends Component
 
     // Cart Data
     public $cartItems = [];
+
     public $subtotal = 0;
+
     public float $baseShippingCost = 0;        // Original cost from geography
+
     public float $shippingDiscountAmount = 0;  // Auto-discount applied (separate from coupon)
+
     public $shippingCost = 0;                  // Net = base - discountAmount
+
     public $total = 0;
 
     /**
@@ -101,6 +118,7 @@ class CheckoutPage extends Component
         if (Auth::guard('customer')->check()) {
             return Auth::guard('customer')->user();
         }
+
         return null;
     }
 
@@ -138,7 +156,7 @@ class CheckoutPage extends Component
         }
 
         // Auto-select Egypt as default country
-        if (!$this->country_id) {
+        if (! $this->country_id) {
             $egypt = \App\Models\Country::where('code', 'EG')->first();
             if ($egypt) {
                 $this->country_id = $egypt->id;
@@ -188,8 +206,8 @@ class CheckoutPage extends Component
     {
         return Cache::remember('shipping_discount_config', 600, function () {
             return [
-                'enabled'    => (bool)  Setting::where('key', 'shipping_discount_enabled')->value('value'),
-                'threshold'  => (float) Setting::where('key', 'shipping_discount_threshold')->value('value'),
+                'enabled' => (bool) Setting::where('key', 'shipping_discount_enabled')->value('value'),
+                'threshold' => (float) Setting::where('key', 'shipping_discount_threshold')->value('value'),
                 'percentage' => (float) Setting::where('key', 'shipping_discount_percentage')->value('value'),
             ];
         });
@@ -218,7 +236,7 @@ class CheckoutPage extends Component
             }
         }
 
-        $this->baseShippingCost      = $base;
+        $this->baseShippingCost = $base;
         $this->shippingDiscountAmount = 0;
 
         // ② Dynamic discount check (Eloquent + Cache — no Setting::get())
@@ -254,7 +272,7 @@ class CheckoutPage extends Component
      */
     public function getGovernoratesProperty()
     {
-        if (!$this->country_id) {
+        if (! $this->country_id) {
             return [];
         }
 
@@ -269,7 +287,7 @@ class CheckoutPage extends Component
      */
     public function getCitiesProperty()
     {
-        if (!$this->governorate_id) {
+        if (! $this->governorate_id) {
             return [];
         }
 
@@ -286,13 +304,7 @@ class CheckoutPage extends Component
 
         if ($cart && $cart->items->count() > 0) {
             $this->cartItems = $cart->items->map(function ($item) {
-                // Safely get product name - handle if it's an array or object
-                $productName = 'Unknown Product';
-                if ($item->product && $item->product->name) {
-                    $productName = is_array($item->product->name) 
-                        ? ($item->product->name[app()->getLocale()] ?? $item->product->name['en'] ?? 'Unknown Product')
-                        : (string) $item->product->name;
-                }
+                $productName = $item->product?->localized_name ?? __('catalog.untranslated_name', ['id' => $item->product_id]);
 
                 // Safely get image URL
                 $imageUrl = '';
@@ -368,11 +380,12 @@ class CheckoutPage extends Component
             $this->getCustomerId()
         );
 
-        if (!$result['valid']) {
+        if (! $result['valid']) {
             $this->couponError = $result['error'];
             $this->appliedCoupon = null;
             $this->couponDiscount = 0;
             $this->recalculateTotal();
+
             return;
         }
 
@@ -392,7 +405,7 @@ class CheckoutPage extends Component
         // Show success message
         $this->dispatch('show-toast', [
             'message' => __('messages.coupon_success.applied'),
-            'type' => 'success'
+            'type' => 'success',
         ]);
     }
 
@@ -409,7 +422,7 @@ class CheckoutPage extends Component
 
         $this->dispatch('show-toast', [
             'message' => __('messages.coupon_success.removed'),
-            'type' => 'info'
+            'type' => 'info',
         ]);
     }
 
@@ -421,7 +434,7 @@ class CheckoutPage extends Component
 
     public function toggleAddressForm()
     {
-        $this->showAddressForm = !$this->showAddressForm;
+        $this->showAddressForm = ! $this->showAddressForm;
         if ($this->showAddressForm) {
             $this->selectedAddressId = null;
         }
@@ -471,10 +484,10 @@ class CheckoutPage extends Component
 
             foreach ($gatewayMethods as $key => $method) {
                 // Safely extract name and description (may be arrays)
-                $name = is_array($method['name'] ?? null) 
+                $name = is_array($method['name'] ?? null)
                     ? ($method['name'][app()->getLocale()] ?? $method['name']['ar'] ?? $method['name']['en'] ?? $key)
                     : ($method['name'] ?? $key);
-                
+
                 $description = is_array($method['description'] ?? null)
                     ? ($method['description'][app()->getLocale()] ?? $method['description']['ar'] ?? $method['description']['en'] ?? '')
                     : ($method['description'] ?? '');
@@ -514,7 +527,7 @@ class CheckoutPage extends Component
 
     /**
      * Place the order with COD payment method
-     * 
+     *
      * Flow:
      * 1. Validate address selection/creation
      * 2. Verify stock availability (race condition protection)
@@ -532,8 +545,9 @@ class CheckoutPage extends Component
         if (empty($this->cartItems)) {
             $this->dispatch('show-toast', [
                 'message' => __('messages.checkout.empty_cart'),
-                'type' => 'error'
+                'type' => 'error',
             ]);
+
             return;
         }
 
@@ -547,11 +561,12 @@ class CheckoutPage extends Component
                 ->where('customer_id', $this->getCustomerId())
                 ->first();
 
-            if (!$shippingAddress) {
+            if (! $shippingAddress) {
                 $this->dispatch('show-toast', [
                     'message' => __('messages.checkout.invalid_address'),
-                    'type' => 'error'
+                    'type' => 'error',
                 ]);
+
                 return;
             }
         } else {
@@ -564,7 +579,7 @@ class CheckoutPage extends Component
 
             // Prepare guest address data
             $guestAddressData = [
-                'name' => $this->first_name . ' ' . $this->last_name,
+                'name' => $this->first_name.' '.$this->last_name,
                 'email' => $this->email,
                 'phone' => $this->phone,
                 'governorate' => $governorate?->name_ar ?? '',
@@ -594,11 +609,12 @@ class CheckoutPage extends Component
 
         // Validate payment method - allow COD and any method from the active gateway
         $validMethods = ['cod', 'card', 'meeza', 'vodafone_cash', 'wallet', 'orange_money', 'etisalat_cash', 'kiosk', 'instapay', 'valu'];
-        if (!in_array($this->paymentMethod, $validMethods)) {
+        if (! in_array($this->paymentMethod, $validMethods)) {
             $this->dispatch('show-toast', [
                 'message' => __('messages.checkout.invalid_payment'),
-                'type' => 'error'
+                'type' => 'error',
             ]);
+
             return;
         }
 
@@ -612,11 +628,12 @@ class CheckoutPage extends Component
         $stockErrors = [];
         $cart = $this->cartService->getCart();
 
-        if (!$cart || $cart->items->isEmpty()) {
+        if (! $cart || $cart->items->isEmpty()) {
             $this->dispatch('show-toast', [
                 'message' => __('messages.checkout.cart_expired'),
-                'type' => 'error'
+                'type' => 'error',
             ]);
+
             return;
         }
 
@@ -624,37 +641,39 @@ class CheckoutPage extends Component
         foreach ($cart->items as $cartItem) {
             $product = Product::find($cartItem->product_id);
 
-            if (!$product) {
+            if (! $product) {
                 $stockErrors[] = __('messages.checkout.product_unavailable', [
-                    'name' => $cartItem->product_name ?? 'Unknown'
+                    'name' => $cartItem->product_name ?? 'Unknown',
                 ]);
+
                 continue;
             }
 
             // Check if variant or main product
             if ($cartItem->product_variant_id) {
                 $variant = $product->variants()->find($cartItem->product_variant_id);
-                if (!$variant || $variant->stock < $cartItem->quantity) {
+                if (! $variant || $variant->stock < $cartItem->quantity) {
                     $stockErrors[] = __('messages.checkout.insufficient_stock', [
                         'name' => $product->name,
-                        'available' => $variant->stock ?? 0
+                        'available' => $variant->stock ?? 0,
                     ]);
                 }
             } else {
                 if ($product->stock < $cartItem->quantity) {
                     $stockErrors[] = __('messages.checkout.insufficient_stock', [
                         'name' => $product->name,
-                        'available' => $product->stock
+                        'available' => $product->stock,
                     ]);
                 }
             }
         }
 
-        if (!empty($stockErrors)) {
+        if (! empty($stockErrors)) {
             $this->dispatch('show-toast', [
                 'message' => implode("\n", $stockErrors),
-                'type' => 'error'
+                'type' => 'error',
             ]);
+
             return;
         }
 
@@ -665,7 +684,7 @@ class CheckoutPage extends Component
         try {
             $order = DB::transaction(function () use ($cart, $shippingAddress, $guestAddressData, $isOnlinePayment) {
                 // Generate temporary order number (will be updated after creation)
-                $tempOrderNumber = 'TEMP-' . uniqid();
+                $tempOrderNumber = 'TEMP-'.uniqid();
 
                 // Determine payment status based on payment method
                 $paymentStatus = $isOnlinePayment ? 'pending' : 'unpaid';
@@ -673,25 +692,25 @@ class CheckoutPage extends Component
                 // Create Order — shipping_cost stores ORIGINAL cost for financial reporting.
                 // shipping_discount_amount stores the auto-discount separately from coupon discounts.
                 $order = Order::create([
-                    'order_number'             => $tempOrderNumber,
-                    'customer_id'              => $this->getCustomerId(),
-                    'shipping_address_id'      => $shippingAddress?->id,
-                    'guest_name'               => $guestAddressData['name'] ?? null,
-                    'guest_email'              => $guestAddressData['email'] ?? null,
-                    'guest_phone'              => $guestAddressData['phone'] ?? null,
-                    'guest_governorate'        => $guestAddressData['governorate'] ?? null,
-                    'guest_city'               => $guestAddressData['city'] ?? null,
-                    'guest_address'            => $guestAddressData['address'] ?? null,
-                    'status'                   => $isOnlinePayment ? OrderStatus::PENDING_PAYMENT : OrderStatus::PENDING,
-                    'payment_status'           => $paymentStatus,
-                    'payment_method'           => $this->paymentMethod,
-                    'subtotal'                 => $this->subtotal,
-                    'shipping_cost'            => $this->baseShippingCost,       // Original geographic cost
+                    'order_number' => $tempOrderNumber,
+                    'customer_id' => $this->getCustomerId(),
+                    'shipping_address_id' => $shippingAddress?->id,
+                    'guest_name' => $guestAddressData['name'] ?? null,
+                    'guest_email' => $guestAddressData['email'] ?? null,
+                    'guest_phone' => $guestAddressData['phone'] ?? null,
+                    'guest_governorate' => $guestAddressData['governorate'] ?? null,
+                    'guest_city' => $guestAddressData['city'] ?? null,
+                    'guest_address' => $guestAddressData['address'] ?? null,
+                    'status' => $isOnlinePayment ? OrderStatus::PENDING_PAYMENT : OrderStatus::PENDING,
+                    'payment_status' => $paymentStatus,
+                    'payment_method' => $this->paymentMethod,
+                    'subtotal' => $this->subtotal,
+                    'shipping_cost' => $this->baseShippingCost,       // Original geographic cost
                     'shipping_discount_amount' => $this->shippingDiscountAmount,  // Auto-discount (new field)
-                    'discount_amount'          => $this->couponDiscount,          // Coupon discount only
-                    'combo_discount_amount'    => $this->comboSavings,            // Informational: total combo savings
-                    'tax_amount'               => 0,
-                    'total'                    => $this->total,
+                    'discount_amount' => $this->couponDiscount,          // Coupon discount only
+                    'combo_discount_amount' => $this->comboSavings,            // Informational: total combo savings
+                    'tax_amount' => 0,
+                    'total' => $this->total,
                 ]);
 
                 // Create Order Items & Decrement Stock
@@ -743,7 +762,7 @@ class CheckoutPage extends Component
                 $order->update(['order_number' => $finalOrderNumber]);
 
                 // Clear cart session cookie for guests
-                if (!$this->getCustomer()) {
+                if (! $this->getCustomer()) {
                     Cookie::queue(Cookie::forget('cart_session_id'));
                 }
 
@@ -755,7 +774,7 @@ class CheckoutPage extends Component
             // Online payments will send emails after successful payment callback
             // =============================================
 
-            if (!$isOnlinePayment) {
+            if (! $isOnlinePayment) {
                 try {
                     $emailService = app(EmailService::class);
 
@@ -783,8 +802,9 @@ class CheckoutPage extends Component
                 // Use Livewire's redirect method
                 $this->redirectRoute('payment.process', [
                     'order' => $order->id,
-                    'method' => $this->paymentMethod
+                    'method' => $this->paymentMethod,
                 ]);
+
                 return;
             }
 
@@ -797,7 +817,7 @@ class CheckoutPage extends Component
 
             $this->dispatch('show-toast', [
                 'message' => __('messages.checkout.order_failed'),
-                'type' => 'error'
+                'type' => 'error',
             ]);
         }
     }

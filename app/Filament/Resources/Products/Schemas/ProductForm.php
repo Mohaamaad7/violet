@@ -2,17 +2,14 @@
 
 namespace App\Filament\Resources\Products\Schemas;
 
-use Filament\Forms\Components\FileUpload;
+use App\Filament\Schemas\CatalogTranslationFields;
 use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Illuminate\Support\Str;
 
 class ProductForm
 {
@@ -24,16 +21,10 @@ class ProductForm
                 Section::make(__('admin.products.form.general.title'))
                     ->description(__('admin.products.form.general.desc'))
                     ->schema([
-                        TextInput::make('name')
-                            ->label(__('admin.form.name'))
-                            ->required()
-                            ->maxLength(255)
-                            ->live(onBlur: true)
-                            ->afterStateUpdated(function (string $operation, $state, callable $set) {
-                                if ($operation === 'create') {
-                                    $set('slug', Str::slug($state));
-                                }
-                            }),
+                        TextInput::make('name')->label(__('catalog.legacy_name'))->disabled()->dehydrated(false)
+                            ->helperText(__('catalog.help'))->visible(fn ($record) => $record !== null),
+
+                        CatalogTranslationFields::make(product: true),
 
                         TextInput::make('slug')
                             ->label(__('admin.form.slug'))
@@ -50,131 +41,21 @@ class ProductForm
                         Select::make('category_id')
                             ->label(__('admin.form.category'))
                             ->relationship('category', 'name')
+                            ->getOptionLabelFromRecordUsing(fn (\App\Models\Category $record) => $record->localized_name)
                             ->required()
                             ->searchable()
                             ->preload()
                             ->createOptionForm([
-                                TextInput::make('name')
-                                    ->label(__('admin.form.name'))
-                                    ->required()
-                                    ->maxLength(255),
+                                TextInput::make('name_ar')->label(__('catalog.name').' (العربية)')->required()->maxLength(255),
+                                TextInput::make('name_en')->label(__('catalog.name').' (English)')->required()->maxLength(255),
                                 TextInput::make('slug')
                                     ->label(__('admin.form.slug'))
                                     ->required()
                                     ->maxLength(255),
                             ]),
-
-                        RichEditor::make('description')
-                            ->label(__('admin.form.description'))
-                            ->columnSpanFull()
-                            ->toolbarButtons([
-                                // Row 1: Text Formatting
-                                ['bold', 'italic', 'underline', 'strike', 'subscript', 'superscript', 'link'],
-                                // Row 2: Colors, Headings & Alignment
-                                ['textColor', 'highlight', 'clearFormatting'],
-                                ['h1', 'h2', 'h3'],
-                                ['alignStart', 'alignCenter', 'alignEnd', 'alignJustify'],
-                                // Row 3: Structure & Media
-                                ['bulletList', 'orderedList', 'blockquote', 'table'],
-                                ['attachFiles'],
-                                ['undo', 'redo'],
-                            ])
-                            ->textColors([
-                                '#000000' => 'Black',
-                                '#ef4444' => 'Red',
-                                '#f97316' => 'Orange',
-                                '#eab308' => 'Yellow',
-                                '#22c55e' => 'Green',
-                                '#3b82f6' => 'Blue',
-                                '#6366f1' => 'Indigo',
-                                '#a855f7' => 'Purple',
-                                '#ec4899' => 'Pink',
-                                '#6b7280' => 'Gray',
-                                '#ffffff' => 'White',
-                            ]),
-
-                        Textarea::make('short_description')
-                            ->label(__('admin.products.form.general.short_description'))
-                            ->rows(3)
-                            ->columnSpanFull()
-                            ->helperText(__('admin.products.form.general.short_description_help')),
                     ])
                     ->columns(2)
                     ->collapsible(),
-
-                // Detailed Content Section
-                Section::make(__('admin.products.form.detailed.title'))
-                    ->description(__('admin.products.form.detailed.desc'))
-                    ->schema([
-                        RichEditor::make('long_description')
-                            ->label(__('admin.products.form.detailed.long_description'))
-                            ->columnSpanFull()
-                            ->toolbarButtons([
-                                ['bold', 'italic', 'underline', 'strike', 'subscript', 'superscript', 'link'],
-                                ['textColor', 'highlight', 'clearFormatting'],
-                                ['h1', 'h2', 'h3'],
-                                ['alignStart', 'alignCenter', 'alignEnd', 'alignJustify'],
-                                ['bulletList', 'orderedList', 'blockquote', 'table'],
-                                ['attachFiles'],
-                                ['undo', 'redo'],
-                            ])
-                            ->textColors([
-                                '#000000' => 'Black',
-                                '#ef4444' => 'Red',
-                                '#f97316' => 'Orange',
-                                '#eab308' => 'Yellow',
-                                '#22c55e' => 'Green',
-                                '#3b82f6' => 'Blue',
-                                '#6366f1' => 'Indigo',
-                                '#a855f7' => 'Purple',
-                                '#ec4899' => 'Pink',
-                                '#6b7280' => 'Gray',
-                                '#ffffff' => 'White',
-                            ])
-                            ->helperText(__('admin.products.form.detailed.long_description_help')),
-
-                        RichEditor::make('specifications')
-                            ->label(__('admin.products.form.detailed.specifications'))
-                            ->columnSpanFull()
-                            ->toolbarButtons([
-                                ['bold', 'italic', 'underline', 'strike', 'link'],
-                                ['textColor', 'highlight', 'clearFormatting'],
-                                ['h2', 'h3'],
-                                ['alignStart', 'alignCenter', 'alignEnd'],
-                                ['bulletList', 'orderedList', 'table'],
-                                ['undo', 'redo'],
-                            ])
-                            ->textColors([
-                                '#000000' => 'Black',
-                                '#ef4444' => 'Red',
-                                '#22c55e' => 'Green',
-                                '#3b82f6' => 'Blue',
-                                '#6b7280' => 'Gray',
-                            ])
-                            ->helperText(__('admin.products.form.detailed.specifications_help')),
-
-                        RichEditor::make('how_to_use')
-                            ->label(__('admin.products.form.detailed.how_to_use'))
-                            ->columnSpanFull()
-                            ->toolbarButtons([
-                                ['bold', 'italic', 'underline', 'strike', 'link'],
-                                ['textColor', 'highlight', 'clearFormatting'],
-                                ['h2', 'h3'],
-                                ['alignStart', 'alignCenter', 'alignEnd'],
-                                ['bulletList', 'orderedList'],
-                                ['undo', 'redo'],
-                            ])
-                            ->textColors([
-                                '#000000' => 'Black',
-                                '#ef4444' => 'Red',
-                                '#22c55e' => 'Green',
-                                '#3b82f6' => 'Blue',
-                                '#6b7280' => 'Gray',
-                            ])
-                            ->helperText(__('admin.products.form.detailed.how_to_use_help')),
-                    ])
-                    ->collapsible()
-                    ->collapsed(),
 
                 // Media Section
                 Section::make(__('admin.products.form.media.title'))
@@ -310,7 +191,7 @@ class ProductForm
                             ->defaultItems(0)
                             ->reorderable(false)
                             ->collapsible()
-                            ->itemLabel(fn(array $state): ?string => $state['name'] ?? null)
+                            ->itemLabel(fn (array $state): ?string => $state['name'] ?? null)
                             ->addActionLabel(__('admin.products.form.variants.add_variant'))
                             ->columnSpanFull(),
                     ])
@@ -328,7 +209,7 @@ class ProductForm
                                 'active' => __('admin.status.active'),
                                 'inactive' => __('admin.status.inactive'),
                             ])
-                            ->default('active')
+                            ->default('draft')->live()
                             ->required()
                             ->native(false),
 
@@ -340,23 +221,6 @@ class ProductForm
                         TextInput::make('brand')
                             ->label(__('admin.products.form.additional.brand'))
                             ->maxLength(100),
-
-                        TextInput::make('meta_title')
-                            ->label(__('admin.products.form.additional.seo_title'))
-                            ->maxLength(255)
-                            ->helperText(__('admin.products.form.additional.seo_help')),
-
-                        Textarea::make('meta_description')
-                            ->label(__('admin.products.form.additional.seo_description'))
-                            ->rows(2)
-                            ->maxLength(255)
-                            ->columnSpanFull(),
-
-                        Textarea::make('meta_keywords')
-                            ->label(__('admin.products.form.additional.seo_keywords'))
-                            ->rows(2)
-                            ->helperText(__('admin.products.form.additional.seo_keywords_help'))
-                            ->columnSpanFull(),
                     ])
                     ->columns(3)
                     ->collapsible()

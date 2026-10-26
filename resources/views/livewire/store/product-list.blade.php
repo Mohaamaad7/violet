@@ -9,18 +9,18 @@
     showFilters: false 
 }">
     @if($this->categoryFirst && $this->categoryRoot)
-        <section class="mb-8 space-y-4" aria-label="{{ $this->categoryRoot->name }}" data-category-strap="{{ $this->categoryRoot->slug }}">
-            <h2 class="text-2xl font-bold text-gray-900">{{ $this->categoryRoot->name }}</h2>
+        <section class="mb-8 space-y-4" aria-label="{{ $this->categoryRoot->localized_name }}" data-category-strap="{{ $this->categoryRoot->slug }}">
+            <h2 class="text-2xl font-bold text-gray-900">{{ $this->categoryRoot->localized_name }}</h2>
             @foreach($this->strapPath as $level => $strapParent)
                 @if($strapParent->children->isNotEmpty())
                     @php
                         $strapAllActive = count($selectedCategories) <= 1 && !isset($this->strapPath[$level + 1]);
                     @endphp
                     <div wire:key="strap-{{ $strapParent->id }}" data-strap-level="{{ $level + 1 }}"
-                        role="group" aria-label="{{ trans_db('storefront.subcategories') }}: {{ $strapParent->name }}"
+                        role="group" aria-label="{{ trans_db('storefront.subcategories') }}: {{ $strapParent->localized_name }}"
                         class="flex items-center gap-3 overflow-x-auto pb-2">
                         <button type="button" wire:click="selectStrapCategory({{ $strapParent->id }})"
-                            aria-label="{{ trans_db('storefront.all') }} {{ $strapParent->name }}"
+                            aria-label="{{ trans_db('storefront.all') }} {{ $strapParent->localized_name }}"
                             aria-pressed="{{ $strapAllActive ? 'true' : 'false' }}"
                             @class(['min-h-[44px] min-w-[44px] shrink-0 rounded-full border px-5 py-2 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-violet-600',
                                 'bg-violet-600 border-violet-600 text-white' => $strapAllActive,
@@ -32,11 +32,11 @@
                                 $strapActive = isset($this->strapPath[$level + 1]) && $this->strapPath[$level + 1]->id === $strapCategory->id;
                             @endphp
                             <button type="button" wire:key="strap-pill-{{ $strapCategory->id }}" wire:click="selectStrapCategory({{ $strapCategory->id }})"
-                                aria-label="{{ $strapCategory->name }}" aria-pressed="{{ $strapActive ? 'true' : 'false' }}"
+                                aria-label="{{ $strapCategory->localized_name }}" aria-pressed="{{ $strapActive ? 'true' : 'false' }}"
                                 @class(['min-h-[44px] min-w-[44px] shrink-0 rounded-full border px-5 py-2 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-violet-600',
                                     'bg-violet-600 border-violet-600 text-white' => $strapActive,
                                     'bg-white border-gray-300 text-gray-600 hover:border-violet-600 hover:text-violet-600' => !$strapActive])>
-                                {{ $strapCategory->name }}
+                                {{ $strapCategory->localized_name }}
                             </button>
                         @endforeach
                     </div>
@@ -139,7 +139,7 @@
                                             </div>
                                             <span
                                                 class="text-sm text-gray-800 group-hover:text-violet-700 font-semibold transition-colors duration-200 flex-1">
-                                                {{ $parentCategory->name }}
+                                                {{ $parentCategory->localized_name }}
                                             </span>
                                             <span
                                                 class="text-xs text-gray-500 group-hover:text-violet-600 transition-colors duration-200">
@@ -164,7 +164,7 @@
                                                     </div>
                                                     <span
                                                         class="text-sm text-gray-700 group-hover:text-violet-700 font-medium transition-colors duration-200 flex-1">
-                                                        {{ $childCategory->name }}
+                                                        {{ $childCategory->localized_name }}
                                                     </span>
                                                     <span
                                                         class="text-xs text-gray-500 group-hover:text-violet-600 transition-colors duration-200">
@@ -469,7 +469,7 @@
                                             :checked="$wire.selectedCategories.includes({{ $parentCategory->id }})"
                                             class="w-4 h-4 text-violet-600 border-2 border-gray-400 rounded focus:ring-2 focus:ring-violet-500">
                                         <span class="text-sm text-gray-800 font-semibold flex-1">
-                                            {{ $parentCategory->name }}
+                                            {{ $parentCategory->localized_name }}
                                         </span>
                                         <span class="text-xs text-gray-500">
                                             ({{ $parentCategory->getTotalActiveProductsCount() }})
@@ -485,7 +485,7 @@
                                                     :checked="$wire.selectedCategories.includes({{ $childCategory->id }})"
                                                     class="w-4 h-4 text-violet-600 border-2 border-gray-400 rounded">
                                                 <span class="text-sm text-gray-700 font-medium flex-1">
-                                                    {{ $childCategory->name }}
+                                                    {{ $childCategory->localized_name }}
                                                 </span>
                                                 <span class="text-xs text-gray-500">
                                                     ({{ $childCategory->products()->where('status', 'active')->count() }})
@@ -699,7 +699,7 @@
                                 <span
                                     class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-violet-300 rounded-full text-sm font-medium text-gray-800 shadow-sm">
                                     <i class="fas fa-tag text-violet-600 text-xs"></i>
-                                    {{ $category->name }}
+                                    {{ $category->localized_name }}
                                     <button wire:click="removeCategory({{ $categoryId }})"
                                         class="ltr:ml-1 rtl:mr-1 text-gray-500 hover:text-red-600">
                                         <i class="fas fa-times text-xs"></i>

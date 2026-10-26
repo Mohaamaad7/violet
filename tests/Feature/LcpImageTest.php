@@ -31,7 +31,7 @@ class LcpImageTest extends TestCase
             'is_featured' => true,
         ]);
 
-        $response = $this->get('/');
+        $response = $this->withSession(['locale' => 'en'])->get('/');
 
         // The first featured product must use fetchpriority="high" (not loading="lazy")
         $response->assertSee('fetchpriority="high"', false);

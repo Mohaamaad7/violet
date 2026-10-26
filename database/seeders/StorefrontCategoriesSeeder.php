@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Category;
 use App\Models\Setting;
 use App\Services\StorefrontLayout;
+use App\Support\LegacyCatalogTranslation;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Spatie\ResponseCache\Facades\ResponseCache;
@@ -17,13 +18,19 @@ class StorefrontCategoriesSeeder extends Seeder
             // Reuse existing roots (including the original plural fragrance slug).
             // Never delete, rename, reparent, deactivate, or move existing products.
             $definitions = [
-                ['Body Care', ['body-care', 'body_care'], 1, 2],
-                ['Skin Care', ['skin-care', 'skincare', 'Skin_Care', 'skin_care'], 2, 3],
-                ['Fragrance', ['fragrance', 'fragrances'], 3, 1],
+                ['Body Care', ['body-care', 'body_care'], 1, 2, 'العناية بالجسم'],
+                ['Skin Care', ['skin-care', 'skincare', 'Skin_Care', 'skin_care'], 2, 3, 'العناية بالبشرة'],
+                ['Fragrance', ['fragrance', 'fragrances', 'Body_mist', 'body_mist', 'body-mist'], 3, 1, 'العطور'],
             ];
 
-            foreach ($definitions as [$name, $slugs, $headerOrder, $homeOrder]) {
+            foreach ($definitions as [$name, $slugs, $headerOrder, $homeOrder, $arabicName]) {
                 $category = Category::query()->parent()->whereIn('slug', $slugs)->first();
+                if (! $category) {
+                    $names = $name === 'Fragrance'
+                        ? [$name, $arabicName, 'عطور ومعطرات الجسم', 'الفريجرانس (Fragrance)', 'العطور والروائح']
+                        : [$name, $arabicName, $arabicName.' ('.$name.')'];
+                    $category = Category::query()->parent()->whereIn('name', $names)->first();
+                }
                 if (! $category) {
                     $category = Category::create([
                         'name' => $name, 'slug' => $slugs[0],
@@ -36,6 +43,7 @@ class StorefrontCategoriesSeeder extends Seeder
                     'show_in_header' => true, 'show_on_home' => true,
                     'sort_order' => $headerOrder, 'home_sort_order' => $homeOrder,
                 ]);
+                $this->translateName($category, $arabicName, $name);
 
                 if ($name === 'Body Care') {
                     $this->child($category, 'Musk', ['musk', 'msk', 'المسك'], 1);
@@ -68,11 +76,32 @@ class StorefrontCategoriesSeeder extends Seeder
 
         $slugs = [$slug, ...$aliases, ...array_map(fn ($alias) => $parent->slug.'-'.$alias, $aliases)];
 
-        return $parent->children()->where(function ($query) use ($slugs, $name, $aliases) {
+        $category = $parent->children()->where(function ($query) use ($slugs, $name, $aliases) {
             $query->whereIn('slug', $slugs)->orWhereIn('name', [$name, ...$aliases]);
         })->first() ?? Category::create([
             'parent_id' => $parent->id, 'name' => $name, 'slug' => $slug,
             'is_active' => true, 'order' => $order, 'sort_order' => $order,
         ]);
+
+        $arabicNames = ['Musk' => 'المسك', 'Mukhammaria' => 'المخمرية', 'Body Lotion' => 'البودي لوشن',
+            'Cleanser' => 'الغسول', 'Women' => 'نساء', 'Men' => 'رجال', '90 ml' => '٩٠ مل', '240 ml' => '٢٤٠ مل'];
+        $this->translateName($category, $arabicNames[$name], $name);
+
+        return $category;
+    }
+
+    private function translateName(Category $category, string $arabic, string $english): void
+    {
+        $updates = [];
+        $legacy = LegacyCatalogTranslation::extract($category->name);
+        if (! filled($category->name_ar) || $category->name_ar === ($legacy['ar'] ?? null)) {
+            $updates['name_ar'] = $arabic;
+        }
+        if (! filled($category->name_en) || $category->name_en === ($legacy['en'] ?? null)) {
+            $updates['name_en'] = $english;
+        }
+        if ($updates !== []) {
+            $category->update($updates);
+        }
     }
 }

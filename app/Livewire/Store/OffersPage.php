@@ -2,8 +2,6 @@
 
 namespace App\Livewire\Store;
 
-use App\Models\DiscountCode;
-use App\Models\Product;
 use Livewire\Component;
 
 class OffersPage extends Component
@@ -15,11 +13,11 @@ class OffersPage extends Component
         // 1. Combo Rules
         $combos = \App\Models\ComboRule::active()->ordered()->get()->map(function ($combo) {
             return [
-                'id' => 'combo_' . $combo->id,
+                'id' => 'combo_'.$combo->id,
                 'type' => 'combo',
                 'title' => $combo->name,
                 'description' => $combo->description ?? 'عرض كومبو مميز',
-                'image' => $combo->image_path ? asset('storage/' . $combo->image_path) : 'https://placehold.co/400x400/e9d5ff/6b21a8?text=' . urlencode($combo->name),
+                'image' => $combo->image_path ? asset('storage/'.$combo->image_path) : 'https://placehold.co/400x400/e9d5ff/6b21a8?text='.urlencode($combo->name),
                 'original_price' => null,
                 'offer_price' => $combo->discount_type === 'fixed' ? $combo->fixed_price : null,
                 'discount_percentage' => $combo->discount_type === 'percentage' ? $combo->discount_percentage : null,
@@ -33,11 +31,11 @@ class OffersPage extends Component
         // 2. Discount Codes
         $discounts = \App\Models\DiscountCode::valid()->whereNull('influencer_id')->get()->map(function ($discount) {
             return [
-                'id' => 'discount_' . $discount->id,
+                'id' => 'discount_'.$discount->id,
                 'type' => 'discount',
                 'title' => $discount->code,
                 'description' => $discount->description ?? 'كود خصم عام',
-                'image' => 'https://placehold.co/400x400/fdf4ff/c026d3?text=' . urlencode($discount->code),
+                'image' => 'https://placehold.co/400x400/fdf4ff/c026d3?text='.urlencode($discount->code),
                 'original_price' => null,
                 'offer_price' => $discount->type === 'fixed' ? $discount->value : null,
                 'discount_percentage' => $discount->type === 'percentage' ? $discount->value : null,
@@ -51,11 +49,11 @@ class OffersPage extends Component
         // 3. Products on Sale (Treating as Bundles/Discounts)
         $saleProducts = \App\Models\Product::with('category')->whereNotNull('sale_price')->whereColumn('sale_price', '<', 'price')->active()->take(16)->get()->map(function ($product) {
             return [
-                'id' => 'bundle_' . $product->id,
+                'id' => 'bundle_'.$product->id,
                 'type' => 'bundle',
-                'title' => $product->name,
+                'title' => $product->localized_name,
                 'description' => 'خصم مباشر على المنتج',
-                'image' => $product->primary_image_url ?? 'https://placehold.co/400x400/f3f4f6/9ca3af?text=' . urlencode($product->name),
+                'image' => $product->primary_image_url ?? 'https://placehold.co/400x400/f3f4f6/9ca3af?text='.urlencode($product->name),
                 'original_price' => $product->price,
                 'offer_price' => $product->sale_price,
                 'discount_percentage' => round((($product->price - $product->sale_price) / $product->price) * 100),

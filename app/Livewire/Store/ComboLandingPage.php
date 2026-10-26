@@ -5,7 +5,6 @@ namespace App\Livewire\Store;
 use App\Models\ComboRule;
 use App\Models\Product;
 use App\Services\CartService;
-use App\Services\ComboDiscountService;
 use Illuminate\Support\Str;
 use Livewire\Component;
 
@@ -77,14 +76,14 @@ class ComboLandingPage extends Component
             ->where('slug', $slug)
             ->first();
 
-        abort_if(!$combo, 404);
+        abort_if(! $combo, 404);
 
         $this->combo = $combo;
-        
+
         $this->tiers = is_string($combo->tiers) ? json_decode($combo->tiers, true) : ($combo->tiers ?? []);
-        
+
         // Sort tiers by quantity DESC (largest savings/quantity first)
-        usort($this->tiers, fn($a, $b) => $b['quantity'] <=> $a['quantity']);
+        usort($this->tiers, fn ($a, $b) => $b['quantity'] <=> $a['quantity']);
         $this->selectedTierIndex = 0;
 
         $this->resolveConditions();
@@ -104,23 +103,23 @@ class ComboLandingPage extends Component
 
             if ($condition->condition_type === 'product') {
                 $product = $condition->product;
-                if (!$product || $product->status !== 'active') {
+                if (! $product || $product->status !== 'active') {
                     continue;
                 }
                 $product->load(['variants', 'media']);
 
                 $this->conditionData[$conditionId] = [
-                    'type'              => 'product',
-                    'product_id'        => $product->id,
-                    'product_name'      => $product->name,
-                    'product_image'     => $product->primary_image,
-                    'product_price'     => (float) $product->final_price,
-                    'regular_price'     => (float) $product->price,
-                    'is_on_sale'        => $product->is_on_sale,
-                    'has_variants'      => $product->variants->count() > 0,
-                    'variants'          => $product->variants->map(fn ($v) => [
-                        'id'    => $v->id,
-                        'name'  => $v->name,
+                    'type' => 'product',
+                    'product_id' => $product->id,
+                    'product_name' => $product->localized_name,
+                    'product_image' => $product->primary_image,
+                    'product_price' => (float) $product->final_price,
+                    'regular_price' => (float) $product->price,
+                    'is_on_sale' => $product->is_on_sale,
+                    'has_variants' => $product->variants->count() > 0,
+                    'variants' => $product->variants->map(fn ($v) => [
+                        'id' => $v->id,
+                        'name' => $v->name,
                         'price' => (float) $v->price,
                         'stock' => $v->stock,
                     ])->toArray(),
@@ -142,7 +141,7 @@ class ComboLandingPage extends Component
 
             } elseif ($condition->condition_type === 'category') {
                 $category = $condition->category;
-                if (!$category) {
+                if (! $category) {
                     continue;
                 }
 
@@ -152,20 +151,20 @@ class ComboLandingPage extends Component
                     ->get();
 
                 $this->conditionData[$conditionId] = [
-                    'type'              => 'category',
-                    'category_id'       => $category->id,
-                    'category_name'     => $category->name,
-                    'products'          => $products->map(fn ($p) => [
-                        'id'           => $p->id,
-                        'name'         => $p->name,
-                        'image'        => $p->primary_image,
-                        'price'        => (float) $p->final_price,
-                        'regular_price'=> (float) $p->price,
-                        'is_on_sale'   => $p->is_on_sale,
+                    'type' => 'category',
+                    'category_id' => $category->id,
+                    'category_name' => $category->localized_name,
+                    'products' => $products->map(fn ($p) => [
+                        'id' => $p->id,
+                        'name' => $p->localized_name,
+                        'image' => $p->primary_image,
+                        'price' => (float) $p->final_price,
+                        'regular_price' => (float) $p->price,
+                        'is_on_sale' => $p->is_on_sale,
                         'has_variants' => $p->variants->count() > 0,
-                        'variants'     => $p->variants->map(fn ($v) => [
-                            'id'    => $v->id,
-                            'name'  => $v->name,
+                        'variants' => $p->variants->map(fn ($v) => [
+                            'id' => $v->id,
+                            'name' => $v->name,
                             'price' => (float) $v->price,
                             'stock' => $v->stock,
                         ])->toArray(),
@@ -188,21 +187,23 @@ class ComboLandingPage extends Component
 
     public function selectTier(int $index): void
     {
-        if (!isset($this->tiers[$index])) return;
-        
+        if (! isset($this->tiers[$index])) {
+            return;
+        }
+
         $this->selectedTierIndex = $index;
         $newQuantity = $this->tiers[$index]['quantity'];
-        
+
         foreach ($this->conditionData as $conditionId => &$data) {
             $data['required_quantity'] = $newQuantity;
-            
+
             if ($data['type'] === 'category') {
                 $slots = $this->selections[$conditionId] ?? [];
-                
+
                 // If shrinking, pop elements off the end
                 if (count($slots) > $newQuantity) {
                     $this->selections[$conditionId] = array_slice($slots, 0, $newQuantity);
-                } 
+                }
                 // If growing, add empty slots
                 elseif (count($slots) < $newQuantity) {
                     for ($i = count($slots); $i < $newQuantity; $i++) {
@@ -211,18 +212,18 @@ class ComboLandingPage extends Component
                 }
             }
         }
-        
+
         // Reset errors
         $this->errors = [];
         $this->calculateComboPrice();
-        
+
         // Protocol 2: Show proactive nudge if there are unselected slots
         $this->showScrollNudge = $this->getFirstUnselectedSlot() !== null;
     }
 
     public function selectProductForSlot(int $conditionId, int $slot, int $productId): void
     {
-        if (!isset($this->conditionData[$conditionId])) {
+        if (! isset($this->conditionData[$conditionId])) {
             return;
         }
 
@@ -242,7 +243,7 @@ class ComboLandingPage extends Component
 
         unset($this->errors["{$conditionId}.{$slot}"]);
         $this->calculateComboPrice();
-        
+
         // Protocol 2: Reset nudge if all selections are complete
         if ($this->getFirstUnselectedSlot() === null) {
             $this->showScrollNudge = false;
@@ -251,13 +252,13 @@ class ComboLandingPage extends Component
 
     public function selectVariantForSlot(int $conditionId, int $slot, int $variantId): void
     {
-        if (!isset($this->selections[$conditionId][$slot])) {
+        if (! isset($this->selections[$conditionId][$slot])) {
             return;
         }
         $this->selections[$conditionId][$slot]['variant_id'] = $variantId;
         unset($this->errors["{$conditionId}.{$slot}"]);
         $this->calculateComboPrice();
-        
+
         // Protocol 2: Reset nudge if all selections are complete
         if ($this->getFirstUnselectedSlot() === null) {
             $this->showScrollNudge = false;
@@ -266,13 +267,13 @@ class ComboLandingPage extends Component
 
     public function selectVariant(int $conditionId, int $variantId): void
     {
-        if (!isset($this->selections[$conditionId])) {
+        if (! isset($this->selections[$conditionId])) {
             return;
         }
         $this->selections[$conditionId]['variant_id'] = $variantId;
         unset($this->errors[$conditionId]);
         $this->calculateComboPrice();
-        
+
         // Protocol 2: Reset nudge if all selections are complete
         if ($this->getFirstUnselectedSlot() === null) {
             $this->showScrollNudge = false;
@@ -285,7 +286,7 @@ class ComboLandingPage extends Component
         foreach ($this->conditionData as $conditionId => $data) {
             if ($data['type'] === 'product') {
                 $selection = $this->selections[$conditionId] ?? null;
-                if ($data['has_variants'] && (!$selection || !$selection['variant_id'])) {
+                if ($data['has_variants'] && (! $selection || ! $selection['variant_id'])) {
                     return (string) $conditionId;
                 }
             } elseif ($data['type'] === 'category') {
@@ -295,12 +296,12 @@ class ComboLandingPage extends Component
                 for ($slot = 0; $slot < $slotCount; $slot++) {
                     $slotData = $slots[$slot] ?? null;
 
-                    if (!$slotData || !$slotData['product_id']) {
+                    if (! $slotData || ! $slotData['product_id']) {
                         return "{$conditionId}.{$slot}";
                     }
 
                     $productData = collect($data['products'])->firstWhere('id', $slotData['product_id']);
-                    if ($productData && $productData['has_variants'] && !$slotData['variant_id']) {
+                    if ($productData && $productData['has_variants'] && ! $slotData['variant_id']) {
                         return "{$conditionId}.{$slot}";
                     }
                 }
@@ -313,10 +314,12 @@ class ComboLandingPage extends Component
     // Protocol 2: Handle CTA validation failure (toast + auto-scroll)
     private function handleValidationError(): void
     {
-        if (empty($this->errors)) return;
-        
+        if (empty($this->errors)) {
+            return;
+        }
+
         $firstErrorKey = array_key_first($this->errors);
-        $targetId = 'piece-' . str_replace('.', '-', (string)$firstErrorKey);
+        $targetId = 'piece-'.str_replace('.', '-', (string) $firstErrorKey);
 
         $this->dispatch('show-toast', type: 'error', message: 'يرجى اختيار جميع القطع أولاً');
         $this->showScrollNudge = true;
@@ -349,21 +352,23 @@ class ComboLandingPage extends Component
                 $slots = $this->selections[$conditionId] ?? [];
 
                 if (empty($slots)) {
-                    if (!empty($data['products'])) {
+                    if (! empty($data['products'])) {
                         $totalOriginal += (float) $data['products'][0]['price'] * $data['required_quantity'];
                     }
+
                     continue;
                 }
 
                 foreach ($slots as $slotIndex => $slot) {
-                    if (!$slot['product_id']) {
-                        $placeholder = !empty($data['products']) ? (float) $data['products'][0]['price'] : 0;
+                    if (! $slot['product_id']) {
+                        $placeholder = ! empty($data['products']) ? (float) $data['products'][0]['price'] : 0;
                         $totalOriginal += $placeholder;
+
                         continue;
                     }
 
                     $productData = collect($data['products'])->firstWhere('id', $slot['product_id']);
-                    if (!$productData) {
+                    if (! $productData) {
                         continue;
                     }
 
@@ -384,7 +389,7 @@ class ComboLandingPage extends Component
         $this->originalPrice = round($totalOriginal, 2);
 
         $selectedTier = $this->tiers[$this->selectedTierIndex] ?? null;
-        
+
         if ($selectedTier) {
             if ($selectedTier['discount_type'] === 'fixed_price') {
                 $this->comboPrice = round((float) $selectedTier['fixed_price'], 2);
@@ -437,10 +442,14 @@ class ComboLandingPage extends Component
                 $slots = $this->selections[$conditionId] ?? [];
 
                 foreach ($slots as $slot) {
-                    if (!$slot['product_id']) continue;
+                    if (! $slot['product_id']) {
+                        continue;
+                    }
 
                     $productData = collect($data['products'])->firstWhere('id', $slot['product_id']);
-                    if (!$productData) continue;
+                    if (! $productData) {
+                        continue;
+                    }
 
                     $unitPrice = (float) $productData['price'];
 
@@ -467,8 +476,8 @@ class ComboLandingPage extends Component
      * Distribute the combo tier price proportionally across items using the
      * Largest Remainder Method for ETA/ERP-compliant rounding.
      *
-     * @param array $flatItems Array of ['product_id', 'variant_id', 'base_price']
-     * @param float $tierPrice The total discounted price for this tier
+     * @param  array  $flatItems  Array of ['product_id', 'variant_id', 'base_price']
+     * @param  float  $tierPrice  The total discounted price for this tier
      * @return array Array of ['product_id', 'variant_id', 'price', 'original_price']
      */
     private function distributeProportionally(array $flatItems, float $tierPrice): array
@@ -478,10 +487,11 @@ class ComboLandingPage extends Component
         if ($totalBase <= 0) {
             // Fallback: equal split
             $equalPrice = round($tierPrice / max(count($flatItems), 1), 2);
-            return array_map(fn($item) => [
-                'product_id'     => $item['product_id'],
-                'variant_id'     => $item['variant_id'],
-                'price'          => $equalPrice,
+
+            return array_map(fn ($item) => [
+                'product_id' => $item['product_id'],
+                'variant_id' => $item['variant_id'],
+                'price' => $equalPrice,
                 'original_price' => $item['base_price'],
             ], $flatItems);
         }
@@ -493,7 +503,7 @@ class ComboLandingPage extends Component
         }
 
         // Step 2: Floor to 2 decimal places
-        $floored = array_map(fn($v) => floor($v * 100) / 100, $exactAmounts);
+        $floored = array_map(fn ($v) => floor($v * 100) / 100, $exactAmounts);
         $distributed = array_sum($floored);
 
         // Step 3: Largest Remainder Correction
@@ -509,7 +519,9 @@ class ComboLandingPage extends Component
 
         // Add 0.01 to each item with the largest remainder until budget is spent
         foreach ($remainders as $idx => $fracPart) {
-            if ($remainderPiastres <= 0) break;
+            if ($remainderPiastres <= 0) {
+                break;
+            }
             $floored[$idx] += 0.01;
             $remainderPiastres--;
         }
@@ -518,9 +530,9 @@ class ComboLandingPage extends Component
         $result = [];
         foreach ($flatItems as $idx => $item) {
             $result[] = [
-                'product_id'     => $item['product_id'],
-                'variant_id'     => $item['variant_id'],
-                'price'          => round($floored[$idx], 2),
+                'product_id' => $item['product_id'],
+                'variant_id' => $item['variant_id'],
+                'price' => round($floored[$idx], 2),
                 'original_price' => $item['base_price'],
             ];
         }
@@ -544,7 +556,7 @@ class ComboLandingPage extends Component
         foreach ($this->conditionData as $conditionId => $data) {
             if ($data['type'] === 'product') {
                 $selection = $this->selections[$conditionId] ?? null;
-                if ($data['has_variants'] && (!$selection || !$selection['variant_id'])) {
+                if ($data['has_variants'] && (! $selection || ! $selection['variant_id'])) {
                     $this->errors[$conditionId] = "يرجى اختيار النوع لـ: {$data['product_name']}";
                 }
             } elseif ($data['type'] === 'category') {
@@ -554,15 +566,16 @@ class ComboLandingPage extends Component
                 for ($slot = 0; $slot < $slotCount; $slot++) {
                     $slotData = $slots[$slot] ?? null;
 
-                    if (!$slotData || !$slotData['product_id']) {
-                        $slotLabel = $slotCount > 1 ? " (القطعة " . ($slot + 1) . ")" : "";
+                    if (! $slotData || ! $slotData['product_id']) {
+                        $slotLabel = $slotCount > 1 ? ' (القطعة '.($slot + 1).')' : '';
                         $this->errors["{$conditionId}.{$slot}"] = "يرجى اختيار المنتج من: {$data['category_name']}{$slotLabel}";
+
                         continue;
                     }
 
                     $productData = collect($data['products'])->firstWhere('id', $slotData['product_id']);
-                    if ($productData && $productData['has_variants'] && !$slotData['variant_id']) {
-                        $slotLabel = $slotCount > 1 ? " (القطعة " . ($slot + 1) . ")" : "";
+                    if ($productData && $productData['has_variants'] && ! $slotData['variant_id']) {
+                        $slotLabel = $slotCount > 1 ? ' (القطعة '.($slot + 1).')' : '';
                         $this->errors["{$conditionId}.{$slot}"] = "يرجى اختيار النوع لـ: {$productData['name']}{$slotLabel}";
                     }
                 }
@@ -582,7 +595,9 @@ class ComboLandingPage extends Component
 
         foreach ($this->selections as $conditionId => $selectionData) {
             $data = $this->conditionData[$conditionId] ?? null;
-            if (!$data) continue;
+            if (! $data) {
+                continue;
+            }
 
             if ($data['type'] === 'product') {
                 $pid = $selectionData['product_id'];
@@ -605,12 +620,12 @@ class ComboLandingPage extends Component
         }
 
         return [
-            'combo_name'   => $this->combo->name,
-            'content_ids'  => array_values(array_unique($contentIds)),
-            'contents'     => $contents,
-            'value'        => $this->comboPrice,
-            'currency'     => 'EGP',
-            'num_items'    => array_sum($contentsMap),
+            'combo_name' => $this->combo->name,
+            'content_ids' => array_values(array_unique($contentIds)),
+            'contents' => $contents,
+            'value' => $this->comboPrice,
+            'currency' => 'EGP',
+            'num_items' => array_sum($contentsMap),
         ];
     }
 
@@ -624,6 +639,7 @@ class ComboLandingPage extends Component
 
         if (empty($flatItems)) {
             $this->globalError = 'لا توجد منتجات مختارة';
+
             return false;
         }
 
@@ -633,17 +649,17 @@ class ComboLandingPage extends Component
         // Group by product_id + variant_id to consolidate duplicate selections
         $grouped = [];
         foreach ($distributedItems as $item) {
-            $key = $item['product_id'] . '_' . ($item['variant_id'] ?? 'null');
-            if (!isset($grouped[$key])) {
+            $key = $item['product_id'].'_'.($item['variant_id'] ?? 'null');
+            if (! isset($grouped[$key])) {
                 $grouped[$key] = [
-                    'product_id'     => $item['product_id'],
-                    'variant_id'     => $item['variant_id'],
-                    'quantity'       => 0,
-                    'price'          => $item['price'],
+                    'product_id' => $item['product_id'],
+                    'variant_id' => $item['variant_id'],
+                    'quantity' => 0,
+                    'price' => $item['price'],
                     'original_price' => $item['original_price'],
                     // Track individual prices for accurate aggregation
-                    '_prices'        => [],
-                    '_originals'     => [],
+                    '_prices' => [],
+                    '_originals' => [],
                 ];
             }
             $grouped[$key]['quantity']++;
@@ -657,10 +673,10 @@ class ComboLandingPage extends Component
         foreach ($grouped as $group) {
             for ($i = 0; $i < $group['quantity']; $i++) {
                 $cartItems[] = [
-                    'product_id'     => $group['product_id'],
-                    'variant_id'     => $group['variant_id'],
-                    'quantity'       => 1,
-                    'price'          => $group['_prices'][$i],
+                    'product_id' => $group['product_id'],
+                    'variant_id' => $group['variant_id'],
+                    'quantity' => 1,
+                    'price' => $group['_prices'][$i],
                     'original_price' => $group['_originals'][$i],
                 ];
             }
@@ -671,8 +687,9 @@ class ComboLandingPage extends Component
 
         $result = $cartService->addComboToCart($cartItems, $comboInstanceUuid);
 
-        if (!$result['success']) {
+        if (! $result['success']) {
             $this->globalError = $result['message'];
+
             return false;
         }
 
@@ -686,14 +703,16 @@ class ComboLandingPage extends Component
     {
         $this->processing = true;
 
-        if (!$this->validateSelections()) {
+        if (! $this->validateSelections()) {
             $this->processing = false;
             $this->handleValidationError(); // Protocol 2: Handle validation visually
+
             return;
         }
 
-        if (!$this->executeComboToCart()) {
+        if (! $this->executeComboToCart()) {
             $this->processing = false;
+
             return;
         }
 
@@ -713,14 +732,16 @@ class ComboLandingPage extends Component
     {
         $this->processing = true;
 
-        if (!$this->validateSelections()) {
+        if (! $this->validateSelections()) {
             $this->processing = false;
             $this->handleValidationError(); // Protocol 2: Handle validation visually
+
             return;
         }
 
-        if (!$this->executeComboToCart()) {
+        if (! $this->executeComboToCart()) {
             $this->processing = false;
+
             return;
         }
 
@@ -738,12 +759,13 @@ class ComboLandingPage extends Component
         foreach ($this->conditionData as $data) {
             if ($data['type'] === 'product') {
                 $ids[] = $data['product_id'];
-            } elseif ($data['type'] === 'category' && !empty($data['products'])) {
+            } elseif ($data['type'] === 'category' && ! empty($data['products'])) {
                 foreach ($data['products'] as $p) {
                     $ids[] = $p['id'];
                 }
             }
         }
+
         return array_unique($ids);
     }
 
@@ -751,9 +773,9 @@ class ComboLandingPage extends Component
     {
         return view('livewire.store.combo-landing-page', [
             'conditionData' => $this->conditionData,
-            'selections'    => $this->selections,
+            'selections' => $this->selections,
         ])->layout('layouts.store', [
-            'title'       => $this->combo->meta_title ?: $this->combo->name,
+            'title' => $this->combo->meta_title ?: $this->combo->name,
             'description' => $this->combo->meta_description ?: strip_tags($this->combo->description ?: config('app.name', 'Violet Store')),
         ]);
     }

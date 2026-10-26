@@ -26,6 +26,7 @@ class StorefrontTemplateTest extends TestCase
         parent::setUp();
         config(['responsecache.cache_store' => 'array']);
         app()->setLocale('en');
+        $this->withSession(['locale' => 'en']);
     }
 
     private function category(string $name, string $slug, ?Category $parent = null, array $extra = []): Category
@@ -351,6 +352,7 @@ class StorefrontTemplateTest extends TestCase
         $root = $this->category('العناية بالجسم', 'body-care');
         $this->category('المسك', 'musk', $root);
         app()->setLocale('ar');
+        $this->withSession(['locale' => 'ar']);
         Livewire::withQueryParams(['category' => $root->slug])->test(ProductList::class)
             ->assertSee('الأقسام الفرعية')->assertSee('الكل')
             ->assertSee('min-h-[44px] min-w-[44px]', false)

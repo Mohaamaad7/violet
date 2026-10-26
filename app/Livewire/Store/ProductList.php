@@ -2,14 +2,14 @@
 
 namespace App\Livewire\Store;
 
-use App\Models\Product;
 use App\Models\Category;
+use App\Models\Product;
 use App\Services\StorefrontLayout;
 use Illuminate\Database\Eloquent\Collection;
-use Livewire\Component;
-use Livewire\WithPagination;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Url;
+use Livewire\Component;
+use Livewire\WithPagination;
 
 class ProductList extends Component
 {
@@ -72,7 +72,7 @@ class ProductList extends Component
         if ($this->category) {
             $categoryModel = Category::where('slug', $this->category)->first();
             if ($categoryModel) {
-                if (!in_array($categoryModel->id, $this->selectedCategories)) {
+                if (! in_array($categoryModel->id, $this->selectedCategories)) {
                     $this->selectedCategories[] = $categoryModel->id;
                 }
             }
@@ -113,7 +113,7 @@ class ProductList extends Component
     public function strapPath(): array
     {
         $root = $this->categoryRoot;
-        if (!$root) {
+        if (! $root) {
             return [];
         }
 
@@ -184,11 +184,11 @@ class ProductList extends Component
     #[Computed]
     public function hasActiveFilters(): bool
     {
-        return !empty($this->selectedCategories)
+        return ! empty($this->selectedCategories)
             || $this->minPrice !== ''
             || $this->maxPrice !== ''
             || $this->selectedRating !== null
-            || !empty($this->selectedBrands)
+            || ! empty($this->selectedBrands)
             || $this->onSaleOnly
             || $this->stockStatus !== 'all'
             || $this->search !== '';
@@ -208,6 +208,7 @@ class ProductList extends Component
         $count += $this->onSaleOnly ? 1 : 0;
         $count += $this->stockStatus !== 'all' ? 1 : 0;
         $count += $this->search !== '' ? 1 : 0;
+
         return $count;
     }
 
@@ -220,7 +221,7 @@ class ProductList extends Component
         $this->selectedCategories = array_values(
             array_filter(
                 array_map('intval', (array) $value),
-                fn($v) => $v > 0
+                fn ($v) => $v > 0
             )
         );
         $this->resetPage();
@@ -283,7 +284,7 @@ class ProductList extends Component
     {
         // Remove null/empty values
         $this->selectedBrands = array_values(
-            array_filter((array) $value, fn($v) => $v !== null && $v !== '')
+            array_filter((array) $value, fn ($v) => $v !== null && $v !== '')
         );
         $this->resetPage();
     }
@@ -308,15 +309,13 @@ class ProductList extends Component
         $this->resetPage();
     }
 
-
-
     /**
      * Remove a single category from filter
      */
     public function removeCategory(int $categoryId): void
     {
         $this->selectedCategories = array_values(
-            array_filter($this->selectedCategories, fn($id) => $id != $categoryId)
+            array_filter($this->selectedCategories, fn ($id) => $id != $categoryId)
         );
         $this->resetPage();
     }
@@ -327,7 +326,7 @@ class ProductList extends Component
     public function removeBrand(string $brand): void
     {
         $this->selectedBrands = array_values(
-            array_filter($this->selectedBrands, fn($b) => $b !== $brand)
+            array_filter($this->selectedBrands, fn ($b) => $b !== $brand)
         );
         $this->resetPage();
     }
@@ -394,17 +393,16 @@ class ProductList extends Component
 
         // Search filter
         if ($this->search !== '') {
-            $searchTerm = '%' . $this->search . '%';
+            $searchTerm = '%'.$this->search.'%';
             $query->where(function ($q) use ($searchTerm) {
-                $q->where('name', 'like', $searchTerm)
-                    ->orWhere('description', 'like', $searchTerm)
+                $q->where(fn ($q) => $q->searchCatalog($searchTerm))
                     ->orWhere('sku', 'like', $searchTerm)
                     ->orWhere('brand', 'like', $searchTerm);
             });
         }
 
         // Filter by categories (including children categories)
-        if (!empty($this->selectedCategories)) {
+        if (! empty($this->selectedCategories)) {
             $categoryIds = $this->categoryFirst ? [] : $this->selectedCategories;
 
             foreach ($this->selectedCategories as $categoryId) {
@@ -453,7 +451,7 @@ class ProductList extends Component
         }
 
         // Filter by brands
-        if (!empty($this->selectedBrands)) {
+        if (! empty($this->selectedBrands)) {
             $query->whereIn('brand', $this->selectedBrands);
         }
 
@@ -505,10 +503,10 @@ class ProductList extends Component
             'categories' => $this->categoryFirst
                 ? $this->storefrontCategories->whereNull('parent_id')->values()
                 : Category::with('children')
-                ->whereNull('parent_id')
-                ->where('is_active', true)
-                ->orderBy('order')
-                ->get(),
+                    ->whereNull('parent_id')
+                    ->where('is_active', true)
+                    ->orderBy('order')
+                    ->get(),
         ]);
     }
 }

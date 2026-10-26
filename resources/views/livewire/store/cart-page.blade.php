@@ -78,7 +78,7 @@
                                                             : asset('images/default-product.svg');
                                                     @endphp
                                                     <a href="{{ route('product.show', $item->product->slug) }}" wire:navigate>
-                                                        <img src="{{ $imagePath }}" alt="{{ $item->product->name }}"
+                                                        <img src="{{ $imagePath }}" alt="{{ $item->product->localized_name }}"
                                                             class="w-full h-full object-cover hover:scale-110 transition-transform duration-300">
                                                     </a>
                                                 </div>
@@ -88,7 +88,7 @@
                                                     {{-- Product Name --}}
                                                     <a href="{{ route('product.show', $item->product->slug) }}" wire:navigate
                                                         class="text-lg font-semibold text-gray-900 hover:text-violet-600 transition">
-                                                        {{ $item->product->name }}
+                                                        {{ $item->product->localized_name }}
                                                     </a>
 
                                                     {{-- Variant Info --}}
@@ -102,7 +102,7 @@
                                                     {{-- Category --}}
                                                     @if($item->product->category)
                                                         <p class="text-xs text-gray-400 mt-1">
-                                                            {{ $item->product->category->name }}
+                                                            {{ $item->product->category->localized_name }}
                                                         </p>
                                                     @endif
 

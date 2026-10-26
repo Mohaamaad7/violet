@@ -56,7 +56,7 @@
                                                     : $primaryMedia->getUrl())
                                                 : asset('images/default-product.svg');
                                         @endphp
-                                        <img src="{{ $imagePath }}" alt="{{ $item->product->name }}"
+                                        <img src="{{ $imagePath }}" alt="{{ $item->product->localized_name }}"
                                             class="w-full h-full object-cover">
                                     </div>
 
@@ -66,7 +66,7 @@
                                             <span class="inline-block text-xs font-bold text-violet-600 bg-violet-100 px-2 py-0.5 rounded-full mb-1">🎁 كومبو</span>
                                         @endif
                                         <h3 class="text-sm font-semibold text-gray-900 truncate">
-                                            {{ $item->product->name }}
+                                            {{ $item->product->localized_name }}
                                         </h3>
 
                                         @if($item->variant)

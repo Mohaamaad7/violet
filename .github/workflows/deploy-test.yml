@@ -6,9 +6,14 @@ on:
     branches:
       - test
 
+concurrency:
+  group: deploy-test
+  cancel-in-progress: false
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     
     steps:
       # جلب الكود من GitHub
@@ -18,24 +23,77 @@ jobs:
       # النشر على بيئة الاختبار
       - name: Deploy to Test Environment
         uses: appleboy/ssh-action@master
+        env:
+          TEST_DEPLOY_PATH: ${{ secrets.TEST_DEPLOY_PATH }}
         with:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           port: ${{ secrets.SSH_PORT }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          envs: TEST_DEPLOY_PATH
+          command_timeout: 12m
           script: |
+            set -euo pipefail
             echo "🧪 بدء النشر على بيئة الاختبار..."
             
-            # الانتقال لمجلد test
-            cd ${{ secrets.TEST_DEPLOY_PATH }}
+            # Never run Git or permission changes outside the verified test checkout.
+            is_test_checkout() {
+              local candidate="$1"
+              [ -f "$candidate/artisan" ] && [ -f "$candidate/composer.json" ] || return 1
+              git -C "$candidate" rev-parse --is-inside-work-tree >/dev/null 2>&1 || return 1
+              git -C "$candidate" remote get-url origin | grep -Eq '[:/]Mohaamaad7/violet(\.git)?$' || return 1
+              case "$(realpath "$candidate")" in
+                */test.flowerviolet.com/*) return 0 ;;
+              esac
+              [ -f "$candidate/.env" ] && grep -Eq '^APP_URL=["\x27]?https?://test\.flowerviolet\.com/?["\x27]?$' "$candidate/.env"
+            }
+
+            target="${TEST_DEPLOY_PATH:-}"
+            if ! is_test_checkout "$target"; then
+              echo "Configured test path is invalid; looking for the existing test checkout under the account domains directory."
+              candidates=()
+              if [ -d "$HOME/domains" ]; then
+                while IFS= read -r artisan_file; do
+                  candidate="$(dirname "$artisan_file")"
+                  if is_test_checkout "$candidate"; then
+                    candidate="$(realpath "$candidate")"
+                    if [[ ! " ${candidates[*]:-} " == *" $candidate "* ]]; then
+                      candidates+=("$candidate")
+                    fi
+                  fi
+                done < <(find "$HOME/domains" -maxdepth 7 -type f -name artisan 2>/dev/null)
+              fi
+              if [ "${#candidates[@]}" -ne 1 ]; then
+                echo "Cannot uniquely identify the test checkout. Correct the TEST_DEPLOY_PATH repository secret. No deployment changes were made."
+                exit 1
+              fi
+              target="${candidates[0]}"
+            fi
+            cd "$(realpath "$target")"
+            echo "Verified test checkout."
             
             # سحب آخر التحديثات من test branch
             git fetch --all
+            php artisan down --retry=10
+            trap 'php artisan up || true' EXIT
             git reset --hard origin/test
+
+            # Install classes and apply additive schema updates before serving the new code.
+            composer install --no-dev --prefer-dist --no-interaction --optimize-autoloader
+            php artisan config:clear
+            php artisan migrate --force
+            # Runs setup once; later deploys preserve the administrator's choices.
+            php artisan storefront:prepare --activate-category-first
+            php artisan route:clear
+            php artisan view:clear
+            php artisan responsecache:clear
+            php artisan config:cache
             
-            # تعديل الصلاحيات
-            find . -type f -exec chmod 644 {} \;
-            find . -type d -exec chmod 755 {} \;
+            # Only Laravel's writable directories need permission updates.
+            chmod -R ug+rwX storage bootstrap/cache
+
+            php artisan up
+            trap - EXIT
             
             echo "✅ تم النشر على بيئة الاختبار بنجاح!"
             echo "Test deployment at $(date)" >> ~/test-deploy-log.txt

@@ -143,9 +143,9 @@
                     @foreach($headerCategories as $headerCategory)
                         <li>
                             <a href="{{ route('products.index', ['category' => $headerCategory->slug]) }}"
-                                aria-label="{{ $headerCategory->name }}"
+                                aria-label="{{ $headerCategory->localized_name }}"
                                 class="min-h-[44px] min-w-[44px] inline-flex items-center text-gray-600 hover:text-violet-600 font-medium transition">
-                                {{ $headerCategory->name }}
+                                {{ $headerCategory->localized_name }}
                             </a>
                         </li>
                     @endforeach
@@ -173,7 +173,7 @@
                                         @else
                                             @svg('heroicon-o-tag', 'w-4 h-4')
                                         @endif
-                                        {{ $parentCategory->name }}
+                                        {{ $parentCategory->localized_name }}
                                     </span>
                                     @if($parentCategory->children->count() > 0)
                                         <svg class="w-4 h-4 {{ app()->getLocale() === 'ar' ? 'rotate-180' : '' }}"
@@ -197,7 +197,7 @@
                                                                 d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
                                                                 clip-rule="evenodd" />
                                                         </svg>
-                                                        {{ $childCategory->name }}
+                                                        {{ $childCategory->localized_name }}
                                                     </span>
                                                 </a>
                                             </li>
@@ -260,9 +260,9 @@
                     @foreach($headerCategories as $headerCategory)
                         <li>
                             <a href="{{ route('products.index', ['category' => $headerCategory->slug]) }}"
-                                aria-label="{{ $headerCategory->name }}"
+                                aria-label="{{ $headerCategory->localized_name }}"
                                 class="min-h-[44px] min-w-[44px] flex items-center py-2 text-gray-600 hover:text-violet-600 font-medium transition">
-                                {{ $headerCategory->name }}
+                                {{ $headerCategory->localized_name }}
                             </a>
                         </li>
                     @endforeach
@@ -288,7 +288,7 @@
                                                 <i class="{{ $parentCategory->icon }} text-xs"></i>
                                             @endif
                                         @endif
-                                        {{ $parentCategory->name }}
+                                        {{ $parentCategory->localized_name }}
                                     </a>
                                     @if($parentCategory->children->count() > 0)
                                         <button onclick="toggleSubcategory({{ $parentCategory->id }})" 
@@ -309,7 +309,7 @@
                                                 <svg class="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20">
                                                     <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
                                                 </svg>
-                                                {{ $childCategory->name }}
+                                                {{ $childCategory->localized_name }}
                                             </a>
                                         @endforeach
                                     </div>

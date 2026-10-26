@@ -12,7 +12,7 @@
                 <li aria-current="page">
                     <div class="flex items-center">
                         <svg class="w-6 h-6 text-gray-400 {{ app()->getLocale() === 'ar' ? 'rotate-180' : '' }}" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path></svg>
-                        <span class="ml-1 text-gray-700 font-medium md:ml-2">{{ $category->name }}</span>
+                        <span class="ml-1 text-gray-700 font-medium md:ml-2">{{ $category->localized_name }}</span>
                     </div>
                 </li>
             </ol>
@@ -20,9 +20,9 @@
 
         {{-- Page Title --}}
         <div class="text-center mb-16">
-            <h1 class="text-4xl font-bold text-gray-900 section-header mb-4">{{ $category->name }}</h1>
-            @if($category->description)
-                <p class="text-gray-500 text-lg max-w-2xl mx-auto">{{ $category->description }}</p>
+            <h1 class="text-4xl font-bold text-gray-900 section-header mb-4">{{ $category->localized_name }}</h1>
+            @if($category->localized_description)
+                <p class="text-gray-500 text-lg max-w-2xl mx-auto">{{ $category->localized_description }}</p>
             @endif
         </div>
 
@@ -34,13 +34,13 @@
                         @php
                             $imageUrl = $child->getFirstMediaUrl('category-images', 'card');
                             if (!$imageUrl) {
-                                $imageUrl = asset('images/default-category.png'); 
+                                $imageUrl = asset('images/default-category.png');
                             }
                         @endphp
-                        
+
                         @if($child->hasMedia('category-images'))
-                            <img src="{{ $imageUrl }}" 
-                                 alt="{{ $child->name }}" 
+                            <img src="{{ $imageUrl }}"
+                                 alt="{{ $child->localized_name }}"
                                  class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
                         @else
                             <div class="w-full h-full flex items-center justify-center bg-violet-50 text-violet-300 group-hover:text-violet-500 transition-colors">
@@ -52,9 +52,9 @@
                             </div>
                         @endif
                     </div>
-                    
+
                     <h3 class="font-bold text-xl text-gray-900 group-hover:text-violet-700 transition font-heading">
-                        {{ $child->name }} &rarr;
+                        {{ $child->localized_name }} &rarr;
                     </h3>
                     @if($child->products_count > 0 || $child->children_count > 0)
                         <p class="text-sm text-gray-400 mt-1">

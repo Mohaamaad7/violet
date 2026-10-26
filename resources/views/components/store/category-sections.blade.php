@@ -5,9 +5,9 @@
     <section class="py-16 {{ $loop->odd ? 'bg-gray-50' : 'bg-white' }}" data-home-category="{{ $category->slug }}">
         <div class="container mx-auto px-4">
             <div class="flex justify-between items-end gap-4 mb-10 border-b border-gray-200 pb-4">
-                <h2 class="text-3xl font-bold text-gray-900 section-header">{{ $category->name }}</h2>
+                <h2 class="text-3xl font-bold text-gray-900 section-header">{{ $category->localized_name }}</h2>
                 <a href="{{ route('products.index', ['category' => $category->slug]) }}"
-                    aria-label="{{ trans_db('storefront.view_all') }} {{ $category->name }}"
+                    aria-label="{{ trans_db('storefront.view_all') }} {{ $category->localized_name }}"
                     class="min-h-[44px] min-w-[44px] inline-flex items-center text-violet-600 hover:text-violet-800 font-bold">
                     {{ trans_db('storefront.view_all') }} &rarr;
                 </a>
